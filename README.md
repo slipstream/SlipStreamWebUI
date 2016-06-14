@@ -65,3 +65,19 @@ should be reflected immediately in the browser.
 
 TBD...
 
+## Current Status
+
+The test application provides:
+
+ * A simple form for logging into the SlipStream server,
+ * A section to visualize the cloud entry point (along with buttons to
+   clear and retrieve the value), and
+ * A section that gives the number of "event" resources visible to the
+   user. 
+
+All of these sections work, although the cookie (token) handling will
+need to be redesigned to make it more compatible with browsers.
+
+**Running the application currently requires that you build a local
+  copy of the SlipStream Clojure client from the branch
+  `feature/using-cljs`.**
