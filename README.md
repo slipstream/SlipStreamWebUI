@@ -60,3 +60,8 @@ doing the following:
 You should see the client application running.  Any changes you make
 to the source files (either ClojureScript sources or HTML templates)
 should be reflected immediately in the browser.
+
+## Integration with IntelliJ
+
+TBD...
+
