@@ -4,7 +4,10 @@
 
  :dependencies '[[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.8.51"]
+                 [org.clojure/core.async "0.2.382"]
                  [reagent "0.6.0-rc"]
+                 [cljsjs/react-bootstrap "0.29.2-0"]
+                 [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.6-SNAPSHOT"]
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
                  [adzerk/boot-reload "0.4.8" :scope "test"]
                  [adzerk/boot-cljs-repl "0.3.0" :scope "test"]
