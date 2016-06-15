@@ -55,7 +55,8 @@ doing the following:
      ...
      cljs.user=> 
      ```
- * Point your browser to http://localhost:3000/.
+ * Point your browser to
+   [http://localhost:3000/](http://localhost:3000). 
 
 You should see the client application running.  Any changes you make
 to the source files (either ClojureScript sources or HTML templates)
