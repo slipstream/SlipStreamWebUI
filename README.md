@@ -7,6 +7,10 @@ The purpose of this is to understand how to use the SlipStream
 Clojure(Script) API from the browser and to see how Reagent works as a
 framework for the browser-side UI.
 
+**WARNING: Running the application currently requires that you build 
+  a local copy of the SlipStream Clojure client from the branch
+  `feature/using-cljs`.**
+
 ## Useful Links
 
 Code:
@@ -108,6 +112,3 @@ The test application provides:
 All of these sections work, although the cookie (token) handling will
 need to be redesigned to make it more compatible with browsers.
 
-**Running the application currently requires that you build a local
-  copy of the SlipStream Clojure client from the branch
-  `feature/using-cljs`.**
