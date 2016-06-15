@@ -49,16 +49,19 @@ Once `boot` is installed, you can setup the interactive environment by
 doing the following:
 
  * In a terminal, start development server `boot dev`.
+  
      ```
      $ boot dev
      ```
  * In another terminal, start the REPL:
+ 
      ```
      $ boot repl -c
      boot.user=> (start-repl)
      ...
      cljs.user=> 
      ```
+
  * Point your browser to
    [http://localhost:3000/](http://localhost:3000). 
 
