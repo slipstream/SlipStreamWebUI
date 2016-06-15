@@ -63,7 +63,36 @@ should be reflected immediately in the browser.
 
 ## Integration with IntelliJ
 
-TBD...
+For IntelliJ, the easiest integration is to generate a `project.clj`
+file from the `build.boot` file.  This can be done by creating a
+function in your boot profile.  There are
+[instructions](https://github.com/boot-clj/boot/wiki/For-Cursive-Users)
+on the boot wiki.
+
+After you've done this you can just run:
+
+```
+$ boot lein-generate
+```
+
+to create the `project.clj` file.  You can then import the repository
+through IntelliJ, using the "leiningen" method in the dialog.
+
+To integrate the boot command line into the interface, configure the
+commands as "external tools".  Use the following:
+
+ * Program: boot
+ * Parameters: dev
+ * Working directory: $ProjectFileDir$
+
+You can create one for the "dev" task and another for "repl -c".  They
+can be started via the "Tools -> External Tools" menu.  When started,
+these will show up in the console section of the interface and behave
+just like a terminal.
+
+You must still use an external browser to connect to the development
+environment.  Chrome is recommended along with the setting to turn off
+the security settings, as described above.
 
 ## Current Status
 
