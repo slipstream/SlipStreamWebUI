@@ -12,7 +12,7 @@ framework for the browser-side UI.
 Code:
 
  * [SlipStream Clojure(Script)
-   API](https://github.com/slipstream/SlipStreamClientAPI )
+   API](https://github.com/slipstream/SlipStreamClojureAPI )
  * [Reagent](https://github.com/reagent-project/reagent)
  * [React-Bootstrap](https://react-bootstrap.github.io)
 
