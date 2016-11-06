@@ -1,17 +1,20 @@
 (ns sixsq.slipstream.ui.core
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require
-   [clojure.walk :as w]
-   [reagent.core :as r]
-   [cljs.core.async :refer [<!]]
-   [cljs.pprint :refer [pprint]]
-   [cljsjs.react-bootstrap]
-   [sixsq.slipstream.client.api.authn :as authn]
-   [sixsq.slipstream.client.api.cimi-async :as cimi]))
+    [clojure.walk :as w]
+    [reagent.core :as r]
+    [cljs.core.async :refer [<!]]
+    [cljs.pprint :refer [pprint]]
+    [cljsjs.react-bootstrap]
+    [sixsq.slipstream.client.api.authn :as authn]
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [sixsq.slipstream.client.api.cimi.async :as cimi-async]))
 
 (enable-console-print!)
 
 (def Button (r/adapt-react-class (aget js/ReactBootstrap "Button")))
+
+(def ^cimi/cimi client (delay (cimi-async/instance)))
 
 ;; --------------------------------------------------
 ;; Cloud Entry Point
@@ -23,10 +26,10 @@
 
 (defn load-cep [& _]
   (go
-   (let [resp (<! (cimi/cloud-entry-point))]
-     (println "Loading CloudEntryPoint!")
-     (swap! cep (constantly (w/keywordize-keys resp))))))
-    
+    (let [resp (<! (cimi/cloud-entry-point @client))]
+      (println "Loading CloudEntryPoint!")
+      (swap! cep (constantly (w/keywordize-keys resp))))))
+
 (defn cep-widget []
   [:div
    [:h1 "Cloud Entry Point"]
@@ -34,7 +37,7 @@
     [Button {:on-click load-cep} "load"]
     [Button {:on-click clear-cep} "clear"]]
    [:pre (with-out-str (pprint (or @cep "__empty__")))]])
-    
+
 ;; --------------------------------------------------
 ;; Login Widget
 ;; --------------------------------------------------
@@ -44,10 +47,10 @@
 
 (defn login [& _]
   (go
-   (let [resp (<! (authn/login-async @username @password))]
-     (println "Logging in as " @username "!")
-     (println "RESPONSE: " resp)
-     (swap! token (constantly "OK")))))
+    (let [resp (<! (cimi/login @client {:username @username, :password @password}))]
+      (println "Logging in as " @username "!")
+      (println "RESPONSE: " resp)
+      (swap! token (constantly "OK")))))
 
 (defn logout [& _]
   (swap! token (constantly nil)))
@@ -55,13 +58,13 @@
 (defn login-widget []
   [:div
    [:form
-    [:label "username" 
-     [:input {:type "text"
-              :value @username
+    [:label "username"
+     [:input {:type      "text"
+              :value     @username
               :on-change #(reset! username (-> % .-target .-value))}]]
     [:label "password"
-     [:input {:type "password"
-              :value @password
+     [:input {:type      "password"
+              :value     @password
               :on-change #(reset! password (-> % .-target .-value))}]]]
    [:div
     [Button {:on-click login} "login"]
@@ -78,13 +81,12 @@
 
 (defn load-events [& _]
   (go
-   (if (and @token @cep)
-     (let [cep-clj (js->clj @cep {:keywordize-keys true})
-           resp (<! (cimi/search @token cep-clj "events"))]
-       (println "Loading Events!")
-       (let [event-count (count (get resp "events"))]
-         (swap! events (constantly event-count)))))))
-    
+    (if (and @token @cep)
+      (let [resp (<! (cimi/search @client "events"))]
+        (println "Loading Events!")
+        (let [event-count (count (get resp "events"))]
+          (swap! events (constantly event-count)))))))
+
 (defn events-widget []
   [:div
    [:h1 "Events"]
@@ -92,7 +94,7 @@
     [Button {:on-click load-events} "load"]
     [Button {:on-click clear-events} "clear"]]
    [:pre (with-out-str (pprint (or @events "__empty__")))]])
-    
+
 ;; --------------------------------------------------
 ;; Core Page
 ;; --------------------------------------------------
