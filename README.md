@@ -2,19 +2,38 @@
 
 ## Purpose
 
-This repository contains a simple browser-side client for SlipStream.
-The purpose of this is to understand how to use the SlipStream
-Clojure(Script) API from the browser and to see how Reagent works as a
-framework for the browser-side UI.
+This repository contains a simple web browser UI for SlipStream, using
+ClojureScript and related technologies. 
 
-## Useful Links
+## Useful Tools (and Commentary)
 
-Code:
+SlipStream Code:
 
  * [SlipStream Clojure(Script)
-   API](https://github.com/slipstream/SlipStreamClojureAPI )
- * [Reagent](https://github.com/reagent-project/reagent)
- * [React-Bootstrap](https://react-bootstrap.github.io)
+   API](https://github.com/slipstream/SlipStreamClojureAPI): Provides
+   a ClojureScript API for the CIMI and CIMI-like resources within
+   SlipStream. 
+
+Frameworks:
+
+ * [Reagent](https://github.com/reagent-project/reagent): Provides a
+   ClojureScript interface to the
+   [React](https://facebook.github.io/react/) framework.
+ * [re-frame](https://github.com/Day8/re-frame): A framework that
+   relies on React for visualization and provides mechanisms for using
+   "FRP" for data flow and control.
+
+Widgets:
+
+ * [React-Bootstrap](https://react-bootstrap.github.io): React
+   bindings for Bootstrap widgets. 
+ * [re-com](https://github.com/Day8/re-com): Pure ClojureScript
+   widgets for web applications.  Comes with warning about portability
+   between browsers.
+ * [React Toolbox](http://react-toolbox.com/): Implementation of
+   Google's Material Design specification.
+ * [Material UI](http://www.material-ui.com/): Implementation of
+   Google's Material Design specification.  
 
 Helpful Information:
 
@@ -26,11 +45,20 @@ Helpful Information:
 
 ## Development Environment
 
+The organization of the repository comes from the [tenzing application
+template](https://github.com/martinklepsch/tenzing).  It uses
+[boot](https://github.com/boot-clj/boot) to create an interactive
+development environment.  It also provides tasks for running unit
+tests and for creating the final artifacts for deployment.
+
+The essentials for using the development environment are below.  See
+the tenzing project page for more detailed instructions.
+
 ### Browser
 
 To test the code on a SlipStream server (e.g. https://nuv.la/) running
 on a different machine, you'll need to start a browser with the XSS
-protections disabled.  For Chrome on OS X, this can be done with:
+protections disabled.  For Chrome on macOS, this can be done with:
 
 ```
 $ open /Applications/Google\ Chrome.app \
@@ -95,19 +123,6 @@ these will show up in the console section of the interface and behave
 just like a terminal.
 
 You must still use an external browser to connect to the development
-environment.  Chrome is recommended along with the setting to turn off
-the security settings, as described above.
-
-## Current Status
-
-The test application provides:
-
- * A simple form for logging into the SlipStream server,
- * A section to visualize the cloud entry point (along with buttons to
-   clear and retrieve the value), and
- * A section that gives the number of "event" resources visible to the
-   user. 
-
-All of these sections work, although the cookie (token) handling will
-need to be redesigned to make it more compatible with browsers.
-
+environment.  Chrome is recommended.  Be sure to turn off the security
+settings if you're using a SlipStream service running on a different
+machine.

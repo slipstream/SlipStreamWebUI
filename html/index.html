@@ -1,20 +1,47 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <title>Hello, Cal!</title>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-  </head>
-  <body>
-    <div id="app">
-      <h1>Main Title</h1>
-    </div>
-    <table>
-      <tr><td><div id="login"></div></td></tr>
-      <tr><td><div id="cep"></div></td></tr>
-      <tr><td><div id="events"></div></td></tr>
-    </table>
-    <script src="js/main.js"></script>
-    <script>sixsq.slipstream.ui.core.run();</script>
-  </body>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+    <h1>Main Title</h1>
+</div>
+<div id="login-area"></div>
+<div id="resource-selector"></div>
+<table>
+    <tr>
+        <td>
+            <div id="reform"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="login"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="cep"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="events"></div>
+        </td>
+    </tr>
+</table>
+<div id="table"></div>
+<div id="select"></div>
+<div id="home"></div>
+<div id="modal"></div>
+<script src="js/main.js"></script>
+<script>sixsq.slipstream.ui.core.run();</script>
+<script>bootstrap_modal.core.main();</script>
+</body>
 </html>
