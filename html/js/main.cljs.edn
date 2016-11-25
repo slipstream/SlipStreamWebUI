@@ -1,2 +1,0 @@
-{:require [sixsq.slipstream.ui.core]
- :compiler-options {:asset-path "js/main.out"}}
