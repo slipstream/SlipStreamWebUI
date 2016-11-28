@@ -1,25 +1,31 @@
 (ns sixsq.slipstream.webui
+  (:require-macros
+   [secretary.core :refer [defroute]])
   (:require
-   [reagent.core :as reagent :refer [atom]]
-   [sixsq.slipstream.client.api.cimi :as cimi]
-   [sixsq.slipstream.client.api.cimi.async :as cimi-async]))
+   [reagent.core :as reagent]
+   [re-frame.core :refer [dispatch dispatch-sync]]
+   [devtools.core :as devtools]
+
+   [sixsq.slipstream.webui.effects]
+   [sixsq.slipstream.webui.events]
+   [sixsq.slipstream.webui.subs]
+   [sixsq.slipstream.webui.views]))
 
 (enable-console-print!)
 
-(def ^cimi/cimi client (delay (cimi-async/instance)))
+;;
+;; debugging tools
+;;
+(devtools/install!)
+(enable-console-print!)
 
-(defn some-component []
-  [:div
-   [:h3 "I am a component!"]
-   [:p.someclass
-    "I have " [:strong "bold"]
-    [:span {:style {:color "red"}} " and red"]
-    " text."]])
-
-(defn calling-component []
-  [:div "Parent component"
-   [some-component]])
-
-(defn init []
-  (reagent/render-component [calling-component]
-                            (.getElementById js/document "container")))
+;;
+;; hook to initialize the web application
+;;
+(defn ^:export init
+  []
+  (dispatch-sync [:initialize-db])
+  (dispatch-sync [:initialize-client])
+  (dispatch-sync [:fetch-cloud-entry-point])
+  (reagent/render [sixsq.slipstream.webui.views/app]
+                  (.getElementById js/document "container")))
