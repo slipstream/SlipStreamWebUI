@@ -4,15 +4,16 @@
   :dependencies '[[org.clojure/clojurescript "1.9.293"]
                   [reagent "0.6.0"]
 
-                  [re-frame "0.8.0"]
+                  [re-frame "0.9.0-alpha1"]
                   [binaryage/devtools "0.8.3"]
-                  [secretary "1.2.3"]
+                  ;;[secretary "1.2.3"]
 
+                  [com.taoensso/tempura "1.0.0-RC4"]
                   [org.clojure/core.async "0.2.395"]
-                  [reagent-forms "0.5.28"]
-                  [reagent-reforms "0.4.3"]
-                  [org.clojars.frozenlock/reagent-modals "0.2.6"]
-                  [cljsjs/react-bootstrap "0.30.6-0"]
+                  ;;[reagent-forms "0.5.28"]
+                  ;;[reagent-reforms "0.4.3"]
+                  ;;[org.clojars.frozenlock/reagent-modals "0.2.6"]
+                  ;;[cljsjs/react-bootstrap "0.30.6-0"]
                   [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.16-SNAPSHOT"]
 
                   [adzerk/boot-cljs "1.7.228-2" :scope "test"]
