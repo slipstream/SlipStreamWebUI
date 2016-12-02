@@ -119,5 +119,5 @@
   :show-search-results
   [check-spec-interceptor trim-v]
   (fn [db [results]]
-    (assoc db :results (str results))))
+    (assoc db :results results)))
 

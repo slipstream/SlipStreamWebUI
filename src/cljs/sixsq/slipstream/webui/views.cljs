@@ -1,5 +1,7 @@
 (ns sixsq.slipstream.webui.views
   (:require
+    [re-com.core :refer [h-box v-box box gap line input-text button label throbber hyperlink-href p] :refer-macros [handler-fn]]
+    [re-com.buttons :refer [button-args-desc]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]))
 
@@ -15,10 +17,14 @@
   (let [authn (subscribe [:authn])]
     (fn []
       (let [{:keys [logged-in? user-id]} @authn]
-        (if logged-in?
-          [:div
-           [:button {:on-click #(js/alert (str "profile for " user-id))} user-id]
-           [:button {:on-click #(dispatch [:logout])} "logout"]])))))
+        (if true                                            ;;logged-in?
+          [h-box
+           :children [[button
+                       :label user-id
+                       :on-click #(js/alert (str "profile for " user-id))]
+                      [button
+                       :label "logout"
+                       :on-click #(dispatch [:logout])]]])))))
 
 (defn login
   []
@@ -28,23 +34,27 @@
     (fn []
       (let [{:keys [logged-in? user-id]} @authn]
         (if-not logged-in?
-          [:div
-           [:input {:type       "text"
-                    :auto-focus true
-                    :on-change  #(reset! username (-> % .-target .-value))}]
-           [:input {:type       "password"
-                    :auto-focus true
-                    :on-change  #(reset! password (-> % .-target .-value))}]
-           [:button {:on-click #(dispatch [:login {:username @username :password @password}])} "login"]])))))
+          [h-box
+           :children [[input-text
+                       :model "atom"
+                       :on-change #(reset! username (-> % .-target .-value))]
+                      [input-text
+                       :model "atom"
+                       :on-change #(reset! password (-> % .-target .-value))]
+                      [button
+                       :label "login"
+                       :on-click #(dispatch [:login {:username @username :password @password}])]]])))))
 
 (defn authn-panel []
-  [:div [login] [logout]])
+  [h-box
+   :children [#_[login] [logout]]])
 
 (def common-keys
   #{:id :created :updated :acl :baseURI :resourceURI})
 
 (defn format-link [k]
-  [:option {:value (name k)} (name k)])
+  (let [n (name k)]
+    [:option {:key n :value n} n]))
 
 (defn cep-select [cep]
   (let [ks (sort (remove common-keys (keys cep)))
@@ -58,14 +68,34 @@
       [:div
        [cep-select @cep]])))
 
+(declare format-value)
+
+(defn as-map [m]
+  [:ul (doall (map (fn [[k v]] [:li [:strong k] " : " (format-value v)]) m))])
+
+(defn as-vec [v]
+  [:ul (doall (map (fn [k v] [:li [:strong k] " : " (format-value v)]) (range) v))])
+
+(defn format-value [v]
+  (cond
+    (map? v) (as-map v)
+    (vector? v) (as-vec v)
+    :else (str v)))
+
 (defn search-results []
   (let [results (subscribe [:results])]
     (fn []
-      [:div [:span @results]])))
+      [:div (format-value @results)])))
 
 (defn app []
-  [:div "Web UI Tests"
-   [message]
-   [authn-panel]
-   [cloud-entry-point]
-   [search-results]])
+  [v-box
+   :children [[h-box
+               :children [[button
+                           :label "hello"]]
+               #_[message]
+               #_[authn-panel]
+               #_[cloud-entry-point]
+               #_[search-results]]
+              [button
+               :label "HELLO2"]
+              ]])

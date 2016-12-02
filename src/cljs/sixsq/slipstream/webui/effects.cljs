@@ -48,6 +48,7 @@
   :cimi/search
   (fn [[client resource-type]]
     (go
-      (if-let [results (<! (cimi/search client resource-type))]
+      (if-let [results (<! (cimi/search client resource-type {:$first 1 :$last 100 :$filter "connector/href='exoscale-ch-dk' or connector/href='exoscale-ch-gva'"
+                                                              }))]
         (dispatch [:show-search-results results])
         (dispatch [:message (str "loading " resource-type " failed")])))))

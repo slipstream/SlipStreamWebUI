@@ -36,7 +36,7 @@
 
 (s/def ::search-resource (s/nilable string?))
 
-(s/def ::results (s/nilable string?))
+(s/def ::results (s/nilable any?))
 
 (s/def ::db (s/keys :req-un [::client ::message ::authn ::cloud-entry-point ::search-resource ::results]))
 

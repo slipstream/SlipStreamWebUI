@@ -1,6 +1,4 @@
 (ns sixsq.slipstream.webui
-  (:require-macros
-   [secretary.core :refer [defroute]])
   (:require
    [reagent.core :as reagent]
    [re-frame.core :refer [dispatch dispatch-sync]]
