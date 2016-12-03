@@ -48,6 +48,7 @@
       (let [{:keys [logged-in? user-id]} @authn]
         (if-not logged-in?
           [h-box
+           :gap "3px"
            :children [[input-text
                        :model username
                        :placeholder "username"
@@ -178,6 +179,7 @@
         filter-value (atom "")]
     (fn []
       [h-box
+       :gap "3px"
        :children [[input-text
                    :model first-value
                    :placeholder "first"
@@ -253,6 +255,7 @@
 
 (defn control-bar []
   [h-box
+   :gap "3px"
    :children [[cloud-entry-point]
               [select-fields]
               [gap :size "1"]
