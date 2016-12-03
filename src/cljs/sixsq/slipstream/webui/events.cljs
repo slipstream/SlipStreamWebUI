@@ -3,10 +3,14 @@
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<!]]
+    [clojure.string :as str]
     [sixsq.slipstream.webui.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v after]]
+    [re-frame.loggers :refer [console]]
     [cljs.spec :as s]
-    [sixsq.slipstream.client.api.cimi.async :as cimi-async]))
+    [sixsq.slipstream.client.api.cimi.async :as cimi-async]
+    [sixsq.slipstream.webui.utils :as utils]
+    [clojure.set :as set]))
 
 ;;
 ;; check schema after every change
@@ -83,7 +87,15 @@
   [check-spec-interceptor trim-v]
   (fn [{:keys [db]} [msg]]
     {:db             (assoc db :message msg)
-     :dispatch-later [{:ms 1000 :dispatch [:message nil]}]}))
+     :dispatch-later [{:ms 3000 :dispatch [:clear-message]}]}))
+
+;; usage: (dispatch [:clear-message])
+;; clears a message
+(reg-event-db
+  :clear-message
+  [check-spec-interceptor]
+  (fn [db _]
+    (assoc db :message nil)))
 
 ;; usage:  (dispatch [:cloud-entry-point])
 ;; triggers a fetch of the cloud entry point resource
@@ -103,21 +115,70 @@
   (fn [db [cep]]
     (assoc db :cloud-entry-point cep)))
 
-;; usage:  (dispatch [:switch-search-resource resource-type])
-;; trigger search on new resource type
-(reg-event-fx
-  :switch-search-resource
-  [check-spec-interceptor trim-v]
-  (fn [cofx [resource-type]]
-    (if-let [client (get-in cofx [:db :client])]
-      (assoc cofx :cimi/search [client resource-type])
-      cofx)))
-
 ;; usage:  (dispatch [:show-search-results results])
 ;; shows the search results
 (reg-event-db
   :show-search-results
   [check-spec-interceptor trim-v]
-  (fn [db [results]]
-    (assoc db :results results)))
+  (fn [db [resource-type results]]
+    (let [entries (get results (keyword resource-type) [])
+          fields (utils/merge-keys (conj entries {:id "id"}))]
+      (-> db
+          (update-in [:search :results] (constantly results))
+          (update-in [:search :completed?] (constantly true))
+          (update-in [:search :available-fields] (constantly fields))))))
 
+;; usage:  (dispatch [:set-search-first f])
+(reg-event-db
+  :set-search-first
+  [check-spec-interceptor trim-v]
+  (fn [db [v]]
+    (let [n (or (utils/str->int v) 1)]
+      (update-in db [:search :params :$first] (constantly n)))))
+
+;; usage:  (dispatch [:set-search-last f])
+(reg-event-db
+  :set-search-last
+  [check-spec-interceptor trim-v]
+  (fn [db [v]]
+    (let [n (or (utils/str->int v) 20)]
+      (update-in db [:search :params :$last] (constantly n)))))
+
+;; usage:  (dispatch [:set-search-filter f])
+(reg-event-db
+  :set-search-filter
+  [check-spec-interceptor trim-v]
+  (fn [db [v]]
+    (update-in db [:search :params :$filter] (constantly v))))
+
+;; usage:  (dispatch [:set-selected-fields fields])
+(reg-event-db
+  :set-selected-fields
+  [check-spec-interceptor trim-v]
+  (fn [db [fields]]
+    (update-in db [:search :selected-fields] (constantly (set/union #{"id"} fields)))))
+
+;; usage:  (dispatch [:switch-search-resource resource-type])
+;; trigger search on new resource type
+(reg-event-fx
+  :new-search
+  [check-spec-interceptor trim-v]
+  (fn [cofx [new-collection-name]]
+    (let [cofx (assoc-in cofx [:db :search :collection-name] new-collection-name)
+          {:keys [client search]} (:db cofx)
+          {:keys [collection-name params]} search]
+      (-> cofx
+          (update-in [:db :search :completed?] (constantly false))
+          (assoc :cimi/search [client collection-name (utils/prepare-params params)])))))
+
+;; usage:  (dispatch [:search])
+;; refine search
+(reg-event-fx
+  :search
+  [check-spec-interceptor]
+  (fn [cofx _]
+    (let [{:keys [client search]} (:db cofx)
+          {:keys [collection-name params]} search]
+      (-> cofx
+          (update-in [:db :search :completed?] (constantly false))
+          (assoc :cimi/search [client collection-name (utils/prepare-params params)])))))
