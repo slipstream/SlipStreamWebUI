@@ -143,10 +143,12 @@
 
 (defn header-row [selected-fields]
   [h-box
+   :class    "rc-div-table-header"
    :children (map (fn [s] [label :label s :width "250px"]) selected-fields)])
 
 (defn data-row [selected-paths entry]
   [h-box
+   :class    "rc-div-table-row"
    :children (->> selected-paths
                   (map (fn [path] (str (get-in entry path))))
                   (map (fn [s] [label :label s :width "250px"])))])
@@ -154,8 +156,9 @@
 (defn data-table [selected-fields selected-paths entries]
   [v-box
    :gap "5px"
+   :class    "rc-div-table"
    :children [[header-row selected-fields]
-              (map (fn [entry] [data-row selected-paths entry]) entries)]])
+              (map (fn [entry] ^{:key (:id entry)} [data-row selected-paths entry]) entries)]])
 
 (defn search-result-table []
   (let [search-results (subscribe [:search-results])
