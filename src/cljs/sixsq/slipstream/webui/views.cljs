@@ -3,7 +3,7 @@
     [re-com.core :refer [h-box v-box box gap line input-text alert-box
                          button md-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p
-                         selection-list] :refer-macros [handler-fn]]
+                         selection-list]]
     [re-com.buttons :refer [button-args-desc]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
@@ -173,6 +173,33 @@
                 selected-paths (map utils/id->path @selected-fields)]
             [data-table @selected-fields selected-paths entries]))))))
 
+(defn data-column [selected-field selected-path entries]
+  [v-box
+   :gap "5px"
+   :class "rc-div-table"
+   :children [[h-box :children [[label :label selected-field]]]
+              (map (fn [entry]
+                     (let [v (get-in entry selected-path)]
+                       [h-box :children [[label :label v]]])) entries)]])
+
+(defn vertical-data-table [selected-fields selected-paths entries]
+  [h-box
+   :gap "5px"
+   :class    "rc-div-table"
+   :children [(map (fn [f p] [data-column f p entries]) selected-fields selected-paths)]])
+
+(defn search-vertical-result-table []
+  (let [search-results (subscribe [:search-results])
+        collection-name (subscribe [:search-collection-name])
+        selected-fields (subscribe [:search-selected-fields])]
+    (fn []
+      (let [results @search-results]
+        (if (instance? js/Error results)
+          [h-box :children [[label :label (str results)]]]
+          (let [entries (get results (keyword @collection-name) [])
+                selected-paths (map utils/id->path @selected-fields)]
+            [vertical-data-table @selected-fields selected-paths entries]))))))
+
 (defn search-header []
   (let [first-value (atom "1")
         last-value (atom "20")
@@ -293,6 +320,7 @@
               [page-header]
               [control-bar]
               [results-bar]
-              [search-result-table]
+              #_[search-result-table]
+              [search-vertical-result-table]
               #_[search-results]
               [page-footer]]])
