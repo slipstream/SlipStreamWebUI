@@ -9,8 +9,6 @@
    [sixsq.slipstream.webui.subs]
    [sixsq.slipstream.webui.views]))
 
-(enable-console-print!)
-
 ;;
 ;; debugging tools
 ;;

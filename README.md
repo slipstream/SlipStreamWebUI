@@ -132,3 +132,17 @@ You must still use an external browser to connect to the development
 environment.  Chrome is recommended.  Be sure to turn off the security
 settings if you're using a SlipStream service running on a different
 machine.
+
+### Logging
+
+You can reset the logging level for kvlt from the REPL when running
+in development mode. From the REPL do:
+
+```
+=> (require '[taoensso.timbre :as timbre])
+=> (timbre/set-level! :info)
+```
+
+The default value is `:debug` which will log all of the HTTP requests
+and responses.  This is useful when debugging interactions with 
+SlipStream, but annoying otherwise.  
