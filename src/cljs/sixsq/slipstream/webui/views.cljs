@@ -32,8 +32,8 @@
 (defn login
   []
   (let [authn (subscribe [:authn])
-        username (atom "")
-        password (atom "")]
+        username (reagent/atom "")
+        password (reagent/atom "")]
     (fn []
       (let [{:keys [logged-in? user-id]} @authn]
         (if-not logged-in?
@@ -98,64 +98,72 @@
 (declare format-data)
 
 (defn format-list-entry
-  [k v]
-  (let [id (:id v)
-        attrs (if id {:key id} {})]
-    [:li attrs [:strong (or id k)] (format-data v)]))
+  [prefix k v]
+  (let [id (:id v)]
+    ^{:key (str prefix "-" k)}
+    [:li [:strong (or id k)] (format-data prefix v)]))
 
 (defn format-map-entry
-  [[k v]]
+  [prefix [k v]]
+  ^{:key (str prefix "-" k)}
   [:li [:strong k] " : " (if (= k :operations)
                            (format-operations v)
-                           (format-data v))])
+                           (format-data prefix v))])
 
-(defn as-map [m]
-  [:ul (doall (map format-map-entry m))])
+(defn as-map [prefix m]
+  [:ul (doall (map (partial format-map-entry prefix) m))])
 
-(defn as-vec [v]
-  [:ul (doall (map format-list-entry (range) v))])
+(defn as-vec [prefix v]
+  [:ul (doall (map (partial format-list-entry prefix) (range) v))])
 
-(defn format-data [v]
-  (cond
-    (map? v) (as-map v)
-    (vector? v) (as-vec v)
-    :else (str v)))
+(defn format-data
+  ([v]
+   (format-data (str (random-uuid)) v))
+  ([prefix v]
+   (cond
+     (map? v) (as-map prefix v)
+     (vector? v) (as-vec prefix v)
+     :else (str v))))
 
 (defn data-field [selected-field entry]
   (fn []
     (let [v (get-in entry (utils/id->path selected-field))
-          k (str "data-" selected-field "-" (:id entry))
           align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
       (if (= "id" selected-field)
-        ^{:key k} [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
-        ^{:key k} [box :align align :child [label :label v]]))))
+        [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
+        [box :align align :child [label :label v]]))))
 
-(defn column-header [selected-field]
-  (fn []
-    ^{:key (str "column-header-" selected-field)}
-    [h-box
-     :justify :between
-     :align :center
-     :children [[label
-                 :label selected-field]
-                (if-not (= "id" selected-field)
-                  [row-button
-                   :md-icon-name "zmdi zmdi-close"
-                   :mouse-over-row? true
-                   :tooltip "remove column"
-                   :on-click #(dispatch [:remove-selected-field selected-field])])]]))
+(defn column-header-with-key [selected-field]
+  ^{:key (str "column-header-" selected-field)}
+  [h-box
+   :justify :between
+   :gap "1ex"
+   :align :center
+   :class "data-column-header"
+   :children [[label
+               :label selected-field]
+              (if-not (= "id" selected-field)
+                [row-button
+                 :md-icon-name "zmdi zmdi-close"
+                 :mouse-over-row? true
+                 :tooltip "remove column"
+                 :on-click #(dispatch [:remove-selected-field selected-field])])]])
 
-(defn data-column [selected-field entries]
+(defn data-field-with-key [selected-field entry]
+  (let [k (str "data-" selected-field "-" (:id entry))]
+    ^{:key k} [data-field selected-field entry]))
+
+(defn data-column-with-key [entries selected-field]
   ^{:key (str "column-" selected-field)}
   [v-box
    :padding "0 5px 0"
-   :children [[column-header selected-field]
-              (map (fn [entry] [data-field selected-field entry]) entries)]])
+   :children [(column-header-with-key selected-field)
+              (doall (map (partial data-field-with-key selected-field) entries))]])
 
 (defn vertical-data-table [selected-fields entries]
   [h-box
    :gap "5px"
-   :children [(map (fn [field] [data-column field entries]) selected-fields)]])
+   :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:search-results])
@@ -171,9 +179,9 @@
                     [vertical-data-table @selected-fields entries]))]))))
 
 (defn search-header []
-  (let [first-value (atom "1")
-        last-value (atom "20")
-        filter-value (atom "")]
+  (let [first-value (reagent/atom "1")
+        last-value (reagent/atom "20")
+        filter-value (reagent/atom "")]
     (fn []
       [h-box
        :gap "3px"
@@ -207,11 +215,10 @@
 
 (defn page-header []
   [h-box
+   :justify :between
    :children [[box
                :child [:img {:src    "assets/images/slipstream_logo.svg"
                              :height "30px"}]]
-              [gap
-               :size "1"]
               [authn-panel]]])
 
 (defn select-fields []
@@ -237,9 +244,10 @@
                                          :choices available-fields
                                          :multi-select? true
                                          :disabled? false
+                                         :height "200px"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :gap "1"
+                                         :justify :between
                                          :children [[button
                                                      :label "update"
                                                      :on-click (fn []
@@ -270,14 +278,18 @@
           [h-box
            :children [[label :label "ERROR"]]]
           [h-box
-           :children [(if-not completed?
-                        [throbber
-                         :size :small])
+           :children [[box
+                       :justify :center
+                       :align :center
+                       :width "30px"
+                       :height "30px"
+                       :child (if completed? "" [throbber :size :small])]
                       (if results
                         (let [total (:count results)
                               n (count (get results (keyword collection-name) []))]
                           [label
-                           :label (str n " / " total)]))
+                           :label (str "Results: " n " / " total)])
+                        [label :label "Results: ?? / ??"])
                       [gap :size "1"]
                       (if-let [ops (:operations results)]
                         (format-operations ops))]])))))
