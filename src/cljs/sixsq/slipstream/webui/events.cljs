@@ -89,6 +89,20 @@
     {:db             (assoc db :message msg)
      :dispatch-later [{:ms 3000 :dispatch [:clear-message]}]}))
 
+;; usage: (dispatch [:set-resource-data data])
+(reg-event-db
+  :set-resource-data
+  [check-spec-interceptor trim-v]
+  (fn [db [data]]
+    (assoc db :resource-data data)))
+
+;; usage: (dispatch [:clear-resource-data data])
+(reg-event-db
+  :clear-resource-data
+  [check-spec-interceptor]
+  (fn [db _]
+    (assoc db :resource-data nil)))
+
 ;; usage: (dispatch [:clear-message])
 ;; clears a message
 (reg-event-db
@@ -157,6 +171,13 @@
   [check-spec-interceptor trim-v]
   (fn [db [fields]]
     (update-in db [:search :selected-fields] (constantly (set/union #{"id"} fields)))))
+
+;; usage:  (dispatch [:remove-selected-field field])
+(reg-event-db
+  :remove-selected-field
+  [check-spec-interceptor trim-v]
+  (fn [db [field]]
+    (update-in db [:search :selected-fields] #(set/difference % #{field}))))
 
 ;; usage:  (dispatch [:switch-search-resource resource-type])
 ;; trigger search on new resource type

@@ -1,25 +1,15 @@
 (ns sixsq.slipstream.webui.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text alert-box
-                         button md-icon-button label modal-panel throbber
+                         button row-button md-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p
-                         selection-list]]
+                         scroller selection-list title]]
     [re-com.buttons :refer [button-args-desc]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [re-frame.loggers :refer [console]]
     [clojure.string :as str]
     [sixsq.slipstream.webui.utils :as utils]))
-
-(defn message
-  []
-  (let [message (subscribe [:message])]
-    (fn []
-      (if @message
-        [modal-panel
-         :child @message
-         :wrap-nicely? true
-         :backdrop-on-click #(dispatch [:clear-message])]))))
 
 (defn logout-buttons
   [user-id]
@@ -105,19 +95,19 @@
                                          :label rel
                                          :on-click #(js/alert (str "Operation: " rel " on URL " href))]) ops))])
 
-(declare format-value)
+(declare format-data)
 
 (defn format-list-entry
   [k v]
   (let [id (:id v)
         attrs (if id {:key id} {})]
-    [:li attrs [:strong (or id k)] (format-value v)]))
+    [:li attrs [:strong (or id k)] (format-data v)]))
 
 (defn format-map-entry
   [[k v]]
   [:li [:strong k] " : " (if (= k :operations)
                            (format-operations v)
-                           (format-value v))])
+                           (format-data v))])
 
 (defn as-map [m]
   [:ul (doall (map format-map-entry m))])
@@ -125,68 +115,47 @@
 (defn as-vec [v]
   [:ul (doall (map format-list-entry (range) v))])
 
-(defn format-value [v]
+(defn format-data [v]
   (cond
     (map? v) (as-map v)
     (vector? v) (as-vec v)
     :else (str v)))
 
-(defn search-results []
-  (let [search-results (subscribe [:search-results])
-        collection-name (subscribe [:search-collection-name])]
-    (fn []
-      (let [results @search-results]
-        (if (instance? js/Error results)
-          [h-box :children [[label :label (str results)]]]
-          (let [entries (get results (keyword @collection-name) [])]
-            [h-box
-             :children [(format-value entries)]]))))))
+(defn data-field [selected-field entry]
+  (fn []
+    (let [v (get-in entry (utils/id->path selected-field))
+          k (str "data-" selected-field "-" (:id entry))
+          align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
+      (if (= "id" selected-field)
+        ^{:key k} [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
+        ^{:key k} [box :align align :child [label :label v]]))))
 
-(defn header-row [selected-fields]
-  [h-box
-   :class    "rc-div-table-header"
-   :children (map (fn [s] [label :label s :width "250px"]) selected-fields)])
+(defn column-header [selected-field]
+  (fn []
+    ^{:key (str "column-header-" selected-field)}
+    [h-box
+     :justify :between
+     :align :center
+     :children [[label
+                 :label selected-field]
+                (if-not (= "id" selected-field)
+                  [row-button
+                   :md-icon-name "zmdi zmdi-close"
+                   :mouse-over-row? true
+                   :tooltip "remove column"
+                   :on-click #(dispatch [:remove-selected-field selected-field])])]]))
 
-(defn data-row [selected-paths entry]
-  [h-box
-   :class    "rc-div-table-row"
-   :children (->> selected-paths
-                  (map (fn [path] (str (get-in entry path))))
-                  (map (fn [s] [label :label s :width "250px"])))])
-
-(defn data-table [selected-fields selected-paths entries]
+(defn data-column [selected-field entries]
+  ^{:key (str "column-" selected-field)}
   [v-box
-   :gap "5px"
-   :class    "rc-div-table"
-   :children [[header-row selected-fields]
-              (map (fn [entry] ^{:key (:id entry)} [data-row selected-paths entry]) entries)]])
+   :padding "0 5px 0"
+   :children [[column-header selected-field]
+              (map (fn [entry] [data-field selected-field entry]) entries)]])
 
-(defn search-result-table []
-  (let [search-results (subscribe [:search-results])
-        collection-name (subscribe [:search-collection-name])
-        selected-fields (subscribe [:search-selected-fields])]
-    (fn []
-      (let [results @search-results]
-        (if (instance? js/Error results)
-          [v-box :children [[label :label (str results)]]]
-          (let [entries (get results (keyword @collection-name) [])
-                selected-paths (map utils/id->path @selected-fields)]
-            [data-table @selected-fields selected-paths entries]))))))
-
-(defn data-column [selected-field selected-path entries]
-  [v-box
-   :gap "5px"
-   :class "rc-div-table"
-   :children [[h-box :children [[label :label selected-field]]]
-              (map (fn [entry]
-                     (let [v (get-in entry selected-path)]
-                       [h-box :children [[label :label v]]])) entries)]])
-
-(defn vertical-data-table [selected-fields selected-paths entries]
+(defn vertical-data-table [selected-fields entries]
   [h-box
    :gap "5px"
-   :class    "rc-div-table"
-   :children [(map (fn [f p] [data-column f p entries]) selected-fields selected-paths)]])
+   :children [(map (fn [field] [data-column field entries]) selected-fields)]])
 
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:search-results])
@@ -194,11 +163,12 @@
         selected-fields (subscribe [:search-selected-fields])]
     (fn []
       (let [results @search-results]
-        (if (instance? js/Error results)
-          [h-box :children [[label :label (str results)]]]
-          (let [entries (get results (keyword @collection-name) [])
-                selected-paths (map utils/id->path @selected-fields)]
-            [vertical-data-table @selected-fields selected-paths entries]))))))
+        [scroller
+         :scroll :auto
+         :child (if (instance? js/Error results)
+                  [box :child (format-data (ex-data results))]
+                  (let [entries (get results (keyword @collection-name) [])]
+                    [vertical-data-table @selected-fields entries]))]))))
 
 (defn search-header []
   (let [first-value (atom "1")
@@ -280,12 +250,16 @@
                                                      :on-click (fn []
                                                                  (reset! show? false))]]]]]])]])))
 
-(defn control-bar []
+(defn select-controls []
   [h-box
    :gap "3px"
    :children [[cloud-entry-point]
-              [select-fields]
-              [gap :size "1"]
+              [select-fields]]])
+
+(defn control-bar []
+  [h-box
+   :justify :between
+   :children [[select-controls]
               [search-header]]])
 
 (defn results-bar []
@@ -294,7 +268,7 @@
       (let [{:keys [completed? results collection-name]} @search]
         (if (instance? js/Error results)
           [h-box
-           :children [[label :label (str results)]]]
+           :children [[label :label "ERROR"]]]
           [h-box
            :children [(if-not completed?
                         [throbber
@@ -310,17 +284,50 @@
 
 (defn page-footer []
   [h-box
+   :justify :center
    :children [[label
                :label "Copyright © 2016, SixSq Sàrl"]]])
+
+(defn message-modal
+  []
+  (let [message (subscribe [:message])]
+    (fn []
+      (if @message
+        [modal-panel
+         :child @message
+         :wrap-nicely? true
+         :backdrop-on-click #(dispatch [:clear-message])]))))
+
+(defn resource-modal
+  []
+  (let [resource-data (subscribe [:resource-data])]
+    (fn []
+      (if @resource-data
+        [modal-panel
+         :child [v-box
+                 :gap "3px"
+                 :children [[scroller
+                             :scroll :auto
+                             :width "500px"
+                             :height "300px"
+                             :child [v-box
+                                     :children [(title
+                                                  :label (:id @resource-data)
+                                                  :level :level3
+                                                  :underline? true)
+                                                (format-data @resource-data)]]]
+                            [button
+                             :label "close"
+                             :on-click #(dispatch [:clear-resource-data])]]]
+         :backdrop-on-click #(dispatch [:clear-resource-data])]))))
 
 (defn app []
   [v-box
    :gap "5px"
-   :children [[message]
+   :children [[message-modal]
+              [resource-modal]
               [page-header]
               [control-bar]
               [results-bar]
-              #_[search-result-table]
               [search-vertical-result-table]
-              #_[search-results]
               [page-footer]]])

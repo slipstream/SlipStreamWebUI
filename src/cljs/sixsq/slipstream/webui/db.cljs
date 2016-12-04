@@ -10,6 +10,8 @@
 
 (s/def ::message (s/nilable string?))
 
+(s/def ::resource-data (s/nilable any?))
+
 (s/def ::logged-in? boolean?)
 (s/def ::user-id (s/nilable string?))
 (s/def ::authn (s/keys :req-un [::logged-in? ::user-id]))
@@ -60,7 +62,7 @@
 (s/def ::search (s/keys :req-un [::collection-name ::params ::results ::completed?
                                  ::available-fields ::selected-fields]))
 
-(s/def ::db (s/keys :req-un [::client ::message ::authn ::cloud-entry-point ::search]))
+(s/def ::db (s/keys :req-un [::client ::message ::resource-data ::authn ::cloud-entry-point ::search]))
 
 ;;
 ;; initial database value
@@ -69,6 +71,7 @@
 (def default-value
   {:client            nil
    :message           nil
+   :resource-data     nil
    :authn             {:logged-in? false
                        :user-id    nil}
    :cloud-entry-point nil

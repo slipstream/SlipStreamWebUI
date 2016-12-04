@@ -16,6 +16,11 @@
   (:message db))
 (reg-sub :message message)
 
+(defn resource-data
+  [db _]
+  (:resource-data db))
+(reg-sub :resource-data resource-data)
+
 (defn cloud-entry-point
   [db _]
   (:cloud-entry-point db))
