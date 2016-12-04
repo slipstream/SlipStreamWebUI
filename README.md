@@ -1,9 +1,15 @@
-# Reagent Evaluation
+# Web UI
 
 ## Purpose
 
 This repository contains a simple web browser UI for SlipStream, using
-ClojureScript and related technologies. 
+ClojureScript and related technologies.  It is an early **prototype**
+but feedback (as GitHub issues) on the UI, source code, and underlying
+technologies is welcome.
+
+At the moment, it is not packaged and can only be run from a 
+development environment.  See the instructions below for starting up
+the web UI.
 
 ## Useful Tools (and Commentary)
 
