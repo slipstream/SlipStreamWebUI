@@ -5,7 +5,7 @@
                   [reagent "0.6.0"]
 
                   [re-frame "0.9.0-alpha1"]
-                  [re-com "1.1.0"]
+                  [re-com "1.2.0-sixsq"]
                   [binaryage/devtools "0.8.3"]
                   ;;[secretary "1.2.3"]
 

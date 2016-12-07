@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.views
   (:require
-    [re-com.core :refer [h-box v-box box gap line input-text alert-box
+    [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p
                          scroller selection-list title]]
@@ -44,7 +44,7 @@
                        :placeholder "username"
                        :change-on-blur? true
                        :on-change #(reset! username %)]
-                      [input-text
+                      [input-password
                        :model password
                        :placeholder "password"
                        :change-on-blur? true
@@ -90,6 +90,7 @@
 (defn format-operations
   [ops]
   [h-box
+   :gap "1ex"
    :children
    (doall (map (fn [{:keys [rel href]}] [hyperlink
                                          :label rel
@@ -127,7 +128,7 @@
 
 (defn data-field [selected-field entry]
   (fn []
-    (let [v (get-in entry (utils/id->path selected-field))
+    (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
           align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
       (if (= "id" selected-field)
         [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
