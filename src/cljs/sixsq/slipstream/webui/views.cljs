@@ -126,6 +126,77 @@
      (vector? v) (as-vec prefix v)
      :else (str v))))
 
+(defn branch? [v]
+  (or (map? v) (vector? v)))
+
+(defn create-label [k v]
+  (if-not (branch? v)
+    (str k " : " v)
+    (str k)))
+
+(declare rows)
+
+(defn indented-row [indent prefix k v]
+  (let [react-key (str prefix "-" k)
+        indent-size (str (* indent 2) "ex")]
+    ^{:key react-key}
+    [h-box
+     ;;:style {:display "inherit"}
+     :children [(if-not (zero? indent) [line :size "3px" :color "grey"])
+                [gap :size indent-size]
+                [md-icon-button
+                 :md-icon-name "zmdi-chevron-right"
+                 :disabled? true]
+                [label :label (create-label k v)]]]))
+
+(defn rows [indent prefix value]
+  (cond
+    (map? value) (doall (map (fn [[k v]] [indented-row indent prefix k v]) value))
+    (vector? value) (doall (map (fn [k v] [indented-row indent prefix k v]) (range) value))
+    :else nil))
+
+(defn tree-old
+  [prefix data]
+  [v-box
+   :gap "2px"
+   :children (rows 0 prefix data)])
+
+(declare tree)
+
+(defn tree-node [indent prefix k v]
+  (let [react-key (str prefix "-" k)
+        indent-size (str (* 2 indent) "ex")
+        tag (create-label k v)
+        icon (if (branch? v)
+               [md-icon-button
+                :size :smaller
+                :md-icon-name "zmdi-chevron-right"
+                :disabled? false]
+               [md-icon-button
+                :size :smaller
+                :md-icon-name "zmdi-stop"
+                :disabled? true])]
+    ^{:key react-key}
+    [h-box
+     :align :center
+     :children [[gap :size indent-size]
+                icon
+                [label :label tag]]]))
+
+(defn tree-reducer [indent prefix r k v]
+  (let [parent (tree-node indent prefix k v)
+        children (tree (inc indent) prefix v)]
+    (concat r [parent] children)))
+
+(defn tree [indent prefix data]
+  (if (branch? data)
+    (doall (reduce-kv (partial tree-reducer indent prefix) [] data))))
+
+(defn tree-widget [indent prefix data]
+  (if-let [tree-rows (tree indent prefix data)]
+    [v-box
+     :children tree-rows]))
+
 (defn data-field [selected-field entry]
   (fn []
     (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
@@ -324,11 +395,13 @@
                              :width "500px"
                              :height "300px"
                              :child [v-box
-                                     :children [(title
-                                                  :label (:id @resource-data)
-                                                  :level :level3
-                                                  :underline? true)
-                                                (format-data @resource-data)]]]
+                                     :children [[title
+                                                 :label (:id @resource-data)
+                                                 :level :level3
+                                                 :underline? true]
+                                                #_(format-data @resource-data)
+                                                #_(tree (:id @resource-data) @resource-data)
+                                                (tree-widget 0 (:id @resource-data) @resource-data)]]]
                             [button
                              :label "close"
                              :on-click #(dispatch [:clear-resource-data])]]]
