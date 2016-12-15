@@ -4,7 +4,7 @@
   :dependencies '[[org.clojure/clojurescript "1.9.293"]
                   [reagent "0.6.0"]
 
-                  [re-frame "0.9.0-alpha1"]
+                  [re-frame "0.9.0"]
                   [re-com "1.2.0-sixsq"]
                   [binaryage/devtools "0.8.3"]
                   ;;[secretary "1.2.3"]
@@ -24,7 +24,7 @@
                   [com.cemerick/piggieback "0.2.1" :scope "test"]
                   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
                   [weasel "0.7.0" :scope "test"]
-                  [crisptrutski/boot-cljs-test "0.2.2" :scope "test"]
+                  [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
                   [boot-deps "0.1.6" :scope "test"]])
 
 (require
@@ -47,11 +47,16 @@
                (build)))
 
 (deftask production []
-         (task-options! cljs {:optimizations :advanced})
+         (task-options! cljs {:optimizations    :advanced
+                              :compiler-options {:pretty-print true
+                                                 :pseudo-names true
+                                                 }
+                              })
          identity)
 
 (deftask development []
-         (task-options! cljs {:optimizations :none :source-map true}
+         (task-options! cljs {:optimizations :none
+                              :source-map true}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
