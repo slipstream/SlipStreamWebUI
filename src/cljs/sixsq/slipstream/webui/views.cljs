@@ -2,7 +2,7 @@
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
-                         single-dropdown hyperlink hyperlink-href p
+                         single-dropdown hyperlink hyperlink-href p checkbox
                          scroller selection-list title]]
     [re-com.buttons :refer [button-args-desc]]
     [reagent.core :as reagent]
@@ -407,6 +407,106 @@
                              :on-click #(dispatch [:clear-resource-data])]]]
          :backdrop-on-click #(dispatch [:clear-resource-data])]))))
 
+(defn runs-control []
+  (let [offset (reagent/atom "1")
+        limit (reagent/atom "10")
+        cloud (reagent/atom "")
+        activeOnly (reagent/atom true)]
+    (fn []
+      [h-box
+       :gap "3px"
+       :children [[input-text
+                   :model offset
+                   :placeholder "offset"
+                   :width "75px"
+                   :change-on-blur? true
+                   :on-change (fn [v]
+                                (reset! offset v)
+                                (dispatch [:set-runs-params {:offset v}]))]
+                  [input-text
+                   :model limit
+                   :placeholder "limit"
+                   :width "75px"
+                   :change-on-blur? true
+                   :on-change (fn [v]
+                                (reset! limit v)
+                                (dispatch [:set-runs-params {:limit v}]))]
+                  [input-text
+                   :model cloud
+                   :placeholder "cloud"
+                   :width "300px"
+                   :change-on-blur? true
+                   :on-change (fn [v]
+                                (reset! cloud v)
+                                (dispatch [:set-runs-params {:cloud v}]))]
+                  [checkbox
+                   :model activeOnly
+                   :label "active only?"
+                   :on-change (fn [v]
+                                (reset! activeOnly v)
+                                (dispatch [:set-runs-params {:activeOnly (if v 1 0)}]))]
+                  [button
+                   :label "show runs"
+                   :on-click #(dispatch [:runs-search])]
+                  ]])))
+
+(defn runs-panel
+  []
+  (let [runs-data (subscribe [:runs-data])]
+    (fn []
+      [v-box
+       :gap "3px"
+       :children [[runs-control]
+                  (if @runs-data
+                    [scroller
+                     :scroll :auto
+                     :width "500px"
+                     :height "300px"
+                     :child [v-box
+                             :children [[title
+                                         :label "RUNS"
+                                         :level :level3
+                                         :underline? true]
+                                        (format-data @runs-data)]]])
+                  ]])))
+
+(defn modules-control []
+  (let [path (reagent/atom "")]
+    (fn []
+      [h-box
+       :gap "3px"
+       :children [[input-text
+                   :model path
+                   :placeholder "module"
+                   :width "150px"
+                   :change-on-blur? true
+                   :on-change (fn [v]
+                                (reset! path v)
+                                (dispatch [:set-module-path (if (str/blank? v) nil v)]))]
+                  [button
+                   :label "show modules"
+                   :on-click #(dispatch [:modules-search])]]])))
+
+(defn modules-panel
+  []
+  (let [modules-data (subscribe [:modules-data])]
+    (fn []
+      [v-box
+       :gap "3px"
+       :children [[modules-control]
+                  (if @modules-data
+                    [scroller
+                     :scroll :auto
+                     :width "500px"
+                     :height "300px"
+                     :child [v-box
+                             :children [[title
+                                         :label "MODULES"
+                                         :level :level3
+                                         :underline? true]
+                                        (format-data @modules-data)]]])
+                  ]])))
+
 (defn app []
   [v-box
    :gap "5px"
@@ -416,4 +516,6 @@
               [control-bar]
               [results-bar]
               [search-vertical-result-table]
+              [runs-panel]
+              [modules-panel]
               [page-footer]]])

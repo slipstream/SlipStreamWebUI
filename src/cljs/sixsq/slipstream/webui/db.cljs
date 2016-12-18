@@ -8,9 +8,26 @@
 
 (s/def ::client any?)
 
+(s/def ::cimi any?)
+(s/def ::runs any?)
+(s/def ::modules any?)
+
+(s/def ::clients (s/nilable (s/keys :req-un [::cimi ::runs ::modules])))
+
 (s/def ::message (s/nilable string?))
 
 (s/def ::resource-data (s/nilable any?))
+
+(s/def ::runs-data (s/nilable any?))
+
+(s/def ::offset string?)
+(s/def ::limit string?)
+(s/def ::cloud (s/nilable string?))
+(s/def ::activeOnly int?)
+(s/def ::runs-params (s/keys :req-un [::offset ::limit ::cloud ::activeOnly]))
+
+(s/def ::modules-data (s/nilable any?))
+(s/def ::modules-path (s/nilable string?))
 
 (s/def ::logged-in? boolean?)
 (s/def ::user-id (s/nilable string?))
@@ -62,7 +79,7 @@
 (s/def ::search (s/keys :req-un [::collection-name ::params ::results ::completed?
                                  ::available-fields ::selected-fields]))
 
-(s/def ::db (s/keys :req-un [::client ::message ::resource-data ::authn ::cloud-entry-point ::search]))
+(s/def ::db (s/keys :req-un [::client ::message ::resource-data ::runs-data ::runs-params ::modules-data ::modules-path ::authn ::cloud-entry-point ::search]))
 
 ;;
 ;; initial database value
@@ -70,8 +87,16 @@
 
 (def default-value
   {:client            nil
+   :clients           nil
    :message           nil
    :resource-data     nil
+   :runs-data         nil
+   :runs-params       {:offset "0"
+                       :limit "10"
+                       :cloud nil
+                       :activeOnly 0}
+   :modules-data      nil
+   :modules-path      nil
    :authn             {:logged-in? false
                        :user-id    nil}
    :cloud-entry-point nil

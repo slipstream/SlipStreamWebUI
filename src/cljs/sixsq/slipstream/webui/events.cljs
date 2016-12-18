@@ -9,6 +9,8 @@
     [re-frame.loggers :refer [console]]
     [cljs.spec :as s]
     [sixsq.slipstream.client.api.cimi.async :as cimi-async]
+    [sixsq.slipstream.client.api.runs.async :as runs-async]
+    [sixsq.slipstream.client.api.modules.async :as modules-async]
     [sixsq.slipstream.webui.utils :as utils]
     [clojure.set :as set]))
 
@@ -42,7 +44,11 @@
   :initialize-client
   [check-spec-interceptor]
   (fn [db _]
-    (assoc db :client (cimi-async/instance))))
+    (let [clients {:cimi (cimi-async/instance)
+                   :runs (runs-async/instance)
+                   :modules (modules-async/instance)}]
+      (assoc db :client (:cimi clients)
+                :clients clients))))
 
 ;; usage: (dispatch [:logout])
 ;; triggers logout through cimi client
@@ -102,6 +108,20 @@
   [check-spec-interceptor]
   (fn [db _]
     (assoc db :resource-data nil)))
+
+;; usage: (dispatch [:set-runs-data data])
+(reg-event-db
+  :set-runs-data
+  [check-spec-interceptor trim-v]
+  (fn [db [data]]
+    (assoc db :runs-data data)))
+
+;; usage: (dispatch [:set-modules-data data])
+(reg-event-db
+  :set-modules-data
+  [check-spec-interceptor trim-v]
+  (fn [db [data]]
+    (assoc db :modules-data data)))
 
 ;; usage: (dispatch [:clear-message])
 ;; clears a message
@@ -203,3 +223,42 @@
       (-> cofx
           (update-in [:db :search :completed?] (constantly false))
           (assoc :cimi/search [client collection-name (utils/prepare-params params)])))))
+
+;; usage:  (dispatch [:runs-search])
+;; refine search
+(reg-event-fx
+  :runs-search
+  [check-spec-interceptor]
+  (fn [cofx _]
+    (let [{:keys [clients runs-params]} (:db cofx)
+          client (:runs clients)]
+      (-> cofx
+          (assoc :runs/search [client runs-params])))))
+
+;; usage:  (dispatch [:modules-search])
+;; refine search
+(reg-event-fx
+  :modules-search
+  [check-spec-interceptor]
+  (fn [cofx _]
+    (let [{:keys [clients modules-path]} (:db cofx)
+          client (:modules clients)]
+      (-> cofx
+          (assoc :modules/search [client modules-path])))))
+
+;; usage:  (dispatch [:set-module-path p])
+(reg-event-db
+  :set-module-path
+  [check-spec-interceptor trim-v]
+  (fn [db [v]]
+    (assoc db :modules-path v)))
+
+;; usage:  (dispatch [:set-runs-params {:key value}])
+(reg-event-db
+  :set-runs-params
+  [check-spec-interceptor trim-v]
+  (fn [db [v]]
+    (let [params (:run-params db)
+          new-params (merge params v)]
+      (assoc db :run-params new-params))))
+

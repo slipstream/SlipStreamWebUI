@@ -15,7 +15,7 @@
                   ;;[reagent-reforms "0.4.3"]
                   ;;[org.clojars.frozenlock/reagent-modals "0.2.6"]
                   ;;[cljsjs/react-bootstrap "0.30.6-0"]
-                  [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.16-SNAPSHOT"]
+                  [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.19-SNAPSHOT"]
 
                   [adzerk/boot-cljs "1.7.228-2" :scope "test"]
                   [adzerk/boot-cljs-repl "0.3.3" :scope "test"]

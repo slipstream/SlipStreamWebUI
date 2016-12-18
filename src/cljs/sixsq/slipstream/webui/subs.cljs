@@ -21,6 +21,16 @@
   (:resource-data db))
 (reg-sub :resource-data resource-data)
 
+(defn runs-data
+  [db _]
+  (:runs-data db))
+(reg-sub :runs-data runs-data)
+
+(defn modules-data
+  [db _]
+  (:modules-data db))
+(reg-sub :modules-data modules-data)
+
 (defn cloud-entry-point
   [db _]
   (:cloud-entry-point db))
