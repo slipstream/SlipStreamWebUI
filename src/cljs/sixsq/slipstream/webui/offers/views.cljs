@@ -1,91 +1,15 @@
-(ns sixsq.slipstream.webui.views
+(ns sixsq.slipstream.webui.offers.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
                          scroller selection-list title]]
-    [re-com.buttons :refer [button-args-desc]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
-    [re-frame.loggers :refer [console]]
-    [clojure.string :as str]
-    [sixsq.slipstream.webui.utils :as utils]))
-
-(defn logout-buttons
-  [user-id]
-  [[button
-    :label user-id
-    :on-click #(js/alert (str "profile for " user-id))]
-   [button
-    :label "logout"
-    :on-click #(dispatch [:logout])]])
-
-(defn logout
-  []
-  (let [authn (subscribe [:authn])]
-    (fn []
-      (let [{:keys [logged-in? user-id]} @authn]
-        (if logged-in?
-          [h-box
-           :children (logout-buttons (or user-id "unknown"))])))))
-
-(defn login
-  []
-  (let [authn (subscribe [:authn])
-        username (reagent/atom "")
-        password (reagent/atom "")]
-    (fn []
-      (let [{:keys [logged-in? user-id]} @authn]
-        (if-not logged-in?
-          [h-box
-           :gap "3px"
-           :children [[input-text
-                       :model username
-                       :placeholder "username"
-                       :change-on-blur? true
-                       :on-change #(reset! username %)]
-                      [input-password
-                       :model password
-                       :placeholder "password"
-                       :change-on-blur? true
-                       :on-change #(reset! password %)]
-                      [button
-                       :label "login"
-                       :on-click (fn []
-                                   (dispatch [:login {:username @username :password @password}])
-                                   (reset! username "")
-                                   (reset! password ""))]]])))))
-
-(defn authn-panel []
-  [h-box
-   :children [[login]
-              [logout]]])
-
-(def common-keys
-  #{:id :created :updated :acl :baseURI :resourceURI})
-
-(defn format-link [k]
-  (let [n (name k)]
-    {:id n :label n}))
-
-(defn cep-opts [cep]
-  (let [ks (sort (remove common-keys (keys cep)))]
-    (map format-link ks)))
-
-(defn cloud-entry-point
-  []
-  (let [cep (subscribe [:cloud-entry-point])
-        selected-id (atom nil)]
-    (fn []
-      [h-box
-       :children [[single-dropdown
-                   :model selected-id
-                   :placeholder "resource type"
-                   :width "250px"
-                   :choices (doall (cep-opts @cep))
-                   :on-change (fn [id]
-                                (reset! selected-id id)
-                                (dispatch [:new-search id]))]]])))
+    [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.offers.effects]
+    [sixsq.slipstream.webui.offers.events]
+    [sixsq.slipstream.webui.offers.subs]))
 
 (defn format-operations
   [ops]
@@ -285,30 +209,6 @@
                    :label "search"
                    :on-click #(dispatch [:search])]]])))
 
-(defn panel-controls []
-  (let [model (reagent/atom :panel/apps)]
-    (fn []
-      [horizontal-pill-tabs
-       :model model
-       :tabs [{:id    :panel/apps
-               :label "Apps"}
-              {:id    :panel/offers
-               :label "Offers"}
-              {:id    :panel/dashboard
-               :label "Dashboard"}]
-       :on-change (fn [selected-panel]
-                    (reset! model selected-panel)
-                    (dispatch [:set-panel selected-panel]))])))
-
-(defn page-header []
-  [h-box
-   :justify :between
-   :children [[box
-               :child [:img {:src    "assets/images/slipstream_logo.svg"
-                             :height "30px"}]]
-              [panel-controls]
-              [authn-panel]]])
-
 (defn select-fields []
   (let [available-fields (subscribe [:search-available-fields])
         selected-fields (subscribe [:search-selected-fields])
@@ -346,6 +246,32 @@
                                                      :on-click (fn []
                                                                  (reset! show? false))]]]]]])]])))
 
+(def common-keys
+  #{:id :created :updated :acl :baseURI :resourceURI})
+
+(defn format-link [k]
+  (let [n (name k)]
+    {:id n :label n}))
+
+(defn cep-opts [cep]
+  (let [ks (sort (remove common-keys (keys cep)))]
+    (map format-link ks)))
+
+(defn cloud-entry-point
+  []
+  (let [cep (subscribe [:cloud-entry-point])
+        selected-id (atom nil)]
+    (fn []
+      [h-box
+       :children [[single-dropdown
+                   :model selected-id
+                   :placeholder "resource type"
+                   :width "250px"
+                   :choices (doall (cep-opts @cep))
+                   :on-change (fn [id]
+                                (reset! selected-id id)
+                                (dispatch [:new-search id]))]]])))
+
 (defn select-controls []
   [h-box
    :gap "3px"
@@ -382,168 +308,9 @@
                       (if-let [ops (:operations results)]
                         (format-operations ops))]])))))
 
-(defn page-footer []
-  [h-box
-   :justify :center
-   :children [[label
-               :label "Copyright © 2016, SixSq Sàrl"]]])
-
-(defn message-modal
-  []
-  (let [message (subscribe [:message])]
-    (fn []
-      (if @message
-        [modal-panel
-         :child @message
-         :wrap-nicely? true
-         :backdrop-on-click #(dispatch [:clear-message])]))))
-
-(defn resource-modal
-  []
-  (let [resource-data (subscribe [:resource-data])]
-    (fn []
-      (if @resource-data
-        [modal-panel
-         :child [v-box
-                 :gap "3px"
-                 :children [[scroller
-                             :scroll :auto
-                             :width "500px"
-                             :height "300px"
-                             :child [v-box
-                                     :children [[title
-                                                 :label (:id @resource-data)
-                                                 :level :level3
-                                                 :underline? true]
-                                                #_(format-data @resource-data)
-                                                #_(tree (:id @resource-data) @resource-data)
-                                                (tree-widget 0 (:id @resource-data) @resource-data)]]]
-                            [button
-                             :label "close"
-                             :on-click #(dispatch [:clear-resource-data])]]]
-         :backdrop-on-click #(dispatch [:clear-resource-data])]))))
-
-(defn runs-control []
-  (let [offset (reagent/atom "1")
-        limit (reagent/atom "10")
-        cloud (reagent/atom "")
-        activeOnly (reagent/atom true)]
-    (fn []
-      [h-box
-       :gap "3px"
-       :children [[input-text
-                   :model offset
-                   :placeholder "offset"
-                   :width "75px"
-                   :change-on-blur? true
-                   :on-change (fn [v]
-                                (reset! offset v)
-                                (dispatch [:set-runs-params {:offset v}]))]
-                  [input-text
-                   :model limit
-                   :placeholder "limit"
-                   :width "75px"
-                   :change-on-blur? true
-                   :on-change (fn [v]
-                                (reset! limit v)
-                                (dispatch [:set-runs-params {:limit v}]))]
-                  [input-text
-                   :model cloud
-                   :placeholder "cloud"
-                   :width "300px"
-                   :change-on-blur? true
-                   :on-change (fn [v]
-                                (reset! cloud v)
-                                (dispatch [:set-runs-params {:cloud v}]))]
-                  [checkbox
-                   :model activeOnly
-                   :label "active only?"
-                   :on-change (fn [v]
-                                (reset! activeOnly v)
-                                (dispatch [:set-runs-params {:activeOnly (if v 1 0)}]))]
-                  [button
-                   :label "show runs"
-                   :on-click #(dispatch [:runs-search])]
-                  ]])))
-
-(defn runs-panel
-  []
-  (let [runs-data (subscribe [:runs-data])]
-    (fn []
-      [v-box
-       :gap "3px"
-       :children [[runs-control]
-                  (if @runs-data
-                    [scroller
-                     :scroll :auto
-                     :width "500px"
-                     :height "300px"
-                     :child [v-box
-                             :children [[title
-                                         :label "RUNS"
-                                         :level :level3
-                                         :underline? true]
-                                        (format-data @runs-data)]]])
-                  ]])))
-
-(defn modules-control []
-  (let [path (reagent/atom "")]
-    (fn []
-      [h-box
-       :gap "3px"
-       :children [[input-text
-                   :model path
-                   :placeholder "module"
-                   :width "150px"
-                   :change-on-blur? true
-                   :on-change (fn [v]
-                                (reset! path v)
-                                (dispatch [:set-module-path (if (str/blank? v) nil v)]))]
-                  [button
-                   :label "show modules"
-                   :on-click #(dispatch [:modules-search])]]])))
-
-(defn modules-panel
-  []
-  (let [modules-data (subscribe [:modules-data])]
-    (fn []
-      [v-box
-       :gap "3px"
-       :children [[modules-control]
-                  (if @modules-data
-                    [scroller
-                     :scroll :auto
-                     :width "500px"
-                     :height "300px"
-                     :child [v-box
-                             :children [[title
-                                         :label "MODULES"
-                                         :level :level3
-                                         :underline? true]
-                                        (format-data @modules-data)]]])
-                  ]])))
-
 (defn offers-panel
   []
   [v-box
    :children [[control-bar]
               [results-bar]
               [search-vertical-result-table]]])
-
-(defn panels
-  []
-  (let [selected-panel (subscribe [:panel])]
-    (fn []
-      (case @selected-panel
-        :panel/offers [offers-panel]
-        :panel/dashboard [runs-panel]
-        :panel/apps [modules-panel]))))
-
-(defn app []
-  [v-box
-   :gap "5px"
-   :children [[message-modal]
-              [resource-modal]
-              [page-header]
-              [panels]
-              [page-footer]]])

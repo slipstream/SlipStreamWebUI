@@ -1,40 +1,10 @@
-(ns sixsq.slipstream.webui.subs
+(ns sixsq.slipstream.webui.offers.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
-
-(defn logged-in?
-  [db _]
-  (get-in db [:authn :logged-in?]))
-(reg-sub :logged-in? logged-in?)
-
-(defn authn
-  [db _]
-  (:authn db))
-(reg-sub :authn authn)
-
-(defn message
-  [db _]
-  (:message db))
-(reg-sub :message message)
 
 (defn resource-data
   [db _]
   (:resource-data db))
 (reg-sub :resource-data resource-data)
-
-(defn runs-data
-  [db _]
-  (:runs-data db))
-(reg-sub :runs-data runs-data)
-
-(defn modules-data
-  [db _]
-  (:modules-data db))
-(reg-sub :modules-data modules-data)
-
-(defn cloud-entry-point
-  [db _]
-  (:cloud-entry-point db))
-(reg-sub :cloud-entry-point cloud-entry-point)
 
 (defn search
   [db _]
@@ -70,9 +40,3 @@
   [db _]
   (get-in db [:search :selected-fields]))
 (reg-sub :search-selected-fields search-selected-fields)
-
-(defn panel
-  [db _]
-  (get-in db [:panel]))
-(reg-sub :panel panel)
-

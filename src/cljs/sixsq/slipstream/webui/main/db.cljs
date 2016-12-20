@@ -1,6 +1,19 @@
-(ns sixsq.slipstream.webui.db
+(ns sixsq.slipstream.webui.main.db
   (:require
-    [cljs.spec :as s]))
+    [cljs.spec :as s]
+    [re-frame.core :refer [after]]))
+
+;;
+;; check schema after every change
+;;
+(defn check-and-throw
+  "throw an exception if db doesn't match the spec."
+  [a-spec db]
+  (when-not (s/valid? a-spec db)
+    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
+
+;; check that all state changes from event handlers are correct
+(def check-spec-interceptor (after (partial check-and-throw :sixsq.slipstream.webui.db/db)))
 
 ;;
 ;; define schema of the local database
@@ -30,6 +43,7 @@
 
 (s/def ::modules-data (s/nilable any?))
 (s/def ::modules-path (s/nilable string?))
+(s/def ::modules-breadcrumbs (s/nilable (s/coll-of string?)))
 
 (s/def ::logged-in? boolean?)
 (s/def ::user-id (s/nilable string?))
@@ -81,34 +95,38 @@
 (s/def ::search (s/keys :req-un [::collection-name ::params ::results ::completed?
                                  ::available-fields ::selected-fields]))
 
-(s/def ::db (s/keys :req-un [::client ::message ::resource-data ::runs-data ::runs-params ::modules-data ::modules-path ::authn ::cloud-entry-point ::search]))
+(s/def ::db (s/keys :req-un [::client ::message ::resource-data
+                             ::runs-data ::runs-params
+                             ::modules-data ::modules-path ::modules-breadcrumbs
+                             ::authn ::cloud-entry-point ::search]))
 
 ;;
 ;; initial database value
 ;;
 
 (def default-value
-  {:panel             :panel/offers
-   :client            nil
-   :clients           nil
-   :message           nil
-   :resource-data     nil
-   :runs-data         nil
-   :runs-params       {:offset "0"
-                       :limit "10"
-                       :cloud nil
-                       :activeOnly 0}
-   :modules-data      nil
-   :modules-path      nil
-   :authn             {:logged-in? false
-                       :user-id    nil}
-   :cloud-entry-point nil
-   :search            {:collection-name  nil
-                       :params           {:$first  1
-                                          :$last   20
-                                          :$filter nil}
-                       :results          nil
-                       :completed?       true
-                       :available-fields [{:id "id" :label "id"}
-                                          {:id "beta" :label "beta"}]
-                       :selected-fields #{"id"}}})
+  {:panel               :panel/offers
+   :client              nil
+   :clients             nil
+   :message             nil
+   :resource-data       nil
+   :runs-data           nil
+   :runs-params         {:offset     "0"
+                         :limit      "10"
+                         :cloud      nil
+                         :activeOnly 0}
+   :modules-data        nil
+   :modules-path        nil
+   :modules-breadcrumbs nil
+   :authn               {:logged-in? false
+                         :user-id    nil}
+   :cloud-entry-point   nil
+   :search              {:collection-name  nil
+                         :params           {:$first  1
+                                            :$last   20
+                                            :$filter nil}
+                         :results          nil
+                         :completed?       true
+                         :available-fields [{:id "id" :label "id"}
+                                            {:id "beta" :label "beta"}]
+                         :selected-fields  #{"id"}}})

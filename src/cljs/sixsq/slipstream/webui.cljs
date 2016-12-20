@@ -4,10 +4,9 @@
    [re-frame.core :refer [dispatch dispatch-sync]]
    [devtools.core :as devtools]
 
-   [sixsq.slipstream.webui.effects]
-   [sixsq.slipstream.webui.events]
-   [sixsq.slipstream.webui.subs]
-   [sixsq.slipstream.webui.views]))
+   [sixsq.slipstream.webui.main.events]
+   [sixsq.slipstream.webui.main.subs]
+   [sixsq.slipstream.webui.main.views]))
 
 ;;
 ;; debugging tools
@@ -23,5 +22,5 @@
   (dispatch-sync [:initialize-db])
   (dispatch-sync [:initialize-client])
   (dispatch-sync [:fetch-cloud-entry-point])
-  (reagent/render [sixsq.slipstream.webui.views/app]
+  (reagent/render [sixsq.slipstream.webui.main.views/app]
                   (.getElementById js/document "container")))
