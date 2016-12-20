@@ -12,6 +12,8 @@
 (s/def ::runs any?)
 (s/def ::modules any?)
 
+(s/def ::panel #{:panel/dashboard :panel/apps :panel/profile :panel/offers})
+
 (s/def ::clients (s/nilable (s/keys :req-un [::cimi ::runs ::modules])))
 
 (s/def ::message (s/nilable string?))
@@ -86,7 +88,8 @@
 ;;
 
 (def default-value
-  {:client            nil
+  {:panel             :panel/offers
+   :client            nil
    :clients           nil
    :message           nil
    :resource-data     nil

@@ -71,3 +71,8 @@
   (get-in db [:search :selected-fields]))
 (reg-sub :search-selected-fields search-selected-fields)
 
+(defn panel
+  [db _]
+  (get-in db [:panel]))
+(reg-sub :panel panel)
+

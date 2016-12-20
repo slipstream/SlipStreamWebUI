@@ -258,7 +258,14 @@
   :set-runs-params
   [check-spec-interceptor trim-v]
   (fn [db [v]]
-    (let [params (:run-params db)
+    (let [params (:runs-params db)
           new-params (merge params v)]
-      (assoc db :run-params new-params))))
+      (assoc db :runs-params new-params))))
+
+;; usage:  (dispatch [:set-panel panel-id])
+(reg-event-db
+  :set-panel
+  [check-spec-interceptor trim-v]
+  (fn [db [panel-id]]
+    (assoc db :panel panel-id)))
 

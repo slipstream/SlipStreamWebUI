@@ -2,7 +2,7 @@
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
-                         single-dropdown hyperlink hyperlink-href p checkbox
+                         single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
                          scroller selection-list title]]
     [re-com.buttons :refer [button-args-desc]]
     [reagent.core :as reagent]
@@ -285,12 +285,28 @@
                    :label "search"
                    :on-click #(dispatch [:search])]]])))
 
+(defn panel-controls []
+  (let [model (reagent/atom :panel/apps)]
+    (fn []
+      [horizontal-pill-tabs
+       :model model
+       :tabs [{:id    :panel/apps
+               :label "Apps"}
+              {:id    :panel/offers
+               :label "Offers"}
+              {:id    :panel/dashboard
+               :label "Dashboard"}]
+       :on-change (fn [selected-panel]
+                    (reset! model selected-panel)
+                    (dispatch [:set-panel selected-panel]))])))
+
 (defn page-header []
   [h-box
    :justify :between
    :children [[box
                :child [:img {:src    "assets/images/slipstream_logo.svg"
                              :height "30px"}]]
+              [panel-controls]
               [authn-panel]]])
 
 (defn select-fields []
@@ -507,15 +523,27 @@
                                         (format-data @modules-data)]]])
                   ]])))
 
+(defn offers-panel
+  []
+  [v-box
+   :children [[control-bar]
+              [results-bar]
+              [search-vertical-result-table]]])
+
+(defn panels
+  []
+  (let [selected-panel (subscribe [:panel])]
+    (fn []
+      (case @selected-panel
+        :panel/offers [offers-panel]
+        :panel/dashboard [runs-panel]
+        :panel/apps [modules-panel]))))
+
 (defn app []
   [v-box
    :gap "5px"
    :children [[message-modal]
               [resource-modal]
               [page-header]
-              [control-bar]
-              [results-bar]
-              [search-vertical-result-table]
-              [runs-panel]
-              [modules-panel]
+              [panels]
               [page-footer]]])
