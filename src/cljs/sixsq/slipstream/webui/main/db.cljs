@@ -13,7 +13,7 @@
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
 
 ;; check that all state changes from event handlers are correct
-(def check-spec-interceptor (after (partial check-and-throw :sixsq.slipstream.webui.db/db)))
+(def check-spec-interceptor (after (partial check-and-throw :sixsq.slipstream.webui.main.db/db)))
 
 ;;
 ;; define schema of the local database

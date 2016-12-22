@@ -11,3 +11,9 @@
   (get-in db [:panel]))
 (reg-sub :panel panel)
 
+(defn cloud-entry-point
+  [db _]
+  (:cloud-entry-point db))
+(reg-sub :cloud-entry-point cloud-entry-point)
+
+

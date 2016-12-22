@@ -28,36 +28,34 @@
                    :label "show modules"
                    :on-click #(dispatch [:modules-search])]]])))
 
-(defn format-crumb [index s]
+(defn format-crumb [s index]
   [hyperlink
-   :label s
-   :on-click (dispatch [:trim-breadcrumbs index])])
+   :label (str s)
+   :on-click #(dispatch [:trim-breadcrumbs index])])
 
 (defn breadcrumbs []
   (let [crumbs (subscribe [:modules-breadcrumbs])]
     (fn []
       [h-box
+       :gap "3px"
        :children
-       (doall (interpose [label :label ">"] (map format-crumb (cons "Home" @crumbs) (range 0))))])))
+       (doall (interpose [label :label ">"] (map format-crumb (cons "Home" @crumbs) (range))))])))
 
 (defn format-module [module]
-  [hyperlink
-   :label module
-   :on-click (dispatch [:push-breadcrumb module])])
+  (if module [hyperlink
+              :label module
+              :on-click #(dispatch [:push-breadcrumb module])]))
 
-(defn modules-panel
+(defn module-listing
   []
-  (let [modules-data (subscribe [:modules-data])]
+  (let [data (subscribe [:modules-data])]
     (fn []
       [v-box
-       :gap "3px"
-       :children [[modules-control]
-                  [breadcrumbs]
-                  (if @modules-data
-                    [scroller
-                     :scroll :auto
-                     :width "500px"
-                     :height "300px"
-                     :child [v-box
-                             :children (doall (map format-module @modules-data))]]
-                    (dispatch [:modules-breadcrumbs-search]))]])))
+       :children (doall (map format-module @data))])))
+
+(defn modules-panel []
+  [v-box
+   :gap "3px"
+   :children [[modules-control]
+              [breadcrumbs]
+              [module-listing]]])

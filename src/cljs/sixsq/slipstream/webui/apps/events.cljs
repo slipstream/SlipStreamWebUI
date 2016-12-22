@@ -31,7 +31,7 @@
     (let [{:keys [clients modules-breadcrumbs]} (:db cofx)
           client (:modules clients)]
       (-> cofx
-          (assoc :modules/search [client (str/join (rest modules-breadcrumbs))])))))
+          (assoc :modules/search [client (str (rest modules-breadcrumbs))])))))
 
 ;; usage:  (dispatch [:set-module-path p])
 (reg-event-db
@@ -40,17 +40,37 @@
   (fn [db [v]]
     (assoc db :modules-path v)))
 
-;; usage:  (dispatch [:trim-breadcrumbs n])
-(reg-event-db
+;; FIXME: MOVE TO UTILITIES!
+(defn breadcrumbs->url [crumbs]
+  (if (seq crumbs)
+    (str/join "/" crumbs)))
+
+;; usage:  (dispatch [:trim-breadcrumb n])
+(reg-event-fx
   :trim-breadcrumbs
   [db/check-spec-interceptor trim-v]
-  (fn [db [n]]
-    (update-in db :modules-breadcrumbs (partial take n))))
+  (fn [cofx [n]]
+    (let [breadcrumbs (->> cofx
+                           :db
+                           :modules-breadcrumbs
+                           vec
+                           (take n))
+          client (get-in cofx [:db :clients :modules])]
+      (-> cofx
+          (assoc-in [:db :modules-breadcrumbs] breadcrumbs)
+          (assoc :modules/search [client (breadcrumbs->url breadcrumbs)])))))
 
 ;; usage:  (dispatch [:push-breadcrumb crumb])
-(reg-event-db
+(reg-event-fx
   :push-breadcrumb
   [db/check-spec-interceptor trim-v]
-  (fn [db [crumb]]
-    (let [breadcrumbs (vec (:modules-breadcrumbs db))]
-      (assoc db :modules-breadcrumbs (conj breadcrumbs crumb)))))
+  (fn [cofx [crumb]]
+    (let [breadcrumbs (-> cofx
+                          :db
+                          :modules-breadcrumbs
+                          vec
+                          (conj crumb))
+          client (get-in cofx [:db :clients :modules])]
+      (-> cofx
+          (assoc-in [:db :modules-breadcrumbs] breadcrumbs)
+          (assoc :modules/search [client (breadcrumbs->url breadcrumbs)])))))
