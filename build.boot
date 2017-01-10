@@ -2,6 +2,8 @@
   :source-paths #{"src/cljs"}
   :resource-paths #{"resources"}
   :dependencies '[[org.clojure/clojurescript "1.9.293"]
+                  [org.clojure/clojure "1.9.0-alpha14"]
+
                   [reagent "0.6.0"]
 
                   [re-frame "0.9.1"]
@@ -11,6 +13,7 @@
                   [com.taoensso/tempura "1.0.0"]
                   [org.clojure/core.async "0.2.395"]
                   [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.19-SNAPSHOT"]
+                  [doo "0.1.7" :scope "test"]
 
                   [adzerk/boot-cljs "1.7.228-2" :scope "test"]
                   [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
@@ -20,7 +23,14 @@
                   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
                   [weasel "0.7.0" :scope "test"]
                   [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
-                  [boot-deps "0.1.6" :scope "test"]])
+                  [boot-deps "0.1.6" :scope "test"]]
+  :repositories #(concat % [["snapshots" {:url "http://nexus.sixsq.com/content/repositories/snapshots-community-rhel7/"
+                                          :username (System/getenv "SIXSQ_USER")
+                                          :password (System/getenv "SIXSQ_PASS")}]
+                            ["releases" {:url "http://nexus.sixsq.com/content/repositories/releases-community-rhel7/"
+                                         :username (System/getenv "SIXSQ_USER")
+                                         :password (System/getenv "SIXSQ_PASS")}]])
+  )
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
