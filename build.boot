@@ -76,6 +76,8 @@
                (test-cljs :js-env :phantom
                           :exit? true)))
 
+(deftask deps [])
+
 (deftask auto-test []
          (comp (testing)
                (watch)

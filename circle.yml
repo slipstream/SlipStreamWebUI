@@ -1,0 +1,25 @@
+machine:
+  java:
+    version: oraclejdk8
+  environment:
+    # Boot sometimes uses over 4G when dowloading deps
+    # Limit could be higher probably, 2-3G?
+    _JAVA_OPTIONS: "-Xms512m -Xmx2048m"
+dependencies:
+  pre:
+    # Could use `latest` tag instead of version number
+    - curl -L https://github.com/boot-clj/boot-bin/releases/download/2.5.2/boot.sh -o ~/bin/boot
+    - chmod +x ~/bin/boot
+  override:
+    # Run tests here so everything loaded by test task is cached
+    - boot deps
+  cache_directories:
+    - "~/bin"
+    - "~/.m2"
+    - "~/.boot/cache/bin"
+    - "~/.boot/cache/lib"
+
+test:
+  override:
+    # Nothing to run here
+    - boot deps test
