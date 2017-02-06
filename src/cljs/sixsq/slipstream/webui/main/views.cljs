@@ -99,7 +99,7 @@
      :children tree-rows]))
 
 (defn panel-controls []
-  (let [model (reagent/atom :panel/apps)]
+  (let [model (subscribe [:panel])]
     (fn []
       [horizontal-pill-tabs
        :model model
@@ -109,9 +109,7 @@
                :label "Offers"}
               {:id    :panel/dashboard
                :label "Dashboard"}]
-       :on-change (fn [selected-panel]
-                    (reset! model selected-panel)
-                    (dispatch [:set-panel selected-panel]))])))
+       :on-change #(dispatch [:set-panel %])])))
 
 (defn page-header []
   [h-box
@@ -123,7 +121,7 @@
   [h-box
    :justify :center
    :children [[label
-               :label "Copyright © 2016, SixSq Sàrl"]]])
+               :label "Copyright © 2016-2017, SixSq Sàrl"]]])
 
 (defn message-modal
   []

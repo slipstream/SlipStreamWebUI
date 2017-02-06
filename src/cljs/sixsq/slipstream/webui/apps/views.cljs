@@ -11,23 +11,6 @@
     [sixsq.slipstream.webui.apps.events]
     [sixsq.slipstream.webui.apps.subs]))
 
-(defn modules-control []
-  (let [path (reagent/atom "")]
-    (fn []
-      [h-box
-       :gap "3px"
-       :children [[input-text
-                   :model path
-                   :placeholder "module"
-                   :width "150px"
-                   :change-on-blur? true
-                   :on-change (fn [v]
-                                (reset! path v)
-                                (dispatch [:set-module-path (if (str/blank? v) nil v)]))]
-                  [button
-                   :label "show modules"
-                   :on-click #(dispatch [:modules-search])]]])))
-
 (defn format-crumb [s index]
   [hyperlink
    :label (str s)
@@ -56,6 +39,5 @@
 (defn modules-panel []
   [v-box
    :gap "3px"
-   :children [[modules-control]
-              [breadcrumbs]
+   :children [[breadcrumbs]
               [module-listing]]])

@@ -1,42 +1,26 @@
 (ns sixsq.slipstream.webui.offers.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
-(defn resource-data
-  [db _]
-  (:resource-data db))
-(reg-sub :resource-data resource-data)
+(reg-sub :resource-data
+         (fn [db _] (-> db :resource-data)))
 
-(defn search
-  [db _]
-  (get-in db [:search]))
-(reg-sub :search search)
+(reg-sub :search
+         (fn [db _] (-> db :search)))
 
-(defn search-completed?
-  [db _]
-  (get-in db [:search :completed?]))
-(reg-sub :search-completed? search-completed?)
+(reg-sub :search-completed?
+         (fn [db _] (-> db :search :completed?)))
 
-(defn search-results
-  [db _]
-  (get-in db [:search :results]))
-(reg-sub :search-results search-results)
+(reg-sub :search-results
+         (fn [db _] (-> db :search :results)))
 
-(defn search-params
-  [db _]
-  (get-in db [:search :params]))
-(reg-sub :search-params search-params)
+(reg-sub :search-params
+         (fn [db _] (-> db :search :params)))
 
-(defn search-collection-name
-  [db _]
-  (get-in db [:search :collection-name]))
-(reg-sub :search-collection-name search-collection-name)
+(reg-sub :search-collection-name
+         (fn [db _] (-> db :search :collection-name)))
 
-(defn search-available-fields
-  [db _]
-  (get-in db [:search :available-fields]))
-(reg-sub :search-available-fields search-available-fields)
+(reg-sub :search-available-fields
+         (fn [db _] (-> db :search :available-fields)))
 
-(defn search-selected-fields
-  [db _]
-  (get-in db [:search :selected-fields]))
-(reg-sub :search-selected-fields search-selected-fields)
+(reg-sub :search-selected-fields
+         (fn [db _] (-> db :search :selected-fields)))

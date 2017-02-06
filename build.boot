@@ -12,7 +12,7 @@
 
                   [com.taoensso/tempura "1.0.0"]
                   [org.clojure/core.async "0.2.395"]
-                  [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.19-SNAPSHOT"]
+                  [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.20-SNAPSHOT"]
                   [doo "0.1.7" :scope "test"]
 
                   [adzerk/boot-cljs "1.7.228-2" :scope "test"]
