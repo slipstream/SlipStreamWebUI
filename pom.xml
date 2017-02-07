@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>SlipStreamWebUI</artifactId>
+  <packaging>pom</packaging>
+  <version>3.21-SNAPSHOT</version>
+  <name>SlipStreamWebUI</name>
+  <description>SlipStreamWebUI</description>
+  <url>http://sixsq.com</url>
+
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamCommunity</artifactId>
+    <version>3.21-SNAPSHOT</version>
+    <relativePath>../SlipStream/community</relativePath>
+  </parent>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>${scm.read}/SlipStreamWebUI.git</connection>
+    <developerConnection>${scm.write}/SlipStreamWebUI.git</developerConnection>
+    <url>${scm.public}/SlipStreamWebUI</url>
+    <tag>HEAD</tag>
+  </scm>
+
+</project>
+
