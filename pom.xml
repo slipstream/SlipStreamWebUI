@@ -4,7 +4,7 @@
 
   <artifactId>SlipStreamWebUI</artifactId>
   <packaging>pom</packaging>
-  <version>3.21-SNAPSHOT</version>
+  <version>3.21</version>
   <name>SlipStreamWebUI</name>
   <description>SlipStreamWebUI</description>
   <url>http://sixsq.com</url>
@@ -12,7 +12,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCommunity</artifactId>
-    <version>3.21-SNAPSHOT</version>
+    <version>3.21</version>
     <relativePath>../SlipStream/community</relativePath>
   </parent>
 
