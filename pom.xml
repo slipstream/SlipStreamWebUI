@@ -6,7 +6,6 @@
   <packaging>pom</packaging>
   <version>3.22-SNAPSHOT</version>
   <name>SlipStreamWebUI</name>
-  <description>SlipStreamWebUI</description>
   <url>http://sixsq.com</url>
 
   <parent>
