@@ -1,43 +1,66 @@
+(def +version+ "3.22-SNAPSHOT")
+
+(set-env!
+  :project 'com.sixsq.slipstream/webui
+  :version +version+
+  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+  :edition "community"
+
+  :dependencies '[[org.clojure/clojure "1.9.0-alpha14"]
+                  [sixsq/build-utils "0.1.4" :scope "test"]])
+
+(require '[sixsq.build-fns :refer [merge-defaults
+                                   sixsq-nexus-url
+                                   lein-generate]])
+
 (set-env!
   :source-paths #{"src/cljs"}
   :resource-paths #{"resources"}
-  :dependencies '[[org.clojure/clojurescript "1.9.293"]
-                  [org.clojure/clojure "1.9.0-alpha14"]
 
-                  [reagent "0.6.0"]
+  :repositories
+  #(reduce conj % [["sixsq" {:url (sixsq-nexus-url)}]])
 
-                  [re-frame "0.9.1"]
-                  [re-com "1.3.0"]
-                  [binaryage/devtools "0.8.3"]
+  :dependencies
+  #(vec (concat %
+                (merge-defaults
+                  ['sixsq/default-deps (get-env :version)]
+                  '[[org.clojure/clojure]
+                    [org.clojure/clojurescript]
 
-                  [com.taoensso/tempura "1.0.0"]
-                  [org.clojure/core.async "0.2.395"]
-                  [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.22-SNAPSHOT"]
-                  [doo "0.1.7" :scope "test"]
+                    [binaryage/devtools]
+                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                    [com.taoensso/tempura]
 
-                  [adzerk/boot-cljs "1.7.228-2" :scope "test"]
-                  [adzerk/boot-cljs-repl "0.3.3" :scope "test"]
-                  [adzerk/boot-reload "0.5.0" :scope "test"]
-                  [pandeiro/boot-http "0.7.6" :scope "test"]
-                  [com.cemerick/piggieback "0.2.1" :scope "test"]
-                  [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-                  [weasel "0.7.0" :scope "test"]
-                  [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
-                  [boot-deps "0.1.6" :scope "test"]]
-  :repositories #(concat % [["snapshots" {:url "http://nexus.sixsq.com/content/repositories/snapshots-community-rhel7/"
-                                          :username (System/getenv "SIXSQ_USER")
-                                          :password (System/getenv "SIXSQ_PASS")}]
-                            ["releases" {:url "http://nexus.sixsq.com/content/repositories/releases-community-rhel7/"
-                                         :username (System/getenv "SIXSQ_USER")
-                                         :password (System/getenv "SIXSQ_PASS")}]])
-  )
+                    [org.clojure/core.async]
+                    
+                    [reagent]
+                    [re-frame]
+                    [re-com]
+                    
+                    [adzerk/boot-cljs]
+                    [adzerk/boot-cljs-repl]
+                    [adzerk/boot-reload]
+                    [adzerk/boot-test]
+                    [boot-deps]
+                    [com.cemerick/piggieback]
+                    [crisptrutski/boot-cljs-test]
+                    [doo]
+                    [org.clojure/tools.nrepl]
+                    [pandeiro/boot-http]
+                    [tolitius/boot-check]
+                    [weasel]]))))
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
   '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
+  '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
-  '[pandeiro.boot-http :refer [serve]]
   '[crisptrutski.boot-cljs-test :refer [test-cljs]]
+  '[pandeiro.boot-http :refer [serve]]
+  '[tolitius.boot-check :refer [with-yagni
+                                with-eastwood
+                                with-kibit
+                                with-bikeshed]]
   '[boot-deps :refer [ancient]])
 
 (deftask build []
