@@ -1,7 +1,7 @@
 (def +version+ "3.22-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/webui
+  :project 'sixsq.slipstream/webui
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
@@ -63,16 +63,10 @@
                                 with-bikeshed]]
   '[boot-deps :refer [ancient]])
 
-(deftask build []
-         (comp (speak)
-               (cljs)))
-
-(deftask run []
-         (comp (serve)
-               (watch)
-               (cljs-repl)
-               (reload)
-               (build)))
+(task-options!
+ pom {:project (get-env :project)
+      :version (get-env :version)}
+ push {:repo "sixsq"})
 
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
@@ -88,12 +82,27 @@
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
+(deftask build []
+         (comp (pom)
+               (production)
+               (cljs)
+               (sift :include #{ #".*app\.out.*" #"app\.cljs\.edn"}
+                     :invert true)
+               (jar)))
+
+(deftask run []
+         (comp (serve)
+               (watch)
+               (cljs-repl)
+               (reload)
+               (speak)
+               (cljs)))
+
 (deftask dev
          "Simple alias to run application in development mode"
          []
          (comp (development)
                (run)))
-
 
 (deftask testing []
          (set-env! :source-paths #(conj % "test/cljs"))
@@ -115,3 +124,18 @@
          (comp (testing)
                (watch)
                (test-cljs :js-env :phantom)))
+
+(deftask mvn-test
+         "run all tests of project"
+         []
+         (test))
+
+(deftask mvn-build
+         "build full project through maven"
+         []
+         (comp
+           (build)
+           (install)
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))
