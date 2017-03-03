@@ -20,11 +20,17 @@
 ;; creates and adds a SlipStream client to the database
 (reg-event-db
   :initialize-client
-  [db/check-spec-interceptor]
-  (fn [db _]
-    (let [clients {:cimi (cimi-async/instance)
-                   :runs (runs-async/instance)
-                   :modules (modules-async/instance)}]
+  [db/check-spec-interceptor trim-v]
+  (fn [db [slipstream-url]]
+    (let [clients {:cimi    (cimi-async/instance (str slipstream-url "/api/cloud-entry-point")
+                                                 (str slipstream-url "/auth/login")
+                                                 (str slipstream-url "/auth/logout"))
+                   :runs    (runs-async/instance (str slipstream-url "/run")
+                                                 (str slipstream-url "/auth/login")
+                                                 (str slipstream-url "/auth/logout"))
+                   :modules (modules-async/instance (str slipstream-url "/module")
+                                                    (str slipstream-url "/auth/login")
+                                                    (str slipstream-url "/auth/logout"))}]
       (assoc db :client (:cimi clients)
                 :clients clients))))
 

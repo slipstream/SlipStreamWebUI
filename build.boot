@@ -32,11 +32,11 @@
                     [com.taoensso/tempura]
 
                     [org.clojure/core.async]
-                    
+
                     [reagent]
                     [re-frame]
                     [re-com]
-                    
+
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
                     [adzerk/boot-reload]
@@ -64,21 +64,28 @@
   '[boot-deps :refer [ancient]])
 
 (task-options!
- pom {:project (get-env :project)
-      :version (get-env :version)}
- push {:repo "sixsq"})
+  pom {:project (get-env :project)
+       :version (get-env :version)}
+  push {:repo "sixsq"})
 
+;;
+;; compiler options :pretty-print and :pseudo-names can help with debugging
+;; generated javascipt code
+;;
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
-                              :compiler-options {:pretty-print true
-                                                 :pseudo-names true
-                                                 }
-                              })
+                              :compiler-options {:language-in     :ecmascript5
+                                                 :closure-defines {'sixsq.slipstream.webui/DEV false
+                                                                   'goog.DEBUG                 false}}})
          identity)
 
 (deftask development []
-         (task-options! cljs {:optimizations :none
-                              :source-map true}
+         (task-options! cljs {:optimizations    :none
+                              :source-map       true
+                              :compiler-options {:language-in     :ecmascript5
+                                                 :closure-defines {'sixsq.slipstream.webui/DEV      true
+                                                                   'sixsq.slipstream.webui/HOST_URL "https://nuv.la"
+                                                                   'goog.DEBUG                      true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
@@ -86,7 +93,7 @@
          (comp (pom)
                (production)
                (cljs)
-               (sift :include #{ #".*app\.out.*" #"app\.cljs\.edn"}
+               (sift :include #{#".*app\.out.*" #"app\.cljs\.edn"}
                      :invert true)
                (jar)))
 
