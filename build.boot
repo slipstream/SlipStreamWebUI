@@ -68,11 +68,13 @@
        :version (get-env :version)}
   push {:repo "sixsq"})
 
+;;
+;; compiler options :pretty-print and :pseudo-names can help with debugging
+;; generated javascipt code
+;;
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
-                                                 :pretty-print    true
-                                                 :pseudo-names    true
                                                  :closure-defines {'sixsq.slipstream.webui/DEV false
                                                                    'goog.DEBUG                 false}}})
          identity)
@@ -81,9 +83,9 @@
          (task-options! cljs {:optimizations    :none
                               :source-map       true
                               :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV true
+                                                 :closure-defines {'sixsq.slipstream.webui/DEV      true
                                                                    'sixsq.slipstream.webui/HOST_URL "https://nuv.la"
-                                                                   'goog.DEBUG                 true}}}
+                                                                   'goog.DEBUG                      true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
