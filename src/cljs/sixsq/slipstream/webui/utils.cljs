@@ -90,7 +90,8 @@
   "Extracts the host URL from the javascript window.location object."
   []
   (if-let [location (.-location js/window)]
-    (let [host (.-hostname location)
+    (let [protocol (.-protocol location)
+          host (.-hostname location)
           port (.-port location)
-          protocol (.-protocol location)]
-      (str protocol "//" host ":" port))))
+          port-field (when-not (str/blank? port) (str ":" port))]
+      (str protocol "//" host port-field))))
