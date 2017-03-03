@@ -86,3 +86,11 @@
       (.-nodeValue node)                                    ;; text node
       (merge (attribute-map node) (child-map node)))))
 
+(defn host-url
+  "Extracts the host URL from the javascript window.location object."
+  []
+  (if-let [location (.-location js/window)]
+    (let [host (.-hostname location)
+          port (.-port location)
+          protocol (.-protocol location)]
+      (str protocol "//" host ":" port))))
