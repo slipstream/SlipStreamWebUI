@@ -5,6 +5,7 @@
     [re-frame.core :refer [dispatch dispatch-sync]]
     [devtools.core :as devtools]
     [sixsq.slipstream.webui.utils :as utils]
+    [taoensso.timbre :as timbre]
 
     ;; must include these to ensure that they are not elided
     [sixsq.slipstream.webui.main.events]
@@ -22,7 +23,10 @@
 (if (identical? DEV true)
   (do
     (devtools/install!)
-    (enable-console-print!)))
+    (enable-console-print!)
+    (timbre/set-level! :info))
+  (timbre/set-level! :warn))
+
 
 ;;
 ;; determine the host url
