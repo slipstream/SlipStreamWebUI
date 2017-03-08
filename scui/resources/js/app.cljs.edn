@@ -1,0 +1,3 @@
+{:require          [sixsq.slipstream.scui]
+ :init-fns         [sixsq.slipstream.scui/init]
+ :compiler-options {:asset-path "js/app.out"}}

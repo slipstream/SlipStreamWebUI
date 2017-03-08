@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>sixsq.slipstream</groupId>
-  <artifactId>webui-dep</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>uis</artifactId>
   <version>3.23-SNAPSHOT</version>
   <name>SlipStreamWebUI</name>
-  <url>http://sixsq.com</url>
+
+  <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
@@ -15,6 +15,11 @@
     <version>3.23-SNAPSHOT</version>
     <relativePath>../SlipStream/community</relativePath>
   </parent>
+
+  <modules>
+    <module>webui</module>
+    <module>scui</module>
+  </modules>
 
   <licenses>
     <license>
@@ -30,84 +35,4 @@
     <tag>HEAD</tag>
   </scm>
 
-  <dependencies>
-    <dependency>
-      <groupId>sixsq</groupId>
-      <artifactId>default-deps</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamClientAPI-jar-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
-  
-  <profiles>
-    <profile>
-      <id>run-tests</id>
-      <activation>
-        <property>
-          <name>!skipTests</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>boot-test</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>boot</executable>
-                  <arguments>
-                    <argument>mvn-test</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
-  <build>
-    <plugins>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>boot-build</id>
-            <phase>install</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
-              <arguments>
-                <argument>mvn-build</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-  </build>
-
 </project>
-
