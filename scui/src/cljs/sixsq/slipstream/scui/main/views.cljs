@@ -10,8 +10,6 @@
     [re-frame.loggers :refer [console]]
     [clojure.string :as str]
     [sixsq.slipstream.scui.utils :as utils]
-    [sixsq.slipstream.scui.apps.views :as apps-views]
-    [sixsq.slipstream.scui.activity.views :as activity-views]
     [sixsq.slipstream.scui.offers.views :as offers-views]
     [sixsq.slipstream.scui.authn.views :as authn-views]))
 
@@ -103,12 +101,9 @@
     (fn []
       [horizontal-pill-tabs
        :model model
-       :tabs [{:id    :panel/apps
-               :label "Apps"}
-              {:id    :panel/offers
+       :tabs [{:id    :panel/offers
                :label "Offers"}
-              {:id    :panel/dashboard
-               :label "Dashboard"}]
+              ]
        :on-change #(dispatch [:set-panel %])])))
 
 (defn page-header []
@@ -163,9 +158,7 @@
   (let [selected-panel (subscribe [:panel])]
     (fn []
       (case @selected-panel
-        :panel/offers [offers-views/offers-panel]
-        :panel/dashboard [activity-views/runs-panel]
-        :panel/apps [apps-views/modules-panel]))))
+        :panel/offers [offers-views/offers-panel]))))
 
 (defn app []
   [v-box
