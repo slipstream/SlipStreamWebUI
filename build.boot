@@ -31,6 +31,8 @@
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.taoensso/tempura]
 
+                    [secretary]
+
                     [org.clojure/core.async]
 
                     [reagent]
@@ -97,8 +99,13 @@
                      :invert true)
                (jar)))
 
+(deftask running []
+         (set-env! :source-paths #(conj % "test/clj"))
+         identity)
+
 (deftask run []
-         (comp (serve)
+         (comp (running)
+               (serve :not-found 'sixsq.slipstream.webui.run/index-handler)
                (watch)
                (cljs-repl)
                (reload)

@@ -13,7 +13,8 @@
     [sixsq.slipstream.webui.apps.views :as apps-views]
     [sixsq.slipstream.webui.activity.views :as activity-views]
     [sixsq.slipstream.webui.offers.views :as offers-views]
-    [sixsq.slipstream.webui.authn.views :as authn-views]))
+    [sixsq.slipstream.webui.authn.views :as authn-views]
+    [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations
   [ops]
@@ -109,7 +110,7 @@
                :label "Offers"}
               {:id    :panel/dashboard
                :label "Dashboard"}]
-       :on-change #(dispatch [:set-panel %])])))
+       :on-change #(history/navigate %)])))
 
 (defn page-header []
   [h-box
