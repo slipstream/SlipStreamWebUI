@@ -1,11 +1,13 @@
 (ns sixsq.slipstream.webui.main.events
   (:require
     [sixsq.slipstream.webui.main.db :as db]
+    [sixsq.slipstream.webui.main.effects :as effects]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
     [sixsq.slipstream.client.api.cimi.async :as cimi-async]
     [sixsq.slipstream.client.api.runs.async :as runs-async]
     [sixsq.slipstream.client.api.modules.async :as modules-async]
     [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.history :as history]
     [clojure.set :as set]))
 
 ;; usage:  (dispatch [:initialize-db])
@@ -15,6 +17,15 @@
   [db/check-spec-interceptor]
   (fn [_ _]
     {:db db/default-value}))
+
+;; usage:  (dispatch [:initialize-history])
+;; triggers initial entry in application history
+(reg-event-fx
+  :initialize-history
+  [db/check-spec-interceptor]
+  (fn [{:keys [db]} _]
+    {:db db
+     :history/initialize []}))
 
 ;; usage:  (dispatch [:initialize-client])
 ;; creates and adds a SlipStream client to the database

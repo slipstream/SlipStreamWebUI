@@ -10,8 +10,7 @@
     ;; must include these to ensure that they are not elided
     [sixsq.slipstream.webui.main.events]
     [sixsq.slipstream.webui.main.subs]
-    [sixsq.slipstream.webui.main.views]
-    [sixsq.slipstream.webui.history :as history]))
+    [sixsq.slipstream.webui.main.views]))
 
 ;;
 ;; debugging tools
@@ -51,6 +50,6 @@
   (dispatch-sync [:initialize-db])
   (dispatch-sync [:initialize-client @SLIPSTREAM_URL])
   (dispatch-sync [:fetch-cloud-entry-point])
+  (dispatch-sync [:initialize-history])
   (reagent/render [sixsq.slipstream.webui.main.views/app]
-                  (.getElementById js/document "container"))
-  (history/start))
+                  (.getElementById js/document "container")))
