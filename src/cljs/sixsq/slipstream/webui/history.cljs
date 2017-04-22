@@ -12,6 +12,19 @@
     [goog.history.Html5History TokenTransformer]))
 
 ;;
+;; set the application prefix
+;;
+;; Set the application prefix with:
+;;
+;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/PREFIX ""}}
+;;
+;; For production you probably want to use the default prefix of "webui",
+;; but you can set this to another value if it is hosted elsewhere on the
+;; webserver.
+;;
+(goog-define PREFIX "/webui")
+
+;;
 ;; utilities for transforming between panel names and keywords
 ;;
 
@@ -61,7 +74,7 @@
 (def history
   (doto (Html5History. js/window (create-transformer))
     (events/listen EventType.NAVIGATE #(secretary/dispatch! (.-token %)))
-    (.setPathPrefix (utils/host-url))
+    (.setPathPrefix (utils/host-url PREFIX))
     (.setUseFragment false)
     (.setEnabled true)))
 
