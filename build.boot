@@ -47,6 +47,7 @@
                     [com.cemerick/piggieback]
                     [crisptrutski/boot-cljs-test]
                     [doo]
+                    [onetom/boot-lein-generate]
                     [org.clojure/tools.nrepl]
                     [pandeiro/boot-http]
                     [tolitius/boot-check]
