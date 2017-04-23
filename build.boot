@@ -78,8 +78,7 @@
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV false
-                                                                   'goog.DEBUG                 false}}})
+                                                 :closure-defines {'goog.DEBUG false}}})
          identity)
 
 (deftask development []
