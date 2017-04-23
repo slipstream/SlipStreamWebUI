@@ -17,12 +17,14 @@
    :on-click #(dispatch [:trim-breadcrumbs index])])
 
 (defn breadcrumbs []
-  (let [crumbs (subscribe [:modules-breadcrumbs])]
+  (let [tr (subscribe [:i18n-tr])
+        crumbs (subscribe [:modules-breadcrumbs])]
     (fn []
-      [h-box
-       :gap "3px"
-       :children
-       (doall (interpose [label :label ">"] (map format-crumb (cons "Home" @crumbs) (range))))])))
+      (let [home (@tr [:home])]
+        [h-box
+         :gap "3px"
+         :children
+         (doall (interpose [label :label ">"] (map format-crumb (cons home @crumbs) (range))))]))))
 
 (defn format-module [module]
   (if module [hyperlink
