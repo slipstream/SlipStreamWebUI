@@ -11,26 +11,28 @@
     [sixsq.slipstream.webui.authn.subs]))
 
 (defn logout-buttons
-  [user-id]
+  [tr user-id]
   [[button
     :label user-id
-    :on-click #(js/alert (str "profile for " user-id))]
+    :on-click #(js/alert (tr [:profile] [user-id]))]
    [button
-    :label "logout"
+    :label (tr [:logout])
     :on-click #(dispatch [:logout])]])
 
 (defn logout
   []
-  (let [authn (subscribe [:authn])]
+  (let [tr (subscribe [:i18n-tr])
+        authn (subscribe [:authn])]
     (fn []
       (let [{:keys [logged-in? user-id]} @authn]
         (if logged-in?
           [h-box
-           :children (logout-buttons (or user-id "unknown"))])))))
+           :children (logout-buttons @tr (or user-id "unknown"))])))))
 
 (defn login
   []
-  (let [authn (subscribe [:authn])
+  (let [tr (subscribe [:i18n-tr])
+        authn (subscribe [:authn])
         username (reagent/atom "")
         password (reagent/atom "")]
     (fn []
@@ -40,16 +42,16 @@
            :gap "3px"
            :children [[input-text
                        :model username
-                       :placeholder "username"
+                       :placeholder (@tr [:username])
                        :change-on-blur? true
                        :on-change #(reset! username %)]
                       [input-password
                        :model password
-                       :placeholder "password"
+                       :placeholder (@tr [:password])
                        :change-on-blur? true
                        :on-change #(reset! password %)]
                       [button
-                       :label "login"
+                       :label (@tr [:login])
                        :on-click (fn []
                                    (dispatch [:login {:username @username :password @password}])
                                    (reset! username "")

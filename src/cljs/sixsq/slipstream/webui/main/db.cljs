@@ -1,7 +1,8 @@
 (ns sixsq.slipstream.webui.main.db
   (:require
     [cljs.spec :as s]
-    [re-frame.core :refer [after]]))
+    [re-frame.core :refer [after]]
+    [sixsq.slipstream.webui.i18n.dictionary :as dictionary]))
 
 ;;
 ;; check schema after every change
@@ -92,6 +93,10 @@
 (s/def ::available-fields (s/coll-of ::choice))
 (s/def ::selected-fields (s/coll-of ::id))
 
+(s/def ::locale string?)
+(s/def ::tr fn?)
+(s/def ::i18n (s/keys :req-un [::locale ::tr]))
+
 (s/def ::search (s/keys :req-un [::collection-name ::params ::results ::completed?
                                  ::available-fields ::selected-fields]))
 
@@ -105,7 +110,9 @@
 ;;
 
 (def default-value
-  {:panel               :panel/offers
+  {:i18n                {:locale "en"
+                         :tr     (dictionary/create-tr-fn "en")}
+   :panel               :panel/offers
    :client              nil
    :clients             nil
    :message             nil

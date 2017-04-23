@@ -14,6 +14,7 @@
     [sixsq.slipstream.webui.activity.views :as activity-views]
     [sixsq.slipstream.webui.offers.views :as offers-views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
+    [sixsq.slipstream.webui.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations
@@ -100,29 +101,33 @@
      :children tree-rows]))
 
 (defn panel-controls []
-  (let [model (subscribe [:panel])]
+  (let [tr (subscribe [:i18n-tr])
+        model (subscribe [:panel])]
     (fn []
       [horizontal-pill-tabs
        :model model
        :tabs [{:id    :panel/apps
-               :label "Apps"}
+               :label (@tr [:apps])}
               {:id    :panel/offers
-               :label "Offers"}
+               :label (@tr [:offers])}
               {:id    :panel/dashboard
-               :label "Dashboard"}]
+               :label (@tr [:dashboard])}]
        :on-change #(history/navigate %)])))
 
 (defn page-header []
   [h-box
    :justify :between
    :children [[panel-controls]
-              [authn-views/authn-panel]]])
+              [authn-views/authn-panel]
+              [i18n-views/locale-selector]]])
 
 (defn page-footer []
-  [h-box
-   :justify :center
-   :children [[label
-               :label "Copyright © 2016-2017, SixSq Sàrl"]]])
+  (let [tr (subscribe [:i18n-tr])]
+    (fn []
+      [h-box
+       :justify :center
+       :children [[label
+                   :label (str (@tr [:copyright]) " © 2016-2017, SixSq Sàrl")]]])))
 
 (defn message-modal
   []
