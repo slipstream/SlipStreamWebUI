@@ -31,9 +31,9 @@
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.taoensso/tempura]
 
-                    [secretary]
-
                     [org.clojure/core.async]
+
+                    [secretary]
 
                     [reagent]
                     [re-frame]
