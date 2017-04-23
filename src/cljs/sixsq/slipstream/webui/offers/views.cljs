@@ -175,7 +175,8 @@
                     [vertical-data-table @selected-fields entries]))]))))
 
 (defn search-header []
-  (let [first-value (reagent/atom "1")
+  (let [tr (subscribe [:i18n-tr])
+        first-value (reagent/atom "1")
         last-value (reagent/atom "20")
         filter-value (reagent/atom "")]
     (fn []
@@ -183,7 +184,7 @@
        :gap "3px"
        :children [[input-text
                    :model first-value
-                   :placeholder "first"
+                   :placeholder (@tr [:first])
                    :width "75px"
                    :change-on-blur? true
                    :on-change (fn [v]
@@ -191,7 +192,7 @@
                                 (dispatch [:set-search-first v]))]
                   [input-text
                    :model last-value
-                   :placeholder "last"
+                   :placeholder (@tr [:last])
                    :width "75px"
                    :change-on-blur? true
                    :on-change (fn [v]
@@ -199,18 +200,19 @@
                                 (dispatch [:set-search-last v]))]
                   [input-text
                    :model filter-value
-                   :placeholder "filter"
+                   :placeholder (@tr [:filter])
                    :width "300px"
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! filter-value v)
                                 (dispatch [:set-search-filter v]))]
                   [button
-                   :label "search"
+                   :label (@tr [:search])
                    :on-click #(dispatch [:search])]]])))
 
 (defn select-fields []
-  (let [available-fields (subscribe [:search-available-fields])
+  (let [tr (subscribe [:i18n-tr])
+        available-fields (subscribe [:search-available-fields])
         selected-fields (subscribe [:search-selected-fields])
         selections (reagent/atom #{})
         show? (reagent/atom false)]
@@ -218,7 +220,7 @@
       (reset! selections @selected-fields)
       [h-box
        :children [[button
-                   :label "fields"
+                   :label (@tr [:fields])
                    :on-click #(reset! show? true)]
                   (when @show?
                     [modal-panel
@@ -259,13 +261,14 @@
 
 (defn cloud-entry-point
   []
-  (let [cep (subscribe [:cloud-entry-point])
+  (let [tr (subscribe [:i18n-tr])
+        cep (subscribe [:cloud-entry-point])
         selected-id (atom nil)]
     (fn []
       [h-box
        :children [[single-dropdown
                    :model selected-id
-                   :placeholder "resource type"
+                   :placeholder (@tr [:resource-type])
                    :width "250px"
                    :choices (doall (cep-opts @cep))
                    :on-change (fn [id]

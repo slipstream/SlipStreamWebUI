@@ -11,7 +11,8 @@
     [sixsq.slipstream.webui.activity.subs]))
 
 (defn runs-control []
-  (let [offset (reagent/atom "1")
+  (let [tr (subscribe [:i18n-tr])
+        offset (reagent/atom "1")
         limit (reagent/atom "10")
         cloud (reagent/atom "")
         activeOnly (reagent/atom true)]
@@ -20,7 +21,7 @@
        :gap "3px"
        :children [[input-text
                    :model offset
-                   :placeholder "offset"
+                   :placeholder (@tr [:offset])
                    :width "75px"
                    :change-on-blur? true
                    :on-change (fn [v]
@@ -28,7 +29,7 @@
                                 (dispatch [:set-runs-params {:offset v}]))]
                   [input-text
                    :model limit
-                   :placeholder "limit"
+                   :placeholder (@tr [:limit])
                    :width "75px"
                    :change-on-blur? true
                    :on-change (fn [v]
@@ -36,7 +37,7 @@
                                 (dispatch [:set-runs-params {:limit v}]))]
                   [input-text
                    :model cloud
-                   :placeholder "cloud"
+                   :placeholder (@tr [:cloud])
                    :width "300px"
                    :change-on-blur? true
                    :on-change (fn [v]
@@ -44,12 +45,12 @@
                                 (dispatch [:set-runs-params {:cloud v}]))]
                   [checkbox
                    :model activeOnly
-                   :label "active only?"
+                   :label (@tr [:active-only])
                    :on-change (fn [v]
                                 (reset! activeOnly v)
                                 (dispatch [:set-runs-params {:activeOnly (if v 1 0)}]))]
                   [button
-                   :label "show runs"
+                   :label (@tr [:show])
                    :on-click #(dispatch [:runs-search])]
                   ]])))
 
