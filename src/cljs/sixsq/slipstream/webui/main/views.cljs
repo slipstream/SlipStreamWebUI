@@ -164,6 +164,18 @@
                              :on-click #(dispatch [:clear-resource-data])]]]
          :backdrop-on-click #(dispatch [:clear-resource-data])]))))
 
+(defn unknown-page-message
+  []
+  (let [tr (subscribe [:i18n-tr])]
+    (fn []
+      [label
+       :label (@tr [:unknown-page])])))
+
+(defn unknown-page-panel
+  []
+  [v-box
+   :children [[unknown-page-message]]])
+
 (defn panels
   []
   (let [selected-panel (subscribe [:panel])]
@@ -171,7 +183,8 @@
       (case @selected-panel
         :panel/offers [offers-views/offers-panel]
         :panel/dashboard [activity-views/runs-panel]
-        :panel/apps [apps-views/modules-panel]))))
+        :panel/apps [apps-views/modules-panel]
+        [unknown-page-panel]))))
 
 (defn app []
   [v-box
