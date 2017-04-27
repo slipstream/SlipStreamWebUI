@@ -15,6 +15,7 @@
 
         :active-only "active only?"
         :apps "applications"
+        :cimi "cimi"
         :cloud "cloud"
         :copyright "copyright"
         :dashboard "dashboard"
@@ -39,6 +40,7 @@
 
         :active-only "active uniquement?"
         :apps "applications"
+        :cimi "cimi"
         :cloud "cloud"
         :copyright "droits d'auteur"
         :dashboard "tableau de bord"

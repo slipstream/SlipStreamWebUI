@@ -12,7 +12,7 @@
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.apps.views :as apps-views]
     [sixsq.slipstream.webui.activity.views :as activity-views]
-    [sixsq.slipstream.webui.offers.views :as offers-views]
+    [sixsq.slipstream.webui.cimi.views :as cimi-views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.history :as history]))
@@ -108,10 +108,10 @@
        :model model
        :tabs [{:id    :panel/apps
                :label (@tr [:apps])}
-              {:id    :panel/offers
-               :label (@tr [:offers])}
               {:id    :panel/dashboard
-               :label (@tr [:dashboard])}]
+               :label (@tr [:dashboard])}
+              {:id    :panel/cimi
+               :label (@tr [:cimi])}]
        :on-change #(history/navigate %)])))
 
 (defn page-header []
@@ -169,7 +169,7 @@
   (let [selected-panel (subscribe [:panel])]
     (fn []
       (case @selected-panel
-        :panel/offers [offers-views/offers-panel]
+        :panel/cimi [cimi-views/cimi-panel]
         :panel/dashboard [activity-views/runs-panel]
         :panel/apps [apps-views/modules-panel]))))
 

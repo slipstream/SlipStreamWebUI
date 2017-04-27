@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.offers.views
+(ns sixsq.slipstream.webui.cimi.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
@@ -7,9 +7,9 @@
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.offers.effects]
-    [sixsq.slipstream.webui.offers.events]
-    [sixsq.slipstream.webui.offers.subs]))
+    [sixsq.slipstream.webui.cimi.effects]
+    [sixsq.slipstream.webui.cimi.events]
+    [sixsq.slipstream.webui.cimi.subs]))
 
 (defn format-operations
   [ops]
@@ -49,77 +49,6 @@
      (map? v) (as-map prefix v)
      (vector? v) (as-vec prefix v)
      :else (str v))))
-
-(defn branch? [v]
-  (or (map? v) (vector? v)))
-
-(defn create-label [k v]
-  (if-not (branch? v)
-    (str k " : " v)
-    (str k)))
-
-(declare rows)
-
-(defn indented-row [indent prefix k v]
-  (let [react-key (str prefix "-" k)
-        indent-size (str (* indent 2) "ex")]
-    ^{:key react-key}
-    [h-box
-     ;;:style {:display "inherit"}
-     :children [(if-not (zero? indent) [line :size "3px" :color "grey"])
-                [gap :size indent-size]
-                [md-icon-button
-                 :md-icon-name "zmdi-chevron-right"
-                 :disabled? true]
-                [label :label (create-label k v)]]]))
-
-(defn rows [indent prefix value]
-  (cond
-    (map? value) (doall (map (fn [[k v]] [indented-row indent prefix k v]) value))
-    (vector? value) (doall (map (fn [k v] [indented-row indent prefix k v]) (range) value))
-    :else nil))
-
-(defn tree-old
-  [prefix data]
-  [v-box
-   :gap "2px"
-   :children (rows 0 prefix data)])
-
-(declare tree)
-
-(defn tree-node [indent prefix k v]
-  (let [react-key (str prefix "-" k)
-        indent-size (str (* 2 indent) "ex")
-        tag (create-label k v)
-        icon (if (branch? v)
-               [md-icon-button
-                :size :smaller
-                :md-icon-name "zmdi-chevron-right"
-                :disabled? false]
-               [md-icon-button
-                :size :smaller
-                :md-icon-name "zmdi-stop"
-                :disabled? true])]
-    ^{:key react-key}
-    [h-box
-     :align :center
-     :children [[gap :size indent-size]
-                icon
-                [label :label tag]]]))
-
-(defn tree-reducer [indent prefix r k v]
-  (let [parent (tree-node indent prefix k v)
-        children (tree (inc indent) prefix v)]
-    (concat r [parent] children)))
-
-(defn tree [indent prefix data]
-  (if (branch? data)
-    (doall (reduce-kv (partial tree-reducer indent prefix) [] data))))
-
-(defn tree-widget [indent prefix data]
-  (if-let [tree-rows (tree indent prefix data)]
-    [v-box
-     :children tree-rows]))
 
 (defn data-field [selected-field entry]
   (fn []
@@ -311,7 +240,7 @@
                       (if-let [ops (:operations results)]
                         (format-operations ops))]])))))
 
-(defn offers-panel
+(defn cimi-panel
   []
   [v-box
    :children [[control-bar]

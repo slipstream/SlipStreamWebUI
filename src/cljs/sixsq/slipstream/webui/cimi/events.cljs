@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.offers.events
+(ns sixsq.slipstream.webui.cimi.events
   (:require
     [sixsq.slipstream.webui.main.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]

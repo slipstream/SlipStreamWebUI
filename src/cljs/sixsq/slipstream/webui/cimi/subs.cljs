@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.offers.subs
+(ns sixsq.slipstream.webui.cimi.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
 (reg-sub :resource-data

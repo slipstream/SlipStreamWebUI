@@ -112,7 +112,7 @@
 (def default-value
   {:i18n                {:locale "en"
                          :tr     (dictionary/create-tr-fn "en")}
-   :panel               :panel/offers
+   :panel               :panel/cimi
    :client              nil
    :clients             nil
    :message             nil

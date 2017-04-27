@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.offers.effects
+(ns sixsq.slipstream.webui.cimi.effects
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
