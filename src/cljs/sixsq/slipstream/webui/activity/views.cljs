@@ -54,22 +54,53 @@
                    :on-click #(dispatch [:runs-search])]
                   ]])))
 
-(defn runs-panel
+(defn service-url
+  [url]
+  (if url
+    [hyperlink-href :label "url" :href url :target "_blank"]
+    [label :label ""]))
+
+(defn format-run
+  [{:keys [cloudServiceNames
+           tags
+           resourceUri
+           startTime
+           username
+           type
+           activeVm
+           abort
+           moduleResourceUri
+           status
+           uuid
+           serviceUrl] :as run}]
+  [h-box
+   :gap "2px"
+   :children [[label :label uuid]
+              (service-url serviceUrl)
+              [label :label activeVm]
+              [label :label status]
+              [label :label username]
+              [label :label cloudServiceNames]
+              [label :label moduleResourceUri]
+              ]])
+
+(defn runs-display
   []
   (let [runs-data (subscribe [:runs-data])]
     (fn []
-      [v-box
-       :gap "3px"
-       :children [[runs-control]
-                  (if @runs-data
-                    [scroller
-                     :scroll :auto
-                     :width "500px"
-                     :height "300px"
-                     :child [v-box
-                             :children [[title
-                                         :label "RUNS"
-                                         :level :level3
-                                         :underline? true]
-                                        (str @runs-data)]]])
-                  ]])))
+      (if-let [{:keys [runs]} @runs-data]
+        (let [{:keys [count totalCount item]} runs]
+          [v-box
+           :gap "3px"
+           :children [[label
+                       :label (str count "/" totalCount)]
+                      [v-box
+                       :children (vec (map format-run item))]]])))))
+
+(defn runs-panel
+  []
+  (fn []
+    [v-box
+     :gap "3px"
+     :children [[runs-control]
+                [runs-display]]]))
