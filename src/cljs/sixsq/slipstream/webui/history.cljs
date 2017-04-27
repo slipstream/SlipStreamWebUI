@@ -12,6 +12,19 @@
     [goog.history.Html5History TokenTransformer]))
 
 ;;
+;; set the application prefix
+;;
+;; Set the application prefix with:
+;;
+;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/PREFIX ""}}
+;;
+;; For production you probably want to use the default prefix of "webui",
+;; but you can set this to another value if it is hosted elsewhere on the
+;; webserver.
+;;
+(goog-define PREFIX "/webui")
+
+;;
 ;; utilities for transforming between panel names and keywords
 ;;
 
@@ -58,10 +71,14 @@
             (str path-prefix token)))
     transformer))
 
+(defn route-token [token]
+  (.log js/console "routing token: " token)
+  (secretary/dispatch! token))
+
 (def history
   (doto (Html5History. js/window (create-transformer))
-    (events/listen EventType.NAVIGATE #(secretary/dispatch! (.-token %)))
-    (.setPathPrefix (utils/host-url))
+    (events/listen EventType.NAVIGATE #(route-token (.-token %)))
+    (.setPathPrefix (utils/host-url PREFIX))
     (.setUseFragment false)
     (.setEnabled true)))
 
@@ -73,6 +90,14 @@
           (.log js/console "requested panel: " panel-name)
           (dispatch [:set-panel (name->panel panel-name)]))
 
+(defroute "/:panel-name/*" {panel-name :panel-name url :*}
+          (.log js/console "requested panel: " panel-name " " url)
+          (dispatch [:set-panel (name->panel panel-name)]))
+
+(defroute "*" {url :*}
+          (.log js/console "unmatched URL: " url)
+          (dispatch [:set-panel :unknown]))
+
 ;;
 ;; method to be used for internal navigation between named resources
 ;;
@@ -83,7 +108,7 @@
   []
   (let [token (get-token (.-location js/window))]
     (.log js/console "start token: " token)
-    (.setToken history (get-token (.-location js/window)))))
+    (.setToken history token)))
 
 (defn navigate
   "Navigates to the panel (specified as a namespaced keyword) by pushing the

@@ -87,11 +87,9 @@
       (merge (attribute-map node) (child-map node)))))
 
 (defn host-url
-  "Extracts the host URL from the javascript window.location object."
-  []
+  "Extracts the host URL from the javascript window.location object.
+   Note that the 'host' field contains both the hostname and port,
+   if a non-standard HTTP(S) port is being used."
+  [& [prefix]]
   (if-let [location (.-location js/window)]
-    (let [protocol (.-protocol location)
-          host (.-hostname location)
-          port (.-port location)
-          port-field (when-not (str/blank? port) (str ":" port))]
-      (str protocol "//" host port-field))))
+    (str (.-protocol location) "//" (.-host location) (or prefix ""))))

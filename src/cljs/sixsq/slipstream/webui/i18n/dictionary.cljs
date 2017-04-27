@@ -33,6 +33,7 @@
         :resource-type "resource type"
         :search "search"
         :show "show"
+        :unknown-page "The page you requested does not exist."
         :username "username"}
 
    :fr {:lang "français"
@@ -57,6 +58,7 @@
         :resource-type "type de resource"
         :search "chercher"
         :show "afficher"
+        :unknown-page "Le page que vous avez demandé n'existe pas."
         :username "nom d'utilisateur"}})
 
 

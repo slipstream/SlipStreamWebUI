@@ -27,13 +27,12 @@
     (timbre/set-level! :info))
   (timbre/set-level! :warn))
 
-
 ;;
 ;; determine the host url
 ;;
 ;; Set a fixed SlipStream endpoint (useful for development) with:
 ;;
-;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/HOST_URL false}}
+;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/HOST_URL "https://nuv.la"}}
 ;;
 ;; NOTE: When using an endpoint other than the one serving the javascript code
 ;; you MUST turn off the XSS protections of the browser.
