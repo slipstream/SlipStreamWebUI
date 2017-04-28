@@ -15,6 +15,7 @@
     [sixsq.slipstream.webui.cimi.views :as cimi-views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.i18n.views :as i18n-views]
+    [sixsq.slipstream.webui.offer.views :as offer-views]
     [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations
@@ -110,6 +111,8 @@
                :label (@tr [:apps])}
               {:id    :panel/dashboard
                :label (@tr [:dashboard])}
+              {:id    :panel/offer
+               :label (@tr [:offer])}
               {:id    :panel/cimi
                :label (@tr [:cimi])}]
        :on-change #(history/navigate %)])))
@@ -170,6 +173,7 @@
     (fn []
       (case @selected-panel
         :panel/cimi [cimi-views/cimi-panel]
+        :panel/offer [offer-views/offer-panel]
         :panel/dashboard [activity-views/runs-panel]
         :panel/apps [apps-views/modules-panel]))))
 

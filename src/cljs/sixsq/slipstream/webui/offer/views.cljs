@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.cimi.views
+(ns sixsq.slipstream.webui.offer.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
@@ -7,9 +7,9 @@
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.cimi.effects]
-    [sixsq.slipstream.webui.cimi.events]
-    [sixsq.slipstream.webui.cimi.subs]))
+    [sixsq.slipstream.webui.offer.effects]
+    [sixsq.slipstream.webui.offer.events]
+    [sixsq.slipstream.webui.offer.subs]))
 
 (defn format-operations
   [ops]
@@ -91,9 +91,9 @@
    :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
-  (let [search-results (subscribe [:search-results])
-        collection-name (subscribe [:search-collection-name])
-        selected-fields (subscribe [:search-selected-fields])]
+  (let [search-results (subscribe [:offer-results])
+        collection-name (subscribe [:offer-collection-name])
+        selected-fields (subscribe [:offer-selected-fields])]
     (fn []
       (let [results @search-results]
         [scroller
@@ -118,7 +118,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! first-value v)
-                                (dispatch [:set-search-first v]))]
+                                (dispatch [:set-offer-first v]))]
                   [input-text
                    :model last-value
                    :placeholder (@tr [:last])
@@ -126,7 +126,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! last-value v)
-                                (dispatch [:set-search-last v]))]
+                                (dispatch [:set-offer-last v]))]
                   [input-text
                    :model filter-value
                    :placeholder (@tr [:filter])
@@ -134,15 +134,15 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! filter-value v)
-                                (dispatch [:set-search-filter v]))]
+                                (dispatch [:set-offer-filter v]))]
                   [button
-                   :label (@tr [:search])
-                   :on-click #(dispatch [:search])]]])))
+                   :label (@tr [:offer])
+                   :on-click #(dispatch [:offer])]]])))
 
 (defn select-fields []
   (let [tr (subscribe [:i18n-tr])
-        available-fields (subscribe [:search-available-fields])
-        selected-fields (subscribe [:search-selected-fields])
+        available-fields (subscribe [:offer-available-fields])
+        selected-fields (subscribe [:offer-selected-fields])
         selections (reagent/atom #{})
         show? (reagent/atom false)]
     (fn []
@@ -177,38 +177,10 @@
                                                      :on-click (fn []
                                                                  (reset! show? false))]]]]]])]])))
 
-(def common-keys
-  #{:id :created :updated :acl :baseURI :resourceURI :operations})
-
-(defn format-link [k]
-  (let [n (name k)]
-    {:id n :label n}))
-
-(defn cep-opts [cep]
-  (let [ks (sort (remove common-keys (keys cep)))]
-    (map format-link ks)))
-
-(defn cloud-entry-point
-  []
-  (let [tr (subscribe [:i18n-tr])
-        cep (subscribe [:cloud-entry-point])
-        selected-id (atom nil)]
-    (fn []
-      [h-box
-       :children [[single-dropdown
-                   :model selected-id
-                   :placeholder (@tr [:resource-type])
-                   :width "250px"
-                   :choices (doall (cep-opts @cep))
-                   :on-change (fn [id]
-                                (reset! selected-id id)
-                                (dispatch [:new-search id]))]]])))
-
 (defn select-controls []
   [h-box
    :gap "3px"
-   :children [[cloud-entry-point]
-              [select-fields]]])
+   :children [[select-fields]]])
 
 (defn control-bar []
   [h-box
@@ -217,7 +189,7 @@
               [search-header]]])
 
 (defn results-bar []
-  (let [search (subscribe [:search])]
+  (let [search (subscribe [:offer])]
     (fn []
       (let [{:keys [completed? results collection-name]} @search]
         (if (instance? js/Error results)
@@ -235,12 +207,9 @@
                               n (count (get results (keyword collection-name) []))]
                           [label
                            :label (str "Results: " n " / " total)])
-                        [label :label "Results: ?? / ??"])
-                      [gap :size "1"]
-                      (if-let [ops (:operations results)]
-                        (format-operations ops))]])))))
+                        [label :label "Results: ?? / ??"])]])))))
 
-(defn cimi-panel
+(defn offer-panel
   []
   [v-box
    :children [[control-bar]

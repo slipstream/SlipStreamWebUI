@@ -100,6 +100,9 @@
 (s/def ::search (s/keys :req-un [::collection-name ::params ::results ::completed?
                                  ::available-fields ::selected-fields]))
 
+(s/def ::offer-data (s/nilable any?))
+(s/def ::offer ::search)
+
 (s/def ::db (s/keys :req-un [::client ::message ::resource-data
                              ::runs-data ::runs-params
                              ::modules-data ::modules-path ::modules-breadcrumbs
@@ -129,6 +132,16 @@
                          :user-id    nil}
    :cloud-entry-point   nil
    :search              {:collection-name  nil
+                         :params           {:$first  1
+                                            :$last   20
+                                            :$filter nil}
+                         :results          nil
+                         :completed?       true
+                         :available-fields [{:id "id" :label "id"}
+                                            {:id "beta" :label "beta"}]
+                         :selected-fields  #{"id"}}
+   :offer-data          nil
+   :offer               {:collection-name  "serviceOffers"
                          :params           {:$first  1
                                             :$last   20
                                             :$filter nil}
