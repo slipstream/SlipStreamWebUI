@@ -10,8 +10,7 @@
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
-                                   sixsq-nexus-url
-                                   lein-generate]])
+                                   sixsq-nexus-url]])
 
 (set-env!
   :source-paths #{"src/cljs"}
@@ -64,7 +63,8 @@
                                 with-eastwood
                                 with-kibit
                                 with-bikeshed]]
-  '[boot-deps :refer [ancient]])
+  '[boot-deps :refer [ancient]]
+  '[boot.lein :refer [generate]])
 
 (task-options!
   pom {:project (get-env :project)
