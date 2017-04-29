@@ -57,14 +57,14 @@
 
 ;; usage:  (dispatch [:set-selected-fields fields])
 (reg-event-db
-  :set-selected-fields
+  :set-offer-selected-fields
   [db/check-spec-interceptor trim-v]
   (fn [db [fields]]
     (update-in db [:offer :selected-fields] (constantly (set/union #{"id"} fields)))))
 
 ;; usage:  (dispatch [:remove-selected-field field])
 (reg-event-db
-  :remove-selected-field
+  :remove-offer-selected-field
   [db/check-spec-interceptor trim-v]
   (fn [db [field]]
     (update-in db [:offer :selected-fields] #(set/difference % #{field}))))

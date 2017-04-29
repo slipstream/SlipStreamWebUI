@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.activity.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
-                         button row-button md-icon-button label modal-panel throbber
+                         button row-button md-icon-button md-circle-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
-                         scroller selection-list title popover-anchor-wrapper popover-content-wrapper]
+                         scroller selection-list title popover-anchor-wrapper popover-content-wrapper popover-tooltip]
      :refer-macros [handler-fn]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
@@ -57,10 +57,15 @@
                   ]])))
 
 (defn service-url
-  [url]
-  (if-not (str/blank? url)
-    [h-box :width "20px" :align :center :children [[hyperlink-href :label "URL" :href url :target "_blank"]]]
-    [h-box :width "20px" :align :center :children [[label :width "80px" :label ""]]]))
+  [url status]
+  [h-box
+   :width "2ex"
+   :justify :center
+   :children [(if (and (= status "Ready") (not (str/blank? url)))
+                [hyperlink-href
+                 :label [:i {:class (str "zmdi zmdi-hc-fw-rc zmdi-mail-reply")}]
+                 :href url
+                 :target "_blank"])]])
 
 (def curr-position (reagent/atom :below-center))
 (def positions [{:id :above-left :label ":above-left  "}
@@ -81,32 +86,53 @@
   (let [showing? (reagent/atom false)
         tag (second (reverse (str/split module #"/")))]
     (fn []
-      [popover-anchor-wrapper
-       :showing? showing?
-       :position @curr-position
-       :anchor [h-box :width "200px"
-                :children [[:div
-                            {:on-mouse-over (handler-fn (reset! showing? true))
-                             :on-mouse-out  (handler-fn (reset! showing? false))}
-                            tag]]]
-       :popover [popover-content-wrapper
-                 :body module]])))
+      (let [module-label [label
+                          :width "20ex"
+                          :label tag
+                          :attr {:on-mouse-over (handler-fn (reset! showing? true))
+                                 :on-mouse-out  (handler-fn (reset! showing? false))}]]
+        [popover-tooltip
+         :label module
+         :showing? showing?
+         :anchor module-label]))))
 
 (defn format-uuid
   [uuid]
   (let [showing? (reagent/atom false)
-        tag (.substring uuid 0 7)]
+        tag (.substring uuid 0 8)]
     (fn []
-      [popover-anchor-wrapper
-       :showing? showing?
-       :position @curr-position
-       :anchor [h-box :width "80px"
-                :children [[:div
-                            {:on-mouse-over (handler-fn (reset! showing? true))
-                             :on-mouse-out  (handler-fn (reset! showing? false))}
-                            tag]]]
-       :popover [popover-content-wrapper
-                 :body uuid]])))
+      (let [uuid-label [label
+                        :width "10ex"
+                        :label tag
+                        :attr {:on-mouse-over (handler-fn (reset! showing? true))
+                               :on-mouse-out  (handler-fn (reset! showing? false))}]]
+        [popover-tooltip
+         :label uuid
+         :showing? showing?
+         :anchor uuid-label]))))
+
+(defn abort-popup [message]
+  (fn []
+    [h-box
+     :width "2ex"
+     :justify :center
+     :children [(when-not (str/blank? message)
+                  [row-button
+                   :md-icon-name "zmdi zmdi-notifications-active"
+                   :mouse-over-row? true
+                   :tooltip message
+                   :on-click #()])]]))
+
+(defn deployment-icon [type]
+  (let [icon (case type
+               "Orchestration" "zmdi-apps"
+               "Run" "zmdi-widgets"
+               "zmdi-minus")]
+    [row-button
+     :md-icon-name (str "zmdi " icon)
+     :mouse-over-row? true
+     :on-click #()]))
+
 (defn format-run
   [{:keys [cloudServiceNames
            tags
@@ -122,18 +148,36 @@
            serviceUrl] :as run}]
   [h-box
    :gap "2px"
-   :children [[label :width "100px" :label type]
-              (service-url serviceUrl)
+   :children [[label :width "2ex" :label [deployment-icon type]]
+              [abort-popup abort]
+              (service-url serviceUrl status)
               [format-uuid uuid]
               [format-module moduleResourceUri]
-              [label :width "80px" :label activeVm]
-              [label :width "100px" :label status]
-              [label :width "200px" :label username]
-              [label :width "200px" :label cloudServiceNames]
-              [label :width "100px" :label tags]
-              [label :width "200px" :label startTime]
-              [label :width "300px" :label abort]
+              [label :width "5ex" :label activeVm]
+              [label :width "10ex" :label status]
+              [label :width "15ex" :label username]
+              [label :width "30ex" :label startTime]
+              [label :width "20ex" :label cloudServiceNames]
+              [label :width "40px" :label tags]
               ]])
+
+(defn run-header []
+  (let [tr (subscribe [:i18n-tr])]
+    (fn []
+      [h-box
+       :gap "2px"
+       :children [[label :width "2ex" :label ""]
+                  [abort-popup ""]
+                  (service-url "" "")
+                  [label :width "10ex" :label (@tr [:id])]
+                  [label :width "20ex" :label (@tr [:module])]
+                  [label :width "5ex" :label (@tr [:vms])]
+                  [label :width "10ex" :label (@tr [:status])]
+                  [label :width "15ex" :label (@tr [:username])]
+                  [label :width "30ex" :label (@tr [:start])]
+                  [label :width "20ex" :label (@tr [:cloud])]
+                  [label :width "40px" :label (@tr [:tag])]
+                  ]])))
 
 (defn runs-display
   []
@@ -146,12 +190,18 @@
            :children [[label
                        :label (str count "/" totalCount)]
                       [v-box
-                       :children (vec (map format-run item))]]])))))
+                       :children (concat [[run-header]] (vec (map format-run item)))]]])))))
 
 (defn runs-panel
   []
   (fn []
     [v-box
      :gap "3px"
-     :children [[runs-control]
+     :children [[md-icon-button
+                 :md-icon-name "zdmi-home"
+                 :emphasise? false
+                 :tooltip "HELLO"
+                 :size :regular
+                 :on-click #()]
+                [runs-control]
                 [runs-display]]]))

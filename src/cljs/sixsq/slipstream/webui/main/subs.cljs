@@ -4,8 +4,8 @@
 (reg-sub :message
          (fn [db _] (-> db :message)))
 
-(reg-sub :panel
-         (fn [db _] (-> db :panel)))
+(reg-sub :resource-path
+         (fn [db _] (-> db :resource-path)))
 
 (reg-sub :cloud-entry-point
          (fn [db _] (-> db :cloud-entry-point)))

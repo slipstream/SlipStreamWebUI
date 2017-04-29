@@ -8,7 +8,8 @@
     [sixsq.slipstream.client.api.modules.async :as modules-async]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.history :as history]
-    [clojure.set :as set]))
+    [clojure.set :as set]
+    [clojure.string :as str]))
 
 ;; usage:  (dispatch [:initialize-db])
 ;; creates initial state of database
@@ -62,10 +63,17 @@
   (fn [db _]
     (assoc db :message nil)))
 
-;; usage:  (dispatch [:set-panel panel-id])
+(defn parse-resource-path
+  "Utility to split a resource path into a vector of terms.
+   Returns an empty vector for a nil argument.  Removes
+   blank or empty terms from the result."
+  [path]
+  (vec (remove str/blank? (str/split path #"/"))))
+
+;; usage:  (dispatch [:set-resource-path path])
 (reg-event-db
-  :set-panel
+  :set-resource-path
   [db/check-spec-interceptor trim-v]
-  (fn [db [panel-id]]
-    (assoc db :panel panel-id)))
+  (fn [db [path]]
+    (assoc db :resource-path (parse-resource-path path))))
 

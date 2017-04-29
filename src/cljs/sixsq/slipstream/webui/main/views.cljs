@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
-                         button row-button md-icon-button label modal-panel throbber
+                         button row-button md-icon-button md-circle-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
                          scroller selection-list title]]
     [re-com.buttons :refer [button-args-desc]]
@@ -103,19 +103,14 @@
 
 (defn panel-controls []
   (let [tr (subscribe [:i18n-tr])
-        model (subscribe [:panel])]
+        model (subscribe [:resource-path])]
     (fn []
-      [horizontal-pill-tabs
-       :model model
-       :tabs [{:id    :panel/apps
-               :label (@tr [:apps])}
-              {:id    :panel/dashboard
-               :label (@tr [:dashboard])}
-              {:id    :panel/offer
-               :label (@tr [:offer])}
-              {:id    :panel/cimi
-               :label (@tr [:cimi])}]
-       :on-change #(history/navigate %)])))
+      [h-box
+       :gap "2px"
+       :children [[button :label (@tr [:apps]) :on-click #(history/navigate "apps")]
+                  [button :label (@tr [:dashboard]) :on-click #(history/navigate "dashboard")]
+                  [button :label (@tr [:offer]) :on-click #(history/navigate "offer")]
+                  [button :label (@tr [:cimi]) :on-click #(history/navigate "cimi")]]])))
 
 (defn page-header []
   [h-box
@@ -129,8 +124,7 @@
     (fn []
       [h-box
        :justify :center
-       :children [[label
-                   :label (str (@tr [:copyright]) " © 2016-2017, SixSq Sàrl")]]])))
+       :children [[label :label (str (@tr [:copyright]) " © 2016-2017, SixSq Sàrl")]]])))
 
 (defn message-modal
   []
@@ -167,15 +161,18 @@
                              :on-click #(dispatch [:clear-resource-data])]]]
          :backdrop-on-click #(dispatch [:clear-resource-data])]))))
 
-(defn panels
+(defn resource-panel
   []
-  (let [selected-panel (subscribe [:panel])]
+  (let [resource-path (subscribe [:resource-path])]
     (fn []
-      (case @selected-panel
-        :panel/cimi [cimi-views/cimi-panel]
-        :panel/offer [offer-views/offer-panel]
-        :panel/dashboard [activity-views/runs-panel]
-        :panel/apps [apps-views/modules-panel]))))
+      (let [panel (or (first @resource-path) "offer")
+            args (rest @resource-path)]
+        (case panel
+          "cimi" [cimi-views/cimi-panel]
+          "offer" [offer-views/offer-panel]
+          "dashboard" [activity-views/runs-panel]
+          "apps" [apps-views/modules-panel]
+          [offer-views/offer-panel])))))
 
 (defn app []
   [v-box
@@ -183,5 +180,5 @@
    :children [[message-modal]
               [resource-modal]
               [page-header]
-              [panels]
+              [resource-panel]
               [page-footer]]])

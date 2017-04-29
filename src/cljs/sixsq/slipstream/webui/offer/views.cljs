@@ -59,20 +59,21 @@
         [box :align align :child [label :label v]]))))
 
 (defn column-header-with-key [selected-field]
-  ^{:key (str "column-header-" selected-field)}
-  [h-box
-   :justify :between
-   :gap "1ex"
-   :align :center
-   :class "data-column-header"
-   :children [[label
-               :label selected-field]
-              (if-not (= "id" selected-field)
-                [row-button
-                 :md-icon-name "zmdi zmdi-close"
-                 :mouse-over-row? true
-                 :tooltip "remove column"
-                 :on-click #(dispatch [:remove-selected-field selected-field])])]])
+  (let [tr (subscribe [:i18n-tr])]
+    (fn []
+      ^{:key (str "column-header-" selected-field)}
+      [h-box
+       :justify :between
+       :gap "1ex"
+       :align :center
+       :class "data-column-header"
+       :children [[label :label selected-field]
+                  (if-not (= "id" selected-field)
+                    [row-button
+                     :md-icon-name "zmdi zmdi-close"
+                     :mouse-over-row? true
+                     :tooltip (@tr [:remove-column])
+                     :on-click #(dispatch [:remove-offer-selected-field selected-field])])]])))
 
 (defn data-field-with-key [selected-field entry]
   (let [k (str "data-" selected-field "-" (:id entry))]
@@ -82,7 +83,7 @@
   ^{:key (str "column-" selected-field)}
   [v-box
    :padding "0 5px 0"
-   :children [(column-header-with-key selected-field)
+   :children [[column-header-with-key selected-field]
               (doall (map (partial data-field-with-key selected-field) entries))]])
 
 (defn vertical-data-table [selected-fields entries]
@@ -136,7 +137,7 @@
                                 (reset! filter-value v)
                                 (dispatch [:set-offer-filter v]))]
                   [button
-                   :label (@tr [:offer])
+                   :label (@tr [:search])
                    :on-click #(dispatch [:offer])]]])))
 
 (defn select-fields []
@@ -155,7 +156,7 @@
                     [modal-panel
                      :backdrop-on-click (fn []
                                           (reset! show? false)
-                                          (dispatch [:set-selected-fields @selections]))
+                                          (dispatch [:set-offer-selected-fields @selections]))
                      :child [v-box
                              :width "350px"
                              :children [[selection-list
@@ -166,16 +167,18 @@
                                          :height "200px"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :between
+                                         :justify :end
+                                         :gap "3px"
                                          :children [[button
-                                                     :label "update"
-                                                     :on-click (fn []
-                                                                 (reset! show? false)
-                                                                 (dispatch [:set-selected-fields @selections]))]
-                                                    [button
                                                      :label "cancel"
                                                      :on-click (fn []
-                                                                 (reset! show? false))]]]]]])]])))
+                                                                 (reset! show? false))]
+                                                    [button
+                                                     :label "update"
+                                                     :class "btn-default"
+                                                     :on-click (fn []
+                                                                 (reset! show? false)
+                                                                 (dispatch [:set-offer-selected-fields @selections]))]]]]]])]])))
 
 (defn select-controls []
   [h-box
@@ -189,25 +192,20 @@
               [search-header]]])
 
 (defn results-bar []
-  (let [search (subscribe [:offer])]
+  (let [tr (subscribe [:i18n-tr])
+        search (subscribe [:offer])]
     (fn []
       (let [{:keys [completed? results collection-name]} @search]
         (if (instance? js/Error results)
           [h-box
-           :children [[label :label "ERROR"]]]
+           :children [[label :label (@tr [:error])]]]
           [h-box
-           :children [[box
-                       :justify :center
-                       :align :center
-                       :width "30px"
-                       :height "30px"
-                       :child (if completed? "" [throbber :size :small])]
-                      (if results
+           :children [[label :label (@tr [:results])]
+                      (when results
                         (let [total (:count results)
                               n (count (get results (keyword collection-name) []))]
-                          [label
-                           :label (str "Results: " n " / " total)])
-                        [label :label "Results: ?? / ??"])]])))))
+                          [label :label (str " " n " / " total)]))
+                      (when-not completed? [throbber :size :regular])]])))))
 
 (defn offer-panel
   []

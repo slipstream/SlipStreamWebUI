@@ -26,8 +26,6 @@
 (s/def ::runs any?)
 (s/def ::modules any?)
 
-(s/def ::panel #{:panel/dashboard :panel/apps :panel/profile :panel/offers})
-
 (s/def ::clients (s/nilable (s/keys :req-un [::cimi ::runs ::modules])))
 
 (s/def ::message (s/nilable string?))
@@ -103,6 +101,8 @@
 (s/def ::offer-data (s/nilable any?))
 (s/def ::offer ::search)
 
+(s/def ::resource-path (s/coll-of [string?] :min-count 1))
+
 (s/def ::db (s/keys :req-un [::client ::message ::resource-data
                              ::runs-data ::runs-params
                              ::modules-data ::modules-path ::modules-breadcrumbs
@@ -115,7 +115,7 @@
 (def default-value
   {:i18n                {:locale "en"
                          :tr     (dictionary/create-tr-fn "en")}
-   :panel               :panel/cimi
+   :resource-path       []
    :client              nil
    :clients             nil
    :message             nil

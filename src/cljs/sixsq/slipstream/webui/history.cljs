@@ -15,7 +15,7 @@
 ;; utilities for transforming between panel names and keywords
 ;;
 
-(defn name->panel
+#_(defn name->panel
   "Transforms the given panel name into the correponding namespaced
    panel keyword.  For example, 'apps' returns :panel/apps."
   [n]
@@ -33,7 +33,7 @@
 ;; initialize the history object
 ;;
 
-(def ^:const default-token "/offers")
+(def ^:const default-token "/offer")
 (defn get-token
   "Creates the history token from the given location."
   [location]
@@ -67,23 +67,26 @@
 
 ;;
 ;; setup the client-side routing for URLs
+;; single route captures all paths and sets the parsed path in the database
+;; routing in this way ignores the query parameters and fragments
 ;;
 
-(defroute "/:panel-name" [panel-name]
-          (.log js/console "requested panel: " panel-name)
-          (dispatch [:set-panel (name->panel panel-name)]))
+(defroute "*" {path :*}
+          (dispatch [:set-resource-path path]))
 
 ;;
 ;; method to be used for internal navigation between named resources
 ;;
 
 (defn start
-  "Sets the starting point for the history. Will dispatch an event that
-   will reset to the correct panels as necessary."
+  "Sets the starting point for the history. No history event will be
+   generated when setting the first value, so this explicitly dispatches
+   the value to the URL routing."
   []
   (let [token (get-token (.-location js/window))]
     (.log js/console "start token: " token)
-    (.setToken history (get-token (.-location js/window)))))
+    (.setToken history (get-token (.-location js/window)))
+    (secretary/dispatch! token)))
 
 (defn navigate
   "Navigates to the panel (specified as a namespaced keyword) by pushing the
