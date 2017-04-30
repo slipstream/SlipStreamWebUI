@@ -9,7 +9,8 @@
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.offer.effects]
     [sixsq.slipstream.webui.offer.events]
-    [sixsq.slipstream.webui.offer.subs]))
+    [sixsq.slipstream.webui.offer.subs]
+    [clojure.string :as str]))
 
 (defn format-operations
   [ops]
@@ -55,7 +56,7 @@
     (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
           align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
       (if (= "id" selected-field)
-        [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
+        [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-offer-data entry])]]
         [box :align align :child [label :label v]]))))
 
 (defn column-header-with-key [selected-field]
@@ -66,7 +67,7 @@
        :justify :between
        :gap "1ex"
        :align :center
-       :class "data-column-header"
+       :class "webui-column-header"
        :children [[label :label selected-field]
                   (if-not (= "id" selected-field)
                     [row-button
@@ -82,13 +83,13 @@
 (defn data-column-with-key [entries selected-field]
   ^{:key (str "column-" selected-field)}
   [v-box
-   :padding "0 5px 0"
+   :class "webui-column"
    :children [[column-header-with-key selected-field]
               (doall (map (partial data-field-with-key selected-field) entries))]])
 
 (defn vertical-data-table [selected-fields entries]
   [h-box
-   :gap "5px"
+   :class "webui-column-table"
    :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
@@ -208,9 +209,84 @@
                           [label :label (str " " n " / " total)]))
                       (when-not completed? [throbber :size :regular])]])))))
 
+(defn attr-ns
+  "Extracts the attribute namespace for the given key-value pair.
+   Returns 'common' if there is no explicit namespace."
+  [[k _]]
+  (or (second (re-matches #"(?:([^:]*):)?(.*)" (name k))) "common"))
+
+(defn strip-attr-ns
+  "Strips the attribute namespace from the given key."
+  [k]
+  (last (re-matches #"(?:([^:]*):)?(.*)" (name k))))
+
+(defn group-data-field [v]
+  (fn []
+    [box
+     :align :start
+     :child [label :label (or v "\u00a0")]]))
+
+(defn group-kv-with-key [tag [k v]]
+  (let [react-key (str "data-" tag "-" k)]
+    ^{:key react-key} [group-data-field (str v)]))
+
+(defn group-column-with-key [tag class-name column-data]
+  ^{:key (str "column-" tag)}
+  [v-box
+   :class (str "webui-column " class-name)
+   :children (vec (map (partial group-kv-with-key tag) column-data))])
+
+(defn group-table
+  [group-data]
+  (let [value-column-data (sort first group-data)
+        key-column-data (map (fn [[k _]] [k (strip-attr-ns k)]) value-column-data)]
+    [h-box
+     :class "webui-column-table"
+     :children [[group-column-with-key "offer-keys" "webui-row-header" key-column-data]
+                [group-column-with-key "offer-vals" "" value-column-data]]]))
+
+(defn format-group [[group data]]
+  ^{:key group}
+  [v-box :children [[title
+                     :label (str group)
+                     :level :level2
+                     :underline? true]
+                    [group-table data]]])
+
+(defn format-offer-data [offer-data]
+  (let [offer-data (dissoc offer-data :acl :operations)]
+    (let [groups (group-by attr-ns offer-data)]
+      (doall (map format-group groups)))))
+
+(defn offer-detail
+  []
+  (let [tr (subscribe [:i18n-tr])]
+    (fn [data]
+      (if data
+        [v-box
+         :gap "3px"
+         :children [[v-box
+                     :children [[title
+                                 :label (:name data)
+                                 :level :level1
+                                 :underline? true]
+                                (format-offer-data data)]]
+                    [button
+                     :label (@tr [:close])
+                     :class "btn-primary"
+                     :on-click #(dispatch [:clear-offer-data])]]]))))
+
+(defn list-or-detail []
+  (let [data (subscribe [:offer-data])]
+    (fn []
+      (if @data
+        [offer-detail @data]
+        [search-vertical-result-table]))))
+
 (defn offer-panel
   []
   [v-box
    :children [[control-bar]
               [results-bar]
-              [search-vertical-result-table]]])
+              [list-or-detail]]])
+

@@ -64,7 +64,7 @@
    :justify :between
    :gap "1ex"
    :align :center
-   :class "data-column-header"
+   :class "webui-column-header"
    :children [[label
                :label selected-field]
               (if-not (= "id" selected-field)
@@ -81,13 +81,13 @@
 (defn data-column-with-key [entries selected-field]
   ^{:key (str "column-" selected-field)}
   [v-box
-   :padding "0 5px 0"
+   :class "webui-column"
    :children [(column-header-with-key selected-field)
               (doall (map (partial data-field-with-key selected-field) entries))]])
 
 (defn vertical-data-table [selected-fields entries]
   [h-box
-   :gap "5px"
+   :class "webui-column-table"
    :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
@@ -166,16 +166,17 @@
                                          :height "200px"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :between
+                                         :justify :end
                                          :children [[button
-                                                     :label "update"
+                                                     :label (@tr [:cancel])
+                                                     :on-click (fn []
+                                                                 (reset! show? false))]
+                                                    [button
+                                                     :label (@tr [:update])
+                                                     :class "btn-primary"
                                                      :on-click (fn []
                                                                  (reset! show? false)
-                                                                 (dispatch [:set-selected-fields @selections]))]
-                                                    [button
-                                                     :label "cancel"
-                                                     :on-click (fn []
-                                                                 (reset! show? false))]]]]]])]])))
+                                                                 (dispatch [:set-selected-fields @selections]))]]]]]])]])))
 
 (def common-keys
   #{:id :created :updated :acl :baseURI :resourceURI :operations})

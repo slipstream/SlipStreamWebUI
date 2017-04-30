@@ -16,6 +16,8 @@
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.offer.views :as offer-views]
+    [sixsq.slipstream.webui.profile.views :as profile-views]
+    [sixsq.slipstream.webui.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations
@@ -167,7 +169,7 @@
   []
   (let [resource-path (subscribe [:resource-path])]
     (fn []
-      (let [panel (or (first @resource-path) "offer")
+      (let [panel (first @resource-path)
             args (rest @resource-path)]
         [v-box
          :class "webui-contents"
@@ -176,7 +178,8 @@
                       "offer" [offer-views/offer-panel]
                       "dashboard" [activity-views/runs-panel]
                       "apps" [apps-views/modules-panel]
-                      [offer-views/offer-panel])]]))))
+                      "profile" [profile-views/profile-panel]
+                      [unknown-views/unknown-panel])]]))))
 
 (defn app []
   [v-box

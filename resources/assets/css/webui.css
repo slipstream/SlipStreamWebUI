@@ -1,7 +1,10 @@
-.data-column-header {
+.webui-column-header {
     font-weight:    bold;
     background-color: #eee;
-    padding: 0 0.5em 0 0.5em;
+}
+
+.webui-row-header {
+    font-weight:    bold;
 }
 
 .webui-header {
@@ -27,4 +30,8 @@
     background-color: white;
     padding: 0.5em;
     border-style: none;
+}
+
+.webui-column {
+    padding: 1em;
 }

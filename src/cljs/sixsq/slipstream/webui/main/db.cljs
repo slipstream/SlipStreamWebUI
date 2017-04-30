@@ -106,7 +106,8 @@
 (s/def ::db (s/keys :req-un [::client ::message ::resource-data
                              ::runs-data ::runs-params
                              ::modules-data ::modules-path ::modules-breadcrumbs
-                             ::authn ::cloud-entry-point ::search]))
+                             ::authn ::cloud-entry-point ::search
+                             ::offer ::offer-data]))
 
 ;;
 ;; initial database value

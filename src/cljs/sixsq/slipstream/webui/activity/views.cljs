@@ -158,8 +158,7 @@
               [label :width "15ex" :label username]
               [label :width "30ex" :label startTime]
               [label :width "20ex" :label cloudServiceNames]
-              [label :width "40px" :label tags]
-              ]])
+              [label :width "40px" :label tags]]])
 
 (defn run-header []
   (let [tr (subscribe [:i18n-tr])]
@@ -176,8 +175,7 @@
                   [label :width "15ex" :label (@tr [:username])]
                   [label :width "30ex" :label (@tr [:start])]
                   [label :width "20ex" :label (@tr [:cloud])]
-                  [label :width "40px" :label (@tr [:tag])]
-                  ]])))
+                  [label :width "40px" :label (@tr [:tag])]]])))
 
 (defn runs-display
   []
@@ -197,11 +195,6 @@
   (fn []
     [v-box
      :gap "3px"
-     :children [[md-icon-button
-                 :md-icon-name "zdmi-home"
-                 :emphasise? false
-                 :tooltip "HELLO"
-                 :size :regular
-                 :on-click #()]
-                [runs-control]
+     :children [[runs-control]
                 [runs-display]]]))
+

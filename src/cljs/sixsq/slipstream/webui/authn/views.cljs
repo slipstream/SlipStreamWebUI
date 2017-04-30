@@ -8,13 +8,14 @@
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.authn.effects]
     [sixsq.slipstream.webui.authn.events]
-    [sixsq.slipstream.webui.authn.subs]))
+    [sixsq.slipstream.webui.authn.subs]
+    [sixsq.slipstream.webui.history :as history]))
 
 (defn logout-buttons
   [tr user-id]
   [[button
     :label user-id
-    :on-click #(js/alert (tr [:profile] [user-id]))]
+    :on-click #(history/navigate "profile")]
    [button
     :label (tr [:logout])
     :on-click #(dispatch [:logout])]])
