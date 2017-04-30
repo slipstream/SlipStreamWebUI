@@ -1,0 +1,30 @@
+.data-column-header {
+    font-weight:    bold;
+    background-color: #eee;
+    padding: 0 0.5em 0 0.5em;
+}
+
+.webui-header {
+    color: black;
+    background-color: #f5f5f5;
+    padding: 0.5em;
+    border-style: solid none;
+    border-width: 1px;
+    border-color: #d3d3d3;
+}
+
+.webui-footer {
+    color: black;
+    background-color: #f5f5f5;
+    padding: 0.5em;
+    border-style: solid none;
+    border-width: 1px;
+    border-color: #d3d3d3;
+}
+
+.webui-contents {
+    color: black;
+    background-color: white;
+    padding: 0.5em;
+    border-style: none;
+}

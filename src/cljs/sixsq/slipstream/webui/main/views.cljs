@@ -114,6 +114,7 @@
 
 (defn page-header []
   [h-box
+   :class "webui-header"
    :justify :between
    :children [[panel-controls]
               [authn-views/authn-panel]
@@ -123,6 +124,7 @@
   (let [tr (subscribe [:i18n-tr])]
     (fn []
       [h-box
+       :class "webui-footer"
        :justify :center
        :children [[label :label (str (@tr [:copyright]) " © 2016-2017, SixSq Sàrl")]]])))
 
@@ -167,16 +169,17 @@
     (fn []
       (let [panel (or (first @resource-path) "offer")
             args (rest @resource-path)]
-        (case panel
-          "cimi" [cimi-views/cimi-panel]
-          "offer" [offer-views/offer-panel]
-          "dashboard" [activity-views/runs-panel]
-          "apps" [apps-views/modules-panel]
-          [offer-views/offer-panel])))))
+        [v-box
+         :class "webui-contents"
+         :children [(case panel
+                      "cimi" [cimi-views/cimi-panel]
+                      "offer" [offer-views/offer-panel]
+                      "dashboard" [activity-views/runs-panel]
+                      "apps" [apps-views/modules-panel]
+                      [offer-views/offer-panel])]]))))
 
 (defn app []
   [v-box
-   :gap "5px"
    :children [[message-modal]
               [resource-modal]
               [page-header]

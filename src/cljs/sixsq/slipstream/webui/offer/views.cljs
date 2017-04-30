@@ -170,12 +170,12 @@
                                          :justify :end
                                          :gap "3px"
                                          :children [[button
-                                                     :label "cancel"
+                                                     :label (@tr [:cancel])
                                                      :on-click (fn []
                                                                  (reset! show? false))]
                                                     [button
-                                                     :label "update"
-                                                     :class "btn-default"
+                                                     :label (@tr [:update])
+                                                     :class "btn-primary"
                                                      :on-click (fn []
                                                                  (reset! show? false)
                                                                  (dispatch [:set-offer-selected-fields @selections]))]]]]]])]])))
@@ -200,6 +200,7 @@
           [h-box
            :children [[label :label (@tr [:error])]]]
           [h-box
+           :gap "2px"
            :children [[label :label (@tr [:results])]
                       (when results
                         (let [total (:count results)

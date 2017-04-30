@@ -16,6 +16,7 @@
         :active-only "active only?"
         :add-column "add column"
         :apps "applications"
+        :cancel "cancel"
         :cimi "cimi"
         :cloud "cloud"
         :copyright "copyright"
@@ -43,6 +44,7 @@
         :start "start"
         :status "status"
         :tag "tag"
+        :update "update"
         :username "username"
         :vms "VMs"}
 
@@ -51,6 +53,7 @@
         :active-only "active uniquement?"
         :add-column "ajouter une colonne"
         :apps "applications"
+        :cancel "annuler"
         :cimi "cimi"
         :cloud "cloud"
         :copyright "droits d'auteur"
@@ -78,6 +81,7 @@
         :start "début"
         :status "statut"
         :tag "etiquette"
+        :update "rétablir"
         :username "nom d'utilisateur"
         :vms "MVs"}})
 
