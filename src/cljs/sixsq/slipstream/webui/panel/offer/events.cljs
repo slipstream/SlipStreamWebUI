@@ -38,7 +38,7 @@
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 1)]
-      (update-in db [:offer :params :$first] (constantly n)))))
+      (assoc-in db [:offer :params :$first] n))))
 
 ;; usage:  (dispatch [:set-offer-last f])
 (reg-event-db
@@ -46,21 +46,21 @@
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 20)]
-      (update-in db [:offer :params :$last] (constantly n)))))
+      (assoc-in db [:offer :params :$last] n))))
 
 ;; usage:  (dispatch [:set-offer-filter f])
 (reg-event-db
   :set-offer-filter
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
-    (update-in db [:offer :params :$filter] (constantly v))))
+    (assoc-in db [:offer :params :$filter] v)))
 
 ;; usage:  (dispatch [:set-selected-fields fields])
 (reg-event-db
   :set-offer-selected-fields
   [db/check-spec-interceptor trim-v]
   (fn [db [fields]]
-    (update-in db [:offer :selected-fields] (constantly (set/union #{"id"} fields)))))
+    (assoc-in db [:offer :selected-fields] (set/union #{"id"} fields))))
 
 ;; usage:  (dispatch [:remove-selected-field field])
 (reg-event-db
@@ -68,19 +68,6 @@
   [db/check-spec-interceptor trim-v]
   (fn [db [field]]
     (update-in db [:offer :selected-fields] #(set/difference % #{field}))))
-
-;; usage:  (dispatch [:switch-offer-resource resource-type])
-;; trigger offer on new resource type
-(reg-event-fx
-  :new-offer
-  [db/check-spec-interceptor trim-v]
-  (fn [cofx [new-collection-name]]
-    (let [cofx (assoc-in cofx [:db :offer :collection-name] new-collection-name)
-          {:keys [client offer]} (:db cofx)
-          {:keys [collection-name params]} offer]
-      (-> cofx
-          (update-in [:db :offer :completed?] (constantly false))
-          (assoc :cimi/offer [client collection-name (utils/prepare-params params)])))))
 
 ;; usage:  (dispatch [:offer])
 ;; refine offer
@@ -91,6 +78,39 @@
     (let [{:keys [client offer]} (:db cofx)
           {:keys [collection-name params]} offer]
       (-> cofx
-          (update-in [:db :offer :completed?] (constantly false))
+          (assoc-in [:db :offer :completed?] false)
           (assoc :cimi/offer [client collection-name (utils/prepare-params params)])))))
+
+;; usage:  (dispatch [:set-offer-search [params]])
+(reg-event-fx
+  :set-offer
+  [db/check-spec-interceptor trim-v]
+  (fn [cofx [params]]
+    (let [{:keys [client offer]} (:db cofx)
+          {:keys [collection-name]} offer
+          new-params (utils/merge-params params)]
+      (-> cofx
+          (assoc-in [:db :offer :params] new-params)
+          (assoc-in [:db :resource-path] ["offer"])
+          (assoc :cimi/offer [client collection-name (utils/prepare-params new-params)])))))
+
+;; usage:  (dispatch [:set-offer-detail [uuid]])
+(reg-event-fx
+  :set-offer-detail
+  [db/check-spec-interceptor trim-v]
+  (fn [cofx [uuid]]
+    (let [{:keys [client offer]} (:db cofx)
+          {:keys [collection-name]} offer]
+      (-> cofx
+          (assoc-in [:db :resource-path] ["offer" uuid])
+          (assoc :cimi/offer-detail [client collection-name uuid])))))
+
+;; usage:  (dispatch [:show-offer-table])
+(reg-event-fx
+  :show-offer-table
+  [db/check-spec-interceptor]
+  (fn [cofx []]
+    (-> cofx
+        (assoc-in [:db :offer-data] nil)
+        (assoc :navigate ["offer"]))))
 

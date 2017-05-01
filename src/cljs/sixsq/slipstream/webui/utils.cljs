@@ -16,6 +16,23 @@
       (dissoc params :$filter)
       params)))
 
+(defn coerce-pos-int [s]
+  (when-let [v (str->int s)]
+    (when (pos? v)
+      v)))
+
+(defn coerse-filter [s]
+  (when-not (str/blank? s)
+    s))
+
+(defn merge-params [params]
+  (let [fst (or (coerce-pos-int (:$first params)) 1)
+        lst (or (coerce-pos-int (:$last params)) 20)
+        flt (coerse-filter (:$filter params))]
+    {:$first fst
+     :$last lst
+     :$filter flt}))
+
 (defn keys-in [m]
   (if (map? m)
     (vec

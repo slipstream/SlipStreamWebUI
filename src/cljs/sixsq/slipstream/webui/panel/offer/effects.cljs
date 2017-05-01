@@ -6,7 +6,7 @@
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]))
 
-;; usage: (dispatch [:search client resource-type])
+;; usage: (dispatch [:cimi/offer client resource-type])
 ;; queries the given resource
 (reg-fx
   :cimi/offer
@@ -14,3 +14,12 @@
     (go
       (let [results (<! (cimi/search client resource-type params))]
         (dispatch [:show-offer-results resource-type results])))))
+
+;; usage: (dispatch [:cimi/offer-detail client resource-type])
+;; queries the given resource
+(reg-fx
+  :cimi/offer-detail
+  (fn [[client resource-type uuid]]
+    (go
+      (let [result (<! (cimi/get client (str "service-offer/" uuid)))] ;; FIXME: Remove hardcoded value.
+        (dispatch [:set-offer-data result])))))

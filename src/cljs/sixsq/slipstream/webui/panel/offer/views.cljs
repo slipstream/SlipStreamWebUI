@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.panel.offer.effects]
     [sixsq.slipstream.webui.panel.offer.events]
     [sixsq.slipstream.webui.panel.offer.subs]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations
   [ops]
@@ -51,12 +52,20 @@
      (vector? v) (as-vec prefix v)
      :else (str v))))
 
+(defn format-id [id]
+  (second (re-matches #"[^/]+/(.{8}).*" id)))
+
+(defn offer-uuid [id]
+  (second (re-matches #"[^/]+/(.+)" id)))
+
 (defn data-field [selected-field entry]
   (fn []
     (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
           align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
       (if (= "id" selected-field)
-        [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-offer-data entry])]]
+        [box :align align :child [hyperlink
+                                  :label (format-id v)
+                                  :on-click #(history/navigate (str "offer/" (offer-uuid v)))]]
         [box :align align :child [label :label v]]))))
 
 (defn column-header-with-key [selected-field]
@@ -107,35 +116,38 @@
 
 (defn search-header []
   (let [tr (subscribe [:i18n-tr])
-        first-value (reagent/atom "1")
-        last-value (reagent/atom "20")
-        filter-value (reagent/atom "")]
+        first-value (subscribe [:offer-params-first])
+        last-value (subscribe [:offer-params-last])
+        filter-value (subscribe [:offer-params-filter])
+        first-atom (reagent/atom (str @first-value))
+        last-atom (reagent/atom (str @last-value))
+        filter-atom (reagent/atom (or @filter-value ""))]
     (fn []
       [h-box
        :gap "3px"
        :children [[input-text
-                   :model first-value
+                   :model first-atom
                    :placeholder (@tr [:first])
                    :width "75px"
                    :change-on-blur? true
                    :on-change (fn [v]
-                                (reset! first-value v)
+                                (reset! first-atom v)
                                 (dispatch [:set-offer-first v]))]
                   [input-text
-                   :model last-value
+                   :model last-atom
                    :placeholder (@tr [:last])
                    :width "75px"
                    :change-on-blur? true
                    :on-change (fn [v]
-                                (reset! last-value v)
+                                (reset! last-atom v)
                                 (dispatch [:set-offer-last v]))]
                   [input-text
-                   :model filter-value
+                   :model filter-atom
                    :placeholder (@tr [:filter])
                    :width "300px"
                    :change-on-blur? true
                    :on-change (fn [v]
-                                (reset! filter-value v)
+                                (reset! filter-atom v)
                                 (dispatch [:set-offer-filter v]))]
                   [button
                    :label (@tr [:search])
@@ -191,6 +203,16 @@
    :justify :between
    :children [[select-controls]
               [search-header]]])
+
+(defn detail-control-bar
+  []
+  (let [tr (subscribe [:i18n-tr])]
+    (fn []
+      [h-box
+       :justify :start
+       :children [[button
+                   :label (@tr [:back])
+                   :on-click #(dispatch [:show-offer-table])]]])))
 
 (defn results-bar []
   (let [tr (subscribe [:i18n-tr])
@@ -260,33 +282,26 @@
 
 (defn offer-detail
   []
-  (let [tr (subscribe [:i18n-tr])]
-    (fn [data]
-      (if data
-        [v-box
-         :gap "3px"
-         :children [[v-box
-                     :children [[title
-                                 :label (:name data)
-                                 :level :level1
-                                 :underline? true]
-                                (format-offer-data data)]]
-                    [button
-                     :label (@tr [:close])
-                     :class "btn-primary"
-                     :on-click #(dispatch [:clear-offer-data])]]]))))
-
-(defn list-or-detail []
   (let [data (subscribe [:offer-data])]
     (fn []
       (if @data
-        [offer-detail @data]
-        [search-vertical-result-table]))))
+        [v-box
+         :children [[title
+                     :label (:name @data)
+                     :level :level1
+                     :underline? true]
+                    (format-offer-data @data)]]))))
 
 (defn offer-panel
   []
-  [v-box
-   :children [[control-bar]
-              [results-bar]
-              [list-or-detail]]])
+  (let [path (subscribe [:resource-path])]
+    (fn []
+      (if (= 1 (count @path))
+        [v-box
+         :children [[control-bar]
+                    [results-bar]
+                    [search-vertical-result-table]]]
+        [v-box
+         :children [[detail-control-bar]
+                    [offer-detail]]]))))
 
