@@ -15,13 +15,6 @@
 ;; utilities for transforming between panel names and keywords
 ;;
 
-#_(defn name->panel
-  "Transforms the given panel name into the correponding namespaced
-   panel keyword.  For example, 'apps' returns :panel/apps."
-  [n]
-  (when-not (str/blank? n)
-    (keyword "panel" n)))
-
 (defn panel->token
   "Transforms a panel keyword into the associated URL token.  For example, the
    keywork :panel/apps would be transformed to '/apps'."
@@ -65,6 +58,11 @@
 ;; single route captures all paths and sets the parsed path in the database
 ;; routing in this way ignores the query parameters and fragments
 ;;
+
+(defroute "/apps" []
+          (dispatch [:set-breadcrumbs []]))
+(defroute "/apps/*" {path :*}
+          (dispatch [:set-breadcrumbs (utils/parse-resource-path path)]))
 
 (defroute "*" {path :*}
           (dispatch [:set-resource-path path]))

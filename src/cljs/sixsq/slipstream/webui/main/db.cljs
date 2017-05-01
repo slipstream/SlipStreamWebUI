@@ -2,7 +2,7 @@
   (:require
     [cljs.spec :as s]
     [re-frame.core :refer [after]]
-    [sixsq.slipstream.webui.i18n.dictionary :as dictionary]))
+    [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]))
 
 ;;
 ;; check schema after every change

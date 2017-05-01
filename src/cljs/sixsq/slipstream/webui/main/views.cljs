@@ -10,15 +10,18 @@
     [re-frame.loggers :refer [console]]
     [clojure.string :as str]
     [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.apps.views :as apps-views]
-    [sixsq.slipstream.webui.activity.views :as activity-views]
-    [sixsq.slipstream.webui.cimi.views :as cimi-views]
-    [sixsq.slipstream.webui.authn.views :as authn-views]
-    [sixsq.slipstream.webui.i18n.views :as i18n-views]
-    [sixsq.slipstream.webui.offer.views :as offer-views]
-    [sixsq.slipstream.webui.profile.views :as profile-views]
-    [sixsq.slipstream.webui.unknown.views :as unknown-views]
-    [sixsq.slipstream.webui.welcome.views :as welcome-views]
+
+    [sixsq.slipstream.webui.widget.authn.views :as authn-views]
+    [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
+
+    [sixsq.slipstream.webui.panel.activity.views :as activity-views]
+    [sixsq.slipstream.webui.panel.apps.views :as apps-views]
+    [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
+    [sixsq.slipstream.webui.panel.offer.views :as offer-views]
+    [sixsq.slipstream.webui.panel.profile.views :as profile-views]
+    [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
+    [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
+
     [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations

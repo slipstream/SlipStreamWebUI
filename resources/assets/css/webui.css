@@ -1,6 +1,9 @@
 .webui-column-header {
     font-weight:    bold;
-    background-color: #eee;
+    border-style: none none solid none;
+    border-color: black;
+    border-width: 1px;
+    #background-color: #eee;
 }
 
 .webui-row-header {

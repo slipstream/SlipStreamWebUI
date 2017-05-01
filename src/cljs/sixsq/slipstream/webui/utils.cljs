@@ -95,3 +95,10 @@
           port (.-port location)
           port-field (when-not (str/blank? port) (str ":" port))]
       (str protocol "//" host port-field))))
+
+(defn parse-resource-path
+  "Utility to split a resource path into a vector of terms.
+   Returns an empty vector for a nil argument.  Removes
+   blank or empty terms from the result."
+  [path]
+  (vec (remove str/blank? (str/split path #"/"))))
