@@ -19,7 +19,9 @@
   :logged-out
   [db/check-spec-interceptor]
   (fn [db _]
-    (assoc db :authn {:logged-in? false :user-id nil})))
+    (assoc db :authn {:logged-in? false
+                      :user-id nil
+                      :show-login-dialog? false})))
 
 ;; usage: (dispatch [:login creds])
 ;; triggers login through the cimi client
@@ -37,4 +39,20 @@
   :logged-in
   [db/check-spec-interceptor trim-v]
   (fn [db [user-id]]
-    (assoc db :authn {:logged-in? true :user-id user-id})))
+    (assoc db :authn {:logged-in? true
+                      :user-id user-id
+                      :show-login-dialog? false})))
+
+;; usage: (dispatch [:close-login-dialog])
+(reg-event-db
+  :close-login-dialog
+  [db/check-spec-interceptor]
+  (fn [db [_]]
+    (update-in db [:authn :show-login-dialog?] (constantly false))))
+
+;; usage: (dispatch [:open-login-dialog])
+(reg-event-db
+  :open-login-dialog
+  [db/check-spec-interceptor]
+  (fn [db [_]]
+    (update-in db [:authn :show-login-dialog?] (constantly true))))

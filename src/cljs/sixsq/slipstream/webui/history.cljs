@@ -33,15 +33,10 @@
 ;; initialize the history object
 ;;
 
-(def ^:const default-token "/offer")
 (defn get-token
   "Creates the history token from the given location."
   [location]
-  (if-let [path (.-pathname location)]
-    (if (= "/" path)
-      default-token
-      (str path (.-search location)))
-    default-token))
+  (str (.-pathname location) (.-search location)))
 
 (defn create-transformer
   "Saves and restores the URL based on the token provided to the

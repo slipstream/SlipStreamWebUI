@@ -18,6 +18,7 @@
     [sixsq.slipstream.webui.offer.views :as offer-views]
     [sixsq.slipstream.webui.profile.views :as profile-views]
     [sixsq.slipstream.webui.unknown.views :as unknown-views]
+    [sixsq.slipstream.webui.welcome.views :as welcome-views]
     [sixsq.slipstream.webui.history :as history]))
 
 (defn format-operations
@@ -119,8 +120,10 @@
    :class "webui-header"
    :justify :between
    :children [[panel-controls]
-              [authn-views/authn-panel]
-              [i18n-views/locale-selector]]])
+              [h-box
+               :gap "2em"
+               :children [[authn-views/authn-panel]
+                          [i18n-views/locale-selector]]]]])
 
 (defn page-footer []
   (let [tr (subscribe [:i18n-tr])]
@@ -179,12 +182,15 @@
                       "dashboard" [activity-views/runs-panel]
                       "apps" [apps-views/modules-panel]
                       "profile" [profile-views/profile-panel]
+                      "welcome" [welcome-views/welcome-panel]
+                      nil [welcome-views/welcome-panel]
                       [unknown-views/unknown-panel])]]))))
 
 (defn app []
   [v-box
    :children [[message-modal]
               [resource-modal]
+              [authn-views/login-modal]
               [page-header]
               [resource-panel]
               [page-footer]]])

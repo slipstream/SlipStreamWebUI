@@ -51,7 +51,9 @@
         :unknown-resource "unknown resource"
         :unknown-resource-text "The resource '%1' doesn't exist. Try another."
         :username "username"
-        :vms "VMs"}
+        :vms "VMs"
+        :welcome "welcome"
+        :welcome-text "Enjoy using this service!"}
 
    :fr {:lang "français"
 
@@ -93,7 +95,9 @@
         :unknown-resource "ressource inconnue"
         :unknown-resource-text "La ressource '%1' n'existe pas. Essayez une autre."
         :username "nom d'utilisateur"
-        :vms "MVs"}})
+        :vms "MVs"
+        :welcome "bienvenue"
+        :welcome-text "Profitez bien de ce service!"}})
 
 
 

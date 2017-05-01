@@ -8,3 +8,9 @@
   :history/initialize
   (fn [_]
     (history/start)))
+
+;; trace events that are dispatched
+(reg-fx
+  :event
+  (fn [arg]
+    (.log js/console "Event: " (with-out-str (cljs.pprint/pprint arg)))))

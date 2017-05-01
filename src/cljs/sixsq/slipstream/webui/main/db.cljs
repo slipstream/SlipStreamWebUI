@@ -45,8 +45,9 @@
 (s/def ::modules-breadcrumbs (s/nilable (s/coll-of string?)))
 
 (s/def ::logged-in? boolean?)
+(s/def ::show-login-dialog? boolean?)
 (s/def ::user-id (s/nilable string?))
-(s/def ::authn (s/keys :req-un [::logged-in? ::user-id]))
+(s/def ::authn (s/keys :req-un [::logged-in? ::show-login-dialog? ::user-id]))
 
 (s/def ::id string?)
 (s/def ::resourceURI string?)
@@ -130,6 +131,7 @@
    :modules-path        nil
    :modules-breadcrumbs nil
    :authn               {:logged-in? false
+                         :show-login-dialog? false
                          :user-id    nil}
    :cloud-entry-point   nil
    :search              {:collection-name  nil
