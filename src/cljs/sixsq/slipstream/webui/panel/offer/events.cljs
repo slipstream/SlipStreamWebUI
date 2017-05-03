@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.panel.offer.events
   (:require
-    [sixsq.slipstream.webui.main.db :as db]
+    [clojure.set :as set]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
-    [sixsq.slipstream.webui.utils :as utils]
-    [clojure.set :as set]))
+    [sixsq.slipstream.webui.main.db :as db]
+    [sixsq.slipstream.webui.utils :as utils]))
 
 ;; usage: (dispatch [:set-offer-data data])
 (reg-event-db
@@ -75,35 +75,38 @@
   :offer
   [db/check-spec-interceptor]
   (fn [cofx _]
-    (let [{:keys [client offer]} (:db cofx)
+    (let [{{:keys [clients offer]} :db} cofx
+          cimi-client (:cimi clients)
           {:keys [collection-name params]} offer]
       (-> cofx
           (assoc-in [:db :offer :completed?] false)
-          (assoc :cimi/offer [client collection-name (utils/prepare-params params)])))))
+          (assoc :cimi/offer [cimi-client collection-name (utils/prepare-params params)])))))
 
 ;; usage:  (dispatch [:set-offer-search [params]])
 (reg-event-fx
   :set-offer
   [db/check-spec-interceptor trim-v]
   (fn [cofx [params]]
-    (let [{:keys [client offer]} (:db cofx)
+    (let [{{:keys [clients offer]} :db} cofx
+          cimi-client (:cimi clients)
           {:keys [collection-name]} offer
           new-params (utils/merge-params params)]
       (-> cofx
           (assoc-in [:db :offer :params] new-params)
           (assoc-in [:db :resource-path] ["offer"])
-          (assoc :cimi/offer [client collection-name (utils/prepare-params new-params)])))))
+          (assoc :cimi/offer [cimi-client collection-name (utils/prepare-params new-params)])))))
 
 ;; usage:  (dispatch [:set-offer-detail [uuid]])
 (reg-event-fx
   :set-offer-detail
   [db/check-spec-interceptor trim-v]
   (fn [cofx [uuid]]
-    (let [{:keys [client offer]} (:db cofx)
+    (let [{{:keys [clients offer]} :db} cofx
+          cimi-client (:cimi clients)
           {:keys [collection-name]} offer]
       (-> cofx
           (assoc-in [:db :resource-path] ["offer" uuid])
-          (assoc :cimi/offer-detail [client collection-name uuid])))))
+          (assoc :cimi/offer-detail [cimi-client collection-name uuid])))))
 
 ;; usage:  (dispatch [:show-offer-table])
 (reg-event-fx

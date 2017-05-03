@@ -9,7 +9,7 @@
   :logout
   [db/check-spec-interceptor]
   (fn [cofx _]
-    (if-let [client (get-in cofx [:db :client])]
+    (if-let [client (get-in cofx [:db :clients :cimi])]
       (assoc cofx :cimi/logout [client])
       cofx)))
 
@@ -29,7 +29,7 @@
   :login
   [db/check-spec-interceptor trim-v]
   (fn [cofx [creds]]
-    (if-let [client (get-in cofx [:db :client])]
+    (if-let [client (get-in cofx [:db :clients :cimi])]
       (assoc cofx :cimi/login [client creds])
       cofx)))
 

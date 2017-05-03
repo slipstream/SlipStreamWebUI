@@ -25,7 +25,7 @@
   :fetch-cloud-entry-point
   [db/check-spec-interceptor]
   (fn [cofx _]
-    (if-let [client (get-in cofx [:db :client])]
+    (if-let [client (get-in cofx [:db :clients :cimi])]
       (assoc cofx :cimi/cloud-entry-point [client])
       cofx)))
 
@@ -94,11 +94,12 @@
   [db/check-spec-interceptor trim-v]
   (fn [cofx [new-collection-name]]
     (let [cofx (assoc-in cofx [:db :search :collection-name] new-collection-name)
-          {:keys [client search]} (:db cofx)
+          {:keys [clients search]} (:db cofx)
+          cimi-client (:cimi clients)
           {:keys [collection-name params]} search]
       (-> cofx
           (update-in [:db :search :completed?] (constantly false))
-          (assoc :cimi/search [client collection-name (utils/prepare-params params)])))))
+          (assoc :cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
 
 ;; usage:  (dispatch [:search])
 ;; refine search
@@ -106,9 +107,10 @@
   :search
   [db/check-spec-interceptor]
   (fn [cofx _]
-    (let [{:keys [client search]} (:db cofx)
+    (let [{:keys [clients search]} (:db cofx)
+          cimi-client (:cimi clients)
           {:keys [collection-name params]} search]
       (-> cofx
           (update-in [:db :search :completed?] (constantly false))
-          (assoc :cimi/search [client collection-name (utils/prepare-params params)])))))
+          (assoc :cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
 

@@ -88,6 +88,7 @@
                               :compiler-options {:language-in     :ecmascript5
                                                  :closure-defines {'sixsq.slipstream.webui/DEV      true
                                                                    'sixsq.slipstream.webui/HOST_URL "https://nuv.la"
+                                                                   'sixsq.slipstream.webui/CONTEXT  ""
                                                                    'goog.DEBUG                      true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)

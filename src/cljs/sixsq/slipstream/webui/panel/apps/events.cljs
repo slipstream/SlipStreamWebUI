@@ -1,9 +1,8 @@
 (ns sixsq.slipstream.webui.panel.apps.events
   (:require
-    [sixsq.slipstream.webui.main.db :as db]
-    [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
     [clojure.string :as str]
-    [sixsq.slipstream.webui.history :as history]))
+    [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
+    [sixsq.slipstream.webui.main.db :as db]))
 
 ;; usage: (dispatch [:set-modules-data data])
 (reg-event-db

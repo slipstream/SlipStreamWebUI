@@ -11,7 +11,7 @@
     [sixsq.slipstream.webui.panel.offer.events]
     [sixsq.slipstream.webui.panel.offer.subs]
     [clojure.string :as str]
-    [sixsq.slipstream.webui.history :as history]))
+    [sixsq.slipstream.webui.widget.history.utils :as history]))
 
 (defn format-operations
   [ops]

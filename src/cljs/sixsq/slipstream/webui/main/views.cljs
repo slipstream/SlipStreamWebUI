@@ -22,7 +22,9 @@
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
 
-    [sixsq.slipstream.webui.history :as history]))
+    [sixsq.slipstream.webui.widget.history.utils :as history]
+    [sixsq.slipstream.webui.widget.history.events]
+    [sixsq.slipstream.webui.widget.history.effects]))
 
 (defn format-operations
   [ops]

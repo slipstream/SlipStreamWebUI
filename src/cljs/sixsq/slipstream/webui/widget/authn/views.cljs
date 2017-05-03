@@ -6,7 +6,7 @@
                          scroller selection-list title]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
-    [sixsq.slipstream.webui.history :as history]
+    [sixsq.slipstream.webui.widget.history.utils :as history]
 
     [sixsq.slipstream.webui.widget.authn.effects]
     [sixsq.slipstream.webui.widget.authn.events]

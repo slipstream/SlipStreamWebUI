@@ -20,8 +20,6 @@
 ;; define schema of the local database
 ;;
 
-(s/def ::client any?)
-
 (s/def ::cimi any?)
 (s/def ::runs any?)
 (s/def ::modules any?)
@@ -104,11 +102,26 @@
 
 (s/def ::resource-path (s/coll-of [string?] :min-count 1))
 
-(s/def ::db (s/keys :req-un [::client ::message ::resource-data
+(s/def ::db  any? #_(s/keys :req-un [::i18n
+                             ::clients ::message ::resource-data ::resource-path
                              ::runs-data ::runs-params
                              ::modules-data ::modules-path ::modules-breadcrumbs
                              ::authn ::cloud-entry-point ::search
-                             ::offer ::offer-data]))
+                             ::offer-data ::offer]))
+
+#_(s/def ::db (s/merge
+                (s/keys :req-un [::i18n
+                                 ::clients ::message ::resource-data ::resource-path
+                                 ::runs-data ::runs-params
+                                 ::modules-data ::modules-path ::modules-breadcrumbs
+                                 ::authn ::cloud-entry-point ::search
+                                 ::offer-data ::offer])
+                (s/map-of [:i18n
+                           :clients :message :resource-data :resource-path
+                           :runs-data :runs-params
+                           :modules-data :modules-path :modules-breadcrumbs
+                           :authn :cloud-entry-point :search
+                           :offer-data :offer] any?)))
 
 ;;
 ;; initial database value
@@ -117,22 +130,25 @@
 (def default-value
   {:i18n                {:locale "en"
                          :tr     (dictionary/create-tr-fn "en")}
-   :resource-path       []
-   :client              nil
+
    :clients             nil
    :message             nil
    :resource-data       nil
+   :resource-path       []
+
    :runs-data           nil
    :runs-params         {:offset     "0"
                          :limit      "10"
                          :cloud      nil
                          :activeOnly 0}
+
    :modules-data        nil
    :modules-path        nil
    :modules-breadcrumbs nil
-   :authn               {:logged-in? false
+
+   :authn               {:logged-in?         false
                          :show-login-dialog? false
-                         :user-id    nil}
+                         :user-id            nil}
    :cloud-entry-point   nil
    :search              {:collection-name  nil
                          :params           {:$first  1

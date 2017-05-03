@@ -1,15 +1,12 @@
 (ns sixsq.slipstream.webui.main.events
   (:require
-    [sixsq.slipstream.webui.main.db :as db]
-    [sixsq.slipstream.webui.main.effects :as effects]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
     [sixsq.slipstream.client.api.cimi.async :as cimi-async]
     [sixsq.slipstream.client.api.runs.async :as runs-async]
     [sixsq.slipstream.client.api.modules.async :as modules-async]
-    [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.history :as history]
-    [clojure.set :as set]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.main.db :as db]
+    [sixsq.slipstream.webui.main.effects :as effects]
+    [sixsq.slipstream.webui.utils :as utils]))
 
 ;; usage:  (dispatch [:initialize-db])
 ;; creates initial state of database
@@ -18,15 +15,6 @@
   [db/check-spec-interceptor]
   (fn [_ _]
     {:db db/default-value}))
-
-;; usage:  (dispatch [:initialize-history])
-;; triggers initial entry in application history
-(reg-event-fx
-  :initialize-history
-  [db/check-spec-interceptor]
-  (fn [{:keys [db]} _]
-    {:db db
-     :history/initialize []}))
 
 ;; usage:  (dispatch [:initialize-client])
 ;; creates and adds a SlipStream client to the database
@@ -43,8 +31,7 @@
                    :modules (modules-async/instance (str slipstream-url "/module")
                                                     (str slipstream-url "/auth/login")
                                                     (str slipstream-url "/auth/logout"))}]
-      (assoc db :client (:cimi clients)
-                :clients clients))))
+      (assoc db :clients clients))))
 
 ;; usage: (dispatch [:message msg])
 ;; displays a message

@@ -4,8 +4,7 @@
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
-    [sixsq.slipstream.client.api.modules :as modules]
-    [sixsq.slipstream.webui.history :as history]))
+    [sixsq.slipstream.client.api.modules :as modules]))
 
 ;; usage: (dispatch [:modules-search client])
 ;; queries the given resource
@@ -15,10 +14,3 @@
     (go
       (let [results (<! (modules/get-children client url))]
         (dispatch [:set-modules-data results])))))
-
-;; usage: (dispatch [:navigate url])
-;; navigates to the given url, which must include the 'panel' type
-(reg-fx
-  :navigate
-  (fn [[url]]
-    (history/navigate url)))
