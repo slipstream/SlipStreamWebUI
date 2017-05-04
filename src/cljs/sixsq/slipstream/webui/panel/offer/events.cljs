@@ -86,11 +86,11 @@
 (reg-event-fx
   :set-offer
   [db/check-spec-interceptor trim-v]
-  (fn [cofx [params]]
-    (let [{{:keys [clients offer]} :db} cofx
+  (fn [cofx [url-params]]
+    (let [{{:keys [clients offer params]} :db} cofx
           cimi-client (:cimi clients)
           {:keys [collection-name]} offer
-          new-params (utils/merge-params params)]
+          new-params (utils/merge-params url-params params)]
       (-> cofx
           (assoc-in [:db :offer :params] new-params)
           (assoc-in [:db :resource-path] ["offer"])

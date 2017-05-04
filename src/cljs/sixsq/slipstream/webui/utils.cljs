@@ -25,13 +25,15 @@
   (when-not (str/blank? s)
     s))
 
-(defn merge-params [params]
-  (let [fst (or (coerce-pos-int (:$first params)) 1)
-        lst (or (coerce-pos-int (:$last params)) 20)
-        flt (coerse-filter (:$filter params))]
-    {:$first fst
-     :$last lst
-     :$filter flt}))
+(defn remove-nil-vals
+  [m]
+  (into {} (remove (comp nil? second) m)))
+
+(defn merge-params [params url-params]
+  (select-keys
+    (merge (remove-nil-vals params)
+           (remove-nil-vals url-params))
+    #{:$first :$last :$filter}))
 
 (defn keys-in [m]
   (if (map? m)
