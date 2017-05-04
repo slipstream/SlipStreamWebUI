@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.widget.history.utils
   (:require
     [goog.events :as events]
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch dispatch-sync]]
     [secretary.core :as secretary]
     [sixsq.slipstream.webui.utils :as utils])
@@ -11,8 +12,9 @@
 
 (defn get-token
   "Creates the history token from the given location."
-  [location]
-  (str (.-pathname location) (.-search location)))
+  [path-prefix location]
+  (let [url (str (.-protocol location) "//" (.-host location) (.-pathname location) (.-search location))]
+    (str/replace-first url path-prefix "")))
 
 (defn create-transformer
   "Saves and restores the URL based on the token provided to the
@@ -23,7 +25,7 @@
   (let [transformer (TokenTransformer.)]
     (set! (.. transformer -retrieveToken)
           (fn [path-prefix location]
-            (get-token location)))
+            (get-token path-prefix location)))
     (set! (.. transformer -createUrl)
           (fn [token path-prefix location]
             (str path-prefix token)))
@@ -47,10 +49,10 @@
   "Sets the starting point for the history. No history event will be
    generated when setting the first value, so this explicitly dispatches
    the value to the URL routing."
-  []
-  (let [token (get-token (.-location js/window))]
+  [path-prefix]
+  (let [token (get-token path-prefix (.-location js/window))]
     (.log js/console "start token: " token)
-    (.setToken history (get-token (.-location js/window)))
+    (.setToken history token)
     (secretary/dispatch! token)))
 
 (defn navigate

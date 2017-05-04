@@ -7,7 +7,7 @@
    method other than GET will return a 405 response."
   [{:keys [request-method]}]
   (if (= request-method :get)
-    (if-let [resp (r/resource-response "index.html")]
+    (if-let [resp (r/resource-response "webui/index.html")]
       (r/content-type resp "text/html")
       (r/not-found))
     (-> (r/response "method not allowed")

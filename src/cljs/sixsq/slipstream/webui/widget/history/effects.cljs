@@ -8,7 +8,7 @@
   :history/initialize
   (fn [[path-prefix]]
     (hutils/initialize path-prefix)
-    (hutils/start)))
+    (hutils/start path-prefix)))
 
 ;; usage: (dispatch [:navigate url])
 ;; navigates to the given url, which must include the 'panel' type
