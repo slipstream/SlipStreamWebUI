@@ -100,28 +100,28 @@
 (s/def ::offer-data (s/nilable any?))
 (s/def ::offer ::search)
 
-(s/def ::resource-path (s/coll-of [string?] :min-count 1))
+(s/def ::resource-path (s/coll-of string?))
 
-(s/def ::db  any? #_(s/keys :req-un [::i18n
+#_(s/def ::db (s/keys :req-un [::i18n
                              ::clients ::message ::resource-data ::resource-path
                              ::runs-data ::runs-params
                              ::modules-data ::modules-path ::modules-breadcrumbs
                              ::authn ::cloud-entry-point ::search
                              ::offer-data ::offer]))
 
-#_(s/def ::db (s/merge
+(s/def ::db (s/merge
                 (s/keys :req-un [::i18n
                                  ::clients ::message ::resource-data ::resource-path
                                  ::runs-data ::runs-params
                                  ::modules-data ::modules-path ::modules-breadcrumbs
                                  ::authn ::cloud-entry-point ::search
                                  ::offer-data ::offer])
-                (s/map-of [:i18n
-                           :clients :message :resource-data :resource-path
-                           :runs-data :runs-params
-                           :modules-data :modules-path :modules-breadcrumbs
-                           :authn :cloud-entry-point :search
-                           :offer-data :offer] any?)))
+                (s/map-of #{:i18n
+                            :clients :message :resource-data :resource-path
+                            :runs-data :runs-params
+                            :modules-data :modules-path :modules-breadcrumbs
+                            :authn :cloud-entry-point :search
+                            :offer-data :offer} any?)))
 
 ;;
 ;; initial database value

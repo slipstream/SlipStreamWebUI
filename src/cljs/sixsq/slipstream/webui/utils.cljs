@@ -29,11 +29,10 @@
   [m]
   (into {} (remove (comp nil? second) m)))
 
-(defn merge-params [params url-params]
-  (select-keys
-    (merge (remove-nil-vals params)
-           (remove-nil-vals url-params))
-    #{:$first :$last :$filter}))
+(defn merge-offer-params [params url-params]
+  {:$first (or (str->int (:$first url-params)) (:$first params))
+   :$last (or (str->int (:$last url-params)) (:$last params))
+   :$filter (or (:$filter url-params) (:$filter params))})
 
 (defn keys-in [m]
   (if (map? m)
