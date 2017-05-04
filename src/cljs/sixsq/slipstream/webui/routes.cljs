@@ -4,9 +4,9 @@
     [secretary.core :as secretary :refer-macros [defroute]]
     [sixsq.slipstream.webui.utils :as utils]))
 
-(defroute "/apps" []
+(defroute "/app" []
           (dispatch [:set-breadcrumbs []]))
-(defroute "/apps/*" {path :*}
+(defroute "/app/*" {path :*}
           (dispatch [:set-breadcrumbs (utils/parse-resource-path path)]))
 
 (defroute "/offer" {query-params :query-params}

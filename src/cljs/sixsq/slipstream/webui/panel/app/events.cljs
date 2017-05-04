@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.panel.apps.events
+(ns sixsq.slipstream.webui.panel.app.events
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
@@ -55,9 +55,9 @@
                            :modules-breadcrumbs
                            vec
                            (take n)
-                           (concat ["apps"]))
-          apps-url (breadcrumbs->url breadcrumbs)]
-      (assoc cofx :navigate [apps-url]))))
+                           (concat ["app"]))
+          app-url (breadcrumbs->url breadcrumbs)]
+      (assoc cofx :navigate [app-url]))))
 
 ;; usage:  (dispatch [:push-breadcrumb crumb])
 (reg-event-fx
@@ -69,8 +69,8 @@
                           :modules-breadcrumbs
                           vec
                           (conj crumb))
-          apps-url (breadcrumbs->url (concat ["apps"] breadcrumbs))]
-      (assoc cofx :navigate [apps-url]))))
+          app-url (breadcrumbs->url (concat ["app"] breadcrumbs))]
+      (assoc cofx :navigate [app-url]))))
 
 ;; usage:  (dispatch [:set-breadcrumbs [breadcrumbs]])
 (reg-event-fx
@@ -80,5 +80,5 @@
     (let [client (get-in cofx [:db :clients :modules])]
       (-> cofx
           (assoc-in [:db :modules-breadcrumbs] breadcrumbs)
-          (assoc-in [:db :resource-path] (concat ["apps"] breadcrumbs))
+          (assoc-in [:db :resource-path] (concat ["app"] breadcrumbs))
           (assoc :modules/search [client (breadcrumbs->url breadcrumbs)])))))

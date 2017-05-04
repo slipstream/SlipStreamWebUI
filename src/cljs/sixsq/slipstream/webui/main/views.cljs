@@ -14,8 +14,8 @@
     [sixsq.slipstream.webui.widget.authn.views :as authn-views]
     [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
 
-    [sixsq.slipstream.webui.panel.activity.views :as activity-views]
-    [sixsq.slipstream.webui.panel.apps.views :as apps-views]
+    [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
+    [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
     [sixsq.slipstream.webui.panel.offer.views :as offer-views]
     [sixsq.slipstream.webui.panel.profile.views :as profile-views]
@@ -115,8 +115,8 @@
     (fn []
       [h-box
        :gap "2px"
-       :children [[button :label (@tr [:apps]) :on-click #(history/navigate "apps")]
-                  [button :label (@tr [:dashboard]) :on-click #(history/navigate "dashboard")]
+       :children [[button :label (@tr [:app]) :on-click #(history/navigate "app")]
+                  [button :label (@tr [:deployment]) :on-click #(history/navigate "deployment")]
                   [button :label (@tr [:offer]) :on-click #(history/navigate "offer")]
                   [button :label (@tr [:cimi]) :on-click #(history/navigate "cimi")]]])))
 
@@ -184,8 +184,8 @@
          :children [(case panel
                       "cimi" [cimi-views/cimi-panel]
                       "offer" [offer-views/offer-panel]
-                      "dashboard" [activity-views/runs-panel]
-                      "apps" [apps-views/modules-panel]
+                      "deployment" [deployment-views/runs-panel]
+                      "app" [app-views/modules-panel]
                       "profile" [profile-views/profile-panel]
                       "welcome" [welcome-views/welcome-panel]
                       nil [welcome-views/welcome-panel]

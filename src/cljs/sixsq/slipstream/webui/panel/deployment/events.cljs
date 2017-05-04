@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.panel.activity.events
+(ns sixsq.slipstream.webui.panel.deployment.events
   (:require
     [sixsq.slipstream.webui.main.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]))

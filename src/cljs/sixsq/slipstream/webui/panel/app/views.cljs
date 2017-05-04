@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.panel.apps.views
+(ns sixsq.slipstream.webui.panel.app.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button label modal-panel throbber
@@ -7,9 +7,9 @@
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [clojure.string :as str]
-    [sixsq.slipstream.webui.panel.apps.effects]
-    [sixsq.slipstream.webui.panel.apps.events]
-    [sixsq.slipstream.webui.panel.apps.subs]))
+    [sixsq.slipstream.webui.panel.app.effects]
+    [sixsq.slipstream.webui.panel.app.events]
+    [sixsq.slipstream.webui.panel.app.subs]))
 
 (defn format-crumb [s index]
   [hyperlink

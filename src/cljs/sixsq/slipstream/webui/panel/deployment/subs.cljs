@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.panel.activity.subs
+(ns sixsq.slipstream.webui.panel.deployment.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
 (reg-sub :runs-data

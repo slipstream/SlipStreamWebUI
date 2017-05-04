@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.panel.apps.subs
+(ns sixsq.slipstream.webui.panel.app.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
 (defn modules-data

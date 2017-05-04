@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.panel.activity.views
+(ns sixsq.slipstream.webui.panel.deployment.views
   (:require
     [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
                          button row-button md-icon-button md-circle-icon-button label modal-panel throbber
@@ -7,9 +7,9 @@
      :refer-macros [handler-fn]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
-    [sixsq.slipstream.webui.panel.activity.effects]
-    [sixsq.slipstream.webui.panel.activity.events]
-    [sixsq.slipstream.webui.panel.activity.subs]
+    [sixsq.slipstream.webui.panel.deployment.effects]
+    [sixsq.slipstream.webui.panel.deployment.events]
+    [sixsq.slipstream.webui.panel.deployment.subs]
     [clojure.string :as str]))
 
 (defn runs-control []
