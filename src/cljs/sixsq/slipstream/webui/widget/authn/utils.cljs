@@ -76,7 +76,3 @@
 (defn clear-form-data [m]
   (let [f (fn [[k v]] (if (string? v) [k ""] [k v]))]
     (walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
-
-(defn extract-form-data
-  [id m]
-  (get m id {}))

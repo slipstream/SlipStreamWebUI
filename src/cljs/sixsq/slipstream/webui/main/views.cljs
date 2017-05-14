@@ -127,7 +127,7 @@
    :children [[panel-controls]
               [h-box
                :gap "2em"
-               :children [[authn-views/authn-panel]
+               :children [[authn-views/authn-widget]
                           [i18n-views/locale-selector]]]]])
 
 (defn page-footer []

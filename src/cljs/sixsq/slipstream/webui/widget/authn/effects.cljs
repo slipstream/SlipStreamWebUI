@@ -2,16 +2,11 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
-    [cljs.core.async :refer [<! >! chan]]
+    [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.client.api.cimi.utils :as cu]
-    [sixsq.slipstream.webui.widget.authn.utils :as au]
-    [sixsq.slipstream.client.api.utils.http-async :as http]
-    [sixsq.slipstream.client.api.utils.json :as json]))
+    [sixsq.slipstream.webui.widget.authn.utils :as au]))
 
-;; usage: (dispatch [:fx.webui.authn/logout])
-;; logs the user out of the client
 (reg-fx
   :fx.webui.authn/logout
   (fn [[client]]
@@ -21,8 +16,6 @@
           (dispatch [:evt.webui.authn/logged-out])
           (dispatch [:message "logout failed"]))))))
 
-;; usage: (dispatch [:fx.webui.authn/logout creds])
-;; logs the user into SlipStream
 (reg-fx
   :fx.webui.authn/login
   (fn [[client creds]]
@@ -33,8 +26,6 @@
             (dispatch [:evt.webui.authn/logged-in session]))
           (dispatch [:message "login failed"]))))))
 
-;; usage: (dispatch [:fx.webui.authn/check-session])
-;; recovers the current session from the server, if it exists
 (reg-fx
   :fx.webui.authn/check-session
   (fn [[client]]
@@ -48,8 +39,6 @@
 ;; Downloads the session templates from the server.  Strips unnecessary
 ;; information and provides absolute URL for the parameter description.
 ;; Triggers event (and then effect) to download the parameter description.
-;;
-;; [:fx.webui.authn/initialize cimi-client]
 ;;
 (reg-fx
   :fx.webui.authn/initialize
@@ -66,8 +55,6 @@
 ;;
 ;; If the description cannot be found, then the login method will be
 ;; ignored.
-;;
-;; [:fx.webui.authn/process-template tpl]
 ;;
 (reg-fx
   :fx.webui.authn/process-template
