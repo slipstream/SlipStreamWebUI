@@ -22,9 +22,7 @@
   :initialize-client
   [db/check-spec-interceptor trim-v]
   (fn [db [slipstream-url]]
-    (let [clients {:cimi    (cimi-async/instance (str slipstream-url "/api/cloud-entry-point")
-                                                 (str slipstream-url "/auth/login")
-                                                 (str slipstream-url "/auth/logout"))
+    (let [clients {:cimi    (cimi-async/instance (str slipstream-url "/api/cloud-entry-point"))
                    :runs    (runs-async/instance (str slipstream-url "/run")
                                                  (str slipstream-url "/auth/login")
                                                  (str slipstream-url "/auth/logout"))

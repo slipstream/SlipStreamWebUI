@@ -3,7 +3,7 @@
     [clojure.string :as str]
     [devtools.core :as devtools]
     [reagent.core :as reagent]
-    [re-frame.core :refer [dispatch-sync]]
+    [re-frame.core :refer [dispatch dispatch-sync]]
     [taoensso.timbre :as timbre]
 
     [sixsq.slipstream.webui.routes]
@@ -65,5 +65,7 @@
   (dispatch-sync [:initialize-client @SLIPSTREAM_URL])
   (dispatch-sync [:fetch-cloud-entry-point])
   (dispatch-sync [:initialize-history @PATH_PREFIX])
+  (dispatch-sync [:evt.webui.authn/initialize])
+  (dispatch [:evt.webui.authn/check-session])
   (reagent/render [sixsq.slipstream.webui.main.views/app]
                   (.getElementById js/document "container")))

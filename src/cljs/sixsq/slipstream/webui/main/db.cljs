@@ -42,10 +42,32 @@
 (s/def ::modules-path (s/nilable string?))
 (s/def ::modules-breadcrumbs (s/nilable (s/coll-of string?)))
 
-(s/def ::logged-in? boolean?)
-(s/def ::show-login-dialog? boolean?)
-(s/def ::user-id (s/nilable string?))
-(s/def ::authn (s/keys :req-un [::logged-in? ::show-login-dialog? ::user-id]))
+;;
+;; authentication state
+;;
+
+(s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
+(s/def :webui.authn/show-dialog? boolean?)
+
+(s/def :webui.authn/method (s/nilable string?))
+
+(s/def :webui.authn/id string?)
+(s/def :webui.authn/label string?)
+(s/def :webui.authn/description string?)
+(s/def :webui.authn/params-desc (s/map-of keyword? map?))
+(s/def :webui.authn/method-defn (s/merge (s/keys :req-un [:webui.authn/id
+                                                          :webui.authn/label
+                                                          :webui.authn/description
+                                                          :webui.authn/params-desc])
+                                         (s/map-of #{:id :label :description :params-desc} any?)))
+(s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
+(s/def :webui.authn/forms (s/map-of string? map?))
+
+(s/def :webui.authn/authn (s/keys :req-un [:webui.authn/session
+                                           :webui.authn/show-dialog?
+                                           :webui.authn/method
+                                           :webui.authn/methods
+                                           :webui.authn/forms]))
 
 (s/def ::id string?)
 (s/def ::resourceURI string?)
@@ -102,26 +124,19 @@
 
 (s/def ::resource-path (s/coll-of string?))
 
-#_(s/def ::db (s/keys :req-un [::i18n
-                             ::clients ::message ::resource-data ::resource-path
-                             ::runs-data ::runs-params
-                             ::modules-data ::modules-path ::modules-breadcrumbs
-                             ::authn ::cloud-entry-point ::search
-                             ::offer-data ::offer]))
-
 (s/def ::db (s/merge
-                (s/keys :req-un [::i18n
-                                 ::clients ::message ::resource-data ::resource-path
-                                 ::runs-data ::runs-params
-                                 ::modules-data ::modules-path ::modules-breadcrumbs
-                                 ::authn ::cloud-entry-point ::search
-                                 ::offer-data ::offer])
-                (s/map-of #{:i18n
-                            :clients :message :resource-data :resource-path
-                            :runs-data :runs-params
-                            :modules-data :modules-path :modules-breadcrumbs
-                            :authn :cloud-entry-point :search
-                            :offer-data :offer} any?)))
+              (s/keys :req-un [::i18n
+                               ::clients ::message ::resource-data ::resource-path
+                               ::runs-data ::runs-params
+                               ::modules-data ::modules-path ::modules-breadcrumbs
+                               :webui.authn/authn ::cloud-entry-point ::search
+                               ::offer-data ::offer])
+              (s/map-of #{:i18n
+                          :clients :message :resource-data :resource-path
+                          :runs-data :runs-params
+                          :modules-data :modules-path :modules-breadcrumbs
+                          :authn :cloud-entry-point :search
+                          :offer-data :offer} any?)))
 
 ;;
 ;; initial database value
@@ -146,9 +161,12 @@
    :modules-path        nil
    :modules-breadcrumbs nil
 
-   :authn               {:logged-in?         false
-                         :show-login-dialog? false
-                         :user-id            nil}
+   :authn               {:session      nil
+                         :show-dialog? false
+                         :method       nil
+                         :methods      []
+                         :forms        {}}
+
    :cloud-entry-point   nil
    :search              {:collection-name  nil
                          :params           {:$first  1

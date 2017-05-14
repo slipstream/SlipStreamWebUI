@@ -19,80 +19,108 @@
     :on-click #(history/navigate "profile")]
    [button
     :label (tr [:logout])
-    :on-click #(dispatch [:logout])]])
+    :on-click #(dispatch [:evt.webui.authn/logout])]])
 
-(defn logout
+(defn logout-controls
   []
   (let [tr (subscribe [:i18n-tr])
-        authn (subscribe [:authn])]
+        session (subscribe [:webui.authn/session])]
     (fn []
-      (let [{:keys [logged-in? user-id]} @authn]
-        (if logged-in?
+      (if @session
+        (let [{:keys [username]} @session]
           [h-box
            :gap "0.25em"
-           :children (logout-buttons @tr (or user-id "unknown"))])))))
+           :children (logout-buttons @tr (or username "unknown"))])))))
 
-(defn login-button
+(defn login-controls
   []
   (let [tr (subscribe [:i18n-tr])
-        authn (subscribe [:authn])]
+        session (subscribe [:webui.authn/session])]
     (fn []
-      (let [{:keys [logged-in?]} @authn]
-        (if-not logged-in?
-          [button
-           :label (@tr [:login])
-           :on-click #(dispatch [:open-login-dialog])])))))
+      (if-not @session
+        [button
+         :label (@tr [:login])
+         :on-click #(dispatch [:evt.webui.authn/show-dialog true])]))))
 
-(defn login-form
+(defn ordered-params
+  [id methods]
+  (->> methods
+       (filter #(= id (:id %)))
+       first
+       :params-desc
+       seq
+       (sort-by (fn [[_ {:keys [order]}]] order))
+       seq))
+
+(defn form-component [method [param-name {:keys [displayName] :as param}]]
+  (if (= "Password" displayName)
+    [input-password
+     :width "100%"
+     :model (reagent/atom "")
+     :placeholder displayName
+     :change-on-blur? true
+     :on-change #(dispatch [:evt.webui.authn/update-form-data [method param-name %]])]
+    [input-text
+     :width "100%"
+     :model (reagent/atom "")
+     :placeholder displayName
+     :change-on-blur? true
+     :on-change #(dispatch [:evt.webui.authn/update-form-data [method param-name %]])]))
+
+(defn method-form
+  []
+  (let [method (subscribe [:webui.authn/method])
+        methods (subscribe [:webui.authn/methods])]
+    (fn []
+      (when-let [params (ordered-params @method @methods)]
+        [v-box
+         :gap "0.25ex"
+         :children (vec (map (partial form-component @method) params))]))))
+
+(defn login-methods-form
   []
   (let [tr (subscribe [:i18n-tr])
-        authn (subscribe [:authn])
-        username (reagent/atom "")
-        password (reagent/atom "")]
+        method (subscribe [:webui.authn/method])
+        methods (subscribe [:webui.authn/methods])]
     (fn []
-      (let [{:keys [logged-in? user-id]} @authn]
-        (if-not logged-in?
-          [v-box
-           :gap "0.25em"
-           :children [[input-text
-                       :model username
-                       :placeholder (@tr [:username])
-                       :change-on-blur? true
-                       :on-change #(reset! username %)]
-                      [input-password
-                       :model password
-                       :placeholder (@tr [:password])
-                       :change-on-blur? true
-                       :on-change #(reset! password %)]
-                      [h-box
-                       :justify :end
-                       :gap "0.25em"
-                       :children [[button
-                                   :label (@tr [:cancel])
-                                   :on-click (fn []
-                                               (dispatch [:close-login-dialog])
-                                               (reset! username "")
-                                               (reset! password ""))]
-                                  [button
-                                   :label (@tr [:login])
-                                   :class "btn-primary"
-                                   :on-click (fn []
-                                               (dispatch [:login {:username @username :password @password}])
-                                               (reset! username "")
-                                               (reset! password ""))]]]]])))))
+      [v-box
+       :gap "0.25ex"
+       :children [[single-dropdown
+                   :choices methods
+                   :model @method
+                   :placeholder (@tr [:login-method])
+                   :width "100%"
+                   :on-change #(dispatch [:evt.webui.authn/update-method %])]
+                  [method-form]
+                  [h-box
+                   :gap "0.25ex"
+                   :justify :end
+                   :children [[button
+                               :label (@tr [:cancel])
+                               :class "btn-default"
+                               :on-click (fn []
+                                           (dispatch [:evt.webui.authn/show-dialog false])
+                                           (dispatch [:evt.webui.authn/clear-form-data]))]
+                              [button
+                               :label (@tr [:login])
+                               :class "btn-primary"
+                               :on-click (fn []
+                                           (dispatch [:evt.webui.authn/show-dialog false])
+                                           (dispatch [:evt.webui.authn/login]))]]]]])))
 
 (defn login-modal
   []
-  (let [show-login-dialog? (subscribe [:show-login-dialog?])]
+  (let [show-dialog? (subscribe [:webui.authn/show-dialog?])]
     (fn []
-      (if @show-login-dialog?
+      (if @show-dialog?
         [modal-panel
          :child [v-box
-                 :children [[login-form]]]
-         :backdrop-on-click #(dispatch [:close-login-dialog])]))))
+                 :width "35ex"
+                 :children [[login-methods-form]]]
+         :backdrop-on-click #(dispatch [:evt.webui.authn/show-dialog false])]))))
 
 (defn authn-panel
   []
   [h-box
-   :children [[login-button]
-              [logout]]])
+   :children [[login-controls]
+              [logout-controls]]])
