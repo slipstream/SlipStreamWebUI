@@ -57,7 +57,7 @@
 (defn login-dropdown
   "Dropdown that contains the list of available login methods."
   []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         method (subscribe [:webui.authn/method])
         methods (subscribe [:webui.authn/methods])]
     (fn []
@@ -72,7 +72,7 @@
   "Form login button that cancels the login process and clears any entered
    data."
   []
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [button
        :label (@tr [:cancel])
@@ -84,11 +84,11 @@
 (defn login-button
   "Form login button that clears the modal and initiates the login process."
   []
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [button
-       :label (@tr [:cancel])
-       :class "btn-default"
+       :label (@tr [:login])
+       :class "btn-primary"
        :on-click (fn []
                    (dispatch [:evt.webui.authn/show-dialog false])
                    (dispatch [:evt.webui.authn/login]))])))
@@ -124,7 +124,7 @@
   "Buttons shown when the user has an active session to allow the user to view
    her profile or to logout."
   []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         session (subscribe [:webui.authn/session])]
     (fn []
       (if @session
@@ -142,7 +142,7 @@
   "Button shown when the user does not have an active session to allow the
    user to log in."
   []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         session (subscribe [:webui.authn/session])]
     (fn []
       (if-not @session

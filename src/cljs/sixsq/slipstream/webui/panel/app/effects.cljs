@@ -9,7 +9,7 @@
 ;; usage: (dispatch [:modules-search client])
 ;; queries the given resource
 (reg-fx
-  :modules/search
+  :fx.webui.app/search
   (fn [[client url]]
     (go
       (let [results (<! (modules/get-children client url))]

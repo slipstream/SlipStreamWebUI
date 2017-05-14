@@ -4,9 +4,9 @@
 (declare dictionary)
 
 (defn create-tr-fn
-  "Returns a translation function from the dictionary and
-   the provided locale-id (which should be a string). The
-   English locale (en) is always the fallback."
+  "Returns a translation function from the dictionary and the provided
+   locale-id (which should be a string). The English locale (en) is always the
+   fallback."
   [locale-id]
   (partial tempura/tr {:dict dictionary :default-locale :en} [(keyword locale-id)]))
 

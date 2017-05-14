@@ -24,7 +24,9 @@
 
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.widget.history.events]
-    [sixsq.slipstream.webui.widget.history.effects]))
+    [sixsq.slipstream.webui.widget.history.effects]
+
+    [sixsq.slipstream.webui.widget.i18n.subs]))
 
 (defn format-operations
   [ops]
@@ -110,7 +112,7 @@
      :children tree-rows]))
 
 (defn panel-controls []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         model (subscribe [:resource-path])]
     (fn []
       [h-box
@@ -131,7 +133,7 @@
                           [i18n-views/locale-selector]]]]])
 
 (defn page-footer []
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [h-box
        :class "webui-footer"

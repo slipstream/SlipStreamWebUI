@@ -1,15 +1,17 @@
 (ns sixsq.slipstream.webui.panel.cimi.views
   (:require
-    [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
-                         button row-button md-icon-button label modal-panel throbber
-                         single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
-                         scroller selection-list title]]
+    [re-com.core :refer [h-box v-box box gap input-text
+                         button row-button label modal-panel throbber
+                         single-dropdown hyperlink
+                         scroller selection-list]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.panel.cimi.events]
-    [sixsq.slipstream.webui.panel.cimi.subs]))
+    [sixsq.slipstream.webui.panel.cimi.subs]
+
+    [sixsq.slipstream.webui.widget.i18n.subs]))
 
 (defn format-operations
   [ops]
@@ -104,7 +106,7 @@
                     [vertical-data-table @selected-fields entries]))]))))
 
 (defn search-header []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         first-value (reagent/atom "1")
         last-value (reagent/atom "20")
         filter-value (reagent/atom "")]
@@ -140,7 +142,7 @@
                    :on-click #(dispatch [:search])]]])))
 
 (defn select-fields []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         available-fields (subscribe [:search-available-fields])
         selected-fields (subscribe [:search-selected-fields])
         selections (reagent/atom #{})
@@ -191,7 +193,7 @@
 
 (defn cloud-entry-point
   []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         cep (subscribe [:cloud-entry-point])
         selected-id (atom nil)]
     (fn []

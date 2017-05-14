@@ -1,40 +1,35 @@
 (ns sixsq.slipstream.webui.widget.i18n.views
   (:require
     [re-com.core :refer [single-dropdown]]
-    [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.widget.i18n.dictionary :refer [dictionary]]
     [sixsq.slipstream.webui.widget.i18n.events]
     [sixsq.slipstream.webui.widget.i18n.subs]))
 
-(defn get-lang
-  [k]
-  (if-let [{:keys [lang]} (get dictionary k)]
-    lang
-    (name k)))
+(defn get-locale-label
+  [locale]
+  (or (get-in dictionary [locale :lang])
+      (name locale)))
 
 (defn locale-choice
-  [k]
-  {:id (name k) :label (get-lang k)})
-
-(def local-choice-comparator
-  (comparator (fn [x y] (< (:label x) (:label y)))))
+  [locale]
+  {:id (name locale)
+   :label (get-locale-label locale)})
 
 (defn locale-choices []
   (doall (->> dictionary
               keys
               (map locale-choice)
-              (sort local-choice-comparator)
+              (sort-by :label)
               vec)))
 
 (defn locale-selector
   []
-  (let [locale (subscribe [:i18n-locale])]
+  (let [locale (subscribe [:webui.i18n/locale])]
     (fn []
       [single-dropdown
        :model @locale
        :width "100px"
        :choices (locale-choices)
-       :on-change (fn [id]
-                    (dispatch [:set-locale id]))])))
+       :on-change #(dispatch [:evt.webui.i18n/set-locale %])])))
 

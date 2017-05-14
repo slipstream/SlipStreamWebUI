@@ -7,14 +7,14 @@
 
 ;; usage: (dispatch [:set-offer-data data])
 (reg-event-db
-  :set-offer-data
+  :evt.webui.offer/set-data
   [db/check-spec-interceptor trim-v]
   (fn [db [data]]
     (assoc db :offer-data data)))
 
 ;; usage: (dispatch [:clear-offer-data data])
 (reg-event-db
-  :clear-offer-data
+  :evt.webui.offer/clear-data
   [db/check-spec-interceptor]
   (fn [db _]
     (assoc db :offer-data nil)))
@@ -22,7 +22,7 @@
 ;; usage:  (dispatch [:show-offer-results results])
 ;; shows the offer results
 (reg-event-db
-  :show-offer-results
+  :evt.webui.offer/show-results
   [db/check-spec-interceptor trim-v]
   (fn [db [resource-type results]]
     (let [entries (get results (keyword resource-type) [])
@@ -34,7 +34,7 @@
 
 ;; usage:  (dispatch [:set-offer-first f])
 (reg-event-db
-  :set-offer-first
+  :evt.webui.offer/set-param-first
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 1)]
@@ -42,7 +42,7 @@
 
 ;; usage:  (dispatch [:set-offer-last f])
 (reg-event-db
-  :set-offer-last
+  :evt.webui.offer/set-param-last
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 20)]
@@ -50,21 +50,21 @@
 
 ;; usage:  (dispatch [:set-offer-filter f])
 (reg-event-db
-  :set-offer-filter
+  :evt.webui.offer/set-param-filter
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
     (assoc-in db [:offer :params :$filter] v)))
 
 ;; usage:  (dispatch [:set-selected-fields fields])
 (reg-event-db
-  :set-offer-selected-fields
+  :evt.webui.offer/set-selected-fields
   [db/check-spec-interceptor trim-v]
   (fn [db [fields]]
     (assoc-in db [:offer :selected-fields] (set/union #{"id"} fields))))
 
 ;; usage:  (dispatch [:remove-selected-field field])
 (reg-event-db
-  :remove-offer-selected-field
+  :evt.webui.offer/remove-selected-field
   [db/check-spec-interceptor trim-v]
   (fn [db [field]]
     (update-in db [:offer :selected-fields] #(set/difference % #{field}))))
@@ -80,7 +80,7 @@
           {:keys [collection-name params]} offer]
       (-> cofx
           (assoc-in [:db :offer :completed?] false)
-          (assoc :cimi/offer [cimi-client collection-name (utils/prepare-params params)])))))
+          (assoc :fx.webui.offer/list [cimi-client collection-name (utils/prepare-params params)])))))
 
 ;; usage:  (dispatch [:set-offer-search [params]])
 (reg-event-fx
@@ -94,7 +94,7 @@
       (-> cofx
           (assoc-in [:db :offer :params] new-params)
           (assoc-in [:db :resource-path] ["offer"])
-          (assoc :cimi/offer [cimi-client collection-name (utils/prepare-params new-params)])))))
+          (assoc :fx.webui.offer/list [cimi-client collection-name (utils/prepare-params new-params)])))))
 
 ;; usage:  (dispatch [:set-offer-detail [uuid]])
 (reg-event-fx
@@ -106,7 +106,7 @@
           {:keys [collection-name]} offer]
       (-> cofx
           (assoc-in [:db :resource-path] ["offer" uuid])
-          (assoc :cimi/offer-detail [cimi-client collection-name uuid])))))
+          (assoc :fx.webui.offer/detail [cimi-client collection-name uuid])))))
 
 ;; usage:  (dispatch [:show-offer-table])
 (reg-event-fx
@@ -115,5 +115,5 @@
   (fn [cofx []]
     (-> cofx
         (assoc-in [:db :offer-data] nil)
-        (assoc :navigate ["offer"]))))
+        (assoc :fx.webui.history/navigate ["offer"]))))
 

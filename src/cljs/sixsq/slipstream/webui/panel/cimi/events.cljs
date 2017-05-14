@@ -26,7 +26,7 @@
   [db/check-spec-interceptor]
   (fn [cofx _]
     (if-let [client (get-in cofx [:db :clients :cimi])]
-      (assoc cofx :cimi/cloud-entry-point [client])
+      (assoc cofx :fx.webui.cimi/cloud-entry-point [client])
       cofx)))
 
 ;; usage:  (dispatch [:cloud-entry-point])
@@ -99,7 +99,7 @@
           {:keys [collection-name params]} search]
       (-> cofx
           (update-in [:db :search :completed?] (constantly false))
-          (assoc :cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
+          (assoc :fx.webui.cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
 
 ;; usage:  (dispatch [:search])
 ;; refine search
@@ -112,5 +112,5 @@
           {:keys [collection-name params]} search]
       (-> cofx
           (update-in [:db :search :completed?] (constantly false))
-          (assoc :cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
+          (assoc :fx.webui.cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
 

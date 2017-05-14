@@ -5,7 +5,7 @@
 
 ;; usage: (dispatch [:set-runs-data data])
 (reg-event-db
-  :set-runs-data
+  :evt.webui.deployment/set-data
   [db/check-spec-interceptor trim-v]
   (fn [db [data]]
     (assoc db :runs-data data)))
@@ -13,17 +13,17 @@
 ;; usage:  (dispatch [:runs-search])
 ;; refine search
 (reg-event-fx
-  :runs-search
+  :evt.webui.deployment/search
   [db/check-spec-interceptor]
   (fn [cofx _]
     (let [{:keys [clients runs-params]} (:db cofx)
           client (:runs clients)]
       (-> cofx
-          (assoc :runs/search [client runs-params])))))
+          (assoc :fx.webui.deployment/search [client runs-params])))))
 
 ;; usage:  (dispatch [:set-runs-params {:key value}])
 (reg-event-db
-  :set-runs-params
+  :evt.webui.deployment/set-params
   [db/check-spec-interceptor trim-v]
   (fn [db [v]]
     (let [params (:runs-params db)

@@ -9,8 +9,8 @@
 ;; usage: (dispatch [:runs-search client])
 ;; queries the given resource
 (reg-fx
-  :runs/search
+  :fx.webui.deployment/search
   (fn [[client params]]
     (go
       (let [results (<! (runs/search client params))]
-        (dispatch [:set-runs-data results])))))
+        (dispatch [:evt.webui.deployment/set-data results])))))

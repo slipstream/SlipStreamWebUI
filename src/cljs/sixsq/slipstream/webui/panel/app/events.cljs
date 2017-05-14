@@ -20,7 +20,7 @@
     (let [{:keys [clients modules-path]} (:db cofx)
           client (:modules clients)]
       (-> cofx
-          (assoc :modules/search [client modules-path])))))
+          (assoc :fx.webui.app/search [client modules-path])))))
 
 ;; usage:  (dispatch [:modules-search])
 ;; refine search
@@ -31,7 +31,7 @@
     (let [{:keys [clients modules-breadcrumbs]} (:db cofx)
           client (:modules clients)]
       (-> cofx
-          (assoc :modules/search [client (str (rest modules-breadcrumbs))])))))
+          (assoc :fx.webui.app/search [client (str (rest modules-breadcrumbs))])))))
 
 ;; usage:  (dispatch [:set-module-path p])
 (reg-event-db
@@ -57,7 +57,7 @@
                            (take n)
                            (concat ["app"]))
           app-url (breadcrumbs->url breadcrumbs)]
-      (assoc cofx :navigate [app-url]))))
+      (assoc cofx :fx.webui.history/navigate [app-url]))))
 
 ;; usage:  (dispatch [:push-breadcrumb crumb])
 (reg-event-fx
@@ -70,7 +70,7 @@
                           vec
                           (conj crumb))
           app-url (breadcrumbs->url (concat ["app"] breadcrumbs))]
-      (assoc cofx :navigate [app-url]))))
+      (assoc cofx :fx.webui.history/navigate [app-url]))))
 
 ;; usage:  (dispatch [:set-breadcrumbs [breadcrumbs]])
 (reg-event-fx
@@ -81,4 +81,4 @@
       (-> cofx
           (assoc-in [:db :modules-breadcrumbs] breadcrumbs)
           (assoc-in [:db :resource-path] (concat ["app"] breadcrumbs))
-          (assoc :modules/search [client (breadcrumbs->url breadcrumbs)])))))
+          (assoc :fx.webui.app/search [client (breadcrumbs->url breadcrumbs)])))))

@@ -9,7 +9,7 @@
 ;; usage: (dispatch [:cloud-entry-point client])
 ;; fetches the cloud entry point
 (reg-fx
-  :cimi/cloud-entry-point
+  :fx.webui.cimi/cloud-entry-point
   (fn [[client]]
     (go
       (if-let [cep (<! (cimi/cloud-entry-point client))]
@@ -19,7 +19,7 @@
 ;; usage: (dispatch [:search client resource-type])
 ;; queries the given resource
 (reg-fx
-  :cimi/search
+  :fx.webui.cimi/search
   (fn [[client resource-type params]]
     (go
       (let [results (<! (cimi/search client resource-type params))]

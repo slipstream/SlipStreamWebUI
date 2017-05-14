@@ -2,7 +2,10 @@
   (:require
     [clojure.string :as str]
     [re-com.core :refer [h-box v-box title label]]
-    [re-frame.core :refer [subscribe]]))
+    [re-frame.core :refer [subscribe]]
+
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.widget.authn.subs]))
 
 (def ^:const common-attrs #{:created :updated :resourceURI :properties :acl :operations})
 
@@ -27,15 +30,16 @@
 (defn session-info
   [session]
   (when session
-    [v-box :children [[title
-                       :label "Current Session"
-                       :level :level2
-                       :underline? true]
-                      [session-table session]]]))
+    [v-box
+     :children [[title
+                 :label "Current Session"
+                 :level :level2
+                 :underline? true]
+                [session-table session]]]))
 
 (defn profile-panel
   []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         session (subscribe [:webui.authn/session])]
     (fn []
       (let [profile-text (if @session

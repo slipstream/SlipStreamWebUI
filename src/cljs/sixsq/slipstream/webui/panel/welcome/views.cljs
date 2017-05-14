@@ -1,12 +1,13 @@
 (ns sixsq.slipstream.webui.panel.welcome.views
   (:require
-    [clojure.string :as str]
     [re-com.core :refer [v-box title]]
-    [re-frame.core :refer [subscribe]]))
+    [re-frame.core :refer [subscribe]]
+
+    [sixsq.slipstream.webui.widget.i18n.subs]))
 
 (defn welcome-panel
   []
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [v-box
        :children [[title

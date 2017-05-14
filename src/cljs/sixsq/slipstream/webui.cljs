@@ -12,7 +12,10 @@
     ;; must include these to ensure that they are not elided
     [sixsq.slipstream.webui.main.events]
     [sixsq.slipstream.webui.main.subs]
-    [sixsq.slipstream.webui.main.views]))
+    [sixsq.slipstream.webui.main.views]
+
+    [sixsq.slipstream.webui.widget.history.events]
+    [sixsq.slipstream.webui.widget.authn.events]))
 
 ;;
 ;; debugging tools
@@ -61,10 +64,10 @@
   []
   (.log js/console "using slipstream server:" @SLIPSTREAM_URL)
   (.log js/console "using path prefix:" @PATH_PREFIX)
-  (dispatch-sync [:initialize-db])
-  (dispatch-sync [:initialize-client @SLIPSTREAM_URL])
+  (dispatch-sync [:evt.webui.main/initialize-db])
+  (dispatch-sync [:evt.webui.main/initialize-client @SLIPSTREAM_URL])
   (dispatch-sync [:fetch-cloud-entry-point])
-  (dispatch-sync [:initialize-history @PATH_PREFIX])
+  (dispatch-sync [:evt.webui.history/initialize @PATH_PREFIX])
   (dispatch-sync [:evt.webui.authn/initialize])
   (dispatch [:evt.webui.authn/check-session])
   (reagent/render [sixsq.slipstream.webui.main.views/app]

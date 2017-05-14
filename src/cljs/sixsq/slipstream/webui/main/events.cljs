@@ -11,7 +11,7 @@
 ;; usage:  (dispatch [:initialize-db])
 ;; creates initial state of database
 (reg-event-fx
-  :initialize-db
+  :evt.webui.main/initialize-db
   [db/check-spec-interceptor]
   (fn [_ _]
     {:db db/default-value}))
@@ -19,7 +19,7 @@
 ;; usage:  (dispatch [:initialize-client])
 ;; creates and adds a SlipStream client to the database
 (reg-event-db
-  :initialize-client
+  :evt.webui.main/initialize-client
   [db/check-spec-interceptor trim-v]
   (fn [db [slipstream-url]]
     (let [clients {:cimi    (cimi-async/instance (str slipstream-url "/api/cloud-entry-point"))

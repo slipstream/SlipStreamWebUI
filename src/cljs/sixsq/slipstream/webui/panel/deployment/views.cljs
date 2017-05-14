@@ -1,26 +1,26 @@
 (ns sixsq.slipstream.webui.panel.deployment.views
   (:require
-    [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
-                         button row-button md-icon-button md-circle-icon-button label modal-panel throbber
-                         single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
-                         scroller selection-list title popover-anchor-wrapper popover-content-wrapper popover-tooltip]
+    [re-com.core :refer [h-box v-box input-text button row-button label
+                         hyperlink-href checkbox popover-tooltip]
      :refer-macros [handler-fn]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
+
+    [clojure.string :as str]
     [sixsq.slipstream.webui.panel.deployment.effects]
     [sixsq.slipstream.webui.panel.deployment.events]
     [sixsq.slipstream.webui.panel.deployment.subs]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.widget.i18n.subs]))
 
 (defn runs-control []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         offset (reagent/atom "1")
         limit (reagent/atom "10")
         cloud (reagent/atom "")
         activeOnly (reagent/atom true)]
     (fn []
       [h-box
-       :gap "3px"
+       :gap "0.25ex"
        :children [[input-text
                    :model offset
                    :placeholder (@tr [:offset])
@@ -28,7 +28,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! offset v)
-                                (dispatch [:set-runs-params {:offset v}]))]
+                                (dispatch [:evt.webui.deployment/set-params {:offset v}]))]
                   [input-text
                    :model limit
                    :placeholder (@tr [:limit])
@@ -36,7 +36,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! limit v)
-                                (dispatch [:set-runs-params {:limit v}]))]
+                                (dispatch [:evt.webui.deployment/set-params {:limit v}]))]
                   [input-text
                    :model cloud
                    :placeholder (@tr [:cloud])
@@ -44,16 +44,16 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! cloud v)
-                                (dispatch [:set-runs-params {:cloud v}]))]
+                                (dispatch [:evt.webui.deployment/set-params {:cloud v}]))]
                   [checkbox
                    :model activeOnly
                    :label (@tr [:active-only])
                    :on-change (fn [v]
                                 (reset! activeOnly v)
-                                (dispatch [:set-runs-params {:activeOnly (if v 1 0)}]))]
+                                (dispatch [:evt.webui.deployment/set-params {:activeOnly (if v 1 0)}]))]
                   [button
                    :label (@tr [:show])
-                   :on-click #(dispatch [:runs-search])]
+                   :on-click #(dispatch [:evt.webui.deployment/search])]
                   ]])))
 
 (defn service-url
@@ -147,7 +147,7 @@
            uuid
            serviceUrl] :as run}]
   [h-box
-   :gap "2px"
+   :gap "0.25ex"
    :children [[label :width "2em" :label [deployment-icon type]]
               [abort-popup abort]
               (service-url serviceUrl status)
@@ -162,7 +162,7 @@
 
 (defn header-label
   [size kw]
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     [h-box
      :class "webui-column-header"
      :justify :between
@@ -170,10 +170,10 @@
                 [label :width "1em" :label "\u00a0"]]]))
 
 (defn run-header []
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [h-box
-       :gap "2px"
+       :gap "0.25ex"
        :children [[header-label "1em" :empty]
                   [abort-popup ""]
                   (service-url "" "")
@@ -188,12 +188,12 @@
 
 (defn runs-display
   []
-  (let [runs-data (subscribe [:runs-data])]
+  (let [runs-data (subscribe [:webui.deployment/runs-data])]
     (fn []
       (if-let [{:keys [runs]} @runs-data]
         (let [{:keys [count totalCount item]} runs]
           [v-box
-           :gap "3px"
+           :gap "0.25ex"
            :children [[label
                        :label (str count "/" totalCount)]
                       [v-box
@@ -203,7 +203,7 @@
   []
   (fn []
     [v-box
-     :gap "3px"
+     :gap "0.25ex"
      :children [[runs-control]
                 [runs-display]]]))
 

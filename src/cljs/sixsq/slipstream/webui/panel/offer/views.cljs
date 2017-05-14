@@ -1,17 +1,17 @@
 (ns sixsq.slipstream.webui.panel.offer.views
   (:require
-    [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
-                         button row-button md-icon-button label modal-panel throbber
-                         single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
-                         scroller selection-list title]]
+    [re-com.core :refer [h-box v-box box input-text
+                         button row-button label modal-panel throbber
+                         hyperlink scroller selection-list title]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.offer.effects]
     [sixsq.slipstream.webui.panel.offer.events]
     [sixsq.slipstream.webui.panel.offer.subs]
-    [clojure.string :as str]
-    [sixsq.slipstream.webui.widget.history.utils :as history]))
+    [sixsq.slipstream.webui.widget.history.utils :as history]
+
+    [sixsq.slipstream.webui.widget.i18n.subs]))
 
 (defn format-operations
   [ops]
@@ -69,7 +69,7 @@
         [box :align align :child [label :label v]]))))
 
 (defn column-header-with-key [selected-field]
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       ^{:key (str "column-header-" selected-field)}
       [h-box
@@ -83,7 +83,7 @@
                      :md-icon-name "zmdi zmdi-close"
                      :mouse-over-row? true
                      :tooltip (@tr [:remove-column])
-                     :on-click #(dispatch [:remove-offer-selected-field selected-field])])]])))
+                     :on-click #(dispatch [:evt.webui.offer/remove-selected-field selected-field])])]])))
 
 (defn data-field-with-key [selected-field entry]
   (let [k (str "data-" selected-field "-" (:id entry))]
@@ -115,7 +115,7 @@
                     [vertical-data-table @selected-fields entries]))]))))
 
 (defn search-header []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         first-value (subscribe [:offer-params-first])
         last-value (subscribe [:offer-params-last])
         filter-value (subscribe [:offer-params-filter])
@@ -132,7 +132,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! first-atom v)
-                                (dispatch [:set-offer-first v]))]
+                                (dispatch [:evt.webui.offer/set-param-first v]))]
                   [input-text
                    :model last-atom
                    :placeholder (@tr [:last])
@@ -140,7 +140,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! last-atom v)
-                                (dispatch [:set-offer-last v]))]
+                                (dispatch [:evt.webui.offer/set-param-last v]))]
                   [input-text
                    :model filter-atom
                    :placeholder (@tr [:filter])
@@ -148,13 +148,13 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! filter-atom v)
-                                (dispatch [:set-offer-filter v]))]
+                                (dispatch [:evt.webui.offer/set-param-filter v]))]
                   [button
                    :label (@tr [:search])
                    :on-click #(dispatch [:offer])]]])))
 
 (defn select-fields []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         available-fields (subscribe [:offer-available-fields])
         selected-fields (subscribe [:offer-selected-fields])
         selections (reagent/atom #{})
@@ -169,7 +169,7 @@
                     [modal-panel
                      :backdrop-on-click (fn []
                                           (reset! show? false)
-                                          (dispatch [:set-offer-selected-fields @selections]))
+                                          (dispatch [:evt.webui.offer/set-selected-fields @selections]))
                      :child [v-box
                              :width "350px"
                              :children [[selection-list
@@ -191,7 +191,7 @@
                                                      :class "btn-primary"
                                                      :on-click (fn []
                                                                  (reset! show? false)
-                                                                 (dispatch [:set-offer-selected-fields @selections]))]]]]]])]])))
+                                                                 (dispatch [:evt.webui.offer/set-selected-fields @selections]))]]]]]])]])))
 
 (defn select-controls []
   [h-box
@@ -206,7 +206,7 @@
 
 (defn detail-control-bar
   []
-  (let [tr (subscribe [:i18n-tr])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [h-box
        :justify :start
@@ -215,7 +215,7 @@
                    :on-click #(dispatch [:show-offer-table])]]])))
 
 (defn results-bar []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         search (subscribe [:offer])]
     (fn []
       (let [{:keys [completed? results collection-name]} @search]

@@ -9,17 +9,17 @@
 ;; usage: (dispatch [:cimi/offer client resource-type])
 ;; queries the given resource
 (reg-fx
-  :cimi/offer
+  :fx.webui.offer/list
   (fn [[client resource-type params]]
     (go
       (let [results (<! (cimi/search client resource-type params))]
-        (dispatch [:show-offer-results resource-type results])))))
+        (dispatch [:evt.webui.offer/show-results resource-type results])))))
 
 ;; usage: (dispatch [:cimi/offer-detail client resource-type])
 ;; queries the given resource
 (reg-fx
-  :cimi/offer-detail
+  :fx.webui.offer/detail
   (fn [[client resource-type uuid]]
     (go
       (let [result (<! (cimi/get client (str "service-offer/" uuid)))] ;; FIXME: Remove hardcoded value.
-        (dispatch [:set-offer-data result])))))
+        (dispatch [:evt.webui.offer/set-data result])))))

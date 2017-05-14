@@ -2,11 +2,14 @@
   (:require
     [clojure.string :as str]
     [re-com.core :refer [v-box title]]
-    [re-frame.core :refer [subscribe]]))
+    [re-frame.core :refer [subscribe]]
+
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.main.subs]))
 
 (defn unknown-panel
   []
-  (let [tr (subscribe [:i18n-tr])
+  (let [tr (subscribe [:webui.i18n/tr])
         resource-path (subscribe [:resource-path])]
     (fn []
       (let [path (str "/" (str/join "/" @resource-path))]

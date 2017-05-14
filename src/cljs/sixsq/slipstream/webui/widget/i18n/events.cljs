@@ -2,12 +2,10 @@
   (:require
     [sixsq.slipstream.webui.main.db :as db]
     [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]
-    [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]))
+    [re-frame.core :refer [reg-event-db trim-v]]))
 
-;; usage: (dispatch [:set-locale locale-id])
-;; updates the current locale and the translation function
 (reg-event-db
-  :set-locale
+  :evt.webui.i18n/set-locale
   [db/check-spec-interceptor trim-v]
   (fn [db [locale-id]]
     (-> db
