@@ -98,13 +98,14 @@
 (defn login-button
   "Form login button that clears the modal and initiates the login process."
   []
-  (let [tr (subscribe [:webui.i18n/tr])]
+  (let [tr (subscribe [:webui.i18n/tr])
+        method (subscribe [:webui.authn/method])]
     (fn []
       [button
        :label (@tr [:login])
        :class "btn-primary"
        :on-click (fn []
-                   (.submit (.getElementById js/document "login_session-template/github"))
+                   (.submit (.getElementById js/document (str "login_" @method)))
                    (dispatch [:evt.webui.authn/show-dialog false]))])))
 
 (defn login-forms
