@@ -21,10 +21,14 @@
   (fn [[client creds]]
     (go
       (let [resp (<! (cimi/login client creds))]
-        (if (= 201 (:status resp))
-          (let [session (<! (au/get-current-session client))]
-            (dispatch [:evt.webui.authn/logged-in session]))
-          (dispatch [:message "login failed"]))))))
+        (case (:status resp)
+          201 (let [session (<! (au/get-current-session client))]
+                (dispatch [:evt.webui.authn/logged-in session]))
+          303 (let [session (<! (au/get-current-session client))]
+                (dispatch [:evt.webui.authn/logged-in session]))
+          (do
+            (.log js/console "Error login response: " (with-out-str (cljs.pprint/pprint resp)))
+            (dispatch [:message "login failed"])))))))
 
 (reg-fx
   :fx.webui.authn/check-session

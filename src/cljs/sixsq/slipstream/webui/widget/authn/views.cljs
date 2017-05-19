@@ -27,17 +27,19 @@
    control for each defined type, but this initial implementation just provides
    either a text or password field. The changed data is stored in the global
    database."
-  [method [param-name {:keys [displayName] :as param}]]
+  [method [param-name {:keys [data displayName] :as param}]]
   (if (= "Password" displayName)
     [input-password
+     :attr {:name param-name}
      :width "100%"
-     :model (reagent/atom "")
+     :model (reagent/atom (or data ""))
      :placeholder displayName
      :change-on-blur? true
      :on-change #(dispatch [:evt.webui.authn/update-form-data [method param-name %]])]
     [input-text
+     :attr {:name param-name}
      :width "100%"
-     :model (reagent/atom "")
+     :model (reagent/atom (or data ""))
      :placeholder displayName
      :change-on-blur? true
      :on-change #(dispatch [:evt.webui.authn/update-form-data [method param-name %]])]))
@@ -47,12 +49,24 @@
    the login method description."
   []
   (let [method (subscribe [:webui.authn/method])
-        methods (subscribe [:webui.authn/methods])]
+        methods (subscribe [:webui.authn/methods])
+        cep (subscribe [:cloud-entry-point])]
     (fn []
-      (when-let [params (ordered-params @method @methods)]
-        [v-box
-         :gap "0.25ex"
-         :children (vec (map (partial form-component @method) params))]))))
+      (let [redirect-uri "/webui/profile"
+            simple-method (second (re-matches #"session-template/(.*)" (str @method)))
+            params (ordered-params @method @methods)
+            params (if (seq params)                         ;; FIXME: Get this from template description.
+                     params
+                     [["redirectURI" {:displayName "Redirect URI" :data redirect-uri}]
+                      ["href" {:displayName "href" :data @method}]])]
+        (when params
+          [:form {:id (str "login_" @method)
+                  :method "post"
+                  :action "/api/session"
+                  :enc-type "application/x-www-form-urlencoded"}
+           [v-box
+            :gap "0.25ex"
+            :children (vec (map (partial form-component @method) params))]])))))
 
 (defn login-dropdown
   "Dropdown that contains the list of available login methods."
@@ -84,14 +98,15 @@
 (defn login-button
   "Form login button that clears the modal and initiates the login process."
   []
-  (let [tr (subscribe [:webui.i18n/tr])]
+  (let [tr (subscribe [:webui.i18n/tr])
+        method (subscribe [:webui.authn/method])]
     (fn []
       [button
        :label (@tr [:login])
        :class "btn-primary"
        :on-click (fn []
-                   (dispatch [:evt.webui.authn/show-dialog false])
-                   (dispatch [:evt.webui.authn/login]))])))
+                   (.submit (.getElementById js/document (str "login_" @method)))
+                   (dispatch [:evt.webui.authn/show-dialog false]))])))
 
 (defn login-forms
   "Allows the user to select the login method, supply information, and then
