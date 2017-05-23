@@ -11,14 +11,13 @@
     [clojure.string :as str]
     [sixsq.slipstream.webui.utils :as utils]
 
-    [sixsq.slipstream.webui.widget.authn.views :as authn-views]
     [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
 
+    [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
     [sixsq.slipstream.webui.panel.offer.views :as offer-views]
-    [sixsq.slipstream.webui.panel.profile.views :as profile-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
 
@@ -129,7 +128,7 @@
    :children [[panel-controls]
               [h-box
                :gap "2em"
-               :children [[authn-views/authn-widget]
+               :children [[authn-views/authn-button]
                           [i18n-views/locale-selector]]]]])
 
 (defn page-footer []
@@ -188,8 +187,8 @@
                       "offer" [offer-views/offer-panel]
                       "deployment" [deployment-views/runs-panel]
                       "app" [app-views/modules-panel]
-                      "profile" [profile-views/profile-panel]
                       "welcome" [welcome-views/welcome-panel]
+                      "login" [authn-views/login-panel]
                       nil [welcome-views/welcome-panel]
                       [unknown-views/unknown-panel])]]))))
 
@@ -197,7 +196,6 @@
   [v-box
    :children [[message-modal]
               [resource-modal]
-              [authn-views/login-modal]
               [page-header]
               [resource-panel]
               [page-footer]]])

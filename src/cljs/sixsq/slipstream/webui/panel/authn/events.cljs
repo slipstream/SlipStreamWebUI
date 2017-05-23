@@ -1,8 +1,8 @@
-(ns sixsq.slipstream.webui.widget.authn.events
+(ns sixsq.slipstream.webui.panel.authn.events
   (:require
     [sixsq.slipstream.webui.main.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
-    [sixsq.slipstream.webui.widget.authn.utils :as au]))
+    [sixsq.slipstream.webui.panel.authn.utils :as au]))
 
 (reg-event-fx
   :evt.webui.authn/logout
@@ -17,8 +17,7 @@
   [db/check-spec-interceptor]
   (fn [db _]
     (-> db
-        (assoc-in [:authn :session] nil)
-        (assoc-in [:authn :show-dialog?] false))))
+        (assoc-in [:authn :session] nil))))
 
 (reg-event-fx
   :evt.webui.authn/login
@@ -39,14 +38,7 @@
   [db/check-spec-interceptor trim-v]
   (fn [db [session]]
     (-> db
-        (assoc-in [:authn :session] session)
-        (assoc-in [:authn :show-dialog?] false))))
-
-(reg-event-db
-  :evt.webui.authn/show-dialog
-  [db/check-spec-interceptor trim-v]
-  (fn [db [show?]]
-    (update-in db [:authn :show-dialog?] (constantly show?))))
+        (assoc-in [:authn :session] session))))
 
 (reg-event-fx
   :evt.webui.authn/initialize

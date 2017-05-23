@@ -120,3 +120,10 @@
    blank or empty terms from the result."
   [path]
   (vec (remove str/blank? (str/split path #"/"))))
+
+(defn truncate
+  [s max-size & [suffix]]
+  (if (> (count s) max-size)
+    (str (str/join "" (take max-size s)) suffix)
+    s))
+

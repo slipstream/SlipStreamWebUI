@@ -47,7 +47,6 @@
 ;;
 
 (s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
-(s/def :webui.authn/show-dialog? boolean?)
 
 (s/def :webui.authn/method (s/nilable string?))
 
@@ -64,7 +63,6 @@
 (s/def :webui.authn/forms (s/map-of string? map?))
 
 (s/def :webui.authn/authn (s/keys :req-un [:webui.authn/session
-                                           :webui.authn/show-dialog?
                                            :webui.authn/method
                                            :webui.authn/methods
                                            :webui.authn/forms]))
@@ -162,7 +160,6 @@
    :modules-breadcrumbs nil
 
    :authn               {:session      nil
-                         :show-dialog? false
                          :method       nil
                          :methods      []
                          :forms        {}}

@@ -10,12 +10,12 @@
     [sixsq.slipstream.webui.utils :as utils]
 
     ;; must include these to ensure that they are not elided
+    [sixsq.slipstream.webui.panel.authn.events]
     [sixsq.slipstream.webui.main.events]
     [sixsq.slipstream.webui.main.subs]
     [sixsq.slipstream.webui.main.views]
 
-    [sixsq.slipstream.webui.widget.history.events]
-    [sixsq.slipstream.webui.widget.authn.events]))
+    [sixsq.slipstream.webui.widget.history.events]))
 
 ;;
 ;; debugging tools
