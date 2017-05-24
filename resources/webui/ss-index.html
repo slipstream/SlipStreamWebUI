@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SlipStream | Login</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" class="ss-themable">
+    <!-- Specifics for portable devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Android Devices -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- iOS Devices -->
+    <meta name="apple-mobile-web-app-title" content="SlipStream">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone-60x60.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="images/apple-touch-icon-ipad-76x76.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-iphone-retina-120x120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-ipad-retina-152x152.png">
+
+    <!-- Startup image for iOS 6 & 7 iPhone 5 -->
+    <link href="images/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px)            and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image">
+
+    <!--
+	Future Pointers:
+
+	iOS 7 Web App
+	- https://gist.github.com/tfausak/2222823
+
+	Prevent links in standalone web apps opening Mobile Safari:
+	- https://gist.github.com/kylebarrow/1042026
+
+	Optimizing Mobile Web Apps for iOS | Treehouse Blog:
+	- http://blog.teamtreehouse.com/optimizing-mobile-web-apps-ios
+
+	Remove rubberband scrolling from web apps on mobile safari (iOS)
+	- https://gist.github.com/amolk/1599412
+      -->
+
+    <base href="/">
+
+    <!-- External CSS Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="external/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstro_custom.css">
+    <!-- <link href="external/bootstrap/css/bootstrap-theme.min.css" data-href="external/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" id="bs-theme-stylesheet"> -->
+
+    <!-- Internal CSS Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="css/icons.css">
+    <link rel="stylesheet" type="text/css" href="css/topbar.css">
+    <link rel="stylesheet" type="text/css" href="css/header.css">
+    <link rel="stylesheet" type="text/css" href="css/secondary-menubar.css">
+    <link rel="stylesheet" type="text/css" href="css/content.css">
+    <link rel="stylesheet" type="text/css" href="css/footer.css">
+    <link rel="stylesheet" type="text/css" href="css/error.css">
+
+    <link rel="stylesheet" type="text/css" href="css/alerts.css">
+    <link rel="stylesheet" type="text/css" href="css/menubar.css">
+    <link rel="stylesheet" type="text/css" href="css/subsection.css">
+    <link rel="stylesheet" type="text/css" href="css/section.css">
+    <link rel="stylesheet" type="text/css" href="css/modal_dialogs.css">
+    <link rel="stylesheet" type="text/css" href="css/table.css">
+
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="/webui/assets/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="/webui/assets/css/re-com.css">
+    <link rel="stylesheet" href="/webui/assets/css/webui.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300" rel="stylesheet" type="text/css">
+
+</head>
+
+<body class="ss-view-name-usages ss-page-type-view">
+
+<div id="ss-loading-screen" class="ss-loading-screen hidden">
+    <div class="backdrop"></div>
+    <div class="ss-loading-screen-content">
+        <span class="glyphicon glyphicon-refresh"></span>
+        Loading...
+    </div>
+</div>
+
+<div class="navbar navbar-default navbar-fixed-top ss-alert-container-fixed-top">
+    <div class="ss-alert-offset-placeholder"></div>
+</div>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation" id="topbar">
+    <div class="menubar ss-menubar-logged-in">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/"><img class="ss-themable" src="images/logo-menubar-logged-in.png"></a>
+            </div><!--/.navbar-header -->
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li><a class="ss-action-dashboard" href="/dashboard">Dashboard</a></li>
+                    <li><a class="ss-action-appstore" href="/appstore">App Store</a></li>
+                    <li><a class="ss-action-modules ss-action-module" href="/module">Workspace</a></li>
+
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="/configuration"><span class="glyphicon glyphicon-cog"></span> <span class="ss-action-system">System</span></a></li>
+
+                            <li><a href="/users"><span class="glyphicon glyphicon-user"></span> <span class="ss-action-users">Users</span></a></li>
+
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="ss-action-help">Help</span> <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li class="ss-action-start-tour"><a href="/appstore?start-tour=yes"><span class="glyphicon glyphicon-comment"></span> <span class="ss-action-label">Start guided tour</span></a></li>
+                            <li><a href="http://ssdocs.sixsq.com" target="_blank"><span class="glyphicon glyphicon-book"></span> <span class="ss-action-documentation">Documentation</span></a></li>
+                            <li><a href=" http://support.sixsq.com/solution/categories" target="_blank"><span class="glyphicon glyphicon-info-sign"></span> <span class="ss-action-knowledge-base">Knowledge Base</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="ss-menubar-username">test</span> <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a id="ss-menubar-user-profile-anchor" href="user/test"><span class="glyphicon glyphicon-user"></span> <span class="ss-action-profile">Profile</span></a></li>
+                            <li class="divider"></li>
+                            <li><a href="/event"><span class="glyphicon glyphicon-flash"></span> <span class="ss-action-events">Events</span></a></li>
+                            <li><a href="/usage"><span class="glyphicon glyphicon-time"></span> <span class="ss-action-usage">Usage</span></a></li>
+                            <li class="divider"></li>
+                            <li><a class="ss-logout-action"><span class="glyphicon glyphicon-log-out"></span> <span class="ss-action-logout">Log out</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!--/.navbar-collapse -->
+        </div><!--/.container -->
+    </div><!--/#menubar -->
+    <!-- Options: "alert-danger" "alert-warning" "alert-info" -->
+</div><!--/.navbar -->
+
+<div id="header" class="jumbotron">
+    <div class="container">
+        <div id="header-content" class="ss-header">
+            <div class="row">
+                <div class="col-sm-1 text-left hidden-xs ss-header-title-icon-col">
+                    <div class="ss-header-title-icon">
+                        <span class="ss-header-icon-error glyphicon glyphicon-remove"></span>
+                        <span class="glyphicon-time ss-icon-tooltip ss-header-icon glyphicon" title="" data-toggle="tooltip" data-placement="bottom" data-original-title="Usage"></span>
+                    </div>
+                </div> <!-- /col -->
+                <div class="col-sm-11 ss-header-title-col text-left">
+                    <div>
+                        <span class="ss-header-error-status-code"></span>
+                        <div class="ss-header-title">Login</div>
+                    </div>
+                    <p class="ss-header-subtitle">Authentication status and information.</p>
+
+                </div> <!-- /col -->
+                <!-- /col -->
+            </div> <!-- /row -->
+        </div><!--/#header-content -->
+    </div>
+</div><!--/#header -->
+
+<!-- The #ss-secondary-menubar-placeholder will maintain the body layout when the
+ #ss-secondary-menubar-container is affixed, avoiding sudden mouvements of the layout. -->
+<div id="ss-secondary-menubar-placeholder"></div>
+
+<div id="ss-content" class="container">
+    <div id="webui-container"></div>
+    <script type="text/javascript" src="/webui/js/webui.js"></script>
+</div><!--/#ss-content.container -->
+
+<div id="footer" class="footer">
+    <div class="container">
+        <div class="ss-footer-notice text-muted text-center hidden-xs"></div> <!-- /.ss-footer-notice -->
+        <div class="row ss-footer-trademarks text-muted">
+            <div class="col-xs-6 col-sm-5 text-left">
+                <span class="hidden-xs">Copyright </span>© 2016 <a target="_blank" href="http://sixsq.com">SixSq</a>
+                <br>
+                All rights reserved.
+            </div>
+            <div class="col-sm-2 text-center hidden-xs">
+                <a target="_blank" href="http://swissmadesoftware.org"><img src="images/logo_swiss_made_software.png"></a><br>
+                <a target="_blank" href="/terms">Terms and Conditions</a>
+            </div>
+            <div class="col-xs-6 col-sm-5 text-right">
+                <span class="hidden-xs">Powered by </span>SlipStream&nbsp;®&nbsp;v<span id="release-version">3.21</span><br><span class="hidden-xs">
+              <a target="_blank" href="https://github.com/slipstream/SlipStream">Open source</a> under </span><a target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License.</a>
+            </div>
+        </div>
+    </div>
+</div><!--/#footer -->
+
+<div id="bottom-scripts">
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="external/jquery/js/jquery-1.11.1.min.js"></script>
+    <script src="external/jquery-color/js/jquery.color.plus-names-2.1.2.min.js"></script>
+    <script src="external/bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/bootstro_custom.js"></script>
+
+    <!-- From: http://bootstrapvalidator.com : -->
+    <script src="external/bootstrapValidator/js/bootstrapValidator.min.js"></script>
+
+    <!-- From: http://mimo84.github.io/bootstrap-maxlength/ -->
+    <script src="external/bootstrap-maxlength/js/bootstrap-maxlength.min.js"></script>
+
+    <!-- Source: https://github.com/desandro/imagesloaded -->
+    <script src="external/imagesloaded/js/imagesloaded.min.js"></script>
+
+    <script src="js/util.js"></script>
+    <script src="js/alert.js"></script>
+    <script src="js/request.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/base.js"></script>
+    <script src="js/secondary_menu_actions.js"></script>
+    <script src="js/menubar.js"></script>
+    <script src="js/subsection.js"></script>
+    <script src="js/section.js"></script>
+    <script src="js/modal_dialogs.js"></script>
+    <script src="js/table.js"></script>
+    <script src="external/ace-editor/src-min-noconflict-1.1.6/ace.js"></script>
+    <script src="external/ace-editor/src-min-noconflict-1.1.6/theme-tomorrow.js"></script>
+    <script src="external/ace-editor/src-min-noconflict-1.1.6/theme-tomorrow_night.js"></script>
+    <script src="js/code_area.js"></script>
+    <script src="js/last.js"></script>
+    <script src="js/support.js"></script>
+</div>
+
+</body>
+
+</html>

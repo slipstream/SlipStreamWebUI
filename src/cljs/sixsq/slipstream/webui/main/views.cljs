@@ -192,10 +192,16 @@
                       nil [welcome-views/welcome-panel]
                       [unknown-views/unknown-panel])]]))))
 
+(defn header []
+  [v-box
+   :children [[page-header]]])
+
+(defn footer []
+  [v-box
+   :children [[page-footer]]])
+
 (defn app []
   [v-box
    :children [[message-modal]
               [resource-modal]
-              [page-header]
-              [resource-panel]
-              [page-footer]]])
+              [resource-panel]]])

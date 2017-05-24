@@ -70,5 +70,9 @@
   (dispatch-sync [:evt.webui.history/initialize @PATH_PREFIX])
   (dispatch-sync [:evt.webui.authn/initialize])
   (dispatch [:evt.webui.authn/check-session])
-  (reagent/render [sixsq.slipstream.webui.main.views/app]
-                  (.getElementById js/document "container")))
+  (when-let [header-element (.getElementById js/document "webui-header")]
+    (reagent/render [sixsq.slipstream.webui.main.views/header] header-element))
+  (when-let [footer-element (.getElementById js/document "webui-footer")]
+    (reagent/render [sixsq.slipstream.webui.main.views/footer] footer-element))
+  (when-let [container-element (.getElementById js/document "webui-container")]
+    (reagent/render [sixsq.slipstream.webui.main.views/app] container-element)))
