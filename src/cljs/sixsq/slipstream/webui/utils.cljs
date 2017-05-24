@@ -5,7 +5,7 @@
     [clojure.set :as set]))
 
 (defn str->int
-  "Converts a string that contains a deciman representation of an integer into
+  "Converts a string that contains a decimal representation of an integer into
    an integer. Returns nil for any invalid input."
   [s]
   (when (and (string? s)
