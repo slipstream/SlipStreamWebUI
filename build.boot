@@ -97,7 +97,7 @@
          (comp (pom)
                (production)
                (cljs)
-               (sift :include #{#".*app\.out.*" #"app\.cljs\.edn"}
+               (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"}
                      :invert true)
                (jar)))
 

@@ -5,9 +5,11 @@
     [clojure.set :as set]))
 
 (defn str->int
+  "Converts a string that contains a deciman representation of an integer into
+   an integer. Returns nil for any invalid input."
   [s]
   (when (and (string? s)
-             (re-find #"^\d+$" s))
+             (re-find #"^-?(0|[1-9]\d*)$" s))
     (edn/read-string s)))
 
 (defn prepare-params [params]
@@ -115,8 +117,16 @@
       (str protocol "//" host port-field))))
 
 (defn parse-resource-path
-  "Utility to split a resource path into a vector of terms.
-   Returns an empty vector for a nil argument.  Removes
-   blank or empty terms from the result."
+  "Utility to split a resource path into a vector of terms. Returns an empty
+   vector for a nil argument. Removes blank or empty terms from the result."
   [path]
   (vec (remove str/blank? (str/split path #"/"))))
+
+(defn truncate
+  "Truncates a string to the given size and adds the optional suffix if the
+   string was actually truncated."
+  [s max-size & [suffix]]
+  (if (> (count s) max-size)
+    (str (str/join "" (take max-size s)) suffix)
+    s))
+

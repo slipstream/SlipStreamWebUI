@@ -1,11 +1,11 @@
-(ns sixsq.slipstream.webui.widget.authn.effects
+(ns sixsq.slipstream.webui.panel.authn.effects
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.widget.authn.utils :as au]))
+    [sixsq.slipstream.webui.panel.authn.utils :as au]))
 
 (reg-fx
   :fx.webui.authn/logout

@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.widget.authn.utils
+(ns sixsq.slipstream.webui.panel.authn.utils
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
@@ -9,6 +9,13 @@
     [sixsq.slipstream.client.api.utils.http-async :as http]
     [sixsq.slipstream.client.api.utils.json :as json]
     [clojure.walk :as walk]))
+
+(def ^:const common-attrs #{:created :updated :resourceURI :properties :acl :operations})
+
+(defn remove-common-attrs
+  "Remove the CIMI common attributes from the given map."
+  [m]
+  (into {} (remove #(common-attrs (first %)) m)))
 
 (defn get-current-session
   [client]
