@@ -24,7 +24,8 @@
        (sort-by (fn [[_ {:keys [order]}]] order))
        seq))
 
-(defn update-form-data [method param-name value]
+(defn update-form-data
+  [method param-name value]
   (dispatch [:evt.webui.authn/update-form-data [method param-name value]]))
 
 (defn form-component
@@ -61,16 +62,15 @@
         cep (subscribe [:cloud-entry-point])]
     (fn []
       (let [redirect-uri "/webui/login"
+            post-uri (str (:baseURI @cep) (get-in @cep [:sessions :href])) ;; FIXME: Should be part of CIMI API.
             simple-method (second (re-matches #"session-template/(.*)" (str @method)))
-            params (ordered-params @method @methods)
-            params (if (seq params)                         ;; FIXME: Get this from template description.
-                     params
-                     [["redirectURI" {:displayName "Redirect URI" :data redirect-uri}]])
-            params (conj params ["href" {:displayName "href" :data @method}])]
+            params (-> (ordered-params @method @methods)
+                       (conj ["href" {:displayName "href" :data @method}]
+                             ["redirectURI" {:displayName "Redirect URI" :data redirect-uri}]))] ;; FIXME: Should come from template
         (when params
           [:form {:id       (str "login_" @method)
                   :method   "post"
-                  :action   "https://nuv.la/api/session"    ;; FIXME: Calculate value based on HOST_URL setting.
+                  :action   post-uri
                   :enc-type "application/x-www-form-urlencoded"}
            [v-box
             :gap "0.25ex"
