@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.main.db
   (:require
-    [cljs.spec :as s]
+    [clojure.spec.alpha :as s]
     [re-frame.core :refer [after]]
     [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]))
 
