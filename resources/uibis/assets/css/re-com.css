@@ -26,7 +26,7 @@ html, body {
     letter-spacing: 0.002em;
     height:         100%;
     margin:         0px;
-    padding:        0px;
+    /* padding:        0px; */  /*** Doesn't play well with old UI stylesheets. ***/
 }
 
 /*----------------------------------------------------------------------------------------

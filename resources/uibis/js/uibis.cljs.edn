@@ -1,0 +1,4 @@
+{:require          [sixsq.slipstream.webui]
+ :init-fns         [sixsq.slipstream.webui/init]
+ :compiler-options {:asset-path "/uibis/js/uibis.out"
+                    :closure-defines {'sixsq.slipstream.webui/CONTEXT "/uibis"}}}
