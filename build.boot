@@ -78,9 +78,8 @@
 ;;
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
-                              :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV false
-                                                                   'goog.DEBUG                 false}}})
+                              :source-map       false
+                              :compiler-options {:language-in :ecmascript5}})
          identity)
 
 (deftask development []
@@ -97,11 +96,13 @@
          (comp (pom)
                (production)
                (cljs :ids #{"uibis"})
-               (sift :include #{#".*\.out/.*" #".*\.cljs\.edn"}
+               (sift :include #{#".*\.out/.*" #"uibis\.cljs\.edn"}
                      :invert true)
                (cljs :ids #{"webui"})
-               (sift :include #{#".*\.out/.*" #".*\.cljs\.edn"}
+               (sift :include #{#".*\.out/.*" #"webui\.cljs\.edn"}
                      :invert true)
+               (sift :move {#"webui\.js" "webui/assets/js/webui.js"
+                            #"uibis\.js" "uibis/assets/js/uibis.js"})
                (jar)))
 
 (deftask running []
