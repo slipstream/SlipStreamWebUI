@@ -1,4 +1,2 @@
 {:require          [sixsq.slipstream.webui]
- :init-fns         [sixsq.slipstream.webui/init]
- :compiler-options {:asset-path "/webui/js/webui.out"
-                    :closure-defines {'sixsq.slipstream.webui/CONTEXT "/webui"}}}
+ :init-fns         [sixsq.slipstream.webui/init]}

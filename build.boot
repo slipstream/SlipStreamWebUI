@@ -77,9 +77,8 @@
 ;; generated javascipt code
 ;;
 (deftask production []
-         (task-options! cljs {:optimizations    :advanced
-                              :source-map       false
-                              :compiler-options {:language-in :ecmascript5}})
+         (task-options! cljs {:optimizations :advanced
+                              :source-map    false})
          identity)
 
 (deftask development []
@@ -92,17 +91,32 @@
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
-(deftask build []
-         (comp (pom)
-               (production)
-               (cljs :ids #{"uibis"})
-               (sift :include #{#".*\.out/.*" #"uibis\.cljs\.edn"}
-                     :invert true)
-               (cljs :ids #{"webui"})
+(deftask build-webui []
+         (comp (pom :project (get-env :project)
+                    :version (get-env :version))
+               (cljs :ids #{"webui"}
+                     :optimizations :advanced
+                     :source-map    false
+                     :compiler-options {:language-in     :ecmascript5
+                                        :closure-defines {'sixsq.slipstream.webui/CONTEXT "/webui"}
+                                        :asset-path      "/webui/js/webui.out"})
                (sift :include #{#".*\.out/.*" #"webui\.cljs\.edn"}
                      :invert true)
-               (sift :move {#"webui\.js" "webui/assets/js/webui.js"
-                            #"uibis\.js" "uibis/assets/js/uibis.js"})
+               (sift :move {#"webui\.js" "webui/assets/js/webui.js"})
+               (jar)))
+
+(deftask build-uibis []
+         (comp (pom :project 'sixsq.slipstream/uibis
+                    :version (get-env :version))
+               (cljs :ids #{"uibis"}
+                     :optimizations :advanced
+                     :source-map    false
+                     :compiler-options {:language-in     :ecmascript5
+                                        :closure-defines {'sixsq.slipstream.webui/CONTEXT "/uibis"}
+                                        :asset-path      "/uibis/js/uibis.out"})
+               (sift :include #{#".*\.out/.*" #"uibis\.cljs\.edn"}
+                     :invert true)
+               (sift :move {#"uibis\.js" "uibis/assets/js/uibis.js"})
                (jar)))
 
 (deftask running []
@@ -154,7 +168,8 @@
          "build full project through maven"
          []
          (comp
-           (build)
+           (build-webui)
+           (build-uibis)
            (install)
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push)
