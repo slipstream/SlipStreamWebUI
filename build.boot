@@ -96,7 +96,10 @@
 (deftask build []
          (comp (pom)
                (production)
-               (cljs)
+               (cljs :ids #{"uibis"})
+               (sift :include #{#".*\.out/.*" #".*\.cljs\.edn"}
+                     :invert true)
+               (cljs :ids #{"webui"})
                (sift :include #{#".*\.out/.*" #".*\.cljs\.edn"}
                      :invert true)
                (jar)))
@@ -112,7 +115,7 @@
                (cljs-repl)
                (reload)
                (speak)
-               (cljs)))
+               (cljs :ids #{"webui"})))
 
 (deftask dev
          "Simple alias to run application in development mode"
