@@ -11,4 +11,4 @@
 
 (defn ^:export init
   []
-  (main/init @debug/slipstream-url @path-prefix))
+  (main/init @debug/slipstream-url @path-prefix "/webui/login"))

@@ -24,14 +24,16 @@
   The path-prefix defines the 'context' of the application within the hosting
   webserver. This must be provided for the internal routing and history
   features to work correctly."
-  [slipstream-url path-prefix]
+  [slipstream-url path-prefix redirect-uri]
   (.log js/console "using slipstream server:" slipstream-url)
   (.log js/console "using path prefix:" path-prefix)
+  (.log js/console "using login redirect:" redirect-uri)
   (dispatch-sync [:evt.webui.main/initialize-db])
   (dispatch-sync [:evt.webui.main/initialize-client slipstream-url])
   (dispatch-sync [:fetch-cloud-entry-point])
   (dispatch-sync [:evt.webui.history/initialize path-prefix])
   (dispatch-sync [:evt.webui.authn/initialize])
+  (dispatch-sync [:evt.webui.authn/set-redirect-uri redirect-uri])
   (dispatch [:evt.webui.authn/check-session])
   (when-let [header-element (.getElementById js/document "webui-header")]
     (reagent/render [sixsq.slipstream.webui.main.views/header] header-element))
