@@ -38,7 +38,7 @@
                     [re-frame]
                     [re-com]
                     [com.andrewmcveigh/cljs-time "0.5.0"]
-                    
+
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
                     [adzerk/boot-reload]
@@ -79,18 +79,18 @@
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV false
-                                                                   'goog.DEBUG                 false}}})
+                                                 :closure-defines {'goog.DEBUG                       false
+                                                                   'sixsq.slipstream.webui.debug/DEV false}}})
          identity)
 
 (deftask development []
          (task-options! cljs {:optimizations    :none
                               :source-map       true
                               :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV      true
-                                                                   'sixsq.slipstream.webui/HOST_URL "https://nuv.la"
-                                                                   ;'sixsq.slipstream.webui/CONTEXT  ""
-                                                                   'goog.DEBUG                      true}}}
+                                                 :closure-defines {'goog.DEBUG                                  true
+                                                                   'sixsq.slipstream.webui.debug/DEV            true
+                                                                   'sixsq.slipstream.webui.debug/LOGGING_LEVEL  "INFO"
+                                                                   'sixsq.slipstream.webui.debug/SLIPSTREAM_URL "https://nuv.la"}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
@@ -98,7 +98,8 @@
          (comp (pom)
                (production)
                (cljs)
-               (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"}
+               (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"
+                                #".*uibis\.out.*" #"uibis\.cljs\.edn"}
                      :invert true)
                (jar)))
 

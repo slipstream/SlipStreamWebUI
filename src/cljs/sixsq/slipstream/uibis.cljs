@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui
+(ns sixsq.slipstream.uibis
   (:require
     [sixsq.slipstream.webui.debug :as debug]
     [sixsq.slipstream.webui.utils :as utils]
@@ -7,7 +7,7 @@
 (debug/initialize-debugging-tools)
 (debug/initialize-logging-level)
 
-(def path-prefix (delay (str (utils/host-url) "/webui")))
+(def path-prefix (delay (str (utils/host-url) "/uibis")))
 
 (defn ^:export init
   []
