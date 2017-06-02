@@ -34,6 +34,13 @@
       cofx)))
 
 (reg-event-db
+  :evt.webui.authn/set-redirect-uri
+  [db/check-spec-interceptor trim-v]
+  (fn [db [redirect-uri]]
+    (-> db
+        (assoc-in [:authn :redirect-uri] redirect-uri))))
+
+(reg-event-db
   :evt.webui.authn/logged-in
   [db/check-spec-interceptor trim-v]
   (fn [db [session]]

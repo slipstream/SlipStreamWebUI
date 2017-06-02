@@ -48,6 +48,8 @@
 
 (s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
 
+(s/def :webui.authn/redirect-uri (s/nilable string?))
+
 (s/def :webui.authn/method (s/nilable string?))
 
 (s/def :webui.authn/id string?)
@@ -63,6 +65,7 @@
 (s/def :webui.authn/forms (s/map-of string? map?))
 
 (s/def :webui.authn/authn (s/keys :req-un [:webui.authn/session
+                                           :webui.authn/redirect-uri
                                            :webui.authn/method
                                            :webui.authn/methods
                                            :webui.authn/forms]))
@@ -160,6 +163,7 @@
    :modules-breadcrumbs nil
 
    :authn               {:session      nil
+                         :redirect-uri nil
                          :method       nil
                          :methods      []
                          :forms        {}}

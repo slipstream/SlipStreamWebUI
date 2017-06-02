@@ -4,6 +4,9 @@
 (reg-sub :webui.authn/session
          (fn [db _] (-> db :authn :session)))
 
+(reg-sub :webui.authn/redirect-uri
+         (fn [db _] (-> db :authn :redirect-uri)))
+
 (reg-sub :webui.authn/method
          (fn [db _] (-> db :authn :method)))
 

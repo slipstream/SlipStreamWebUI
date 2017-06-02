@@ -57,11 +57,12 @@
   "Renders the form for a particular login method. The fields are taken from
    the login method description."
   []
-  (let [method (subscribe [:webui.authn/method])
+  (let [redirect-uri (subscribe [:webui.authn/redirect-uri])
+        method (subscribe [:webui.authn/method])
         methods (subscribe [:webui.authn/methods])
         cep (subscribe [:cloud-entry-point])]
     (fn []
-      (let [redirect-uri "/webui/login"
+      (let [redirect-uri @redirect-uri
             post-uri (str (:baseURI @cep) (get-in @cep [:sessions :href])) ;; FIXME: Should be part of CIMI API.
             simple-method (second (re-matches #"session-template/(.*)" (str @method)))
             params (-> (ordered-params @method @methods)
