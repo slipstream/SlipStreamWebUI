@@ -38,7 +38,7 @@
                     [re-frame]
                     [re-com]
                     [com.andrewmcveigh/cljs-time "0.5.0"]
-                    
+
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
                     [adzerk/boot-reload]
@@ -77,10 +77,8 @@
 ;; generated javascipt code
 ;;
 (deftask production []
-         (task-options! cljs {:optimizations    :advanced
-                              :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV false
-                                                                   'goog.DEBUG                 false}}})
+         (task-options! cljs {:optimizations :advanced
+                              :source-map    false})
          identity)
 
 (deftask development []
@@ -89,17 +87,36 @@
                               :compiler-options {:language-in     :ecmascript5
                                                  :closure-defines {'sixsq.slipstream.webui/DEV      true
                                                                    'sixsq.slipstream.webui/HOST_URL "https://nuv.la"
-                                                                   ;'sixsq.slipstream.webui/CONTEXT  ""
                                                                    'goog.DEBUG                      true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
-(deftask build []
-         (comp (pom)
-               (production)
-               (cljs)
-               (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"}
+(deftask build-webui []
+         (comp (pom :project (get-env :project)
+                    :version (get-env :version))
+               (cljs :ids #{"webui"}
+                     :optimizations :advanced
+                     :source-map    false
+                     :compiler-options {:language-in     :ecmascript5
+                                        :closure-defines {'sixsq.slipstream.webui/CONTEXT "/webui"}
+                                        :asset-path      "/webui/js/webui.out"})
+               (sift :include #{#".*\.out/.*" #"webui\.cljs\.edn"}
                      :invert true)
+               (sift :move {#"webui\.js" "webui/assets/js/webui.js"})
+               (jar)))
+
+(deftask build-uibis []
+         (comp (pom :project 'sixsq.slipstream/uibis
+                    :version (get-env :version))
+               (cljs :ids #{"uibis"}
+                     :optimizations :advanced
+                     :source-map    false
+                     :compiler-options {:language-in     :ecmascript5
+                                        :closure-defines {'sixsq.slipstream.webui/CONTEXT "/uibis"}
+                                        :asset-path      "/uibis/js/uibis.out"})
+               (sift :include #{#".*\.out/.*" #"uibis\.cljs\.edn"}
+                     :invert true)
+               (sift :move {#"uibis\.js" "uibis/assets/js/uibis.js"})
                (jar)))
 
 (deftask running []
@@ -113,7 +130,7 @@
                (cljs-repl)
                (reload)
                (speak)
-               (cljs)))
+               (cljs :ids #{"webui"})))
 
 (deftask dev
          "Simple alias to run application in development mode"
@@ -151,7 +168,8 @@
          "build full project through maven"
          []
          (comp
-           (build)
+           (build-webui)
+           (build-uibis)
            (install)
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push)
