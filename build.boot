@@ -38,7 +38,7 @@
                     [re-frame]
                     [re-com]
                     [com.andrewmcveigh/cljs-time "0.5.0"]
-                    
+
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
                     [adzerk/boot-reload]
@@ -79,18 +79,19 @@
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV false
-                                                                   'goog.DEBUG                 false}}})
+                                                 :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "warn"
+                                                                   'goog.DEBUG                           false}}})
          identity)
 
 (deftask development []
          (task-options! cljs {:optimizations    :none
                               :source-map       true
-                              :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/DEV      true
-                                                                   'sixsq.slipstream.webui/HOST_URL "https://nuv.la"
+                              :compiler-options {           ;:preloads        '[devtools.preload]
+                                                 :language-in     :ecmascript5
+                                                 :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"
+                                                                   'sixsq.slipstream.webui/HOST_URL      "https://nuv.la"
                                                                    ;'sixsq.slipstream.webui/CONTEXT  ""
-                                                                   'goog.DEBUG                      true}}}
+                                                                   'goog.DEBUG                           true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
