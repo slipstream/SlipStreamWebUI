@@ -1,7 +1,6 @@
 (ns sixsq.slipstream.webui
   (:require
     [clojure.string :as str]
-    [devtools.core :as devtools]
     [reagent.core :as reagent]
     [re-frame.core :refer [dispatch dispatch-sync]]
     [taoensso.timbre :as timbre]
@@ -18,20 +17,20 @@
     [sixsq.slipstream.webui.widget.history.events]))
 
 ;;
-;; debugging tools
+;; This option is not compatible with other platforms, notably nodejs.
+;; Use instead the logging calls to provide console output.
 ;;
-;; Turn this on or off with:
-;;
-;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/DEV false}}
-;;
-(goog-define DEV false)
-(if (identical? DEV true)
-  (do
-    (devtools/install!)
-    (enable-console-print!)
-    (timbre/set-level! :info))
-  (timbre/set-level! :warn))
+;; (enable-console-print!)  ;; do not activate
 
+;;
+;; debugging log level
+;;
+;; Set the value like this:
+;;
+;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"}}
+;;
+(goog-define LOGGING_LEVEL "info")
+(timbre/set-level! (keyword LOGGING_LEVEL))
 
 ;;
 ;; determine the host url

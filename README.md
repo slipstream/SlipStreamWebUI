@@ -110,7 +110,7 @@ on the boot wiki.
 After you've done this you can just run:
 
 ```
-$ boot lein-generate
+$ boot generate
 ```
 
 to create the `project.clj` file.  You can then import the repository
