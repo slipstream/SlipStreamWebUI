@@ -3,7 +3,7 @@
     [clojure.string :as str]
     [reagent.core :as reagent]
     [re-frame.core :refer [dispatch dispatch-sync]]
-    [taoensso.timbre :as timbre]
+    [taoensso.timbre :as log]
 
     [sixsq.slipstream.webui.routes]
     [sixsq.slipstream.webui.utils :as utils]
@@ -30,7 +30,7 @@
 ;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"}}
 ;;
 (goog-define LOGGING_LEVEL "info")
-(timbre/set-level! (keyword LOGGING_LEVEL))
+(log/set-level! (keyword LOGGING_LEVEL))
 
 ;;
 ;; determine the host url
@@ -61,8 +61,8 @@
 ;;
 (defn ^:export init
   []
-  (.log js/console "using slipstream server:" @SLIPSTREAM_URL)
-  (.log js/console "using path prefix:" @PATH_PREFIX)
+  (log/info "using slipstream server:" @SLIPSTREAM_URL)
+  (log/info "using path prefix:" @PATH_PREFIX)
   (dispatch-sync [:evt.webui.main/initialize-db])
   (dispatch-sync [:evt.webui.main/initialize-client @SLIPSTREAM_URL])
   (dispatch-sync [:fetch-cloud-entry-point])
