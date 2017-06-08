@@ -5,7 +5,8 @@
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.panel.authn.utils :as au]))
+    [sixsq.slipstream.webui.panel.authn.utils :as au]
+    [taoensso.timbre :as log]))
 
 (reg-fx
   :fx.webui.authn/logout
@@ -27,7 +28,7 @@
           303 (let [session (<! (au/get-current-session client))]
                 (dispatch [:evt.webui.authn/logged-in session]))
           (do
-            (.log js/console "Error login response: " (with-out-str (cljs.pprint/pprint resp)))
+            (log/error "Error login response:" (with-out-str (cljs.pprint/pprint resp)))
             (dispatch [:message "login failed"])))))))
 
 (reg-fx

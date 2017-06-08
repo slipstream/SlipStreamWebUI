@@ -2,7 +2,8 @@
   (:require
     [goog.events :as events]
     [clojure.string :as str]
-    [secretary.core :as secretary])
+    [secretary.core :as secretary]
+    [taoensso.timbre :as log])
   (:import
     [goog History]
     [goog.history Html5History EventType]
@@ -49,7 +50,7 @@
    URL routing."
   [path-prefix]
   (let [token (get-token path-prefix (.-location js/window))]
-    (.log js/console "start token: " token)
+    (log/info "start token: " token)
     (.setToken history token)
     (secretary/dispatch! token)))
 
