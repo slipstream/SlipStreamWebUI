@@ -18,6 +18,7 @@
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
     [sixsq.slipstream.webui.panel.offer.views :as offer-views]
+    [sixsq.slipstream.webui.panel.session.views :as session-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
 
@@ -189,6 +190,7 @@
                       "app" [app-views/modules-panel]
                       "welcome" [welcome-views/welcome-panel]
                       "login" [authn-views/login-panel]
+                      "session" [session-views/session-panel]
                       nil [welcome-views/welcome-panel]
                       [unknown-views/unknown-panel])]]))))
 

@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.panel.authn.views
   (:require
     [re-com.core :refer [h-box v-box input-text input-password label
-                         button modal-panel single-dropdown title]]
+                         button info-button modal-panel single-dropdown title line]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.widget.history.utils :as history]
@@ -10,15 +10,13 @@
     [sixsq.slipstream.webui.panel.authn.events]
     [sixsq.slipstream.webui.panel.authn.subs]
     [clojure.string :as str]
-    [sixsq.slipstream.webui.utils :as utils]))
+    [sixsq.slipstream.webui.utils :as utils]
+    [taoensso.timbre :as log]))
 
 (defn ordered-params
-  "Selects the information for a single login method and then orders the
-   parameter descriptions for rendering the form."
-  [id methods]
-  (->> methods
-       (filter #(= id (:id %)))
-       first
+  "Extracts and orders the parameter descriptions for rendering the form."
+  [method]
+  (->> method
        :params-desc
        seq
        (sort-by (fn [[_ {:keys [order]}]] order))
@@ -27,6 +25,22 @@
 (defn update-form-data
   [method param-name value]
   (dispatch [:evt.webui.authn/update-form-data [method param-name value]]))
+
+(defn login-button
+  "Form login button initiates the login process."
+  [{:keys [id label description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
+  (log/info "method object:" (with-out-str (cljs.pprint/pprint method)))
+  [h-box
+   :gap "0.25ex"
+   :justify :between
+   :children [[button
+               :label label
+               :class "btn btn-primary"
+               :disabled? false
+               :on-click (fn []
+                           (.submit (.getElementById js/document (str "login_" id)))
+                           (dispatch [:evt.webui.authn/clear-form-data]))]
+              [info-button :info description]]])
 
 (defn form-component
   "Provides a single element of a form. This should provide a reasonable
@@ -57,74 +71,41 @@
   "Renders the form for a particular login method. The fields are taken from
    the login method description."
   []
-  (let [method (subscribe [:webui.authn/method])
-        methods (subscribe [:webui.authn/methods])
+  (let [methods (subscribe [:webui.authn/methods])
         cep (subscribe [:cloud-entry-point])]
-    (fn []
+    (fn [{:keys [id] :as method}]
+      (log/info "creating login form for method" id)
       (let [redirect-uri "/webui/login"
             post-uri (str (:baseURI @cep) (get-in @cep [:sessions :href])) ;; FIXME: Should be part of CIMI API.
-            simple-method (second (re-matches #"session-template/(.*)" (str @method)))
-            params (-> (ordered-params @method @methods)
-                       (conj ["href" {:displayName "href" :data @method}]
+            simple-method (second (re-matches #"session-template/(.*)" id))
+            params (-> (ordered-params method)
+                       (conj ["href" {:displayName "href" :data id}]
                              ["redirectURI" {:displayName "Redirect URI" :data redirect-uri}]))] ;; FIXME: Should come from template
         (when params
-          [:form {:id       (str "login_" @method)
+          [:form {:id       (str "login_" id)
                   :method   "post"
                   :action   post-uri
                   :enc-type "application/x-www-form-urlencoded"}
            [v-box
             :gap "0.25ex"
-            :children (vec (map (partial form-component @method) params))]])))))
+            :children (conj (vec (map (partial form-component id) params))
+                            [login-button method])]])))))
 
-(defn login-dropdown
-  "Dropdown that contains the list of available login methods."
+;; FIXME: Actually sort the methods with some reasonable algorithm.
+(defn sort-methods [methods]
+  methods)
+
+(defn login-form-container
+  "Container that holds all of the login forms."
   []
-  (let [tr (subscribe [:webui.i18n/tr])
-        method (subscribe [:webui.authn/method])
-        methods (subscribe [:webui.authn/methods])]
+  (let [methods (subscribe [:webui.authn/methods])]
     (fn []
-      [single-dropdown
-       :choices methods
-       :model @method
-       :placeholder (@tr [:login-method])
-       :width "100%"
-       :on-change #(dispatch [:evt.webui.authn/update-method %])])))
-
-(defn login-button
-  "Form login button initiates the login process."
-  []
-  (let [tr (subscribe [:webui.i18n/tr])
-        method (subscribe [:webui.authn/method])]
-    (fn []
-      [button
-       :label (@tr [:login])
-       :class "btn-primary"
-       :disabled? (nil? @method)
-       :on-click (fn []
-                   (.submit (.getElementById js/document (str "login_" @method)))
-                   (dispatch [:evt.webui.authn/clear-form-data]))])))
-
-(defn login-forms
-  "Allows the user to select the login method, supply information, and then
-   login. The form is different for each login method."
-  []
-  [v-box
-   :gap "0.25ex"
-   :width "35ex"
-   :children [[login-dropdown]
-              [method-form]
-              [login-button]]])
-
-(defn login-form
-  "Modal dialog to allow the user to choose the login method and to provide
-   the necessary information."
-  []
-  (let [session (subscribe [:webui.authn/session])]
-    (fn []
-      (when-not @session
-        [v-box
-         :justify :center
-         :children [[login-forms]]]))))
+      [v-box
+       :justify :center
+       :gap "2ex"
+       :width "40ex"
+       :children (vec (interpose [line] (vec (for [method (sort-methods @methods)]
+                                               [method-form method]))))])))
 
 (defn logout-button
   "Buttons shown when the user has an active session to allow the user to view
@@ -133,47 +114,33 @@
   (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [button
-       :class "btn-primary"
        :label (@tr [:logout])
        :on-click #(dispatch [:evt.webui.authn/logout])])))
 
 (defn authn-button
-  "Button that navigates to the login page. The text of the button is either
-   'login' or the username depending on whether there is an active session or
-   not."
+  "Button that navigates to the login page or to the session page depending on
+   whether there is an active session or not. When there is no active session,
+   the button label is 'login' and redirects to the login page. If there is an
+   active session, then the button label is the username and redirects to the
+   session page."
   []
   (let [tr (subscribe [:webui.i18n/tr])
         session (subscribe [:webui.authn/session])]
     (fn []
-      (let [{:keys [username] :or {:username "unknown"}} @session
-            button-text (if @session (utils/truncate username 15 "…") (@tr [:login]))]
-        [button :label button-text :on-click #(history/navigate "login")]))))
-
-(defn column
-  [vs cls]
-  [v-box
-   :class "webui-column"
-   :children (doall (for [v vs] [label :class cls :label v]))])
-
-(defn session-table [session]
-  (let [data (sort (u/remove-common-attrs session))
-        ks (map (comp name first) data)
-        vs (map (comp str second) data)]
-    [h-box
-     :children [[column ks "webui-row-header"]
-                [column vs ""]]]))
-
-(defn session-info
-  [session]
-  (when session
-    [v-box
-     :children [[session-table session]
-                [logout-button]]]))
+      (if @session
+        (let [button-text (-> @session
+                              :username
+                              (or "unknown")
+                              (utils/truncate 15 "…"))]
+          [h-box
+           :gap "0.25ex"
+           :children [[button :label button-text :on-click #(history/navigate "session")]
+                      [logout-button]]])
+        (let [button-text (@tr [:login])]
+          [button :label button-text :on-click #(history/navigate "login")])))))
 
 (defn login-panel
-  "The login panel provides the forms to log into the SlipStream server if the
-   user is not already logged in. If the user is logged in, then the current
-   session information is provided, as well as a logout button."
+  "The login panel provides the forms to log into the SlipStream server."
   []
   (let [tr (subscribe [:webui.i18n/tr])
         session (subscribe [:webui.authn/session])]
@@ -183,6 +150,5 @@
                    :label (@tr (if @session [:session] [:login]))
                    :level :level1
                    :underline? true]
-                  [login-form]
-                  [session-info @session]]])))
+                  [login-form-container]]])))
 
