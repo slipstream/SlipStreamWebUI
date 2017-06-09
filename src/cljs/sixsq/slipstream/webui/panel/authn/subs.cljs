@@ -7,9 +7,6 @@
 (reg-sub :webui.authn/session
          (fn [db _] (-> db :authn :session)))
 
-(reg-sub :webui.authn/method
-         (fn [db _] (-> db :authn :method)))
-
 (reg-sub :webui.authn/methods
          (fn [db _] (-> db :authn :methods)))
 

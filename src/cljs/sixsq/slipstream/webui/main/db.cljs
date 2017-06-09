@@ -48,8 +48,6 @@
 
 (s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
 
-(s/def :webui.authn/method (s/nilable string?))
-
 (s/def :webui.authn/id string?)
 (s/def :webui.authn/label string?)
 (s/def :webui.authn/authn-method string?)
@@ -67,7 +65,6 @@
 
 (s/def :webui.authn/authn (s/keys :req-un [:webui.authn/error-message
                                            :webui.authn/session
-                                           :webui.authn/method
                                            :webui.authn/methods
                                            :webui.authn/forms]))
 
@@ -165,7 +162,6 @@
 
    :authn               {:error-message nil
                          :session       nil
-                         :method        nil
                          :methods       []
                          :forms         {}}
 
