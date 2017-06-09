@@ -1,6 +1,9 @@
 (ns sixsq.slipstream.webui.panel.authn.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
+(reg-sub :webui.authn/error-message
+         (fn [db _] (-> db :authn :error-message)))
+
 (reg-sub :webui.authn/session
          (fn [db _] (-> db :authn :session)))
 

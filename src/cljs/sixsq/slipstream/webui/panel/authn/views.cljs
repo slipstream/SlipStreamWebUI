@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.panel.authn.views
   (:require
-    [re-com.core :refer [h-box v-box input-text input-password label
+    [re-com.core :refer [h-box v-box box input-text input-password label alert-box
                          button info-button modal-panel single-dropdown title line]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
@@ -29,17 +29,18 @@
 (defn login-button
   "Form login button initiates the login process."
   [{:keys [id label description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
-  [h-box
-   :gap "0.25ex"
-   :justify :between
-   :children [[button
-               :label label
-               :class "btn btn-primary"
-               :disabled? false
-               :on-click (fn []
-                           (.submit (.getElementById js/document (str "login_" id)))
-                           (dispatch [:evt.webui.authn/clear-form-data]))]
-              [info-button :info description]]])
+  [box
+   :class "webui-block-button"
+   :size "auto"
+   :child [button
+           :label label
+           :class "btn btn-primary btn-block"
+           :style {:flex "1 0 auto"}
+           :disabled? false
+           :on-click (fn []
+                       (.submit (.getElementById js/document (str "login_" id)))
+                       (dispatch [:evt.webui.authn/clear-form-data])
+                       (dispatch [:evt.webui.authn/clear-error-message]))]])
 
 (defn form-component
   "Provides a single element of a form. This should provide a reasonable
@@ -158,16 +159,29 @@
         (let [button-text (@tr [:login])]
           [button :label button-text :on-click #(history/navigate "login")])))))
 
+(defn error-message [msg]
+  (let [tr (subscribe [:webui.i18n/tr])
+        error-message (subscribe [:webui.authn/error-message])]
+    (fn []
+      (when @error-message
+        [alert-box
+         :alert-type :danger
+         :heading (@tr [:login-failed])
+         :body @error-message
+         :closeable? true
+         :on-close #(dispatch [:evt.webui.authn/clear-error-message])]))))
+
 (defn login-panel
   "The login panel provides the forms to log into the SlipStream server."
   []
-  (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [v-box
+       :justify :center
        :children [[title
                    :label (@tr [:login])
                    :level :level1
                    :underline? true]
+                  [error-message]
                   [login-form-container]]])))
 

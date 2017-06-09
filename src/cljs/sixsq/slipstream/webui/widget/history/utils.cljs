@@ -10,7 +10,13 @@
     [goog.history.Html5History TokenTransformer]))
 
 (defn get-token
-  "Creates the history token from the given location."
+  "Creates the history token from the given location excluding the query parameters."
+  [path-prefix location]
+  (let [url (str (.-protocol location) "//" (.-host location) (.-pathname location))]
+    (str/replace-first url path-prefix "")))
+
+(defn get-full-token
+  "Creates the history token from the given location including the query parameters."
   [path-prefix location]
   (let [url (str (.-protocol location) "//" (.-host location) (.-pathname location) (.-search location))]
     (str/replace-first url path-prefix "")))
@@ -49,10 +55,12 @@
    when setting the first value, so this explicitly dispatches the value to the
    URL routing."
   [path-prefix]
-  (let [token (get-token path-prefix (.-location js/window))]
+  (let [location (.-location js/window)
+        token (get-token path-prefix location)
+        full-token (get-full-token path-prefix location)]
     (log/info "start token: " token)
     (.setToken history token)
-    (secretary/dispatch! token)))
+    (secretary/dispatch! full-token)))
 
 (defn navigate
   "Navigates to the given internal URL (relative to the application root) by

@@ -2,7 +2,9 @@
   (:require
     [sixsq.slipstream.webui.main.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
-    [sixsq.slipstream.webui.panel.authn.utils :as au]))
+    [sixsq.slipstream.webui.panel.authn.utils :as au]
+    [sixsq.slipstream.webui.utils :as utils]
+    [taoensso.timbre :as log]))
 
 (reg-event-fx
   :evt.webui.authn/logout
@@ -100,3 +102,18 @@
   (fn [db [_]]
     (let [cleared-form-data (au/clear-form-data (-> db :authn :forms))]
       (assoc-in db [:authn :forms] cleared-form-data))))
+
+(reg-event-db
+  :set-login-path-and-error
+  [db/check-spec-interceptor trim-v]
+  (fn [db [error-message]]
+    (-> db
+        (assoc :resource-path (utils/parse-resource-path "/login"))
+        (assoc-in [:authn :error-message] error-message))))
+
+(reg-event-db
+  :evt.webui.authn/clear-error-message
+  [db/check-spec-interceptor trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :error-message] nil)))
+

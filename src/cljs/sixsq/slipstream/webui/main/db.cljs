@@ -54,6 +54,7 @@
 (s/def :webui.authn/label string?)
 (s/def :webui.authn/authn-method string?)
 (s/def :webui.authn/description string?)
+(s/def :webui.authn/error-message (s/nilable string?))
 (s/def :webui.authn/params-desc (s/map-of keyword? map?))
 (s/def :webui.authn/method-defn (s/merge (s/keys :req-un [:webui.authn/id
                                                           :webui.authn/label
@@ -64,7 +65,8 @@
 (s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
 (s/def :webui.authn/forms (s/map-of string? map?))
 
-(s/def :webui.authn/authn (s/keys :req-un [:webui.authn/session
+(s/def :webui.authn/authn (s/keys :req-un [:webui.authn/error-message
+                                           :webui.authn/session
                                            :webui.authn/method
                                            :webui.authn/methods
                                            :webui.authn/forms]))
@@ -161,10 +163,11 @@
    :modules-path        nil
    :modules-breadcrumbs nil
 
-   :authn               {:session      nil
-                         :method       nil
-                         :methods      []
-                         :forms        {}}
+   :authn               {:error-message nil
+                         :session       nil
+                         :method        nil
+                         :methods       []
+                         :forms         {}}
 
    :cloud-entry-point   nil
    :search              {:collection-name  nil
