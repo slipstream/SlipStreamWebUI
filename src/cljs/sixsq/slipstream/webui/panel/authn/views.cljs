@@ -29,7 +29,6 @@
 (defn login-button
   "Form login button initiates the login process."
   [{:keys [id label description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
-  (log/info "method object:" (with-out-str (cljs.pprint/pprint method)))
   [h-box
    :gap "0.25ex"
    :justify :between
@@ -91,21 +90,41 @@
             :children (conj (vec (map (partial form-component id) params))
                             [login-button method])]])))))
 
-;; FIXME: Actually sort the methods with some reasonable algorithm.
-(defn sort-methods [methods]
-  methods)
+(defn internal? [{:keys [authn-method]}]
+  (= "internal" authn-method))
+
+(defn order-and-group
+  "Sorts the methods by ID and then groups them (true/false) on whether it is
+   an internal method or not."
+  [methods]
+  (->> methods
+       (sort-by :id)
+       (group-by internal?)))
 
 (defn login-form-container
   "Container that holds all of the login forms."
   []
   (let [methods (subscribe [:webui.authn/methods])]
     (fn []
-      [v-box
-       :justify :center
-       :gap "2ex"
-       :width "40ex"
-       :children (vec (interpose [line] (vec (for [method (sort-methods @methods)]
-                                               [method-form method]))))])))
+      (let [ordered-methods (order-and-group @methods)
+            internals (get ordered-methods true)
+            externals (get ordered-methods false)]
+
+        [h-box
+         :gap "5ex"
+         :align :start
+         :children [[v-box
+                     :justify :center
+                     :gap "2ex"
+                     :width "40ex"
+                     :children (vec (for [method internals]
+                                      [method-form method]))]
+                    [v-box
+                     :justify :center
+                     :gap "2ex"
+                     :width "40ex"
+                     :children (vec (for [method externals]
+                                      [method-form method]))]]]))))
 
 (defn logout-button
   "Buttons shown when the user has an active session to allow the user to view
@@ -147,7 +166,7 @@
     (fn []
       [v-box
        :children [[title
-                   :label (@tr (if @session [:session] [:login]))
+                   :label (@tr [:login])
                    :level :level1
                    :underline? true]
                   [login-form-container]]])))

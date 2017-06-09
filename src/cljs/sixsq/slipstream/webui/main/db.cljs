@@ -52,13 +52,15 @@
 
 (s/def :webui.authn/id string?)
 (s/def :webui.authn/label string?)
+(s/def :webui.authn/authn-method string?)
 (s/def :webui.authn/description string?)
 (s/def :webui.authn/params-desc (s/map-of keyword? map?))
 (s/def :webui.authn/method-defn (s/merge (s/keys :req-un [:webui.authn/id
                                                           :webui.authn/label
+                                                          :webui.authn/authn-method
                                                           :webui.authn/description
                                                           :webui.authn/params-desc])
-                                         (s/map-of #{:id :label :description :params-desc} any?)))
+                                         (s/map-of #{:id :label :authn-method :description :params-desc} any?)))
 (s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
 (s/def :webui.authn/forms (s/map-of string? map?))
 

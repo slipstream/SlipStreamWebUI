@@ -56,12 +56,13 @@
               (dissoc :describe-url)))))))
 
 (defn prepare-session-template
-  [baseURI {:keys [id name description operations] :as tpl}]
+  [baseURI {:keys [id name method description operations] :as tpl}]
   (when-let [describe-url (->> operations
                                extract-describe-url
                                (absolute-url baseURI))]
     {:id           id
      :label        name
+     :authn-method method
      :description  description
      :describe-url describe-url}))
 
