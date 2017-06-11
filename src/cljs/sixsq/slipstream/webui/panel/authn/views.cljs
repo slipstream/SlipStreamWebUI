@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.panel.authn.views
   (:require
     [re-com.core :refer [h-box v-box box input-text input-password label alert-box
-                         button info-button modal-panel single-dropdown title line]]
+                         button info-button modal-panel single-dropdown title line gap progress-bar]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.widget.history.utils :as history]
@@ -91,8 +91,37 @@
             :children (conj (vec (map (partial form-component id) params))
                             [login-button method])]])))))
 
-(defn internal? [{:keys [authn-method]}]
-  (= "internal" authn-method))
+(defn model-login-forms
+  []
+  (let [show? (reagent/atom false)]
+    (fn [method-type methods]
+      [v-box
+       :width "35ex"
+       :children [[button
+                   :label (str "Sign In with " (str/upper-case method-type))
+                   :class "btn btn-primary btn-block"
+                   :on-click #(reset! show? true)]
+                  (when @show?
+                    [modal-panel
+                     :backdrop-on-click #(reset! show? false)
+                     :child [v-box
+                             :width "35ex"
+                             :children (conj (vec (doall (for [method methods]
+                                                           [method-form method])))
+                                             [gap :size "3ex"]
+                                             [button
+                                              :label (str "Cancel")
+                                              :class "btn btn-danger btn-block"
+                                              :on-click #(reset! show? false)])]])]])))
+
+
+(defn method-comparator [x y]
+  (cond
+    (= x y) 0
+    (= "internal" x) -1
+    (= "internal" y) 1
+    (< x y) -1
+    :else 1))
 
 (defn order-and-group
   "Sorts the methods by ID and then groups them (true/false) on whether it is
@@ -100,32 +129,37 @@
   [methods]
   (->> methods
        (sort-by :id)
-       (group-by internal?)))
+       (group-by :authn-method)
+       (sort-by first method-comparator)
+       (into {})))
+
+(defn login-form-group
+  []
+  (fn [method-type methods]
+    (if (= 1 (count methods))
+      [v-box
+       :gap "2ex"
+       :width "35ex"
+       :children [[method-form (first methods)]]]
+      [model-login-forms method-type methods])))
 
 (defn login-form-container
   "Container that holds all of the login forms."
   []
   (let [methods (subscribe [:webui.authn/methods])]
     (fn []
-      (let [ordered-methods (order-and-group @methods)
-            internals (get ordered-methods true)
-            externals (get ordered-methods false)]
+      (let [methods (order-and-group @methods)
+            internals (get methods "internal")
+            externals (into {} (remove (fn [[k _]] (= "internal" k)) methods))]
 
         [h-box
          :gap "5ex"
          :align :start
-         :children [[v-box
-                     :justify :center
-                     :gap "2ex"
-                     :width "40ex"
-                     :children (vec (for [method internals]
-                                      [method-form method]))]
+         :children [[login-form-group "internal" internals]
                     [v-box
-                     :justify :center
-                     :gap "2ex"
-                     :width "40ex"
-                     :children (vec (for [method externals]
-                                      [method-form method]))]]]))))
+                     :gap "1ex"
+                     :children (vec (doall (for [k (keys externals)]
+                                             [login-form-group k (get externals k)])))]]]))))
 
 (defn logout-button
   "Buttons shown when the user has an active session to allow the user to view
@@ -177,11 +211,12 @@
   (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [v-box
-       :justify :center
        :children [[title
                    :label (@tr [:login])
                    :level :level1
                    :underline? true]
-                  [error-message]
-                  [login-form-container]]])))
-
+                  [h-box
+                   :justify :center
+                   :children [[v-box
+                               :children [[error-message]
+                                          [login-form-container]]]]]]])))
