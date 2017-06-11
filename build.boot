@@ -86,7 +86,7 @@
 (deftask development []
          (task-options! cljs {:optimizations    :none
                               :source-map       true
-                              :compiler-options {           ;:preloads        '[devtools.preload]
+                              :compiler-options {:preloads        '[devtools.preload]
                                                  :language-in     :ecmascript5
                                                  :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"
                                                                    'sixsq.slipstream.webui/HOST_URL      "https://nuv.la"

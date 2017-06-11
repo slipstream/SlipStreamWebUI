@@ -198,7 +198,9 @@
     (fn []
       [button
        :label (@tr [:logout])
-       :on-click #(dispatch [:evt.webui.authn/logout])])))
+       :on-click (fn []
+                   (dispatch [:evt.webui.authn/logout])
+                   (history/navigate "login"))])))
 
 (defn authn-button
   "Button that navigates to the login page or to the session page depending on

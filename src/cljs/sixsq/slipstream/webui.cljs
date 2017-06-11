@@ -20,7 +20,7 @@
 ;; This option is not compatible with other platforms, notably nodejs.
 ;; Use instead the logging calls to provide console output.
 ;;
-;; (enable-console-print!)  ;; do not activate
+(enable-console-print!)
 
 ;;
 ;; debugging log level
