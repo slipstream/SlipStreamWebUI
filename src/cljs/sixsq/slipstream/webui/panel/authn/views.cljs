@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.panel.authn.views
   (:require
     [re-com.core :refer [h-box v-box box input-text input-password label alert-box
-                         button info-button modal-panel single-dropdown title line gap progress-bar]]
+                         button info-button modal-panel single-dropdown title line gap]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.widget.history.utils :as history]
@@ -13,34 +13,24 @@
     [sixsq.slipstream.webui.utils :as utils]
     [taoensso.timbre :as log]))
 
+(defn hidden? [{:keys [type] :as param-desc}]
+  (= "hidden" type))
+
 (defn ordered-params
-  "Extracts and orders the parameter descriptions for rendering the form."
+  "Extracts and orders the parameter descriptions for rendering the form.
+   Returns a tuple with two ordered parameter groups. The first contains the
+   list of hidden parameters; the second contains the list of visible ones."
   [method]
-  (->> method
-       :params-desc
-       seq
-       (sort-by (fn [[_ {:keys [order]}]] order))
-       seq))
+  (let [params (->> method
+                    :params-desc
+                    seq
+                    (sort-by (fn [[_ {:keys [order]}]] order))
+                    (group-by (fn [[k v]] (hidden? v))))]
+    [(get params true) (get params false)]))
 
 (defn update-form-data
   [method param-name value]
   (dispatch [:evt.webui.authn/update-form-data [method param-name value]]))
-
-(defn login-button
-  "Form login button initiates the login process."
-  [{:keys [id label description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
-  [box
-   :class "webui-block-button"
-   :size "auto"
-   :child [button
-           :label label
-           :class "btn btn-primary btn-block"
-           :style {:flex "1 0 auto"}
-           :disabled? false
-           :on-click (fn []
-                       (.submit (.getElementById js/document (str "login_" id)))
-                       (dispatch [:evt.webui.authn/clear-form-data])
-                       (dispatch [:evt.webui.authn/clear-error-message]))]])
 
 (defn form-component
   "Provides a single element of a form. This should provide a reasonable
@@ -48,24 +38,40 @@
    either a text or password field. The changed data is stored in the global
    database."
   [method [param-name {:keys [data type displayName] :as param}]]
-  (cond
-    (or (= "Password" displayName) (= "password" type)) [input-password
-                                                         :attr {:name param-name}
-                                                         :width "100%"
-                                                         :model (reagent/atom (or data ""))
-                                                         :placeholder displayName
-                                                         :change-on-blur? true
-                                                         :on-change #(update-form-data method param-name %)]
-    (or (= "redirectURI" param-name) (= "href" param-name)) [:input {:name  param-name
-                                                                     :type  "hidden"
-                                                                     :value (or data "")}]
-    :else [input-text
-           :attr {:name param-name}
-           :width "100%"
-           :model (reagent/atom (or data ""))
-           :placeholder displayName
-           :change-on-blur? true
-           :on-change #(update-form-data method param-name %)]))
+  (case type
+    "hidden" [:input {:name  param-name
+                      :type  "hidden"
+                      :value (or data "")}]
+    "password" [input-password
+                :attr {:name param-name}
+                :width "100%"
+                :model (reagent/atom (or data ""))
+                :placeholder displayName
+                :change-on-blur? true
+                :on-change #(update-form-data method param-name %)]
+    [input-text
+     :attr {:name param-name}
+     :width "100%"
+     :model (reagent/atom (or data ""))
+     :placeholder displayName
+     :change-on-blur? true
+     :on-change #(update-form-data method param-name %)]))
+
+(defn login-button
+  "Button to initiate the login process by submitting the form associated with
+   the login method. This also clears the form data and any error message."
+  [{:keys [id label description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
+  [box
+   :class "webui-block-button"
+   :size "auto"
+   :child [button
+           :label label
+           :class "btn btn-primary btn-block"
+           :disabled? false
+           :on-click (fn []
+                       (.submit (.getElementById js/document (str "login_" id)))
+                       (dispatch [:evt.webui.authn/clear-form-data])
+                       (dispatch [:evt.webui.authn/clear-error-message]))]])
 
 (defn method-form
   "Renders the form for a particular login method. The fields are taken from
@@ -78,18 +84,22 @@
       (let [redirect-uri "/webui/login"
             post-uri (str (:baseURI @cep) (get-in @cep [:sessions :href])) ;; FIXME: Should be part of CIMI API.
             simple-method (second (re-matches #"session-template/(.*)" id))
-            params (-> (ordered-params method)
-                       (conj ["href" {:displayName "href" :data id}]
-                             ["redirectURI" {:displayName "Redirect URI" :data redirect-uri}]))] ;; FIXME: Should come from template
-        (when params
-          [:form {:id       (str "login_" id)
-                  :method   "post"
-                  :action   post-uri
-                  :enc-type "application/x-www-form-urlencoded"}
-           [v-box
-            :gap "0.25ex"
-            :children (conj (vec (map (partial form-component id) params))
-                            [login-button method])]])))))
+            [hidden-params visible-params] (ordered-params method)
+            hidden-params (conj
+                            hidden-params
+                            ["href" {:displayName "href" :data id :type "hidden"}]
+                            ["redirectURI" {:displayName "redirectURI" :data redirect-uri :type "hidden"}])]
+        [:form {:id       (str "login_" id)
+                :method   "post"
+                :action   post-uri
+                :enc-type "application/x-www-form-urlencoded"}
+         [v-box
+          :children [[v-box :children (vec (map (partial form-component id) hidden-params))]
+                     [v-box
+                      :gap "0.5ex"
+                      :children (vec (map (partial form-component id) visible-params))]
+                     [gap :size "1ex"]
+                     [login-button method]]]]))))
 
 (defn model-login-forms
   []
@@ -114,8 +124,10 @@
                                               :class "btn btn-danger btn-block"
                                               :on-click #(reset! show? false)])]])]])))
 
-
-(defn method-comparator [x y]
+(defn method-comparator
+  "Compares two login method types. The value 'internal' will always compare
+   as less than anything other than itself."
+  [x y]
   (cond
     (= x y) 0
     (= "internal" x) -1
@@ -134,19 +146,26 @@
        (into {})))
 
 (defn login-form-group
+  "Renders the forms for a given group. If there's only one item, the form is
+   rendered directly. If not, the forms are rendered in a modal dialog and a
+   button activates that dialog."
   []
   (fn [method-type methods]
     (if (= 1 (count methods))
       [v-box
-       :gap "2ex"
        :width "35ex"
        :children [[method-form (first methods)]]]
       [model-login-forms method-type methods])))
 
 (defn login-form-container
-  "Container that holds all of the login forms."
+  "Container that holds all of the login forms. These will be placed into two
+   columns. The first has the 'internal' login forms and the second contains
+   all of the rest. An extra margin will be added to each column so that the
+   contents are spaced reasonably when they flow. This margin should be removed
+   from the container holding the returned h-box."
   []
-  (let [methods (subscribe [:webui.authn/methods])]
+  (let [methods (subscribe [:webui.authn/methods])
+        margin "0 0 6ex 0"]
     (fn []
       (let [methods (order-and-group @methods)
             internals (get methods "internal")
@@ -155,9 +174,14 @@
         [h-box
          :gap "5ex"
          :align :start
-         :children [[login-form-group "internal" internals]
+         :class "webui-wrap"
+         :style {:flex-flow "row wrap"}
+         :children [[v-box
+                     :style {:margin margin}
+                     :children [[login-form-group "internal" internals]]]
                     [v-box
                      :gap "1ex"
+                     :style {:margin margin}
                      :children (vec (doall (for [k (keys externals)]
                                              [login-form-group k (get externals k)])))]]]))))
 
@@ -193,7 +217,9 @@
         (let [button-text (@tr [:login])]
           [button :label button-text :on-click #(history/navigate "login")])))))
 
-(defn error-message [msg]
+(defn error-message
+  "Provides the error message as an alert box when the message isn't nil."
+  []
   (let [tr (subscribe [:webui.i18n/tr])
         error-message (subscribe [:webui.authn/error-message])]
     (fn []
@@ -211,12 +237,10 @@
   (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [v-box
+       :style {:margin "0 0 -6ex 0"}                        ;; remove extra margin from login-form-container
        :children [[title
                    :label (@tr [:login])
                    :level :level1
                    :underline? true]
-                  [h-box
-                   :justify :center
-                   :children [[v-box
-                               :children [[error-message]
-                                          [login-form-container]]]]]]])))
+                  [error-message]
+                  [login-form-container]]])))
