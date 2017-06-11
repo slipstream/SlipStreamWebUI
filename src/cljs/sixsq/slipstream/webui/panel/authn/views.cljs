@@ -4,6 +4,7 @@
                          button info-button modal-panel single-dropdown title line gap]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
+    [clojure.string :as str]
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.panel.authn.utils :as u]
     [sixsq.slipstream.webui.panel.authn.effects]
@@ -165,25 +166,29 @@
    from the container holding the returned h-box."
   []
   (let [methods (subscribe [:webui.authn/methods])
-        margin "0 0 6ex 0"]
+        wrapped-row-spacing "6ex"
+        margin (str "0 0 " wrapped-row-spacing " 0")
+        neg-margin (str "0 0 -" wrapped-row-spacing " 0")]
     (fn []
       (let [methods (order-and-group @methods)
             internals (get methods "internal")
             externals (into {} (remove (fn [[k _]] (= "internal" k)) methods))]
 
-        [h-box
-         :gap "5ex"
-         :align :start
-         :class "webui-wrap"
-         :style {:flex-flow "row wrap"}
-         :children [[v-box
-                     :style {:margin margin}
-                     :children [[login-form-group "internal" internals]]]
-                    [v-box
-                     :gap "1ex"
-                     :style {:margin margin}
-                     :children (vec (doall (for [k (keys externals)]
-                                             [login-form-group k (get externals k)])))]]]))))
+        [v-box
+         :style {:margin neg-margin}
+         :children [[h-box
+                     :gap "5ex"
+                     :align :start
+                     :class "webui-wrap"
+                     :style {:flex-flow "row wrap"}
+                     :children [[v-box
+                                 :style {:margin margin}
+                                 :children [[login-form-group "internal" internals]]]
+                                [v-box
+                                 :gap "1ex"
+                                 :style {:margin margin}
+                                 :children (vec (for [k (keys externals)]
+                                                  [login-form-group k (get externals k)]))]]]]]))))
 
 (defn logout-button
   "Buttons shown when the user has an active session to allow the user to view
@@ -237,7 +242,6 @@
   (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [v-box
-       :style {:margin "0 0 -6ex 0"}                        ;; remove extra margin from login-form-container
        :children [[title
                    :label (@tr [:login])
                    :level :level1
