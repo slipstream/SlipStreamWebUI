@@ -20,24 +20,24 @@
                 [column vs ""]]]))
 
 (defn session-info
-  [session]
-  (let [tr (subscribe [:webui.i18n/tr])]
+  []
+  (let [tr (subscribe [:webui.i18n/tr])
+        session (subscribe [:webui.authn/session])]
     (fn []
-      (if session
-        [session-table session]
+      (if @session
+        [session-table @session]
         [label :label (@tr [:no-session])]))))
 
 (defn session-panel
   "This panel shows the details of the user's active session. If there is no
    active session, then a simple message to that effect is shown."
   []
-  (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
+  (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
       [v-box
        :children [[title
                    :label (@tr [:session])
                    :level :level1
                    :underline? true]
-                  [session-info @session]]])))
+                  [session-info]]])))
 
