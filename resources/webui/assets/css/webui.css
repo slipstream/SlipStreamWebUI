@@ -38,3 +38,7 @@
 .webui-column {
     padding: 1em;
 }
+
+.webui-block-button > div {
+    flex: 1 0 auto !important;
+}
