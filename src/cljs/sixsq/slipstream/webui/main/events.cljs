@@ -55,3 +55,8 @@
   (fn [db [path]]
     (assoc db :resource-path (utils/parse-resource-path path))))
 
+(reg-event-fx
+  :evt.webui.main/set-host-theme
+  [db/check-spec-interceptor trim-v]
+  (fn [cofx [path-prefix]]
+    (assoc cofx :fx.webui.main/set-host-theme [])))
