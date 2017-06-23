@@ -66,6 +66,7 @@
   (dispatch-sync [:evt.webui.main/initialize-db])
   (dispatch-sync [:evt.webui.main/initialize-client @SLIPSTREAM_URL])
   (dispatch-sync [:fetch-cloud-entry-point])
+  (dispatch-sync [:evt.webui.main/set-host-theme])
   (dispatch-sync [:evt.webui.history/initialize @PATH_PREFIX])
   (dispatch-sync [:evt.webui.authn/initialize])
   (dispatch [:evt.webui.authn/check-session])
