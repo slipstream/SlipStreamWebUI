@@ -4,6 +4,13 @@
 @import "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic"
 @import "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300"
 
+.webui-logo {
+    background-image: url('../images/slipstream-logo.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
 .webui-column-header {
     font-weight:    bold;
     border-style: none none solid none;

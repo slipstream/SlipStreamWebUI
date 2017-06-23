@@ -117,7 +117,8 @@
     (fn []
       [h-box
        :gap "2px"
-       :children [[button :label (@tr [:app]) :on-click #(history/navigate "app")]
+       :children [[box :class "webui-logo" :width "20ex" :child ""]
+                  [button :label (@tr [:app]) :on-click #(history/navigate "app")]
                   [button :label (@tr [:deployment]) :on-click #(history/navigate "deployment")]
                   [button :label (@tr [:offer]) :on-click #(history/navigate "offer")]
                   [button :label (@tr [:cimi]) :on-click #(history/navigate "cimi")]]])))

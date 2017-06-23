@@ -1,3 +1,11 @@
+
+.webui-logo {
+    background-image: url('../images/nuvla-logo.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
 .webui-header {
     color: white;
     background-color: red;
