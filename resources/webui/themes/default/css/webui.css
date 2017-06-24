@@ -1,9 +1,34 @@
 
 /* Import the Roboto fonts for use in the default theme. */
 /* FIXME: These should be served locally. */
-@import "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic"
-@import "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300"
+@import "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic";
+@import "https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300";
 
+/*
+  Override the re-com font definitions.
+*/
+html, body {
+    font-family: Roboto, 'Segoe UI', sans-serif;
+}
+
+/*
+  Styles on the webui-wrapper and webui-container allow for a 'sticky' footer
+  that stays at the bottom of the window even if there's insufficient content.
+*/
+#webui-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#webui-container {
+    flex: 1;
+}
+
+/*
+  Inserts a theme-dependent image. Themes would normally override only the
+  URL for the background image itself.
+*/
 .webui-logo {
     background-image: url('../images/slipstream-logo.png');
     background-repeat: no-repeat;
@@ -11,21 +36,9 @@
     background-size: cover;
 }
 
-.webui-column-header {
-    font-weight:    bold;
-    border-style: none none solid none;
-    border-color: black;
-    border-width: 1px;
-    #background-color: #eee;
-}
-
-.webui-row-header {
-    font-weight:    bold;
-}
-
 .webui-header {
-    color: black;
-    background-color: #f5f5f5;
+    color: white;
+    background-color: #36454f;
     padding: 0.5em;
     border-style: solid none;
     border-width: 1px;
@@ -33,12 +46,12 @@
 }
 
 .webui-footer {
-    color: black;
-    background-color: #f5f5f5;
+    color: white;
+    background-color: #36454f;
     padding: 0.5em;
-    border-style: solid none;
-    border-width: 1px;
-    border-color: #d3d3d3;
+    border-style: none;
+    font-family: 'Roboto Condensed', 'Segoe UI', san-serif;
+    font-weight: lighter;
 }
 
 .webui-contents {
@@ -48,10 +61,31 @@
     border-style: none;
 }
 
+/*
+  The following styles apply to the 'column-wise' tables and to the
+  formatted display of resource documents.
+*/
 .webui-column {
     padding: 1em;
 }
 
+.webui-column-header {
+    font-family: 'Roboto Condensed', 'Segoe UI', sans-serif;
+    font-weight: bold;
+    border-style: none none solid none;
+    border-color: black;
+    border-width: 1px;
+}
+
+.webui-row-header {
+    font-weight: bold;
+}
+
+/*
+  Block-level buttons are not possible without this style.  This forces
+  the override of the default style to allow the button to expand
+  horizontally to cover the width of its parent.
+*/
 .webui-block-button > div {
     flex: 1 0 auto !important;
 }

@@ -1,17 +1,12 @@
 
 .webui-logo {
     background-image: url('../images/cyclone-logo.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
 }
 
 .webui-header {
-    color: white;
-    background-color: blue;
+    background-color: lightgrey;
 }
 
 .webui-footer {
-    color: white;
-    background-color: blue;
+    background-color: lightgrey;
 }

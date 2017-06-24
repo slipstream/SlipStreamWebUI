@@ -1,17 +1,12 @@
 
 .webui-logo {
     background-image: url('../images/slipstream-logo.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
 }
 
 .webui-header {
-    color: white;
-    background-color: lightblue;
+    background-color: navy;
 }
 
 .webui-footer {
-    color: white;
-    background-color: lightblue;
+    background-color: navy;
 }
