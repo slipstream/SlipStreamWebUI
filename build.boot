@@ -79,7 +79,8 @@
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
-                                                 :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "warn"
+                                                 :closure-defines {'sixsq.slipstream.authn/LOGGING_LEVEL "warn"
+                                                                   'sixsq.slipstream.webui/LOGGING_LEVEL "warn"
                                                                    'goog.DEBUG                           false}}})
          identity)
 
@@ -99,7 +100,8 @@
          (comp (pom)
                (production)
                (cljs)
-               (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"}
+               (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"
+                                #".*authn\.out.*" #"authn\.cljs\.edn"}
                      :invert true)
                (jar)))
 

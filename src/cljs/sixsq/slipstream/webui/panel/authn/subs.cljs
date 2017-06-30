@@ -13,3 +13,6 @@
 (reg-sub :webui.authn/forms
          (fn [db _] (-> db :authn :forms)))
 
+(reg-sub :webui.authn/redirect-uri
+         (fn [db _] (-> db :authn :redirect-uri)))
+

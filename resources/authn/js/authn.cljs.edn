@@ -1,0 +1,3 @@
+{:require          [sixsq.slipstream.authn]
+ :init-fns         [sixsq.slipstream.authn/init]
+ :compiler-options {:asset-path "/authn/js/authn.out"}}

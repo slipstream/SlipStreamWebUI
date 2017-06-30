@@ -53,6 +53,7 @@
 (s/def :webui.authn/authn-method string?)
 (s/def :webui.authn/description string?)
 (s/def :webui.authn/error-message (s/nilable string?))
+(s/def :webui.authn/redirect-uri string?)
 (s/def :webui.authn/params-desc (s/map-of keyword? map?))
 (s/def :webui.authn/method-defn (s/merge (s/keys :req-un [:webui.authn/id
                                                           :webui.authn/label
@@ -63,7 +64,8 @@
 (s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
 (s/def :webui.authn/forms (s/map-of string? map?))
 
-(s/def :webui.authn/authn (s/keys :req-un [:webui.authn/error-message
+(s/def :webui.authn/authn (s/keys :req-un [:webui.authn/redirect-uri
+                                           :webui.authn/error-message
                                            :webui.authn/session
                                            :webui.authn/methods
                                            :webui.authn/forms]))
@@ -160,7 +162,8 @@
    :modules-path        nil
    :modules-breadcrumbs nil
 
-   :authn               {:error-message nil
+   :authn               {:redirect-uri  "/webui/login"
+                         :error-message nil
                          :session       nil
                          :methods       []
                          :forms         {}}

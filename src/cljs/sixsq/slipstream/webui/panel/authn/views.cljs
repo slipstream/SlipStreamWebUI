@@ -79,10 +79,11 @@
    the login method description."
   []
   (let [methods (subscribe [:webui.authn/methods])
-        cep (subscribe [:cloud-entry-point])]
+        cep (subscribe [:cloud-entry-point])
+        redirect-uri (subscribe [:webui.authn/redirect-uri])]
     (fn [{:keys [id] :as method}]
       (log/info "creating login form for method" id)
-      (let [redirect-uri "/webui/login"
+      (let [redirect-uri @redirect-uri
             post-uri (str (:baseURI @cep) (get-in @cep [:sessions :href])) ;; FIXME: Should be part of CIMI API.
             simple-method (second (re-matches #"session-template/(.*)" id))
             [hidden-params visible-params] (ordered-params method)
@@ -238,6 +239,12 @@
          :closeable? true
          :on-close #(dispatch [:evt.webui.authn/clear-error-message])]))))
 
+(defn login-contents
+  []
+  [v-box
+   :children [[error-message]
+              [login-form-container]]])
+
 (defn login-panel
   "The login panel provides the forms to log into the SlipStream server."
   []
@@ -248,5 +255,4 @@
                    :label (@tr [:login])
                    :level :level1
                    :underline? true]
-                  [error-message]
-                  [login-form-container]]])))
+                  [login-contents]]])))
