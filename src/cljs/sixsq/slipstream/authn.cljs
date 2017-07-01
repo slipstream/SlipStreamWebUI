@@ -17,7 +17,6 @@
     [sixsq.slipstream.webui.main.views]
 
     [sixsq.slipstream.authn.main.events]
-    [sixsq.slipstream.authn.main.effects]
     [sixsq.slipstream.authn.main.views]
 
     [sixsq.slipstream.webui.widget.history.events]))
