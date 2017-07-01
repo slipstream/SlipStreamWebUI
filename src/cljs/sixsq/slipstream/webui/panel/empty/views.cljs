@@ -3,7 +3,9 @@
    at the start before the initialization is completed."
   (:require
     [re-com.core :refer [v-box]]
-    [re-frame.core :refer [dispatch]]))
+    [re-frame.core :refer [dispatch]]
+
+    [sixsq.slipstream.webui.panel.empty.events]))
 
 (defn empty-panel
   []

@@ -19,10 +19,10 @@
     [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.empty.views :as empty-views]
     [sixsq.slipstream.webui.panel.offer.views :as offer-views]
-    [sixsq.slipstream.webui.panel.session.views :as session-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
 
+    [sixsq.slipstream.webui.widget.authn.views :as authn-widget]
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.widget.history.events]
     [sixsq.slipstream.webui.widget.history.effects]
@@ -131,7 +131,7 @@
    :children [[panel-controls]
               [h-box
                :gap "2em"
-               :children [[authn-views/authn-button]
+               :children [[authn-widget/authn-buttons]
                           [i18n-views/locale-selector]]]]])
 
 (defn page-footer []
@@ -169,8 +169,6 @@
                                                  :label (:id @resource-data)
                                                  :level :level3
                                                  :underline? true]
-                                                #_(format-data @resource-data)
-                                                #_(tree (:id @resource-data) @resource-data)
                                                 (tree-widget 0 (:id @resource-data) @resource-data)]]]
                             [button
                              :label "close"
@@ -192,9 +190,9 @@
                       "app" [app-views/modules-panel]
                       "welcome" [welcome-views/welcome-panel]
                       "login" [authn-views/login-panel]
-                      "session" [session-views/session-panel]
+                      "empty" [empty-views/empty-panel]
                       nil [empty-views/empty-panel]
-                      [unknown-views/unknown-panel])]]))))
+                      [empty-views/empty-panel])]]))))
 
 (defn header []
   [v-box

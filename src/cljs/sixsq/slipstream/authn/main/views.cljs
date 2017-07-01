@@ -1,17 +1,17 @@
 (ns sixsq.slipstream.authn.main.views
   (:require
-    [re-com.core :refer [v-box modal-panel p button]]
+    [re-com.core :refer [v-box modal-panel]]
     [re-frame.core :refer [subscribe dispatch]]
+    [taoensso.timbre :as log]
 
     [sixsq.slipstream.authn.main.events]
+    [sixsq.slipstream.webui.panel.authn.views-forms :as forms]
+    [sixsq.slipstream.webui.panel.authn.views-session :as session]))
 
-    [sixsq.slipstream.webui.panel.authn.views :as authn-views]
-    [sixsq.slipstream.webui.panel.session.views :as session-views]
-
-    [sixsq.slipstream.webui.widget.history.utils :as history]
-    [sixsq.slipstream.webui.widget.history.events]
-    [sixsq.slipstream.webui.widget.history.effects]
-    [taoensso.timbre :as log]))
+(defn redirect
+  []
+  (log/info "dispatching trigger-redirect")
+  (dispatch [:evt.authn.main/trigger-redirect]))
 
 (defn message-modal
   []
@@ -23,32 +23,14 @@
          :wrap-nicely? true
          :backdrop-on-click #(dispatch [:clear-message])]))))
 
-(defn login-info
+(defn app
   []
-  (let [session (subscribe [:webui.authn/session])]
-    (fn []
-      (when @session
-        (log/info "dispatching trigger-redirect")
-        (dispatch [:evt.authn.main/trigger-redirect])
+  (fn []
+    (let [session (subscribe [:webui.authn/session])]
+      (fn []
+        (when @session (redirect))
         [v-box
-         :children [[p (str "Authenticated as '" (:username @session) "'.")]]]))))
-
-(defn resource-panel
-  []
-  (let [resource-path (subscribe [:resource-path])
-        session (subscribe [:webui.authn/session])]
-    (fn []
-      (when-not @session
-        (let [panel (first @resource-path)]
-          [v-box
-           :class "webui-contents"
-           :children [(case panel
-                        "login" [authn-views/login-contents]
-                        "session" [session-views/session-info]
-                        [authn-views/login-contents])]])))))
-
-(defn app []
-  [v-box
-   :children [[message-modal]
-              [login-info]
-              [resource-panel]]])
+         :children [[message-modal]
+                    (if @session
+                      [forms/login-controls]
+                      [session/session-info])]]))))
