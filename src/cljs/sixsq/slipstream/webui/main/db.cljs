@@ -34,7 +34,7 @@
 
 (s/def ::offset string?)
 (s/def ::limit string?)
-(s/def ::cloud (s/nilable string?))
+(s/def ::cloud string?)
 (s/def ::activeOnly int?)
 (s/def ::runs-params (s/keys :req-un [::offset ::limit ::cloud ::activeOnly]))
 
