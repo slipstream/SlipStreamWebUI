@@ -8,22 +8,10 @@
     [sixsq.slipstream.webui.panel.app.events]
     [sixsq.slipstream.webui.panel.app.subs]
 
-    [sixsq.slipstream.webui.widget.i18n.subs]))
+    [sixsq.slipstream.webui.widget.i18n.subs]
 
-(defn format-crumb [s index]
-  [hyperlink
-   :label (str s)
-   :on-click #(dispatch [:trim-breadcrumbs index])])
-
-(defn breadcrumbs []
-  (let [tr (subscribe [:webui.i18n/tr])
-        crumbs (subscribe [:modules-breadcrumbs])]
-    (fn []
-      (let [home (@tr [:home])]
-        [h-box
-         :gap "3px"
-         :children
-         (doall (interpose [label :label ">"] (map format-crumb (cons home @crumbs) (range))))]))))
+    [sixsq.slipstream.webui.widget.breadcrumbs.views :as crumbs-views]
+    [sixsq.slipstream.webui.widget.breadcrumbs.events]))
 
 (defn format-module [module]
   (if module [hyperlink
@@ -40,5 +28,5 @@
 (defn modules-panel []
   [v-box
    :gap "3px"
-   :children [[breadcrumbs]
+   :children [[crumbs-views/breadcrumbs]
               [module-listing]]])
