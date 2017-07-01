@@ -17,4 +17,4 @@
   [db/check-spec-interceptor]
   (fn [cofx _]
     (log/info "scheduling redirect to /dashboard")
-    (assoc cofx :dispatch-later [{:ms 1500 :dispatch [:evt.authn.main/redirect]}])))
+    (assoc cofx :dispatch-later [{:ms 200 :dispatch [:evt.authn.main/redirect]}])))

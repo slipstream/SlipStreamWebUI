@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.authn.main.views
   (:require
-    [re-com.core :refer [v-box modal-panel]]
+    [re-com.core :refer [v-box modal-panel title]]
     [re-frame.core :refer [subscribe dispatch]]
     [taoensso.timbre :as log]
 
@@ -31,6 +31,10 @@
         (when @session (redirect))
         [v-box
          :children [[message-modal]
+                    (when @session [title
+                                    :label "Redirecting..."
+                                    :level :level1
+                                    :underline? true])
                     (if @session
-                      [forms/login-controls]
-                      [session/session-info])]]))))
+                      [session/session-info]
+                      [forms/login-controls])]]))))

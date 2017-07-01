@@ -1,66 +1,78 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <meta name="ss-current-tour" content=""/>
+    <meta name="ss-navigate-away-confirmation-msg"
+          content="You have unsaved changes that will be lost if you leave or reload this page without saving."/>
+    <meta name="ss-page-type" content="view"/>
+    <meta name="ss-user-type" content="regular"/>
+    <meta name="ss-username" content=""/>
+    <meta name="ss-view-name" content="login"/>
+    <meta name="ss-view-ns" content="slipstream.ui.views.login"/>
     <title>SlipStream | Login</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" class="ss-themable">
+    <link rel="icon" type="image/x-icon" href="themes/nuvla/images/favicon.ico" class="ss-themable"/>
     <!-- Specifics for portable devices -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <!-- Android Devices -->
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes"/>
     <!-- iOS Devices -->
-    <meta name="apple-mobile-web-app-title" content="SlipStream">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone-60x60.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="images/apple-touch-icon-ipad-76x76.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-iphone-retina-120x120.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-ipad-retina-152x152.png">
+    <meta name="apple-mobile-web-app-title" content="SlipStream"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone-60x60.png"/>
+    <link rel="apple-touch-icon" sizes="76x76" href="images/apple-touch-icon-ipad-76x76.png"/>
+    <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-iphone-retina-120x120.png"/>
+    <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-ipad-retina-152x152.png"/>
 
     <!-- Startup image for iOS 6 & 7 iPhone 5 -->
-    <link href="images/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px)            and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image">
+    <link href="images/apple-touch-startup-image-640x1096.png"
+          media="(device-width: 320px) and (device-height: 568px)            and (-webkit-device-pixel-ratio: 2)"
+          rel="apple-touch-startup-image"/>
 
     <!--
-	Future Pointers:
+    Future Pointers:
 
-	iOS 7 Web App
-	- https://gist.github.com/tfausak/2222823
+    iOS 7 Web App
+    - https://gist.github.com/tfausak/2222823
 
-	Prevent links in standalone web apps opening Mobile Safari:
-	- https://gist.github.com/kylebarrow/1042026
+    Prevent links in standalone web apps opening Mobile Safari:
+    - https://gist.github.com/kylebarrow/1042026
 
-	Optimizing Mobile Web Apps for iOS | Treehouse Blog:
-	- http://blog.teamtreehouse.com/optimizing-mobile-web-apps-ios
+    Optimizing Mobile Web Apps for iOS | Treehouse Blog:
+    - http://blog.teamtreehouse.com/optimizing-mobile-web-apps-ios
 
-	Remove rubberband scrolling from web apps on mobile safari (iOS)
-	- https://gist.github.com/amolk/1599412
-      -->
+    Remove rubberband scrolling from web apps on mobile safari (iOS)
+    - https://gist.github.com/amolk/1599412
+    -->
 
-    <base href="/">
+    <base href="/"/>
 
     <!-- External CSS Stylesheets -->
-    <link rel="stylesheet" type="text/css" href="external/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstro_custom.css">
+    <link rel="stylesheet" type="text/css" href="external/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstro_custom.css"/>
     <!-- <link href="external/bootstrap/css/bootstrap-theme.min.css" data-href="external/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" id="bs-theme-stylesheet"> -->
 
     <!-- Internal CSS Stylesheets -->
-    <link rel="stylesheet" type="text/css" href="css/icons.css">
-    <link rel="stylesheet" type="text/css" href="css/topbar.css">
-    <link rel="stylesheet" type="text/css" href="css/header.css">
-    <link rel="stylesheet" type="text/css" href="css/secondary-menubar.css">
-    <link rel="stylesheet" type="text/css" href="css/content.css">
-    <link rel="stylesheet" type="text/css" href="css/footer.css">
-    <link rel="stylesheet" type="text/css" href="css/error.css">
+    <link rel="stylesheet" type="text/css" href="css/icons.css"/>
+    <link rel="stylesheet" type="text/css" href="css/topbar.css"/>
+    <link rel="stylesheet" type="text/css" href="css/header.css"/>
+    <link rel="stylesheet" type="text/css" href="css/secondary-menubar.css"/>
+    <link rel="stylesheet" type="text/css" href="css/content.css"/>
+    <link rel="stylesheet" type="text/css" href="css/footer.css"/>
+    <link rel="stylesheet" type="text/css" href="css/error.css"/>
 
-    <link rel="stylesheet" type="text/css" href="css/alerts.css">
-    <link rel="stylesheet" type="text/css" href="css/menubar.css">
-    <link rel="stylesheet" type="text/css" href="css/subsection.css">
-    <link rel="stylesheet" type="text/css" href="css/section.css">
-    <link rel="stylesheet" type="text/css" href="css/modal_dialogs.css">
-    <link rel="stylesheet" type="text/css" href="css/table.css">
+    <link rel="stylesheet" type="text/css" href="css/alerts.css"/>
+    <link rel="stylesheet" type="text/css" href="css/menubar.css"/>
+    <link rel="stylesheet" type="text/css" href="css/subsection.css"/>
+    <link rel="stylesheet" type="text/css" href="css/section.css"/>
+    <link rel="stylesheet" type="text/css" href="css/modal_dialogs.css"/>
+    <link rel="stylesheet" type="text/css" href="css/table.css"/>
+    <link rel="stylesheet" type="text/css" href="css/login.css"/>
+    <link rel="stylesheet" type="text/css" href="themes/nuvla/css/custom.css"/>
 
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css"> -->
     <link rel="stylesheet" href="/webui/assets/css/material-design-iconic-font.min.css">
@@ -69,25 +81,17 @@
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,300" rel="stylesheet" type="text/css">
-
 </head>
 
-<body class="ss-view-name-usages ss-page-type-view">
+<body class="ss-view-name-login ss-page-type-view">
 
-<div id="ss-loading-screen" class="ss-loading-screen hidden">
-    <div class="backdrop"></div>
-    <div class="ss-loading-screen-content">
-        <span class="glyphicon glyphicon-refresh"></span>
-        Loading...
+<div class="navbar navbar-default navbar-fixed-top ss-alert-container-fixed-top">
+    <div class="ss-alert-offset-placeholder">
     </div>
 </div>
 
-<div class="navbar navbar-default navbar-fixed-top ss-alert-container-fixed-top">
-    <div class="ss-alert-offset-placeholder"></div>
-</div>
-
 <div class="navbar navbar-default navbar-fixed-top" role="navigation" id="topbar">
-    <div class="menubar ss-menubar-logged-in">
+    <div class="menubar ss-menubar-unlogged">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -96,68 +100,86 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/"><img class="ss-themable" src="images/logo-menubar-logged-in.png"></a>
+
+                <a class="navbar-brand" href="/"><img class="ss-themable"
+                                                      src="themes/nuvla/images/logo-menubar-unlogged.png"/></a>
+
             </div><!--/.navbar-header -->
-            <!-- Collect the nav links, forms, and other content for toggling -->
+
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-left">
-                    <li><a class="ss-action-dashboard" href="/dashboard">Dashboard</a></li>
-                    <li><a class="ss-action-appstore" href="/appstore">App Store</a></li>
-                    <li><a class="ss-action-modules ss-action-module" href="/module">Workspace</a></li>
+                <span id="hidden-msg-container" style="display: none"></span>
 
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-
+                <form id="login" class="navbar-form navbar-right" role="form" method="post">
+                    <input type="hidden" name="authn-method" value="internal" autocomplete="off"/>
+                    <button type="submit" class="btn btn-default btn-block visible-xs"><span
+                            class="glyphicon glyphicon-log-in"></span> <span class="ss-action-login">Log in</span>
+                    </button>
+                    <button class="btn btn-danger btn-block ss-login-error-on-mobile-alert"><span
+                            class="glyphicon glyphicon-exclamation-sign"></span> <span
+                            class="ss-login-error-on-mobile-alert-message">Wrong Credendials</span></button>
+                    <ul class="nav navbar-nav visible-xs">
+                        <li><a href="#" data-toggle="modal" data-target="#ss-reset-password-dialog"><span
+                                class="glyphicon glyphicon-flash"></span> <span class="ss-action-reset-password">Reset password</span></a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="http://ssdocs.sixsq.com" target="_blank"><span
+                                class="glyphicon glyphicon-book"></span> <span class="ss-action-documentation">Documentation</span></a>
+                        </li>
+                        <li><a href=" http://support.sixsq.com/solution/categories" target="_blank"><span
+                                class="glyphicon glyphicon-info-sign"></span> <span class="ss-action-knowledge-base">Knowledge Base</span></a>
+                        </li>
+                        <li class="ss-menu-item-support"><a
+                                href="mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20question%20%2D%20Not%20logged%20in"><span
+                                class="glyphicon glyphicon-envelope"></span> <span
+                                class="ss-action-support">Support</span></a></li>
+                    </ul>
+                    <div class="btn-group hidden-xs">
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-log-in"></span>
+                            <span class="ss-action-login">Log in</span></button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="/configuration"><span class="glyphicon glyphicon-cog"></span> <span class="ss-action-system">System</span></a></li>
-
-                            <li><a href="/users"><span class="glyphicon glyphicon-user"></span> <span class="ss-action-users">Users</span></a></li>
-
+                            <li><a href="#" data-toggle="modal" data-target="#ss-reset-password-dialog"><span
+                                    class="glyphicon glyphicon-flash"></span> <span class="ss-action-reset-password">Reset password</span></a>
+                            </li>
+                            <li class="divider"></li>
+                            <li><a href="http://ssdocs.sixsq.com" target="_blank"><span
+                                    class="glyphicon glyphicon-book"></span> <span class="ss-action-documentation">Documentation</span></a>
+                            </li>
+                            <li><a href=" http://support.sixsq.com/solution/categories" target="_blank"><span
+                                    class="glyphicon glyphicon-info-sign"></span> <span
+                                    class="ss-action-knowledge-base">Knowledge Base</span></a></li>
+                            <li class="ss-menu-item-support"><a
+                                    href="mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20question%20%2D%20Not%20logged%20in"><span
+                                    class="glyphicon glyphicon-envelope"></span> <span
+                                    class="ss-action-support">Support</span></a></li>
                         </ul>
-                    </li>
-
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="ss-action-help">Help</span> <span class="caret"></span></a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li class="ss-action-start-tour"><a href="/appstore?start-tour=yes"><span class="glyphicon glyphicon-comment"></span> <span class="ss-action-label">Start guided tour</span></a></li>
-                            <li><a href="http://ssdocs.sixsq.com" target="_blank"><span class="glyphicon glyphicon-book"></span> <span class="ss-action-documentation">Documentation</span></a></li>
-                            <li><a href=" http://support.sixsq.com/solution/categories" target="_blank"><span class="glyphicon glyphicon-info-sign"></span> <span class="ss-action-knowledge-base">Knowledge Base</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
+                    </div>
+                </form>
             </div><!--/.navbar-collapse -->
         </div><!--/.container -->
     </div><!--/#menubar -->
     <!-- Options: "alert-danger" "alert-warning" "alert-info" -->
 </div><!--/.navbar -->
 
-<div id="header" class="jumbotron">
+<div id="header" class="jumbotron ss-header">
     <div class="container">
-        <div id="header-content" class="ss-header">
-            <div class="row">
-                <div class="col-sm-1 text-left hidden-xs ss-header-title-icon-col">
-                    <div class="ss-header-title-icon">
-                        <span class="ss-header-icon-error glyphicon glyphicon-remove"></span>
-                    </div>
-                </div> <!-- /col -->
-                <div class="col-sm-11 ss-header-title-col text-left">
-                    <div>
-                        <span class="ss-header-error-status-code"></span>
-                        <div class="ss-header-title">Login</div>
-                    </div>
-                    <p class="ss-header-subtitle">Authentication status and information.</p>
-
-                </div> <!-- /col -->
-                <!-- /col -->
-            </div> <!-- /row -->
-        </div><!--/#header-content -->
+        <div class="row">
+            <div class="col-sm-8 col-lg-8">
+                <h1 class="ss-header-title">Login</h1>
+            </div>
+        </div>
     </div>
+</div>
 </div><!--/#header -->
 
 <!-- The #ss-secondary-menubar-placeholder will maintain the body layout when the
- #ss-secondary-menubar-container is affixed, avoiding sudden mouvements of the layout. -->
+  #ss-secondary-menubar-container is affixed, avoiding sudden mouvements of the layout. -->
 <div id="ss-secondary-menubar-placeholder"></div>
+
+<!-- /.ss-secondary-menubar-container -->
 
 <div id="ss-content" class="container">
     <div id="webui-container"></div>
@@ -170,16 +192,18 @@
         <div class="row ss-footer-trademarks text-muted">
             <div class="col-xs-6 col-sm-5 text-left">
                 <span class="hidden-xs">Copyright </span>© 2017 <a target="_blank" href="http://sixsq.com">SixSq</a>
-                <br>
+                <br/>
                 All rights reserved.
             </div>
             <div class="col-sm-2 text-center hidden-xs">
-                <a target="_blank" href="http://swissmadesoftware.org"><img src="images/logo_swiss_made_software.png"></a><br>
+                <a target="_blank" href="http://swissmadesoftware.org"><img src="images/logo_swiss_made_software.png"/></a><br/>
                 <a target="_blank" href="/terms">Terms and Conditions</a>
             </div>
             <div class="col-xs-6 col-sm-5 text-right">
-                <span class="hidden-xs">Powered by </span>SlipStream&nbsp;®&nbsp;v<span id="release-version">3.31</span><br><span class="hidden-xs">
-              <a target="_blank" href="https://github.com/slipstream/SlipStream">Open source</a> under </span><a target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License.</a>
+                <span class="hidden-xs">Powered by </span>SlipStream ® v<span id="release-version">3.30</span><br/><span
+                    class="hidden-xs">
+            <a target="_blank" href="https://github.com/slipstream/SlipStream">Open source</a> under </span><a
+                    target="_blank" href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License.</a>
             </div>
         </div>
     </div>
@@ -218,10 +242,10 @@
     <script src="external/ace-editor/src-min-noconflict-1.1.6/theme-tomorrow.js"></script>
     <script src="external/ace-editor/src-min-noconflict-1.1.6/theme-tomorrow_night.js"></script>
     <script src="js/code_area.js"></script>
+    <script src="js/login.js"></script>
     <script src="js/last.js"></script>
     <script src="js/support.js"></script>
 </div>
-
 </body>
 
 </html>
