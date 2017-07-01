@@ -6,5 +6,5 @@
   "Converts a sequence of crumbs to a URL by separating the values with
    slashes. Returns nil if the argument is not a sequence or is empty."
   [crumbs]
-  (if (seq crumbs)
+  (if (and (seqable? crumbs) (seq crumbs))
     (str/join "/" crumbs)))
