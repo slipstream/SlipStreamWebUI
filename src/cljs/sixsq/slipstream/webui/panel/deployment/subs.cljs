@@ -4,3 +4,6 @@
 (reg-sub :webui.deployment/runs-data
          (fn [db _] (-> db :runs-data)))
 
+(reg-sub :webui.deployment/runs-params
+         (fn [db _] (-> db :runs-params)))
+
