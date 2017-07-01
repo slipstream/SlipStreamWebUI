@@ -155,8 +155,8 @@
    :runs-data           nil
    :runs-params         {:offset     "0"
                          :limit      "10"
-                         :cloud      nil
-                         :activeOnly 0}
+                         :cloud      ""
+                         :activeOnly 1}
 
    :modules-data        nil
    :modules-path        nil

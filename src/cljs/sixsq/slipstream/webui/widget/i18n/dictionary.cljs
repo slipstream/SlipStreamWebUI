@@ -13,7 +13,7 @@
 (def dictionary
   {:en {:lang "english"
 
-        :active-only "active only?"
+        :active? "active?"
         :add-column "add column"
         :app "application"
         :back "back"
@@ -63,7 +63,7 @@
 
    :fr {:lang "français"
 
-        :active-only "active uniquement?"
+        :active? "active?"
         :add-column "ajouter une colonne"
         :app "applications"
         :back "précédent"
