@@ -1,9 +1,7 @@
 (ns sixsq.slipstream.webui.widget.breadcrumbs.views
   (:require
-    [re-com.core :refer [h-box v-box label hyperlink ]]
-    [reagent.core :as reagent]
+    [re-com.core :refer [h-box label hyperlink]]
     [re-frame.core :refer [subscribe dispatch]]
-    [clojure.string :as str]
     [sixsq.slipstream.webui.panel.app.effects]
     [sixsq.slipstream.webui.panel.app.events]
     [sixsq.slipstream.webui.panel.app.subs]

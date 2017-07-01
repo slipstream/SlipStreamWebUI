@@ -1,12 +1,12 @@
 (ns sixsq.slipstream.webui.panel.deployment.events
   (:require
-    [sixsq.slipstream.webui.main.db :as db]
+    [sixsq.slipstream.webui.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]))
 
 ;; usage: (dispatch [:set-runs-data data])
 (reg-event-db
   :evt.webui.deployment/set-data
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [data]]
     (assoc db :runs-data data)))
 
@@ -14,7 +14,7 @@
 ;; refine search
 (reg-event-fx
   :evt.webui.deployment/search
-  [db/check-spec-interceptor]
+  [db/debug-interceptors]
   (fn [cofx _]
     (let [{:keys [clients runs-params]} (:db cofx)
           client (:runs clients)]
@@ -24,7 +24,7 @@
 ;; usage:  (dispatch [:set-runs-params {:key value}])
 (reg-event-db
   :evt.webui.deployment/set-params
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [v]]
     (let [params (:runs-params db)
           new-params (merge params v)]

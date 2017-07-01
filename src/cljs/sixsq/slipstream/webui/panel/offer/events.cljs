@@ -2,20 +2,20 @@
   (:require
     [clojure.set :as set]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
-    [sixsq.slipstream.webui.main.db :as db]
+    [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.utils :as utils]))
 
 ;; usage: (dispatch [:set-offer-data data])
 (reg-event-db
   :evt.webui.offer/set-data
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [data]]
     (assoc db :offer-data data)))
 
 ;; usage: (dispatch [:clear-offer-data data])
 (reg-event-db
   :evt.webui.offer/clear-data
-  [db/check-spec-interceptor]
+  [db/debug-interceptors]
   (fn [db _]
     (assoc db :offer-data nil)))
 
@@ -23,7 +23,7 @@
 ;; shows the offer results
 (reg-event-db
   :evt.webui.offer/show-results
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [resource-type results]]
     (let [entries (get results (keyword resource-type) [])
           fields (utils/merge-keys (conj entries {:id "id"}))]
@@ -35,7 +35,7 @@
 ;; usage:  (dispatch [:set-offer-first f])
 (reg-event-db
   :evt.webui.offer/set-param-first
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 1)]
       (assoc-in db [:offer :params :$first] n))))
@@ -43,7 +43,7 @@
 ;; usage:  (dispatch [:set-offer-last f])
 (reg-event-db
   :evt.webui.offer/set-param-last
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 20)]
       (assoc-in db [:offer :params :$last] n))))
@@ -51,21 +51,21 @@
 ;; usage:  (dispatch [:set-offer-filter f])
 (reg-event-db
   :evt.webui.offer/set-param-filter
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [v]]
     (assoc-in db [:offer :params :$filter] v)))
 
 ;; usage:  (dispatch [:set-selected-fields fields])
 (reg-event-db
   :evt.webui.offer/set-selected-fields
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [fields]]
     (assoc-in db [:offer :selected-fields] (set/union #{"id"} fields))))
 
 ;; usage:  (dispatch [:remove-selected-field field])
 (reg-event-db
   :evt.webui.offer/remove-selected-field
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [db [field]]
     (update-in db [:offer :selected-fields] #(set/difference % #{field}))))
 
@@ -73,7 +73,7 @@
 ;; refine offer
 (reg-event-fx
   :offer
-  [db/check-spec-interceptor]
+  [db/debug-interceptors]
   (fn [cofx _]
     (let [{{:keys [clients offer]} :db} cofx
           cimi-client (:cimi clients)
@@ -85,7 +85,7 @@
 ;; usage:  (dispatch [:set-offer-search [params]])
 (reg-event-fx
   :set-offer
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [cofx [url-params]]
     (let [{{:keys [clients offer]} :db} cofx
           cimi-client (:cimi clients)
@@ -99,7 +99,7 @@
 ;; usage:  (dispatch [:set-offer-detail [uuid]])
 (reg-event-fx
   :set-offer-detail
-  [db/check-spec-interceptor trim-v]
+  [db/debug-interceptors trim-v]
   (fn [cofx [uuid]]
     (let [{{:keys [clients offer]} :db} cofx
           cimi-client (:cimi clients)
@@ -111,7 +111,7 @@
 ;; usage:  (dispatch [:show-offer-table])
 (reg-event-fx
   :show-offer-table
-  [db/check-spec-interceptor]
+  [db/debug-interceptors]
   (fn [cofx []]
     (-> cofx
         (assoc-in [:db :offer-data] nil)

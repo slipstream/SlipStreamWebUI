@@ -1,23 +1,28 @@
-(ns sixsq.slipstream.webui.main.db
+(ns sixsq.slipstream.webui.db
   (:require
     [clojure.spec.alpha :as s]
     [re-frame.core :refer [after]]
-    [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]))
+    [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]
+    [taoensso.timbre :as log]))
+
+(defn schema-validator
+  "Returns a function that will validate a value against the given spec. If
+   the schema check fails, then an error will be logged to the console with the
+   schema failure explanation."
+  [db-spec]
+  (fn validate-schema [db]
+    (let [valid? (s/valid? db-spec db)]
+      (when-not valid?
+        (log/error "failed db schema check: " (s/explain-str db-spec db)))
+      valid?)))
+
+(def validate-schema-interceptor (after (schema-validator ::db)))
+
+(def debug-interceptors [(when ^boolean goog.DEBUG re-frame.core/debug)
+                         (when ^boolean goog.DEBUG validate-schema-interceptor)])
 
 ;;
-;; check schema after every change
-;;
-(defn check-and-throw
-  "throw an exception if db doesn't match the spec."
-  [a-spec db]
-  (when-not (s/valid? a-spec db)
-    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
-
-;; check that all state changes from event handlers are correct
-(def check-spec-interceptor (after (partial check-and-throw :sixsq.slipstream.webui.main.db/db)))
-
-;;
-;; define schema of the local database
+;; full schema definition of the application
 ;;
 
 (s/def ::cimi any?)
