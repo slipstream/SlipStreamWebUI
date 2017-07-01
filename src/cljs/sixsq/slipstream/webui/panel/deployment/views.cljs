@@ -14,17 +14,19 @@
 
 (defn runs-control []
   (let [tr (subscribe [:webui.i18n/tr])
-        offset (reagent/atom "1")
-        limit (reagent/atom "10")
-        cloud (reagent/atom "")
-        activeOnly (reagent/atom true)]
+        params (subscribe [:webui.deployment/runs-params])
+        offset (reagent/atom (:offset @params))
+        limit (reagent/atom (:limit @params))
+        cloud (reagent/atom (:cloud @params))
+        activeOnly (reagent/atom (not (zero? (:activeOnly @params))))]
     (fn []
       [h-box
-       :gap "0.25ex"
+       :gap "1ex"
+       :align :center
        :children [[input-text
                    :model offset
                    :placeholder (@tr [:offset])
-                   :width "75px"
+                   :width "10ex"
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! offset v)
@@ -32,7 +34,7 @@
                   [input-text
                    :model limit
                    :placeholder (@tr [:limit])
-                   :width "75px"
+                   :width "10ex"
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! limit v)
@@ -40,21 +42,20 @@
                   [input-text
                    :model cloud
                    :placeholder (@tr [:cloud])
-                   :width "300px"
+                   :width "30ex"
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! cloud v)
                                 (dispatch [:evt.webui.deployment/set-params {:cloud v}]))]
                   [checkbox
                    :model activeOnly
-                   :label (@tr [:active-only])
+                   :label (@tr [:active?])
                    :on-change (fn [v]
                                 (reset! activeOnly v)
                                 (dispatch [:evt.webui.deployment/set-params {:activeOnly (if v 1 0)}]))]
                   [button
                    :label (@tr [:show])
-                   :on-click #(dispatch [:evt.webui.deployment/search])]
-                  ]])))
+                   :on-click #(dispatch [:evt.webui.deployment/search])]]])))
 
 (defn service-url
   [url status]

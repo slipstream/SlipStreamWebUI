@@ -34,7 +34,7 @@
 
 (s/def ::offset string?)
 (s/def ::limit string?)
-(s/def ::cloud (s/nilable string?))
+(s/def ::cloud string?)
 (s/def ::activeOnly int?)
 (s/def ::runs-params (s/keys :req-un [::offset ::limit ::cloud ::activeOnly]))
 
@@ -155,8 +155,8 @@
    :runs-data           nil
    :runs-params         {:offset     "0"
                          :limit      "10"
-                         :cloud      nil
-                         :activeOnly 0}
+                         :cloud      ""
+                         :activeOnly 1}
 
    :modules-data        nil
    :modules-path        nil
