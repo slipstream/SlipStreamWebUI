@@ -13,10 +13,11 @@
 
     [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
 
-    [sixsq.slipstream.webui.panel.authn.views :as authn-views]
-    [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.app.views :as app-views]
+    [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
+    [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
+    [sixsq.slipstream.webui.panel.empty.views :as empty-views]
     [sixsq.slipstream.webui.panel.offer.views :as offer-views]
     [sixsq.slipstream.webui.panel.session.views :as session-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
@@ -192,7 +193,7 @@
                       "welcome" [welcome-views/welcome-panel]
                       "login" [authn-views/login-panel]
                       "session" [session-views/session-panel]
-                      nil [welcome-views/welcome-panel]
+                      nil [empty-views/empty-panel]
                       [unknown-views/unknown-panel])]]))))
 
 (defn header []
