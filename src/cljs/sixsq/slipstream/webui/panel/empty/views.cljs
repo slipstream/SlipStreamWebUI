@@ -5,7 +5,8 @@
     [re-com.core :refer [v-box]]
     [re-frame.core :refer [dispatch]]
 
-    [sixsq.slipstream.webui.panel.empty.events]))
+    [sixsq.slipstream.webui.panel.empty.events]
+    [sixsq.slipstream.webui.resource :as resource]))
 
 (defn empty-panel
   []
@@ -13,3 +14,11 @@
     (dispatch [:evt.webui.empty/redirect-login])
     [v-box
      :children [[:div]]]))
+
+(defmethod resource/render "empty"
+  [path query-params]
+  [empty-panel])
+
+(defmethod resource/render nil
+  [path query-params]
+  [empty-panel])

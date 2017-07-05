@@ -11,7 +11,10 @@
     [sixsq.slipstream.webui.panel.offer.subs]
     [sixsq.slipstream.webui.widget.history.utils :as history]
 
-    [sixsq.slipstream.webui.widget.i18n.subs]))
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
+    [taoensso.timbre :as log]))
 
 (defn format-operations
   [ops]
@@ -102,7 +105,7 @@
    :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
-  (let [search-results (subscribe [:offer-results])
+  (let [search-results (subscribe [:offer-listing])
         collection-name (subscribe [:offer-collection-name])
         selected-fields (subscribe [:offer-selected-fields])]
     (fn []
@@ -296,12 +299,22 @@
   []
   (let [path (subscribe [:resource-path])]
     (fn []
-      (if (= 1 (count @path))
+      (let [listing? (= 1 (count @path))
+            children (if listing?
+                       [[control-bar]
+                        [results-bar]
+                        [search-vertical-result-table]]
+                       [[detail-control-bar]
+                        [offer-detail]])]
         [v-box
-         :children [[control-bar]
-                    [results-bar]
-                    [search-vertical-result-table]]]
-        [v-box
-         :children [[detail-control-bar]
-                    [offer-detail]]]))))
+         :gap "1ex"
+         :children (cons [breadcrumbs/breadcrumbs-widget
+                          :model path
+                          :on-change #(dispatch [:set-resource-path-vec %])]
+                         children)]))))
 
+(defmethod resource/render "offer"
+  [path query-params]
+  (dispatch [:set-offer query-params])
+  (when (second path) (dispatch [:set-offer-detail (second path)]))
+  [offer-panel])

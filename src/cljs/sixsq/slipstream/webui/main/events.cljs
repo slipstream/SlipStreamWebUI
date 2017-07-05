@@ -55,6 +55,20 @@
   (fn [db [path]]
     (assoc db :resource-path (utils/parse-resource-path path))))
 
+(reg-event-db
+  :set-resource-path-vec
+  [db/debug-interceptors trim-v]
+  (fn [db [path]]
+    (assoc db :resource-path path)))
+
+(reg-event-db
+  :set-resource
+  [db/debug-interceptors trim-v]
+  (fn [db [path query-params]]
+    (-> db
+        (assoc :resource-path path)
+        (assoc :resource-query-params query-params))))
+
 (reg-event-fx
   :evt.webui.main/set-host-theme
   [db/debug-interceptors trim-v]

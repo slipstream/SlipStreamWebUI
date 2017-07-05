@@ -1,17 +1,21 @@
 (ns sixsq.slipstream.webui.panel.cimi.views
   (:require
-    [re-com.core :refer [h-box v-box box gap input-text
+    [re-com.core :refer [h-box v-box box gap input-text title
                          button row-button label modal-panel throbber
                          single-dropdown hyperlink
                          scroller selection-list]]
     [reagent.core :as reagent]
+    [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
 
-    [sixsq.slipstream.webui.widget.i18n.subs]))
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
+    [taoensso.timbre :as log]))
 
 (defn format-operations
   [ops]
@@ -56,6 +60,7 @@
   (fn []
     (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
           align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
+      (log/error "DATA ENTRY:" (with-out-str (pprint entry)))
       (if (= "id" selected-field)
         [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
         [box :align align :child [label :label v]]))))
@@ -93,7 +98,7 @@
    :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
-  (let [search-results (subscribe [:search-results])
+  (let [search-results (subscribe [:search-listing])
         collection-name (subscribe [:search-collection-name])
         selected-fields (subscribe [:search-selected-fields])]
     (fn []
@@ -195,7 +200,7 @@
   []
   (let [tr (subscribe [:webui.i18n/tr])
         cep (subscribe [:cloud-entry-point])
-        selected-id (atom nil)]
+        selected-id (subscribe [:search-collection-name])]
     (fn []
       [h-box
        :children [[single-dropdown
@@ -204,7 +209,9 @@
                    :width "250px"
                    :choices (doall (cep-opts @cep))
                    :on-change (fn [id]
-                                (reset! selected-id id)
+                                #_(reset! selected-id id)
+                                (dispatch [:set-resource-path-vec ["cimi" (name id)]])
+                                (dispatch [:set-collection-name id])
                                 (dispatch [:new-search id]))]]])))
 
 (defn select-controls []
@@ -243,9 +250,56 @@
                       (if-let [ops (:operations results)]
                         (format-operations ops))]])))))
 
-(defn cimi-panel
+(defn detail-control-bar
+  []
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn []
+      [h-box
+       :justify :start
+       :children [[button
+                   :label (@tr [:back])
+                   :on-click #()]]])))
+
+(defn resource-detail
+  []
+  (let [data (subscribe [:resource-data])]
+    (fn []
+      (if @data
+        [v-box
+         :children [[title
+                     :label "CIMI RESOURCE DETAIL"
+                     :level :level1
+                     :underline? true]
+                    [:p (with-out-str (pprint @data))]]]))))
+
+#_(defn cimi-resource
   []
   [v-box
    :children [[control-bar]
               [results-bar]
               [search-vertical-result-table]]])
+
+(defn cimi-resource
+  []
+  (let [path (subscribe [:resource-path])]
+    (fn []
+      (let [n (count @path)
+            children (case n
+                       1 [[control-bar]]
+                       2 [[control-bar]
+                          [results-bar]
+                          [search-vertical-result-table]]
+                       3 [[detail-control-bar]
+                          [resource-detail]]
+                       [[control-bar]])]
+        [v-box
+         :gap "1ex"
+         :children (cons [breadcrumbs/breadcrumbs-widget
+                          :model path
+                          :on-change #(dispatch [:set-resource-path-vec %])]
+                         children)]))))
+
+(defmethod resource/render "cimi"
+  [path query-params]
+  (if (second path) (dispatch [:set-collection-name (second path)]))
+  [cimi-resource])

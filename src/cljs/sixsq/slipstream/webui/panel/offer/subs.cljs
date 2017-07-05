@@ -10,8 +10,8 @@
 (reg-sub :offer-completed?
          (fn [db _] (-> db :offer :completed?)))
 
-(reg-sub :offer-results
-         (fn [db _] (-> db :offer :results)))
+(reg-sub :offer-listing
+         (fn [db _] (-> db :offer :listing)))
 
 (reg-sub :offer-params
          (fn [db _] (-> db :offer :params)))

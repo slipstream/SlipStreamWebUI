@@ -24,11 +24,11 @@
 (reg-event-db
   :evt.webui.offer/show-results
   [db/debug-interceptors trim-v]
-  (fn [db [resource-type results]]
-    (let [entries (get results (keyword resource-type) [])
+  (fn [db [resource-type listing]]
+    (let [entries (get listing (keyword resource-type) [])
           fields (utils/merge-keys (conj entries {:id "id"}))]
       (-> db
-          (update-in [:offer :results] (constantly results))
+          (update-in [:offer :listing] (constantly listing))
           (update-in [:offer :completed?] (constantly true))
           (update-in [:offer :available-fields] (constantly fields))))))
 

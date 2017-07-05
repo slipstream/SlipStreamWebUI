@@ -42,11 +42,11 @@
 (reg-event-db
   :show-search-results
   [db/debug-interceptors trim-v]
-  (fn [db [resource-type results]]
-    (let [entries (get results (keyword resource-type) [])
+  (fn [db [resource-type listing]]
+    (let [entries (get listing (keyword resource-type) [])
           fields (utils/merge-keys (conj entries {:id "id"}))]
       (-> db
-          (update-in [:search :results] (constantly results))
+          (update-in [:search :listing] (constantly listing))
           (update-in [:search :completed?] (constantly true))
           (update-in [:search :available-fields] (constantly fields))))))
 
@@ -100,6 +100,12 @@
       (-> cofx
           (update-in [:db :search :completed?] (constantly false))
           (assoc :fx.webui.cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
+
+(reg-event-db
+  :set-collection-name
+  [db/debug-interceptors trim-v]
+  (fn [db [new-collection-name]]
+    (assoc-in db [:search :collection-name] new-collection-name)))
 
 ;; usage:  (dispatch [:search])
 ;; refine search

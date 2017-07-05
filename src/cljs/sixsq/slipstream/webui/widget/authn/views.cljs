@@ -18,6 +18,7 @@
     (fn []
       [button
        :label (@tr [:logout])
+       :class "btn-link webui-nav-link"
        :on-click (fn []
                    (dispatch [:evt.webui.authn/logout])
                    (history/navigate "login"))])))
@@ -40,5 +41,8 @@
                           (@tr [:login]))]
         [h-box
          :gap "0.25ex"
-         :children [[button :label button-text :on-click #(history/navigate "login")]
+         :children [[button
+                     :label button-text
+                     :class "btn-link webui-nav-link"
+                     :on-click #(history/navigate "login")]
                     (when @session [logout-button])]]))))

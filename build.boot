@@ -13,7 +13,7 @@
                                    sixsq-nexus-url]])
 
 (set-env!
-  :source-paths #{"src/cljs"}
+  :source-paths #{"src/cljs" "src/cljc"}
   :resource-paths #{"resources"}
 
   :repositories

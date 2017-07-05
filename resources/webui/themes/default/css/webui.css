@@ -93,3 +93,19 @@ html, body {
 .webui-breadcrumbs {
     background-color: lightsteelblue;
 }
+
+.webui-nav-link {
+    color: white;
+}
+
+.webui-nav-link:hover {
+    color: white;
+    background-color: darkgrey;
+    text-decoration: none;
+}
+
+.webui-nav-link:active {
+    color: white;
+    background-color: darkgrey;
+    text-decoration:none;
+}

@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.panel.app.views
   (:require
-    [re-com.core :refer [h-box v-box label hyperlink ]]
+    [re-com.core :refer [h-box v-box label hyperlink]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [clojure.string :as str]
@@ -11,7 +11,8 @@
     [sixsq.slipstream.webui.widget.i18n.subs]
 
     [sixsq.slipstream.webui.widget.breadcrumbs.views :as crumbs-views]
-    [sixsq.slipstream.webui.widget.breadcrumbs.events]))
+    [sixsq.slipstream.webui.widget.breadcrumbs.events]
+    [sixsq.slipstream.webui.resource :as resource]))
 
 (defn format-module [module]
   (if module [hyperlink
@@ -25,8 +26,12 @@
       [v-box
        :children (doall (map format-module @data))])))
 
-(defn modules-panel []
+(defn module-resource []
   [v-box
-   :gap "3px"
+   :gap "1ex"
    :children [[crumbs-views/breadcrumbs]
               [module-listing]]])
+
+(defmethod resource/render "application"
+  [path query-params]
+  [module-resource])
