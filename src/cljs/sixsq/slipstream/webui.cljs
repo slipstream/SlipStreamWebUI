@@ -9,6 +9,9 @@
     [sixsq.slipstream.webui.utils :as utils]
 
     ;; must include these to ensure that they are not elided
+    [cljsjs.codemirror]
+    [cljsjs.codemirror.mode.clojure]
+    [cljsjs.codemirror.mode.javascript]
     [sixsq.slipstream.webui.panel.authn.events]
     [sixsq.slipstream.webui.main.events]
     [sixsq.slipstream.webui.main.subs]

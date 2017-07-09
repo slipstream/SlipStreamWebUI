@@ -27,6 +27,7 @@
                     [org.clojure/clojurescript]
 
                     [binaryage/devtools]
+                    [cljsjs/codemirror "5.24.0-1"]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.taoensso/tempura]
 
@@ -98,6 +99,8 @@
 
 (deftask build []
          (comp (pom)
+               (sift :add-jar {'cljsjs/codemirror #"cljsjs/codemirror/development/codemirror.css"})
+               (sift :move {#"cljsjs/codemirror/development/codemirror.css" "webui/assets/css/codemirror.css"})
                (production)
                (cljs)
                (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"
@@ -111,6 +114,8 @@
 
 (deftask run []
          (comp (running)
+               (sift :add-jar {'cljsjs/codemirror #"cljsjs/codemirror/development/codemirror.css"})
+               (sift :move {#"cljsjs/codemirror/development/codemirror.css" "webui/assets/css/codemirror.css"})
                (serve :not-found 'sixsq.slipstream.webui.run/index-handler)
                (watch)
                (cljs-repl)

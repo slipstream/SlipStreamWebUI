@@ -2,7 +2,10 @@
   (:require
     [re-com.core :refer [h-box v-box box label title button modal-panel p]]
     [taoensso.timbre :as log]
-    [reagent.core :as reagent]))
+    [reagent.core :as reagent]
+    [cljsjs.codemirror]
+    [cljsjs.codemirror.mode.clojure]
+    [cljsjs.codemirror.mode.javascript]))
 
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
@@ -10,37 +13,38 @@
   [data action-fn]
   (let [show? (reagent/atom false)]
     (fn []
-      [v-box
-       :children [[button
-                   :label "edit"
-                   :class "btn-primary"
-                   :on-click #(reset! show? true)]
-                  (when @show?
-                    [modal-panel
-                     :backdrop-on-click #(reset! show? false)
-                     :child [v-box
-                             :gap "2ex"
-                             :size "auto"
-                             :children [[:pre (with-out-str (cljs.pprint/pprint data))]
-                                        [box
-                                         :class "webui-block-button"
-                                         :size "auto"
-                                         :child [button
-                                                 :label "save"
-                                                 :class "btn btn-danger btn-block"
-                                                 :disabled? false
-                                                 :on-click (fn []
-                                                             (action-fn)
-                                                             (reset! show? false))]]
-                                        [box
-                                         :class "webui-block-button"
-                                         :size "auto"
-                                         :child [button
-                                                 :label "cancel"
-                                                 :class "btn btn-default btn-block"
-                                                 :disabled? false
-                                                 :on-click (fn []
-                                                             (reset! show? false))]]]]])]])))
+      (let [cm nil #_(js/CodeMirror. (.-body js/document))]
+        [v-box
+         :children [[button
+                     :label "edit"
+                     :class "btn-primary"
+                     :on-click #(reset! show? true)]
+                    (when @show?
+                      [modal-panel
+                       :backdrop-on-click #(reset! show? false)
+                       :child [v-box
+                               :gap "2ex"
+                               :size "auto"
+                               :children [[:pre (with-out-str (cljs.pprint/pprint data))]
+                                          [box
+                                           :class "webui-block-button"
+                                           :size "auto"
+                                           :child [button
+                                                   :label "save"
+                                                   :class "btn btn-danger btn-block"
+                                                   :disabled? false
+                                                   :on-click (fn []
+                                                               (action-fn)
+                                                               (reset! show? false))]]
+                                          [box
+                                           :class "webui-block-button"
+                                           :size "auto"
+                                           :child [button
+                                                   :label "cancel"
+                                                   :class "btn btn-default btn-block"
+                                                   :disabled? false
+                                                   :on-click (fn []
+                                                               (reset! show? false))]]]]])]]))))
 
 (defn delete-button
   "Creates a button that will bring up a delete dialog and will execute the
