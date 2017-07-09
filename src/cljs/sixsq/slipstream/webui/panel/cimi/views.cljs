@@ -16,7 +16,8 @@
     [sixsq.slipstream.webui.resource :as resource]
     [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
     [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.widget.history.utils :as history]))
+    [sixsq.slipstream.webui.widget.history.utils :as history]
+    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]))
 
 (defn format-link [[k {:keys [href]}]]
   (let [n (name k)]
@@ -261,22 +262,11 @@
                       (if-let [ops (:operations results)]
                         (format-operations ops))]])))))
 
-(defn resource-detail
-  []
-  (let [data (subscribe [:resource-data])]
-    (fn []
-      (let [label (or (:name @data) (:id @data) "unknown")]
-        [v-box
-         :children [[title
-                     :label label
-                     :level :level1
-                     :underline? true]
-                    [:pre (with-out-str (pprint @data))]]]))))
-
 (defn cimi-resource
   []
   (let [cep (subscribe [:cloud-entry-point])
-        path (subscribe [:resource-path])]
+        path (subscribe [:resource-path])
+        data (subscribe [:resource-data])]
     (fn []
       (let [[_ resource-type resource-id] @path]
         (dispatch [:set-collection-name resource-type]))
@@ -286,7 +276,7 @@
                        2 [[control-bar]
                           [results-bar]
                           [search-vertical-result-table]]
-                       3 [[resource-detail]]
+                       3 [[doc-utils/resource-detail @data (:baseURI @cep)]]
                        [[control-bar]])]
         [v-box
          :gap "1ex"
