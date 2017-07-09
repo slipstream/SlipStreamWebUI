@@ -89,9 +89,12 @@
 (s/def ::owner (only-keys :req-un [::principal ::type]))
 (s/def ::acl (only-keys :req-un [::owner ::rules]))
 
-(s/def ::baseURI string?)
-
-(s/def ::cloud-entry-point (s/nilable (s/keys :req-un [::id ::created ::updated ::acl ::baseURI])))
+(s/def :cimi.cep/baseURI string?)
+(s/def :cimi.cep/collection-key (s/map-of string? keyword?))
+(s/def :cimi.cep/collection-href (s/map-of keyword? string?))
+(s/def :cimi/cloud-entry-point (s/nilable (only-keys :req-un [:cimi.cep/baseURI
+                                                              :cimi.cep/collection-key
+                                                              :cimi.cep/collection-href])))
 
 (s/def ::cimi-filter (s/nilable string?))
 (s/def ::page nat-int?)
@@ -113,6 +116,7 @@
 (s/def ::choice (only-keys :req-un [::id ::label]))
 (s/def ::available-fields (s/coll-of ::choice))
 (s/def ::selected-fields (s/coll-of ::id))
+(s/def ::search-data (s/nilable any?))
 
 (s/def ::search (only-keys :req-un [::collection-name ::params ::listing ::completed?
                                     ::available-fields ::selected-fields]))
@@ -132,10 +136,12 @@
 (s/def :webui.i18n/i18n (only-keys :req-un [:webui.i18n/locale :webui.i18n/tr]))
 
 (s/def ::db (only-keys :req-un [:webui.i18n/i18n
+                                :cimi/cloud-entry-point
                                 ::clients ::message ::resource-data ::resource-path ::resource-query-params
                                 ::runs-data ::runs-params
                                 ::modules-data ::modules-path ::modules-breadcrumbs
-                                :webui.authn/authn ::cloud-entry-point ::search
+                                :webui.authn/authn
+                                ::search-data ::search
                                 ::offer-data ::offer]))
 
 ;;
@@ -170,7 +176,8 @@
 
    :cloud-entry-point     nil
 
-   :search                {:collection-name  "sessions"
+   :search-data           nil
+   :search                {:collection-name  "session"
                            :params           {:$first  1
                                               :$last   20
                                               :$filter nil}
@@ -181,7 +188,7 @@
                            :selected-fields  #{"id"}}
 
    :offer-data            nil
-   :offer                 {:collection-name  "serviceOffers"
+   :offer                 {:collection-name  "service-offer"
                            :params           {:$first  1
                                               :$last   20
                                               :$filter nil}

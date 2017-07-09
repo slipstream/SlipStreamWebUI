@@ -15,7 +15,28 @@
     [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.resource :as resource]
     [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.widget.history.utils :as history]))
+
+(defn format-link [[k {:keys [href]}]]
+  (let [n (name k)]
+    {:id href :label n}))
+
+(defn link? [m]
+  (boolean (and (map? m) (:href m))))
+
+(defn cep-opts [cep]
+  (let [links (sort (remove (fn [[_ v]] (not (link? v))) cep))]
+    (map format-link links)))
+
+(defn href->collection-name
+  [cep resource-type]
+  (when (and cep resource-type)
+    (log/error "MAPPING CEP:" cep resource-type)
+    (let [mappings (->> cep
+                        (map (juxt #(:href (second %)) #(name (first %)))))]
+      (log/error "MAPPING: " mappings)
+      (get (into {} mappings) resource-type))))
 
 (defn format-operations
   [ops]
@@ -60,9 +81,10 @@
   (fn []
     (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
           align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
-      (log/error "DATA ENTRY:" (with-out-str (pprint entry)))
       (if (= "id" selected-field)
-        [box :align align :child [hyperlink :label v :on-click #(dispatch [:set-resource-data entry])]]
+        [box :align align :child [hyperlink :label v :on-click (fn []
+                                                                 (dispatch [:set-resource-data entry])
+                                                                 (history/navigate (str "cimi/" v)))]]
         [box :align align :child [label :label v]]))))
 
 (defn column-header-with-key [selected-field]
@@ -100,14 +122,17 @@
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:search-listing])
         collection-name (subscribe [:search-collection-name])
-        selected-fields (subscribe [:search-selected-fields])]
+        selected-fields (subscribe [:search-selected-fields])
+        cep (subscribe [:cloud-entry-point])]
     (fn []
-      (let [results @search-results]
+      (let [{:keys [collection-key]} @cep
+            resource-collection-key (get collection-key @collection-name)
+            results @search-results]
         [scroller
          :scroll :auto
          :child (if (instance? js/Error results)
                   [box :child (format-data (ex-data results))]
-                  (let [entries (get results (keyword @collection-name) [])]
+                  (let [entries (get results resource-collection-key [])]
                     [vertical-data-table @selected-fields entries]))]))))
 
 (defn search-header []
@@ -185,17 +210,6 @@
                                                                  (reset! show? false)
                                                                  (dispatch [:set-selected-fields @selections]))]]]]]])]])))
 
-(def common-keys
-  #{:id :created :updated :acl :baseURI :resourceURI :operations})
-
-(defn format-link [k]
-  (let [n (name k)]
-    {:id n :label n}))
-
-(defn cep-opts [cep]
-  (let [ks (sort (remove common-keys (keys cep)))]
-    (map format-link ks)))
-
 (defn cloud-entry-point
   []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -207,12 +221,9 @@
                    :model selected-id
                    :placeholder (@tr [:resource-type])
                    :width "250px"
-                   :choices (doall (cep-opts @cep))
+                   :choices (vec (map (fn [k] {:id k :label k}) (sort (vals (:collection-href @cep)))))
                    :on-change (fn [id]
-                                #_(reset! selected-id id)
-                                (dispatch [:set-resource-path-vec ["cimi" (name id)]])
-                                (dispatch [:set-collection-name id])
-                                (dispatch [:new-search id]))]]])))
+                                (history/navigate (str "cimi/" (name id))))]]])))
 
 (defn select-controls []
   [h-box
@@ -250,56 +261,37 @@
                       (if-let [ops (:operations results)]
                         (format-operations ops))]])))))
 
-(defn detail-control-bar
-  []
-  (let [tr (subscribe [:webui.i18n/tr])]
-    (fn []
-      [h-box
-       :justify :start
-       :children [[button
-                   :label (@tr [:back])
-                   :on-click #()]]])))
-
 (defn resource-detail
   []
   (let [data (subscribe [:resource-data])]
     (fn []
-      (if @data
+      (let [label (or (:name @data) (:id @data) "unknown")]
         [v-box
          :children [[title
-                     :label "CIMI RESOURCE DETAIL"
+                     :label label
                      :level :level1
                      :underline? true]
-                    [:p (with-out-str (pprint @data))]]]))))
-
-#_(defn cimi-resource
-  []
-  [v-box
-   :children [[control-bar]
-              [results-bar]
-              [search-vertical-result-table]]])
+                    [:pre (with-out-str (pprint @data))]]]))))
 
 (defn cimi-resource
   []
-  (let [path (subscribe [:resource-path])]
+  (let [cep (subscribe [:cloud-entry-point])
+        path (subscribe [:resource-path])]
     (fn []
+      (let [[_ resource-type resource-id] @path]
+        (dispatch [:set-collection-name resource-type]))
       (let [n (count @path)
             children (case n
                        1 [[control-bar]]
                        2 [[control-bar]
                           [results-bar]
                           [search-vertical-result-table]]
-                       3 [[detail-control-bar]
-                          [resource-detail]]
+                       3 [[resource-detail]]
                        [[control-bar]])]
         [v-box
          :gap "1ex"
-         :children (cons [breadcrumbs/breadcrumbs-widget
-                          :model path
-                          :on-change #(dispatch [:set-resource-path-vec %])]
-                         children)]))))
+         :children children]))))
 
 (defmethod resource/render "cimi"
   [path query-params]
-  (if (second path) (dispatch [:set-collection-name (second path)]))
   [cimi-resource])

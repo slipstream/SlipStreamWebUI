@@ -1,9 +1,13 @@
 (ns sixsq.slipstream.webui.main.effects
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.pprint :refer [pprint]]
-    [re-frame.core :refer [reg-fx]]
     [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.main.utils :as utils]))
+    [cljs.core.async :refer [<!]]
+    [re-frame.core :refer [reg-fx dispatch]]
+    [sixsq.slipstream.webui.main.utils :as utils]
+    [sixsq.slipstream.client.api.cimi :as cimi]))
 
 ;; trace events that are dispatched
 (reg-fx
@@ -21,3 +25,11 @@
   :fx.webui.main/set-host-theme
   (fn [[arg]]
     (utils/add-host-theme)))
+
+(reg-fx
+  :fx.webui.main/cloud-entry-point
+  (fn [[client]]
+    (go
+      (if-let [cep (<! (cimi/cloud-entry-point client))]
+        (dispatch [:evt.webui.main/set-cloud-entry-point cep])
+        (dispatch [:message "loading cloud-entry-point failed"])))))

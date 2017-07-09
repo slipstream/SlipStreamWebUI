@@ -28,7 +28,8 @@
     [sixsq.slipstream.webui.widget.history.effects]
 
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.resource :as resource]))
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]))
 
 (defn format-operations
   [ops]
@@ -153,7 +154,7 @@
          :wrap-nicely? true
          :backdrop-on-click #(dispatch [:clear-message])]))))
 
-(defn resource-modal
+#_(defn resource-modal
   []
   (let [resource-data (subscribe [:resource-data])]
     (fn []
@@ -185,8 +186,13 @@
        :children [(resource/render @resource-path nil)]])))
 
 (defn header []
-  [v-box
-   :children [[page-header]]])
+  (let [path (subscribe [:resource-path])]
+    (fn []
+      [v-box
+       :children [[page-header]
+                  [breadcrumbs/breadcrumbs-widget
+                   :model path
+                   :on-change #(dispatch [:set-resource-path-vec %])]]])))
 
 (defn footer []
   [v-box
@@ -195,5 +201,5 @@
 (defn app []
   [v-box
    :children [[message-modal]
-              [resource-modal]
+              #_[resource-modal]
               [resource-panel]]])

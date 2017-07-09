@@ -107,15 +107,18 @@
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:offer-listing])
         collection-name (subscribe [:offer-collection-name])
-        selected-fields (subscribe [:offer-selected-fields])]
+        selected-fields (subscribe [:offer-selected-fields])
+        cloud-entry-point (subscribe [:cloud-entry-point])]
     (fn []
-      (let [results @search-results]
-        [scroller
-         :scroll :auto
-         :child (if (instance? js/Error results)
-                  [box :child (format-data (ex-data results))]
-                  (let [entries (get results (keyword @collection-name) [])]
-                    [vertical-data-table @selected-fields entries]))]))))
+      (let [results @search-results
+            {:keys [collection-key]} @cloud-entry-point]
+        (when (and collection-name collection-key)
+          [scroller
+           :scroll :auto
+           :child (if (instance? js/Error results)
+                    [box :child (format-data (ex-data results))]
+                    (let [entries (get results (collection-key @collection-name) [])]
+                      [vertical-data-table @selected-fields entries]))])))))
 
 (defn search-header []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -308,10 +311,7 @@
                         [offer-detail]])]
         [v-box
          :gap "1ex"
-         :children (cons [breadcrumbs/breadcrumbs-widget
-                          :model path
-                          :on-change #(dispatch [:set-resource-path-vec %])]
-                         children)]))))
+         :children children]))))
 
 (defmethod resource/render "offer"
   [path query-params]
