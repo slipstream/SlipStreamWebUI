@@ -45,8 +45,6 @@
 (s/def ::runs-params (only-keys :req-un [::offset ::limit ::cloud ::activeOnly]))
 
 (s/def ::modules-data (s/nilable any?))
-(s/def ::modules-path (s/nilable string?))
-(s/def ::modules-breadcrumbs (s/nilable (s/coll-of string?)))
 
 ;;
 ;; authentication state
@@ -124,7 +122,7 @@
 (s/def ::offer-data (s/nilable any?))
 (s/def ::offer ::search)
 
-(s/def ::resource-path (s/coll-of string?))
+(s/def ::resource-path (s/coll-of string? :kind vector?))
 (s/def ::resource-query-params (s/nilable map?))
 
 ;;
@@ -139,7 +137,7 @@
                                 :cimi/cloud-entry-point
                                 ::clients ::message ::resource-data ::resource-path ::resource-query-params
                                 ::runs-data ::runs-params
-                                ::modules-data ::modules-path ::modules-breadcrumbs
+                                ::modules-data
                                 :webui.authn/authn
                                 ::search-data ::search
                                 ::offer-data ::offer]))
@@ -165,8 +163,6 @@
                            :activeOnly 1}
 
    :modules-data          nil
-   :modules-path          nil
-   :modules-breadcrumbs   nil
 
    :authn                 {:redirect-uri  "/webui/login"
                            :error-message nil

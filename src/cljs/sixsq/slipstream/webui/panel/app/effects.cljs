@@ -4,13 +4,13 @@
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
-    [sixsq.slipstream.client.api.modules :as modules]))
+    [sixsq.slipstream.client.api.modules :as modules]
+    [taoensso.timbre :as log]))
 
-;; usage: (dispatch [:modules-search client])
-;; queries the given resource
 (reg-fx
   :fx.webui.app/search
   (fn [[client url]]
     (go
       (let [results (<! (modules/get-children client url))]
+        (log/info (count results) "returned for url" url)
         (dispatch [:set-modules-data results])))))
