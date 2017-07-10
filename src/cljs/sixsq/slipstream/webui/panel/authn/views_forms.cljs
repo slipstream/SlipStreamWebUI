@@ -84,8 +84,9 @@
         redirect-uri (subscribe [:webui.authn/redirect-uri])]
     (fn [{:keys [id] :as method}]
       (log/info "creating login form for method" id)
-      (let [redirect-uri @redirect-uri
-            post-uri (str (:baseURI @cep) (get-in @cep [:sessions :href])) ;; FIXME: Should be part of CIMI API.
+      (let [{:keys [baseURI collection-href]} @cep
+            redirect-uri @redirect-uri
+            post-uri (str baseURI (:sessions collection-href)) ;; FIXME: Should be part of CIMI API.
             simple-method (second (re-matches #"session-template/(.*)" id))
             [hidden-params visible-params] (ordered-params method)
             hidden-params (conj

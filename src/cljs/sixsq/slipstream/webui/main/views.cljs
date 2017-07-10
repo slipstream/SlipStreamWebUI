@@ -27,7 +27,9 @@
     [sixsq.slipstream.webui.widget.history.events]
     [sixsq.slipstream.webui.widget.history.effects]
 
-    [sixsq.slipstream.webui.widget.i18n.subs]))
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]))
 
 (defn format-operations
   [ops]
@@ -119,10 +121,10 @@
       [h-box
        :gap "2px"
        :children [[box :class "webui-logo" :width "20ex" :child ""]
-                  [button :label (@tr [:app]) :on-click #(history/navigate "app")]
-                  [button :label (@tr [:deployment]) :on-click #(history/navigate "deployment")]
-                  [button :label (@tr [:offer]) :on-click #(history/navigate "offer")]
-                  [button :label (@tr [:cimi]) :on-click #(history/navigate "cimi")]]])))
+                  [button :class "btn-link webui-nav-link" :label (@tr [:app]) :on-click #(history/navigate "application")]
+                  [button :class "btn-link webui-nav-link" :label (@tr [:deployment]) :on-click #(history/navigate "deployment")]
+                  [button :class "btn-link webui-nav-link" :label (@tr [:offer]) :on-click #(history/navigate "offer")]
+                  [button :class "btn-link webui-nav-link" :label (@tr [:cimi]) :on-click #(history/navigate "cimi")]]])))
 
 (defn page-header []
   [h-box
@@ -152,7 +154,7 @@
          :wrap-nicely? true
          :backdrop-on-click #(dispatch [:clear-message])]))))
 
-(defn resource-modal
+#_(defn resource-modal
   []
   (let [resource-data (subscribe [:resource-data])]
     (fn []
@@ -179,24 +181,18 @@
   []
   (let [resource-path (subscribe [:resource-path])]
     (fn []
-      (let [panel (first @resource-path)
-            args (rest @resource-path)]
-        [v-box
-         :class "webui-contents"
-         :children [(case panel
-                      "cimi" [cimi-views/cimi-panel]
-                      "offer" [offer-views/offer-panel]
-                      "deployment" [deployment-views/runs-panel]
-                      "app" [app-views/modules-panel]
-                      "welcome" [welcome-views/welcome-panel]
-                      "login" [authn-views/login-panel]
-                      "empty" [empty-views/empty-panel]
-                      nil [empty-views/empty-panel]
-                      [empty-views/empty-panel])]]))))
+      [v-box
+       :class "webui-contents"
+       :children [(resource/render @resource-path nil)]])))
 
 (defn header []
-  [v-box
-   :children [[page-header]]])
+  (let [path (subscribe [:resource-path])]
+    (fn []
+      [v-box
+       :children [[page-header]
+                  [breadcrumbs/breadcrumbs-widget
+                   :model path
+                   :on-change #(dispatch [:set-resource-path-vec %])]]])))
 
 (defn footer []
   [v-box
@@ -205,5 +201,5 @@
 (defn app []
   [v-box
    :children [[message-modal]
-              [resource-modal]
+              #_[resource-modal]
               [resource-panel]]])

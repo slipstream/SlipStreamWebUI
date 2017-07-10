@@ -24,11 +24,11 @@
 (reg-event-db
   :evt.webui.offer/show-results
   [db/debug-interceptors trim-v]
-  (fn [db [resource-type results]]
-    (let [entries (get results (keyword resource-type) [])
+  (fn [db [resource-type listing]]
+    (let [entries (get listing (keyword resource-type) [])
           fields (utils/merge-keys (conj entries {:id "id"}))]
       (-> db
-          (update-in [:offer :results] (constantly results))
+          (update-in [:offer :listing] (constantly listing))
           (update-in [:offer :completed?] (constantly true))
           (update-in [:offer :available-fields] (constantly fields))))))
 
@@ -75,26 +75,28 @@
   :offer
   [db/debug-interceptors]
   (fn [cofx _]
-    (let [{{:keys [clients offer]} :db} cofx
+    (let [{{:keys [clients offer cloud-entry-point]} :db} cofx
           cimi-client (:cimi clients)
-          {:keys [collection-name params]} offer]
+          {:keys [collection-name params]} offer
+          {:keys [collection-key]} cloud-entry-point]
       (-> cofx
           (assoc-in [:db :offer :completed?] false)
-          (assoc :fx.webui.offer/list [cimi-client collection-name (utils/prepare-params params)])))))
+          (assoc :fx.webui.offer/list [cimi-client (collection-key collection-name) (utils/prepare-params params)])))))
 
 ;; usage:  (dispatch [:set-offer-search [params]])
 (reg-event-fx
   :set-offer
   [db/debug-interceptors trim-v]
   (fn [cofx [url-params]]
-    (let [{{:keys [clients offer]} :db} cofx
+    (let [{{:keys [clients offer cloud-entry-point]} :db} cofx
           cimi-client (:cimi clients)
           {:keys [collection-name params]} offer
+          {:keys [collection-key]} cloud-entry-point
           new-params (utils/merge-offer-params params url-params)]
       (-> cofx
           (assoc-in [:db :offer :params] new-params)
           (assoc-in [:db :resource-path] ["offer"])
-          (assoc :fx.webui.offer/list [cimi-client collection-name (utils/prepare-params new-params)])))))
+          (assoc :fx.webui.offer/list [cimi-client (collection-key collection-name) (utils/prepare-params new-params)])))))
 
 ;; usage:  (dispatch [:set-offer-detail [uuid]])
 (reg-event-fx
@@ -116,4 +118,3 @@
     (-> cofx
         (assoc-in [:db :offer-data] nil)
         (assoc :fx.webui.history/navigate ["offer"]))))
-

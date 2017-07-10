@@ -6,16 +6,6 @@
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]))
 
-;; usage: (dispatch [:cloud-entry-point client])
-;; fetches the cloud entry point
-(reg-fx
-  :fx.webui.cimi/cloud-entry-point
-  (fn [[client]]
-    (go
-      (if-let [cep (<! (cimi/cloud-entry-point client))]
-        (dispatch [:insert-cloud-entry-point cep])
-        (dispatch [:message "loading cloud-entry-point failed"])))))
-
 ;; usage: (dispatch [:search client resource-type])
 ;; queries the given resource
 (reg-fx

@@ -90,6 +90,39 @@ html, body {
     flex: 1 0 auto !important;
 }
 
+/*
+  Formatting for the breadcrumbs.
+*/
+
 .webui-breadcrumbs {
-    background-color: lightsteelblue;
+    background-color: lightgray;
+    padding: 1ex;
+}
+
+.webui-breadcrumb-element {
+    color: black !important;
+}
+
+.webui-breadcrumbs-separator {
+    color: black !important;
+}
+
+/*
+  Styles for the top-level menubar links. The buttons/links will
+  have the same color no matter what the state (inactive, active,
+  hover, focus). When the cursor hovers over a button/link, then
+  a white, translucent background will be used to highlight it.
+  The buttons/links may have the keyboard focus; when focused,
+  the default focus outline is maintained.
+*/
+
+.webui-nav-link {
+    color: white;
+    text-decoration: none;
+}
+
+.webui-nav-link:hover, .webui-nav-link:active, .webui-nav-link:focus {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.25);
+    text-decoration: none;
 }

@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.panel.deployment.effects]
     [sixsq.slipstream.webui.panel.deployment.events]
     [sixsq.slipstream.webui.panel.deployment.subs]
-    [sixsq.slipstream.webui.widget.i18n.subs]))
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.resource :as resource]))
 
 (defn runs-control []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -200,7 +201,7 @@
                       [v-box
                        :children (concat [[run-header]] (vec (map format-run item)))]]])))))
 
-(defn runs-panel
+(defn deployment-resource
   []
   (fn []
     [v-box
@@ -208,3 +209,6 @@
      :children [[runs-control]
                 [runs-display]]]))
 
+(defmethod resource/render "deployment"
+  [path query-params]
+  [deployment-resource])

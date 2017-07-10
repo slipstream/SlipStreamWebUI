@@ -3,6 +3,7 @@
     [sixsq.slipstream.webui.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
     [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [clojure.set :as set]))
 
 ;; usage: (dispatch [:set-resource-data data])
@@ -19,34 +20,16 @@
   (fn [db _]
     (assoc db :resource-data nil)))
 
-;; usage:  (dispatch [:cloud-entry-point])
-;; triggers a fetch of the cloud entry point resource
-(reg-event-fx
-  :fetch-cloud-entry-point
-  [db/debug-interceptors]
-  (fn [cofx _]
-    (if-let [client (get-in cofx [:db :clients :cimi])]
-      (assoc cofx :fx.webui.cimi/cloud-entry-point [client])
-      cofx)))
-
-;; usage:  (dispatch [:cloud-entry-point])
-;; triggers a fetch of the cloud entry point resource
-(reg-event-db
-  :insert-cloud-entry-point
-  [db/debug-interceptors trim-v]
-  (fn [db [cep]]
-    (assoc db :cloud-entry-point cep)))
-
 ;; usage:  (dispatch [:show-search-results results])
 ;; shows the search results
 (reg-event-db
   :show-search-results
   [db/debug-interceptors trim-v]
-  (fn [db [resource-type results]]
-    (let [entries (get results (keyword resource-type) [])
+  (fn [db [resource-type listing]]
+    (let [entries (get listing (keyword resource-type) [])
           fields (utils/merge-keys (conj entries {:id "id"}))]
       (-> db
-          (update-in [:search :results] (constantly results))
+          (update-in [:search :listing] (constantly listing))
           (update-in [:search :completed?] (constantly true))
           (update-in [:search :available-fields] (constantly fields))))))
 
@@ -101,16 +84,23 @@
           (update-in [:db :search :completed?] (constantly false))
           (assoc :fx.webui.cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
 
+(reg-event-db
+  :set-collection-name
+  [db/debug-interceptors trim-v]
+  (fn [db [new-collection-name]]
+    (assoc-in db [:search :collection-name] new-collection-name)))
+
 ;; usage:  (dispatch [:search])
 ;; refine search
 (reg-event-fx
   :search
   [db/debug-interceptors]
   (fn [cofx _]
-    (let [{:keys [clients search]} (:db cofx)
+    (let [{:keys [clients search cloud-entry-point]} (:db cofx)
           cimi-client (:cimi clients)
-          {:keys [collection-name params]} search]
+          {:keys [collection-name params]} search
+          {:keys [collection-key]} cloud-entry-point]
       (-> cofx
-          (update-in [:db :search :completed?] (constantly false))
-          (assoc :fx.webui.cimi/search [cimi-client collection-name (utils/prepare-params params)])))))
+          (assoc-in [:db :search :completed?] false)
+          (assoc :fx.webui.cimi/search [cimi-client (collection-key collection-name) (utils/prepare-params params)])))))
 

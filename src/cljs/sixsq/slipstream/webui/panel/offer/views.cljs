@@ -11,7 +11,11 @@
     [sixsq.slipstream.webui.panel.offer.subs]
     [sixsq.slipstream.webui.widget.history.utils :as history]
 
-    [sixsq.slipstream.webui.widget.i18n.subs]))
+    [sixsq.slipstream.webui.widget.i18n.subs]
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
+    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
+    [taoensso.timbre :as log]))
 
 (defn format-operations
   [ops]
@@ -102,17 +106,20 @@
    :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
 
 (defn search-vertical-result-table []
-  (let [search-results (subscribe [:offer-results])
+  (let [search-results (subscribe [:offer-listing])
         collection-name (subscribe [:offer-collection-name])
-        selected-fields (subscribe [:offer-selected-fields])]
+        selected-fields (subscribe [:offer-selected-fields])
+        cloud-entry-point (subscribe [:cloud-entry-point])]
     (fn []
-      (let [results @search-results]
-        [scroller
-         :scroll :auto
-         :child (if (instance? js/Error results)
-                  [box :child (format-data (ex-data results))]
-                  (let [entries (get results (keyword @collection-name) [])]
-                    [vertical-data-table @selected-fields entries]))]))))
+      (let [results @search-results
+            {:keys [collection-key]} @cloud-entry-point]
+        (when (and collection-name collection-key)
+          [scroller
+           :scroll :auto
+           :child (if (instance? js/Error results)
+                    [box :child (format-data (ex-data results))]
+                    (let [entries (get results (collection-key @collection-name) [])]
+                      [vertical-data-table @selected-fields entries]))])))))
 
 (defn search-header []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -204,16 +211,6 @@
    :children [[select-controls]
               [search-header]]])
 
-(defn detail-control-bar
-  []
-  (let [tr (subscribe [:webui.i18n/tr])]
-    (fn []
-      [h-box
-       :justify :start
-       :children [[button
-                   :label (@tr [:back])
-                   :on-click #(dispatch [:show-offer-table])]]])))
-
 (defn results-bar []
   (let [tr (subscribe [:webui.i18n/tr])
         search (subscribe [:offer])]
@@ -231,77 +228,24 @@
                           [label :label (str " " n " / " total)]))
                       (when-not completed? [throbber :size :regular])]])))))
 
-(defn attr-ns
-  "Extracts the attribute namespace for the given key-value pair.
-   Returns 'common' if there is no explicit namespace."
-  [[k _]]
-  (or (second (re-matches #"(?:([^:]*):)?(.*)" (name k))) "common"))
-
-(defn strip-attr-ns
-  "Strips the attribute namespace from the given key."
-  [k]
-  (last (re-matches #"(?:([^:]*):)?(.*)" (name k))))
-
-(defn group-data-field [v]
-  (fn []
-    [box
-     :align :start
-     :child [label :label (or v "\u00a0")]]))
-
-(defn group-kv-with-key [tag [k v]]
-  (let [react-key (str "data-" tag "-" k)]
-    ^{:key react-key} [group-data-field (str v)]))
-
-(defn group-column-with-key [tag class-name column-data]
-  ^{:key (str "column-" tag)}
-  [v-box
-   :class (str "webui-column " class-name)
-   :children (vec (map (partial group-kv-with-key tag) column-data))])
-
-(defn group-table
-  [group-data]
-  (let [value-column-data (sort first group-data)
-        key-column-data (map (fn [[k _]] [k (strip-attr-ns k)]) value-column-data)]
-    [h-box
-     :class "webui-column-table"
-     :children [[group-column-with-key "offer-keys" "webui-row-header" key-column-data]
-                [group-column-with-key "offer-vals" "" value-column-data]]]))
-
-(defn format-group [[group data]]
-  ^{:key group}
-  [v-box :children [[title
-                     :label (str group)
-                     :level :level2
-                     :underline? true]
-                    [group-table data]]])
-
-(defn format-offer-data [offer-data]
-  (let [offer-data (dissoc offer-data :acl :operations)]
-    (let [groups (group-by attr-ns offer-data)]
-      (doall (map format-group groups)))))
-
-(defn offer-detail
-  []
-  (let [data (subscribe [:offer-data])]
-    (fn []
-      (if @data
-        [v-box
-         :children [[title
-                     :label (:name @data)
-                     :level :level1
-                     :underline? true]
-                    (format-offer-data @data)]]))))
-
 (defn offer-panel
   []
-  (let [path (subscribe [:resource-path])]
+  (let [cep (subscribe [:cloud-entry-point])
+        path (subscribe [:resource-path])
+        data (subscribe [:offer-data])]
     (fn []
-      (if (= 1 (count @path))
+      (let [listing? (= 1 (count @path))
+            children (if listing?
+                       [[control-bar]
+                        [results-bar]
+                        [search-vertical-result-table]]
+                       [[doc-utils/resource-detail @data (:baseURI @cep)]])]
         [v-box
-         :children [[control-bar]
-                    [results-bar]
-                    [search-vertical-result-table]]]
-        [v-box
-         :children [[detail-control-bar]
-                    [offer-detail]]]))))
+         :gap "1ex"
+         :children children]))))
 
+(defmethod resource/render "offer"
+  [path query-params]
+  (dispatch [:set-offer query-params])
+  (when (second path) (dispatch [:set-offer-detail (second path)]))
+  [offer-panel])

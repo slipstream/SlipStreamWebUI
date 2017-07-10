@@ -10,8 +10,8 @@
 (reg-sub :search-completed?
          (fn [db _] (-> db :search :completed?)))
 
-(reg-sub :search-results
-         (fn [db _] (-> db :search :results)))
+(reg-sub :search-listing
+         (fn [db _] (-> db :search :listing)))
 
 (reg-sub :search-params
          (fn [db _] (-> db :search :params)))

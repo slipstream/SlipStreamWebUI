@@ -6,7 +6,8 @@
     [sixsq.slipstream.client.api.modules.async :as modules-async]
     [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.main.effects :as effects]
-    [sixsq.slipstream.webui.utils :as utils]))
+    [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.panel.cimi.utils :as u]))
 
 ;; usage:  (dispatch [:initialize-db])
 ;; creates initial state of database
@@ -31,6 +32,24 @@
                                                     (str slipstream-url "/auth/logout"))}]
       (assoc db :clients clients))))
 
+(reg-event-fx
+  :evt.webui.main/load-cloud-entry-point
+  [db/debug-interceptors]
+  (fn [cofx _]
+    (if-let [client (get-in cofx [:db :clients :cimi])]
+      (assoc cofx :fx.webui.main/cloud-entry-point [client])
+      cofx)))
+
+(reg-event-db
+  :evt.webui.main/set-cloud-entry-point
+  [db/debug-interceptors trim-v]
+  (fn [db [{:keys [baseURI] :as cep}]]
+    (let [href-map (u/collection-href-map cep)
+          key-map (u/collection-key-map cep)]
+      (assoc db :cloud-entry-point {:baseURI         baseURI
+                                    :collection-href href-map
+                                    :collection-key  key-map}))))
+
 ;; usage: (dispatch [:message msg])
 ;; displays a message
 (reg-event-fx
@@ -54,6 +73,20 @@
   [db/debug-interceptors trim-v]
   (fn [db [path]]
     (assoc db :resource-path (utils/parse-resource-path path))))
+
+(reg-event-db
+  :set-resource-path-vec
+  [db/debug-interceptors trim-v]
+  (fn [db [path]]
+    (assoc db :resource-path path)))
+
+(reg-event-db
+  :set-resource
+  [db/debug-interceptors trim-v]
+  (fn [db [path query-params]]
+    (-> db
+        (assoc :resource-path path)
+        (assoc :resource-query-params query-params))))
 
 (reg-event-fx
   :evt.webui.main/set-host-theme

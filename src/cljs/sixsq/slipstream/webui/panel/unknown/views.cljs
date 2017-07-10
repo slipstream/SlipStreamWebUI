@@ -5,9 +5,10 @@
     [re-frame.core :refer [subscribe]]
 
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.main.subs]))
+    [sixsq.slipstream.webui.main.subs]
+    [sixsq.slipstream.webui.resource :as resource]))
 
-(defn unknown-panel
+(defn unknown-resource
   []
   (let [tr (subscribe [:webui.i18n/tr])
         resource-path (subscribe [:resource-path])]
@@ -20,4 +21,6 @@
                      :underline? true]
                     [:div (@tr [:unknown-resource-text] [path])]]]))))
 
-
+(defmethod resource/render :default
+  [path query-params]
+  [unknown-resource])
