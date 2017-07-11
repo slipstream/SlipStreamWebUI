@@ -193,39 +193,6 @@
                                  :children (vec (for [k (keys externals)]
                                                   [login-form-group k (get externals k)]))]]]]]))))
 
-(defn logout-button
-  "Buttons shown when the user has an active session to allow the user to view
-   her profile or to logout."
-  []
-  (let [tr (subscribe [:webui.i18n/tr])]
-    (fn []
-      [button
-       :label (@tr [:logout])
-       :on-click (fn []
-                   (dispatch [:evt.webui.authn/logout])
-                   (history/navigate "login"))])))
-
-(defn authn-button
-  "Button that navigates to the login page or to the session page depending on
-   whether there is an active session or not. When there is no active session,
-   the button label is 'login' and redirects to the login page. If there is an
-   active session, then the button label is the username and redirects to the
-   session page."
-  []
-  (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
-    (fn []
-      (let [button-text (if @session
-                          (-> @session
-                              :username
-                              (or "unknown")
-                              (utils/truncate 15 "…"))
-                          (@tr [:login]))]
-        [h-box
-         :gap "0.25ex"
-         :children [[button :label button-text :on-click #(history/navigate "session")]
-                    (when @session [logout-button])]]))))
-
 (defn error-message
   "Provides the error message as an alert box when the message isn't nil."
   []
