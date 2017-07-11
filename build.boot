@@ -80,6 +80,7 @@
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
+                                                 :parallel-build  true
                                                  :closure-defines {'sixsq.slipstream.authn/LOGGING_LEVEL "warn"
                                                                    'sixsq.slipstream.webui/LOGGING_LEVEL "warn"
                                                                    'goog.DEBUG                           false}}})
@@ -90,6 +91,7 @@
                               :source-map       true
                               :compiler-options {:preloads        '[devtools.preload]
                                                  :language-in     :ecmascript5
+                                                 :parallel-build  true
                                                  :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"
                                                                    'sixsq.slipstream.webui/HOST_URL      "https://nuv.la"
                                                                    ;'sixsq.slipstream.webui/CONTEXT  ""
