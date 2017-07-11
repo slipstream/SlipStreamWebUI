@@ -14,21 +14,21 @@
   "Button shown when the user has an active session to allow the user to
    logout."
   []
-  (let [tr (subscribe [:webui.i18n/tr])]
+  (let [tr (subscribe [:webui.i18n/tr])
+        session (subscribe [:webui.authn/session])]
     (fn []
-      [button
-       :label (@tr [:logout])
-       :class "btn-link webui-nav-link"
-       :on-click (fn []
-                   (dispatch [:evt.webui.authn/logout])
-                   (history/navigate "login"))])))
+      (when @session
+        [button
+         :label (@tr [:logout])
+         :class "btn-link webui-nav-link"
+         :on-click (fn []
+                     (dispatch [:evt.webui.authn/logout])
+                     (history/navigate "login"))]))))
 
-(defn authn-buttons
-  "Contains two buttons: one to login and one to logout. The login button
-   navigates to the 'login' panel. If there is an active session the button
-   label will be the username, if not then just 'login'. The panel itself will
-   show the login forms or session information as appropriate. The logout
-   button will only appear if there is an active session."
+(defn login-button
+  "Button that sends the user to the login page. The label (and contents of
+   the target page) depend on whether the user has an active session. (The
+   label is 'login' if no session is active, otherwise it is the username.)"
   []
   (let [tr (subscribe [:webui.i18n/tr])
         session (subscribe [:webui.authn/session])]
@@ -39,10 +39,19 @@
                               (or "unknown")
                               (utils/truncate 15 "…"))
                           (@tr [:login]))]
-        [h-box
-         :gap "0.25ex"
-         :children [[button
-                     :label button-text
-                     :class "btn-link webui-nav-link"
-                     :on-click #(history/navigate "login")]
-                    (when @session [logout-button])]]))))
+        [button
+         :label button-text
+         :class "btn-link webui-nav-link"
+         :on-click #(history/navigate "login")]))))
+
+(defn authn-buttons
+  "Contains two buttons: one to login and one to logout. The login button
+   navigates to the 'login' panel. If there is an active session the button
+   label will be the username, if not then just 'login'. The panel itself will
+   show the login forms or session information as appropriate. The logout
+   button will only appear if there is an active session."
+  []
+  [h-box
+   :gap "0.25ex"
+   :children [[login-button]
+              [logout-button]]])
