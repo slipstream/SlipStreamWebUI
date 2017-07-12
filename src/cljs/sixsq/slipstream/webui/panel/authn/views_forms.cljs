@@ -99,10 +99,11 @@
                 :enc-type "application/x-www-form-urlencoded"}
          [v-box
           :children [[v-box :children (vec (map (partial form-component id) hidden-params))]
-                     [v-box
-                      :gap "0.5ex"
-                      :children (vec (map (partial form-component id) visible-params))]
-                     [gap :size "1ex"]
+                     (when (pos? (count visible-params))
+                       [v-box
+                        :gap "0.5ex"
+                        :children (conj (vec (map (partial form-component id) visible-params))
+                                        [gap :size "1ex"])])
                      [login-button method]]]]))))
 
 (defn model-login-forms
@@ -188,7 +189,6 @@
          :children [(if (or (zero? @total) (not= @count @total))
                       [progress-bar :model progress]
                       [h-box
-                       ;:gap "5ex"
                        :align :start
                        :justify :center
                        :class "webui-wrap"
@@ -197,7 +197,7 @@
                                    :style {:margin margin}
                                    :children [[login-form-group (first internals) (second internals)]]]
                                   [v-box
-                                   :gap "1ex"
+                                   :gap "2ex"
                                    :style {:margin margin}
                                    :children (vec (map (fn [[k v]] [login-form-group k v]) externals))]]])]]))))
 
