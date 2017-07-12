@@ -50,6 +50,7 @@
   (fn [[client]]
     (go
       (let [tpls (<! (au/extract-template-info client))]
+        (dispatch [:evt.webui.authn/set-methods-total (count tpls)])
         (doseq [tpl tpls]
           (dispatch [:evt.webui.authn/process-template tpl]))))))
 

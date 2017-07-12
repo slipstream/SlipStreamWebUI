@@ -56,12 +56,13 @@
               (dissoc :describe-url)))))))
 
 (defn prepare-session-template
-  [baseURI {:keys [id name method description operations] :as tpl}]
+  [baseURI {:keys [id name group method description operations] :as tpl}]
   (when-let [describe-url (->> operations
                                extract-describe-url
                                (absolute-url baseURI))]
     {:id           id
      :label        name
+     :group        group
      :authn-method method
      :description  description
      :describe-url describe-url}))
@@ -78,8 +79,7 @@
     (let [baseURI (:baseURI (<! (cimi/cloud-entry-point client)))
           session-templates (:sessionTemplates (<! (cimi/search client :sessionTemplates)))]
       (if-not (instance? js/Error session-templates)
-        (doall (for [session-template session-templates]
-                 (prepare-session-template baseURI session-template)))))))
+        (doall (map (partial prepare-session-template baseURI) session-templates))))))
 
 (defn clear-form-data [m]
   (let [f (fn [[k v]] (if (string? v) [k ""] [k v]))]

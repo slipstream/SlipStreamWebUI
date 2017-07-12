@@ -88,8 +88,17 @@
   (fn [db [{:keys [id] :as tpl}]]
     (let [form (au/login-form-fields tpl)]
       (-> db
+          (update-in [:authn :count] inc)
           (update-in [:authn :methods] conj tpl)
           (update-in [:authn :forms] assoc id form)))))
+
+(reg-event-db
+  :evt.webui.authn/set-methods-total
+  [db/debug-interceptors trim-v]
+  (fn [db [n]]
+    (-> db
+        (assoc-in [:authn :total] n)
+        (assoc-in [:authn :count] 0))))
 
 (reg-event-db
   :evt.webui.authn/update-method

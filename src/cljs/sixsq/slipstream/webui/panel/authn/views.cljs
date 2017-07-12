@@ -13,15 +13,10 @@
   "This panel shows the login controls if there is no active user session;
    otherwise it shows the details of the session."
   []
-  (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
+  (let [session (subscribe [:webui.authn/session])]
     (fn []
       [v-box
-       :children [[title
-                   :label (@tr (if @session [:session] [:login]))
-                   :level :level1
-                   :underline? true]
-                  (if @session
+       :children [(if @session
                     [session/session-info]
                     [forms/login-controls])]])))
 

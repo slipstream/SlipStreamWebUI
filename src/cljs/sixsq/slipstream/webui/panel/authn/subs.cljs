@@ -7,6 +7,12 @@
 (reg-sub :webui.authn/session
          (fn [db _] (-> db :authn :session)))
 
+(reg-sub :webui.authn/total
+         (fn [db _] (-> db :authn :total)))
+
+(reg-sub :webui.authn/count
+         (fn [db _] (-> db :authn :count)))
+
 (reg-sub :webui.authn/methods
          (fn [db _] (-> db :authn :methods)))
 

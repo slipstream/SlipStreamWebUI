@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.panel.authn.views-forms
   (:require
-    [re-com.core :refer [h-box v-box box input-text input-password label alert-box
+    [re-com.core :refer [h-box v-box box input-text input-password label alert-box progress-bar
                          button info-button modal-panel single-dropdown title line gap]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
@@ -112,7 +112,7 @@
       [v-box
        :width "35ex"
        :children [[button
-                   :label (str "Sign In with " (str/upper-case method-type))
+                   :label method-type
                    :class "btn btn-primary btn-block"
                    :on-click #(reset! show? true)]
                   (when @show?
@@ -139,15 +139,19 @@
     (< x y) -1
     :else 1))
 
+(defn sort-value [[tag [{:keys [authn-method]}]]]
+  (if (= "internal" authn-method)
+    "internal"
+    (or tag authn-method)))
+
 (defn order-and-group
   "Sorts the methods by ID and then groups them (true/false) on whether it is
    an internal method or not."
   [methods]
   (->> methods
        (sort-by :id)
-       (group-by :authn-method)
-       (sort-by first method-comparator)
-       (into {})))
+       (group-by (or :group :authn-method))
+       (sort-by sort-value method-comparator)))
 
 (defn login-form-group
   "Renders the forms for a given group. If there's only one item, the form is
@@ -169,29 +173,33 @@
    from the container holding the returned h-box."
   []
   (let [methods (subscribe [:webui.authn/methods])
+        total (subscribe [:webui.authn/total])
+        count (subscribe [:webui.authn/count])
         wrapped-row-spacing "6ex"
-        margin (str "0 0 " wrapped-row-spacing " 0")
-        neg-margin (str "0 0 -" wrapped-row-spacing " 0")]
+        margin (str "0 3ex " wrapped-row-spacing " 3ex")
+        neg-margin (str "0 3ex -" wrapped-row-spacing " 3ex")]
     (fn []
       (let [methods (order-and-group @methods)
-            internals (get methods "internal")
-            externals (into {} (remove (fn [[k _]] (= "internal" k)) methods))]
-
+            internals (first methods)
+            externals (rest methods)
+            progress (if (zero? @total) 0 (int (* 100. (/ @count @total))))]
         [v-box
          :style {:margin neg-margin}
-         :children [[h-box
-                     :gap "5ex"
-                     :align :start
-                     :class "webui-wrap"
-                     :style {:flex-flow "row wrap"}
-                     :children [[v-box
-                                 :style {:margin margin}
-                                 :children [[login-form-group "internal" internals]]]
-                                [v-box
-                                 :gap "1ex"
-                                 :style {:margin margin}
-                                 :children (vec (for [k (keys externals)]
-                                                  [login-form-group k (get externals k)]))]]]]]))))
+         :children [(if (or (zero? @total) (not= @count @total))
+                      [progress-bar :model progress]
+                      [h-box
+                       ;:gap "5ex"
+                       :align :start
+                       :justify :center
+                       :class "webui-wrap"
+                       :style {:flex-flow "row wrap"}
+                       :children [[v-box
+                                   :style {:margin margin}
+                                   :children [[login-form-group (first internals) (second internals)]]]
+                                  [v-box
+                                   :gap "1ex"
+                                   :style {:margin margin}
+                                   :children (vec (map (fn [[k v]] [login-form-group k v]) externals))]]])]]))))
 
 (defn error-message
   "Provides the error message as an alert box when the message isn't nil."

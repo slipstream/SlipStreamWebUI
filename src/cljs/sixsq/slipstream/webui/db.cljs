@@ -50,24 +50,32 @@
 ;; authentication state
 ;;
 
-(s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
 
 (s/def :webui.authn/id string?)
 (s/def :webui.authn/label string?)
+(s/def :webui.authn/group string?)
 (s/def :webui.authn/authn-method string?)
 (s/def :webui.authn/description string?)
-(s/def :webui.authn/error-message (s/nilable string?))
-(s/def :webui.authn/redirect-uri string?)
 (s/def :webui.authn/params-desc (s/map-of keyword? map?))
 (s/def :webui.authn/method-defn (only-keys :req-un [:webui.authn/id
                                                     :webui.authn/label
+                                                    :webui.authn/group
                                                     :webui.authn/authn-method
                                                     :webui.authn/description
                                                     :webui.authn/params-desc]))
+
+
+(s/def :webui.authn/total nat-int?)
+(s/def :webui.authn/count nat-int?)
+(s/def :webui.authn/redirect-uri string?)
+(s/def :webui.authn/error-message (s/nilable string?))
+(s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
 (s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
 (s/def :webui.authn/forms (s/map-of string? map?))
 
-(s/def :webui.authn/authn (only-keys :req-un [:webui.authn/redirect-uri
+(s/def :webui.authn/authn (only-keys :req-un [:webui.authn/total
+                                              :webui.authn/count
+                                              :webui.authn/redirect-uri
                                               :webui.authn/error-message
                                               :webui.authn/session
                                               :webui.authn/methods
@@ -164,7 +172,9 @@
 
    :modules-data          nil
 
-   :authn                 {:redirect-uri  "/webui/login"
+   :authn                 {:total         0
+                           :count         0
+                           :redirect-uri  "/webui/login"
                            :error-message nil
                            :session       nil
                            :methods       []
