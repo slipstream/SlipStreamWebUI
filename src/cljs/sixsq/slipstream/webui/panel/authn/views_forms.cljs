@@ -120,10 +120,11 @@
                     [modal-panel
                      :backdrop-on-click #(reset! show? false)
                      :child [v-box
+                             :gap "1ex"
                              :width "35ex"
                              :children (conj (vec (doall (for [method methods]
                                                            [method-form method])))
-                                             [gap :size "3ex"]
+                                             [gap :size "2ex"]
                                              [button
                                               :label (str "Cancel")
                                               :class "btn btn-danger btn-block"
