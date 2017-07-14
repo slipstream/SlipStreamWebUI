@@ -4,6 +4,31 @@
     <meta charset='utf-8'>
     <title>SlipStream WebUI</title>
 
+    <!-- 
+      If EventSource (Server Sent Event) is not present, load
+      a polyfill implementation to provide it.  This is natively
+      supported (and unneeded) on all major browsers except 
+      Microsoft Edge (of course).
+    -->
+    <script type="text/javascript">
+function polyfillEventSource() {
+  if (EventSource === undefined) {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '/webui/js/eventsource.min.js';
+
+    var head = document.getElementsByTagName('head')[0];
+    head.appendChild(script);
+
+    console.log("loaded EventSource polyfill");
+  } else {
+    console.log("using native EventSource implementation");
+  }
+}
+
+polyfillEventSource();
+    </script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="/webui/assets/css/material-design-iconic-font.min.css">
     <link rel="stylesheet" href="/webui/assets/css/re-com.css">
