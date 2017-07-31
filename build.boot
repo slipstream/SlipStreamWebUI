@@ -38,7 +38,7 @@
                     [reagent]
                     [re-frame]
                     [re-com]
-                    [com.andrewmcveigh/cljs-time "0.5.0"]
+                    [com.andrewmcveigh/cljs-time]
 
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
@@ -140,17 +140,23 @@
 ;;; about.
 (ns-unmap 'boot.user 'test)
 
+;; FIXME: Remove :process-shim flag when possible.
+;; See https://github.com/bensu/doo/pull/141 
 (deftask test []
          (comp (testing)
                (test-cljs :js-env :phantom
+                          :cljs-opts {:process-shim false}
                           :exit? true)))
 
 (deftask deps [])
 
+;; FIXME: Remove :process-shim flag when possible.
+;; See https://github.com/bensu/doo/pull/141 
 (deftask auto-test []
          (comp (testing)
                (watch)
-               (test-cljs :js-env :phantom)))
+               (test-cljs :js-env :phantom
+                          :cljs-opts {:process-shim false})))
 
 (deftask mvn-test
          "run all tests of project"
