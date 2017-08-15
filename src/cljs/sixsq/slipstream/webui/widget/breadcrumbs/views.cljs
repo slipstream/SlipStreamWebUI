@@ -35,8 +35,8 @@
                            :label separator
                            :class "webui-breadcrumbs-separator"]
           crumbs (map (partial format-crumb-widget model on-change) (range (count @model)))]
-      (log/error "rendering breadcrumbs:" @model)
       [h-box
        :class "webui-breadcrumbs"
        :gap "0.5ex"
        :children (interpose separator-label crumbs)])))
+

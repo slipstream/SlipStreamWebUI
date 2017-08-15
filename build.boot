@@ -93,7 +93,7 @@
                                                  :language-in     :ecmascript5
                                                  :parallel-build  true
                                                  :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"
-                                                                   'sixsq.slipstream.webui/HOST_URL      "https://nuv.la"
+                                                                   'sixsq.slipstream.webui/HOST_URL      "https://159.100.241.33"
                                                                    ;'sixsq.slipstream.webui/CONTEXT  ""
                                                                    'goog.DEBUG                           true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
@@ -141,7 +141,7 @@
 (ns-unmap 'boot.user 'test)
 
 ;; FIXME: Remove :process-shim flag when possible.
-;; See https://github.com/bensu/doo/pull/141 
+;; See https://github.com/bensu/doo/pull/141
 (deftask test []
          (comp (testing)
                (test-cljs :js-env :phantom
@@ -151,7 +151,7 @@
 (deftask deps [])
 
 ;; FIXME: Remove :process-shim flag when possible.
-;; See https://github.com/bensu/doo/pull/141 
+;; See https://github.com/bensu/doo/pull/141
 (deftask auto-test []
          (comp (testing)
                (watch)

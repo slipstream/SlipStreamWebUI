@@ -17,7 +17,8 @@
     [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
     [taoensso.timbre :as log]
     [sixsq.slipstream.webui.widget.history.utils :as history]
-    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]))
+    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
+    [sixsq.slipstream.webui.widget.operations.views :as ops]))
 
 (defn format-link [[k {:keys [href]}]]
   (let [n (name k)]
@@ -238,6 +239,15 @@
    :children [[select-controls]
               [search-header]]])
 
+(defn action-bar []
+  (let [cep (subscribe [:cloud-entry-point])
+        search (subscribe [:search])]
+    (fn []
+      (let [{:keys [baseURI]} @cep
+            {{:keys [operations]} :listing :as data} @search]
+        (when operations
+          (ops/format-operations (:listing data) baseURI))))))
+
 (defn results-bar []
   (let [search (subscribe [:search])]
     (fn []
@@ -272,8 +282,10 @@
         (dispatch [:set-collection-name resource-type]))
       (let [n (count @path)
             children (case n
-                       1 [[control-bar]]
+                       1 [[control-bar]
+                          [action-bar]]
                        2 [[control-bar]
+                          [action-bar]
                           [results-bar]
                           [search-vertical-result-table]]
                        3 [[doc-utils/resource-detail @data (:baseURI @cep)]]
