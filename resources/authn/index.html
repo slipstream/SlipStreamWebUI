@@ -88,6 +88,89 @@
 <div class="navbar navbar-default navbar-fixed-top ss-alert-container-fixed-top">
     <div class="ss-alert-offset-placeholder">
     </div>
+    <div id="ss-alert-container-floating" class="container">
+      <div id="alert-error" class="alert alert-danger alert-dismissible hidden" role="alert">
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <span></span>
+        <h3>
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+          <span class="alert-title">Error</span>
+        </h3>
+        <div class="alert-msg-container">
+          <div class="alert-msg">
+            Something is wrong with your credentials.
+          </div>
+        </div>
+      </div>
+      <div id="alert-warning" class="alert alert-dismissible hidden alert-warning" role="alert">
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <span></span>
+        <h3>
+          <span class="glyphicon glyphicon-alert"></span>
+          <span class="alert-title">Warning</span>
+        </h3>
+        <div class="alert-msg-container">
+          <div class="alert-msg">
+            With the deployment you just performed you are aproaching the quota limit on Amazon EC2 cloud.
+          </div>
+        </div>
+      </div>
+      <div id="alert-success" class="alert alert-success alert-dismissible hidden" role="alert">
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <span></span>
+        <h3>
+          <span class="glyphicon glyphicon-ok"></span>
+          <span class="alert-title">Success</span>
+        </h3>
+        <div class="alert-msg-container">
+          <div class="alert-msg">
+            Your credentials for Amazon EC2 cloud were successfully validated.
+          </div>
+        </div>
+      </div>
+      <div id="alert-info" class="alert-info alert alert-dismissible hidden" role="alert">
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <span></span>
+        <h3>
+          <!-- <span class="glyphicon glyphicon-comment"></span> -->
+          <span class="glyphicon glyphicon-bookmark"></span>
+          <span class="alert-title">Info</span>
+        </h3>
+        <div class="alert-msg-container">
+          <div class="alert-msg">
+            To have an overview of your deployments go to the dashboard.
+          </div>
+        </div>
+      </div>
+      <div id="alert-wrong-credentials" class="alert alert-danger alert-dismissible hidden" role="alert">
+        <button type="button" class="close" data-dismiss="alert">
+          <span aria-hidden="true">×</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <span></span>
+        <h3>
+          <span class="glyphicon glyphicon-remove"></span>
+          <span class="alert-title">Error</span>
+        </h3>
+        <div class="alert-msg-container">
+          <div class="alert-msg">
+            Something is wrong with your credentials. Do you need a <a data-toggle="modal" data-target="#pwdResetModal" class="alert-link">new password</a>?
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
 
 <div class="navbar navbar-default navbar-fixed-top" role="navigation" id="topbar">
@@ -208,6 +291,34 @@
         </div>
     </div>
 </div><!--/#footer -->
+
+<div id="ss-modal-dialogs-placeholder">
+  <div class="modal fade ss-reset-password-dialog" id="ss-reset-password-dialog" tabindex="-1" role="dialog" aria-labelledby="ss-reset-password-dialog-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="form-horizontal" id="ss-reset-password-form" role="form" data-success-message="A password reset validation email has been sent to the address                                                                                   in the user's account profile. Please visit the link in that email                                                                                   to confirm this request.">
+        <div class="modal-content panel-warning">
+          <div class="modal-header panel-heading">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="ss-reset-password-dialog-label">Reset password</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group has-warning">
+              <label id="ss-reset-password-username-label" for="ss-reset-password-username" class="col-sm-3 control-label">Username</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control" id="ss-reset-password-username" name="username" autocomplete="off" />
+              </div>
+            </div>
+            <div class="ss-dialog-footnote text-muted">Enter the username to reset the pasword for. If it corresponds to an existent user,                                                                                 we'll send an email to the email address in the user's profile with a link to reset the password.</div> <!-- /.ss-save-dialog-footnote -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default ss-cancel-btn" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-warning ss-ok-btn ss-build-btn">Request password reset link</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div id="bottom-scripts">
     <!-- Bootstrap core JavaScript -->
