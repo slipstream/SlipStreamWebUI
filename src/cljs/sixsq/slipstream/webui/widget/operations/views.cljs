@@ -38,7 +38,7 @@
                                                              :class "webui-block-button"
                                                              :size "auto"
                                                              :child [button
-                                                                     :label "save"
+                                                                     :label "add"
                                                                      :class "btn btn-primary btn-block"
                                                                      :disabled? false
                                                                      :on-click (fn []
@@ -175,6 +175,7 @@
                                                  :disabled? false
                                                  :on-click (fn []
                                                              (reset! show? false))]]]]])]])))
+
 (defn operation-name [op-uri]
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
