@@ -93,7 +93,7 @@
                                                  :language-in     :ecmascript5
                                                  :parallel-build  true
                                                  :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"
-                                                                   'sixsq.slipstream.webui/HOST_URL      "https://nuv.la"
+                                                                   'sixsq.slipstream.webui/HOST_URL      "https://185.19.29.234"
                                                                    ;'sixsq.slipstream.webui/CONTEXT  ""
                                                                    'goog.DEBUG                           true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})

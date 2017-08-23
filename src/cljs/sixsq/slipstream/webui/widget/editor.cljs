@@ -29,7 +29,7 @@
        :component-did-update update
        :display-name         "cm-inner"})))
 
-(defn cm-outer []
+(defn cm-outer [data]
   (let [_ (subscribe [:cloud-entry-point])]
     (fn [data]
       [cm-inner data])))

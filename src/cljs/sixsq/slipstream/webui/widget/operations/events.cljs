@@ -9,6 +9,7 @@
   :evt.webui.op/add
   [db/debug-interceptors trim-v]
   (fn [cofx [resource-type data]]
+    (log/error "DEBUG EVENT" "ADD" resource-type data)
     (if-let [client (get-in cofx [:db :clients :cimi])]
       (assoc cofx :fx.webui.op/add [client resource-type data])
       cofx)))

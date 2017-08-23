@@ -12,10 +12,17 @@
   :fx.webui.op/add
   (fn [[client resource-type data]]
     (go
-      (let [resp (<! (cimi/add client resource-type data))]
-        (if (= 201 (:status resp))
-          (dispatch [:message (str "creation of " resource-type " succeeded")])
-          (dispatch [:message (str "creation of " resource-type " failed")]))))))
+      (log/error "DEBUG" "ADD" resource-type data)
+      (let [resource-type :credentials
+            data {:credentialTemplate {:href "credential-template/generate-api-key"}}]
+        (log/error "DEBUG" "ADD" resource-type data)
+        (let [cep (<! (cimi/cloud-entry-point client))
+              resp (<! (cimi/add client resource-type data))]
+          (log/error "DEBUG" "CEP" cep)
+          (log/error "DEBUG" "RESPONSE" resp)
+          (if (= 201 (:status resp))
+            (dispatch [:message (str "creation of " resource-type " succeeded")])
+            (dispatch [:message (str "creation of " resource-type " failed")])))))))
 
 (reg-fx
   :fx.webui.op/edit
