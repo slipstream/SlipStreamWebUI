@@ -73,6 +73,24 @@
        :version (get-env :version)}
   push {:repo "sixsq"})
 
+(deftask write-version-css
+         "Writes a version.css file to the fileset that contains a rule for
+          adding the current SlipStream version to the web page footers."
+         []
+         (let [contents (str "#release-version:after {content: '" +version+ "';}\n")
+               tmp (tmp-dir!)]
+           (fn middleware [next-handler]
+             (fn handler [fileset]
+               (empty-dir! tmp)
+               (let [out-file (clojure.java.io/file tmp "webui/assets/css/version.css")]
+                 (doto out-file
+                   clojure.java.io/make-parents
+                   (spit contents))
+                 (-> fileset
+                     (add-resource tmp)
+                     commit!
+                     next-handler))))))
+
 ;;
 ;; compiler options :pretty-print and :pseudo-names can help with debugging
 ;; generated javascipt code
@@ -101,6 +119,7 @@
 
 (deftask build []
          (comp (pom)
+               (write-version-css)
                (sift :add-jar {'cljsjs/codemirror #"cljsjs/codemirror/development/codemirror.css"})
                (sift :move {#"cljsjs/codemirror/development/codemirror.css" "webui/assets/css/codemirror.css"})
                (production)
@@ -116,6 +135,7 @@
 
 (deftask run []
          (comp (running)
+               (write-version-css)
                (sift :add-jar {'cljsjs/codemirror #"cljsjs/codemirror/development/codemirror.css"})
                (sift :move {#"cljsjs/codemirror/development/codemirror.css" "webui/assets/css/codemirror.css"})
                (serve :not-found 'sixsq.slipstream.webui.run/index-handler)
@@ -141,7 +161,7 @@
 (ns-unmap 'boot.user 'test)
 
 ;; FIXME: Remove :process-shim flag when possible.
-;; See https://github.com/bensu/doo/pull/141 
+;; See https://github.com/bensu/doo/pull/141
 (deftask test []
          (comp (testing)
                (test-cljs :js-env :phantom
@@ -151,7 +171,7 @@
 (deftask deps [])
 
 ;; FIXME: Remove :process-shim flag when possible.
-;; See https://github.com/bensu/doo/pull/141 
+;; See https://github.com/bensu/doo/pull/141
 (deftask auto-test []
          (comp (testing)
                (watch)

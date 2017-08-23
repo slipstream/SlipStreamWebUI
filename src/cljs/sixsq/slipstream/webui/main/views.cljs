@@ -141,8 +141,9 @@
     (fn []
       [h-box
        :class "webui-footer"
-       :justify :center
-       :children [[label :label (str (@tr [:copyright]) " © 2016-2017, SixSq Sàrl")]]])))
+       :justify :between
+       :children [[label :label [:span#release-version (str "SlipStream v")]]
+                  [label :label (str (@tr [:copyright]) " © 2016-2017, SixSq Sàrl")]]])))
 
 (defn message-modal
   []
