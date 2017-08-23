@@ -179,11 +179,12 @@
 
 (defn resource-panel
   []
-  (let [resource-path (subscribe [:resource-path])]
+  (let [resource-path (subscribe [:resource-path])
+        resource-query-params (subscribe [:resource-query-params])]
     (fn []
       [v-box
        :class "webui-contents"
-       :children [(resource/render @resource-path nil)]])))
+       :children [(resource/render @resource-path @resource-query-params)]])))
 
 (defn header []
   (let [path (subscribe [:resource-path])]

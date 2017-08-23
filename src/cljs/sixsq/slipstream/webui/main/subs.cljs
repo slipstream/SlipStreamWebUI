@@ -7,6 +7,9 @@
 (reg-sub :resource-path
          (fn [db _] (-> db :resource-path)))
 
+(reg-sub :resource-query-params
+         (fn [db _] (-> db :resource-query-params)))
+
 (reg-sub :cloud-entry-point
          (fn [db _] (-> db :cloud-entry-point)))
 
