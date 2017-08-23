@@ -53,7 +53,7 @@
 
 (s/def :webui.authn/id string?)
 (s/def :webui.authn/label string?)
-(s/def :webui.authn/group string?)
+(s/def :webui.authn/group (s/nilable string?))
 (s/def :webui.authn/authn-method string?)
 (s/def :webui.authn/description string?)
 (s/def :webui.authn/params-desc (s/map-of keyword? map?))
