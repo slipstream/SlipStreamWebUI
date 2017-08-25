@@ -141,6 +141,15 @@
 (s/def :webui.i18n/tr fn?)
 (s/def :webui.i18n/i18n (only-keys :req-un [:webui.i18n/locale :webui.i18n/tr]))
 
+;;
+;; editor data
+;;
+(s/def :webui.editor/data (s/nilable string?))
+(s/def :webui.editor/editor (only-keys :req-un [:webui.editor/data]))
+
+;;
+;; full database schema
+;;
 (s/def ::db (only-keys :req-un [:webui.i18n/i18n
                                 :cimi/cloud-entry-point
                                 ::clients ::message ::resource-data ::resource-path ::resource-query-params
@@ -148,7 +157,8 @@
                                 ::modules-data
                                 :webui.authn/authn
                                 ::search-data ::search
-                                ::offer-data ::offer]))
+                                ::offer-data ::offer
+                                :webui.editor/editor]))
 
 ;;
 ;; initial database value
@@ -202,4 +212,6 @@
                            :completed?       true
                            :available-fields [{:id "id" :label "id"}
                                               {:id "beta" :label "beta"}]
-                           :selected-fields  #{"id"}}})
+                           :selected-fields  #{"id"}}
+
+   :editor                {:data nil}})

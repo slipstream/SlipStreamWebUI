@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.widget.operations.views
   (:require
-    [re-com.core :refer [h-box v-box box label title button modal-panel p scroller gap]]
+    [re-com.core :refer [h-box v-box box label title button modal-panel p scroller gap input-textarea]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [cljsjs.codemirror]
@@ -9,16 +9,20 @@
     [sixsq.slipstream.webui.widget.editor :as editor]
 
     [sixsq.slipstream.webui.widget.operations.events]
-    [sixsq.slipstream.webui.widget.operations.effects]))
+    [sixsq.slipstream.webui.widget.operations.effects]
+
+    [sixsq.slipstream.webui.widget.editor.subs]
+    [sixsq.slipstream.webui.widget.editor.events]))
 
 (defn add-button
   "Creates an add button that will bring up a dialog to create a new resource."
   [data action-fn]
-  (let [show? (reagent/atom false)]
+  (let [show? (reagent/atom false)
+        editor-data (subscribe [:webui.editor/data])]
     (fn []
       [v-box
        :children [[button
-                   :label [:span [:i.zmdi.zmdi-hc-fw-rc.zmdi-plus-square] " add" ]
+                   :label [:span [:i.zmdi.zmdi-hc-fw-rc.zmdi-plus-square] " add"]
                    :class "btn-primary"
                    :on-click #(reset! show? true)]
                   (when @show?
@@ -32,7 +36,11 @@
                                          :min-height "10em"
                                          :child [v-box
                                                  :gap "1ex"
-                                                 :children [[editor/cm-outer {:data data}]
+                                                 :children [#_[editor/cm-outer {:data data}]
+                                                            [input-textarea
+                                                             :model editor-data
+                                                             :on-change (fn [%]
+                                                                          (dispatch [:evt.webui.editor/set-data %]))]
                                                             [gap :size "2ex"]
                                                             [box
                                                              :class "webui-block-button"
@@ -42,7 +50,7 @@
                                                                      :class "btn btn-primary btn-block"
                                                                      :disabled? false
                                                                      :on-click (fn []
-                                                                                 (action-fn {})
+                                                                                 (action-fn @editor-data)
                                                                                  (reset! show? false))]]
                                                             [box
                                                              :class "webui-block-button"
@@ -62,7 +70,7 @@
     (fn []
       [v-box
        :children [[button
-                   :label [:span [:i.zmdi.zmdi-hc-fw-rc.zmdi-edit] " edit" ]
+                   :label [:span [:i.zmdi.zmdi-hc-fw-rc.zmdi-edit] " edit"]
                    :class "btn-primary"
                    :on-click #(reset! show? true)]
                   (when @show?
@@ -106,7 +114,7 @@
     (fn []
       [v-box
        :children [[button
-                   :label [:span [:i.zmdi.zmdi-hc-fw-rc.zmdi-delete] " delete" ]
+                   :label [:span [:i.zmdi.zmdi-hc-fw-rc.zmdi-delete] " delete"]
                    :class "btn-primary"
                    :on-click #(reset! show? true)]
                   (when @show?

@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.widget.operations.effects
+(ns sixsq.slipstream.webui.widget.cimi.effects
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
@@ -7,6 +7,36 @@
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.webui.panel.authn.utils :as au]
     [taoensso.timbre :as log]))
+
+(reg-fx
+  :fx.webui.cimi/logout
+  (fn [[client]]
+    (go
+      (let [resp (<! (cimi/logout client))]
+        (if (= 200 (:status resp))
+          (dispatch [:evt.webui.authn/logged-out])
+          (dispatch [:message "logout failed"]))))))
+
+(reg-fx
+  :fx.webui.cimi/login
+  (fn [[client creds]]
+    (go
+      (let [resp (<! (cimi/login client creds))]
+        (case (:status resp)
+          201 (let [session (<! (au/get-current-session client))]
+                (dispatch [:evt.webui.authn/logged-in session]))
+          303 (let [session (<! (au/get-current-session client))]
+                (dispatch [:evt.webui.authn/logged-in session]))
+          (do
+            (log/error "Error login response:" (with-out-str (cljs.pprint/pprint resp)))
+            (dispatch [:message "login failed"])))))))
+
+(reg-fx
+  :fx.webui.cimi/search
+  (fn [[client resource-type params]]
+    (go
+      (let [results (<! (cimi/search client resource-type params))]
+        (dispatch [:show-search-results resource-type results])))))
 
 (reg-fx
   :fx.webui.op/add
@@ -38,5 +68,3 @@
       (let [{:keys [status message] :as resp} (<! (cimi/delete client href))
             state (if (= 200 status) "SUCCESS" "FAIL")]
         (dispatch [:message (str state ": deleting " href "\n" message)])))))
-
-
