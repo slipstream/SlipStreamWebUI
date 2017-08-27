@@ -1,5 +1,6 @@
 (ns sixsq.slipstream.webui.components.editor
   (:require
+    [re-com.core :refer [label]]
     [re-com.util :refer [deref-or-value]]
     [re-com.validate :refer-macros [validate-args-macro]]
     [re-frame.core :refer [subscribe]]
@@ -12,6 +13,9 @@
 
 (def json-options {:lineNumbers true
                    :mode        {:name "javascript", :json true}})
+
+(def default-args {:options {}
+                   :change-on-blur? true})
 
 (defn random-id
   "Random six character string that can be used to generate unique
@@ -31,7 +35,7 @@
 (defn editor-inner
   "Function that acts as the reagent component for the editor. This should
    only be used via the public component function."
-  [& {:keys [options] :as args}]
+  [{:keys [options] :as args}]
   (let [cm (atom nil)
         text-area-id (str "editor-" (random-id))
         options (clj->js options)
@@ -40,7 +44,7 @@
                    (.setValue @cm (or (deref-or-value text) ""))))]
 
     (reagent/create-class
-      {:reagent-render       (fn [& {:as args}]
+      {:reagent-render       (fn [args]
                                [:textarea {:id text-area-id}])
 
        :component-did-mount  (fn [comp]
@@ -71,13 +75,12 @@
 (defn editor
   "Provides an editor component based on Codemirror. To use modes other than
    javascript, you will have to require the mode explicitly in your code."
-  [& {:keys [text] :or {:options {}, :change-on-blur? true} :as args}]
+  [& {:as args}]
   {:pre [(validate-args-macro editor-args-desc args "editor")]}
-  [editor-inner args])
+  [editor-inner (merge default-args args)])
 
 (defn json-editor
   "A convenience function to setup the CodeMirror editor component for JSON."
-  [& {:keys [text options] :or {:options {}, :change-on-blur? true} :as args}]
-  {:pre [(validate-args-macro editor-args-desc args "json-editor")]}
-  (log/error "GOT HERE" (with-out-str (cljs.pprint/pprint args)))
-  [editor-inner (update-in args [:options] #(merge json-options %))])
+  [& {:as args}]
+  {:pre [(validate-args-macro editor-args-desc args "editor")]}
+  [editor-inner (update-in (merge default-args args) [:options] #(merge json-options %))])
