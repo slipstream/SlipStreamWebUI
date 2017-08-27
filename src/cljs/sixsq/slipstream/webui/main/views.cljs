@@ -5,7 +5,6 @@
                          single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
                          scroller selection-list title]]
     [re-com.buttons :refer [button-args-desc]]
-    [sixsq.slipstream.webui.components.core :refer [json-editor]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [re-frame.loggers :refer [console]]
@@ -204,5 +203,4 @@
   [v-box
    :children [[message-modal]
               #_[resource-modal]
-              [resource-panel]
-              [h-box :children [[json-editor]]]]])
+              [resource-panel]]])
