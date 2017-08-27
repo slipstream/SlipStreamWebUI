@@ -99,9 +99,8 @@
          (task-options! cljs {:optimizations    :advanced
                               :compiler-options {:language-in     :ecmascript5
                                                  :parallel-build  true
-                                                 :closure-defines {'sixsq.slipstream.authn/LOGGING_LEVEL "warn"
-                                                                   'sixsq.slipstream.webui/LOGGING_LEVEL "warn"
-                                                                   'goog.DEBUG                           false}}})
+                                                 :closure-defines {'sixsq.slipstream.webui.defines/LOGGING_LEVEL "warn"
+                                                                   'goog.DEBUG                                   false}}})
          identity)
 
 (deftask development []
@@ -110,10 +109,10 @@
                               :compiler-options {:preloads        '[devtools.preload]
                                                  :language-in     :ecmascript5
                                                  :parallel-build  true
-                                                 :closure-defines {'sixsq.slipstream.webui/LOGGING_LEVEL "info"
-                                                                   'sixsq.slipstream.webui/HOST_URL      "https://nuv.la"
-                                                                   ;'sixsq.slipstream.webui/CONTEXT  ""
-                                                                   'goog.DEBUG                           true}}}
+                                                 :closure-defines {'sixsq.slipstream.webui.defines/LOGGING_LEVEL "info"
+                                                                   'sixsq.slipstream.webui.defines/HOST_URL      "https://nuv.la"
+                                                                   ;'sixsq.slipstream.webui.defines/CONTEXT  ""
+                                                                   'goog.DEBUG                                   true}}}
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 

@@ -5,6 +5,7 @@
     [re-frame.core :refer [dispatch dispatch-sync]]
     [taoensso.timbre :as log]
 
+    [sixsq.slipstream.webui.defines :as defines]
     [sixsq.slipstream.webui.routes]
     [sixsq.slipstream.webui.utils :as utils]
 
@@ -30,36 +31,17 @@
 ;;
 ;; debugging log level
 ;;
-;; Set the value like this:
-;;
-;; {:compiler-options {:closure-defines {'sixsq.slipstream.authn/LOGGING_LEVEL "info"}}
-;;
-(goog-define LOGGING_LEVEL "info")
-(log/set-level! (keyword LOGGING_LEVEL))
+(log/set-level! (keyword defines/LOGGING_LEVEL))
 
 ;;
 ;; determine the host url
 ;;
-;; Set a fixed SlipStream endpoint (useful for development) with:
-;;
-;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/HOST_URL "https://nuv.la"}}
-;;
-;; NOTE: When using an endpoint other than the one serving the javascript code
-;; you MUST turn off the XSS protections of the browser.
-;;
-(goog-define HOST_URL "")
-(def SLIPSTREAM_URL (delay (if-not (str/blank? HOST_URL) HOST_URL (utils/host-url))))
+(def SLIPSTREAM_URL (delay (if-not (str/blank? defines/HOST_URL) defines/HOST_URL (utils/host-url))))
 
 ;;
 ;; determine the web application prefix
 ;;
-;; The default is to concatenate '/webui' to the end of the SLIPSTREAM_URL.
-;; If the application is mounted elsewhere, you can change the default with:
-;;
-;; {:compiler-options {:closure-defines {'sixsq.slipstream.webui/CONTEXT ""}}
-;;
-(goog-define CONTEXT "/authn")
-(def PATH_PREFIX (delay (str (utils/host-url) CONTEXT)))
+(def PATH_PREFIX (delay (str (utils/host-url) defines/CONTEXT)))
 
 ;;
 ;; hook to initialize the web application
