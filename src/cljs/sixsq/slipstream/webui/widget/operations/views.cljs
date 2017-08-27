@@ -1,12 +1,12 @@
 (ns sixsq.slipstream.webui.widget.operations.views
   (:require
-    [re-com.core :refer [h-box v-box box label title button modal-panel p scroller gap input-textarea]]
+    [re-com.core :refer [h-box v-box box label title button modal-panel p scroller gap]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [cljsjs.codemirror]
     [cljsjs.codemirror.mode.clojure]
     [cljsjs.codemirror.mode.javascript]
-    [sixsq.slipstream.webui.widget.editor :as editor]
+    [sixsq.slipstream.webui.components.core :as webui-com]
 
     [sixsq.slipstream.webui.widget.operations.events]
     [sixsq.slipstream.webui.widget.operations.effects]
@@ -36,11 +36,10 @@
                                          :min-height "10em"
                                          :child [v-box
                                                  :gap "1ex"
-                                                 :children [#_[editor/cm-outer {:data data}]
-                                                            [input-textarea
-                                                             :model editor-data
-                                                             :on-change (fn [%]
-                                                                          (dispatch [:evt.webui.editor/set-data %]))]
+                                                 :children [[webui-com/json-editor
+                                                             :text editor-data
+                                                             :on-change #(dispatch [:evt.webui.editor/set-data %])
+                                                             :change-on-blur? false]
                                                             [gap :size "2ex"]
                                                             [box
                                                              :class "webui-block-button"
@@ -84,7 +83,9 @@
                                          :min-height "10em"
                                          :child [v-box
                                                  :gap "1ex"
-                                                 :children [[editor/cm-outer {:data data}]
+                                                 :children [[webui-com/json-editor
+                                                             :data data
+                                                             :on-change (constantly nil)]
                                                             [gap :size "2ex"]
                                                             [box
                                                              :class "webui-block-button"
@@ -200,4 +201,3 @@
     [h-box
      :gap "1ex"
      :children (map (partial operation-button data) ops)]))
-

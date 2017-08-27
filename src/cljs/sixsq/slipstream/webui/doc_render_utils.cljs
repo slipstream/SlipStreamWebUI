@@ -6,7 +6,6 @@
     [cljsjs.codemirror]
     [cljsjs.codemirror.mode.clojure]
     [cljsjs.codemirror.mode.javascript]
-    [sixsq.slipstream.webui.widget.editor :as editor]
     [sixsq.slipstream.webui.widget.operations.views :as ops]))
 
 (defn attr-ns
