@@ -19,7 +19,7 @@
      :disabled? (= (count @model) (inc index))
      :class "webui-breadcrumb-element"
      :on-click (fn []
-                 (log/info "breadcrumb path changing to" trim-value)
+                 (log/debug "breadcrumb path changing to" trim-value)
                  (on-change trim-value))]))
 
 (defn breadcrumbs-widget
@@ -35,7 +35,7 @@
                            :label separator
                            :class "webui-breadcrumbs-separator"]
           crumbs (map (partial format-crumb-widget model on-change) (range (count @model)))]
-      (log/error "rendering breadcrumbs:" @model)
+      (log/debug "rendering breadcrumbs:" @model)
       [h-box
        :class "webui-breadcrumbs"
        :gap "0.5ex"
