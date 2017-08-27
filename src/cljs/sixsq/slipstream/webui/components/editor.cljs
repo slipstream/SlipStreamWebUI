@@ -14,7 +14,7 @@
 (def json-options {:lineNumbers true
                    :mode        {:name "javascript", :json true}})
 
-(def default-args {:options {}
+(def default-args {:options         {}
                    :change-on-blur? true})
 
 (defn random-id
@@ -67,10 +67,28 @@
 ;;
 
 (def editor-args-desc
-  [{:name :text, :required true, :type "nil | string | atom"}
-   {:name :options, :required false, :type "options map", :validate-fn map?}
-   {:name :on-change, :required true, :type "update fn", :validate-fn fn?}
-   {:name :change-on-blur?, :required false, :type "boolean", :validate-fn boolean?}])
+  [{:name        :text
+    :required    true
+    :type        "nil | string | atom"
+    :description "string or atom that holds the text to be edited"}
+
+   {:name        :options
+    :required    false
+    :type        "options map"
+    :validate-fn map?
+    :description "map of CodeMirror options"}
+
+   {:name        :on-change
+    :required    true
+    :type        "update fn"
+    :validate-fn fn?
+    :description "1-arg (updated text) function called on updates"}
+
+   {:name        :change-on-blur?
+    :required    false
+    :type        "boolean"
+    :validate-fn boolean?
+    :description "call update function only on blur (true, default) or on all changes (false)"}])
 
 (defn editor
   "Provides an editor component based on Codemirror. To use modes other than
