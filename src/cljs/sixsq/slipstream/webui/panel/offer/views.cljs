@@ -13,7 +13,6 @@
 
     [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.resource :as resource]
-    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]
     [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
     [taoensso.timbre :as log]))
 

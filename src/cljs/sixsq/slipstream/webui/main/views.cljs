@@ -4,14 +4,15 @@
                          button row-button md-icon-button md-circle-icon-button label modal-panel throbber
                          single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
                          scroller selection-list title]]
-    [re-com.buttons :refer [button-args-desc]]
+    [sixsq.slipstream.webui.components.core :refer [breadcrumbs]]
+
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
     [re-frame.loggers :refer [console]]
     [clojure.string :as str]
+
     [sixsq.slipstream.webui.utils :as utils]
 
-    [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
 
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
@@ -27,9 +28,10 @@
     [sixsq.slipstream.webui.widget.history.events]
     [sixsq.slipstream.webui.widget.history.effects]
 
+    [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.resource :as resource]
-    [sixsq.slipstream.webui.widget.breadcrumbs.views :as breadcrumbs]))
+
+    [sixsq.slipstream.webui.resource :as resource]))
 
 (defn format-operations
   [ops]
@@ -191,8 +193,14 @@
     (fn []
       [v-box
        :children [[page-header]
-                  [breadcrumbs/breadcrumbs-widget
+
+                  ;; FIXME: rely only on CSS for the styling
+                  [breadcrumbs
                    :model path
+                   :class "webui-breadcrumbs"
+                   :separator "\u2022"
+                   :separator-class "webui-breadcrumbs-separator"
+                   :breadcrumb-class "webui-breadcrumb-element"
                    :on-change #(dispatch [:set-resource-path-vec %])]]])))
 
 (defn footer []
