@@ -2,25 +2,26 @@
   (:require
     [re-com.core :refer [h-box v-box label button title]]
     [re-frame.core :refer [subscribe dispatch]]
+    [sixsq.slipstream.webui.components.core :refer [column]]
     [sixsq.slipstream.webui.panel.authn.utils :as u]
     [sixsq.slipstream.webui.panel.authn.subs]))
-
-(defn column
-  [vs cls]
-  [v-box
-   :class "webui-column"
-   :children (doall (for [v vs] [label :class cls :label v]))])
 
 (defn session-info
   "Provides the user's session information."
   []
-  (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
-    (fn []
-      (let [data (sort (u/remove-common-attrs @session))
-            ks (map (comp name first) data)
-            vs (map (comp str second) data)]
-        [h-box
-         :children [[column ks "webui-row-header"]
-                    [column vs ""]]]))))
+  (let [session @(subscribe [:webui.authn/session])
+        data (sort (u/remove-common-attrs session))
+        key-fn (comp name first)
+        value-fn (comp str second)]
+    [h-box
+     :gap "1ex"
+     :children [[column
+                 :model data
+                 :key-fn key-fn
+                 :value-fn key-fn
+                 :value-class "webui-row-header"]
+                [column
+                 :model data
+                 :key-fn key-fn
+                 :value-fn value-fn]]]))
 
