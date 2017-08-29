@@ -1,12 +1,14 @@
 (ns sixsq.slipstream.authn.main.views
   (:require
-    [re-com.core :refer [v-box modal-panel title]]
+    [re-com.core :refer [v-box alert-box title]]
     [re-frame.core :refer [subscribe dispatch]]
     [taoensso.timbre :as log]
 
     [sixsq.slipstream.authn.main.events]
+    [sixsq.slipstream.authn.main.subs]
     [sixsq.slipstream.webui.panel.authn.views-forms :as forms]
-    [sixsq.slipstream.webui.panel.authn.views-session :as session]))
+    [sixsq.slipstream.webui.panel.authn.views-session :as session]
+    [reagent.core :as reagent]))
 
 (defn redirect
   []
@@ -15,13 +17,17 @@
 
 (defn message-modal
   []
-  (let [message (subscribe [:message])]
+  (let [query-params (subscribe [:resource-query-params])
+        show? (reagent/atom true)]
     (fn []
-      (if @message
-        [modal-panel
-         :child @message
-         :wrap-nicely? true
-         :backdrop-on-click #(dispatch [:clear-message])]))))
+      (let [{:keys [error]} @query-params]
+        (when (and @show? error)
+          [alert-box
+           :alert-type :danger
+           :heading "Login Error"
+           :body error
+           :closeable? true
+           :on-close #(reset! show? false)])))))
 
 (defn app
   []
