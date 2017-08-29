@@ -1,18 +1,9 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
-    [re-com.core :refer [h-box v-box box gap line input-text input-password alert-box
-                         button row-button md-icon-button md-circle-icon-button label modal-panel throbber
-                         single-dropdown hyperlink hyperlink-href p checkbox horizontal-pill-tabs
-                         scroller selection-list title]]
+    [re-com.core :refer [box h-box v-box button label modal-panel]]
     [sixsq.slipstream.webui.components.core :refer [breadcrumbs]]
 
-    [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
-    [re-frame.loggers :refer [console]]
-    [clojure.string :as str]
-
-    [sixsq.slipstream.webui.utils :as utils]
-
 
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
@@ -33,88 +24,16 @@
 
     [sixsq.slipstream.webui.resource :as resource]))
 
-(defn format-operations
-  [ops]
-  [h-box
-   :gap "1ex"
-   :children
-   (doall (map (fn [{:keys [rel href]}] [hyperlink
-                                         :label rel
-                                         :on-click #(js/alert (str "Operation: " rel " on URL " href))]) ops))])
+(defn logo []
+  [box :class "webui-logo" :width "20ex" :child ""])
 
-(declare format-data)
-
-(defn format-list-entry
-  [prefix k v]
-  (let [id (:id v)]
-    ^{:key (str prefix "-" k)}
-    [:li [:strong (or id k)] (format-data prefix v)]))
-
-(defn format-map-entry
-  [prefix [k v]]
-  ^{:key (str prefix "-" k)}
-  [:li [:strong k] " : " (if (= k :operations)
-                           (format-operations v)
-                           (format-data prefix v))])
-
-(defn as-map [prefix m]
-  [:ul (doall (map (partial format-map-entry prefix) m))])
-
-(defn as-vec [prefix v]
-  [:ul (doall (map (partial format-list-entry prefix) (range) v))])
-
-(defn format-data
-  ([v]
-   (format-data (str (random-uuid)) v))
-  ([prefix v]
-   (cond
-     (map? v) (as-map prefix v)
-     (vector? v) (as-vec prefix v)
-     :else (str v))))
-
-(defn branch? [v]
-  (or (map? v) (vector? v)))
-
-(defn create-label [k v]
-  (if-not (branch? v)
-    (str k " : " v)
-    (str k)))
-
-(declare tree)
-
-(defn tree-node [indent prefix k v]
-  (let [react-key (str prefix "-" k)
-        indent-size (str (* 2 indent) "ex")
-        tag (create-label k v)
-        icon (if (branch? v)
-               [md-icon-button
-                :size :smaller
-                :md-icon-name "zmdi-chevron-right"
-                :disabled? false]
-               [md-icon-button
-                :size :smaller
-                :md-icon-name "zmdi-stop"
-                :disabled? true])]
-    ^{:key react-key}
-    [h-box
-     :align :center
-     :children [[gap :size indent-size]
-                icon
-                [label :label tag]]]))
-
-(defn tree-reducer [indent prefix r k v]
-  (let [parent (tree-node indent prefix k v)
-        children (tree (inc indent) prefix v)]
-    (concat r [parent] children)))
-
-(defn tree [indent prefix data]
-  (if (branch? data)
-    (doall (reduce-kv (partial tree-reducer indent prefix) [] data))))
-
-(defn tree-widget [indent prefix data]
-  (if-let [tree-rows (tree indent prefix data)]
-    [v-box
-     :children tree-rows]))
+(defn panel-link [label-kw url]
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn [label-kw url]
+      [button
+       :class "btn-link webui-nav-link"
+       :label (@tr [label-kw])
+       :on-click #(history/navigate url)])))
 
 (defn panel-controls []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -122,11 +41,13 @@
     (fn []
       [h-box
        :gap "2px"
-       :children [[box :class "webui-logo" :width "20ex" :child ""]
-                  [button :class "btn-link webui-nav-link" :label (@tr [:app]) :on-click #(history/navigate "application")]
-                  [button :class "btn-link webui-nav-link" :label (@tr [:deployment]) :on-click #(history/navigate "deployment")]
-                  [button :class "btn-link webui-nav-link" :label (@tr [:offer]) :on-click #(history/navigate "offer")]
-                  [button :class "btn-link webui-nav-link" :label (@tr [:cimi]) :on-click #(history/navigate "cimi")]]])))
+       :children [[logo]
+                  (doall
+                    (for [[label-kw url] [[:app "application"]
+                                          [:deployment "deployment"]
+                                          [:offer "offer"]
+                                          [:cimi "cimi"]]]
+                      [panel-link label-kw url]))]])))
 
 (defn page-header []
   [h-box
@@ -156,29 +77,6 @@
          :child @message
          :wrap-nicely? true
          :backdrop-on-click #(dispatch [:clear-message])]))))
-
-#_(defn resource-modal
-  []
-  (let [resource-data (subscribe [:resource-data])]
-    (fn []
-      (if @resource-data
-        [modal-panel
-         :child [v-box
-                 :gap "3px"
-                 :children [[scroller
-                             :scroll :auto
-                             :width "500px"
-                             :height "300px"
-                             :child [v-box
-                                     :children [[title
-                                                 :label (:id @resource-data)
-                                                 :level :level3
-                                                 :underline? true]
-                                                (tree-widget 0 (:id @resource-data) @resource-data)]]]
-                            [button
-                             :label "close"
-                             :on-click #(dispatch [:clear-resource-data])]]]
-         :backdrop-on-click #(dispatch [:clear-resource-data])]))))
 
 (defn resource-panel
   []
@@ -210,5 +108,4 @@
 (defn app []
   [v-box
    :children [[message-modal]
-              #_[resource-modal]
               [resource-panel]]])
