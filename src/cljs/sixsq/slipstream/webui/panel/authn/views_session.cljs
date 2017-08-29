@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.panel.authn.views-session
   (:require
     [re-com.core :refer [h-box v-box label button title]]
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [subscribe]]
     [sixsq.slipstream.webui.panel.authn.utils :as u]
     [sixsq.slipstream.webui.panel.authn.subs]))
 
@@ -14,8 +14,7 @@
 (defn session-info
   "Provides the user's session information."
   []
-  (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
+  (let [session (subscribe [:webui.authn/session])]
     (fn []
       (let [data (sort (u/remove-common-attrs @session))
             ks (map (comp name first) data)

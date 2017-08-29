@@ -56,6 +56,18 @@
     (let [client (get-in cofx [:db :clients :cimi])]
       (assoc cofx :fx.webui.authn/initialize [client]))))
 
+(reg-event-db
+  :evt.webui.authn/show-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:authn :show-modal?] true)))
+
+(reg-event-db
+  :evt.webui.authn/hide-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:authn :show-modal?] false)))
+
 ;;
 ;; checks current session, marks user logged in/out as appropriate
 ;; used during initialization

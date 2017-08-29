@@ -1,6 +1,12 @@
 (ns sixsq.slipstream.webui.panel.authn.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]))
 
+(reg-sub :webui.authn/use-modal?
+         (fn [db _] (-> db :authn :use-modal?)))
+
+(reg-sub :webui.authn/show-modal?
+         (fn [db _] (-> db :authn :show-modal?)))
+
 (reg-sub :webui.authn/error-message
          (fn [db _] (-> db :authn :error-message)))
 

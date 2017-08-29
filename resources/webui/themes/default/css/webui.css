@@ -126,3 +126,12 @@ html, body {
     background-color: rgba(255, 255, 255, 0.25);
     text-decoration: none;
 }
+
+/*
+  Modal panel properties.  May be embedded in the header, footer, etc., so
+  the styles may need to be set explicitly.
+*/
+
+.webui-modal {
+    color: black;
+}

@@ -1,0 +1,63 @@
+{
+  "id": "virtual-machine/867876-8768",
+  "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+
+  "updated": "2017-08-15T10:00:00.0Z",
+  "created": "2017-08-15T10:00:00.0Z",
+
+  "name": "short name",
+  "description": "short description",
+  "properties": {
+    "a": "one",
+    "b": "two"
+  },
+
+  "instanceID": "aaa-bbb-111",
+  "state": "Running",
+  "ip": "127.0.0.1"
+
+  "cloud": {
+    "href": "credential or connector/0123-4567-8912",
+    "roles": ["realm:cern", "realm:my-accounting-group"]
+  },
+
+  "serviceOffer": {
+    "href": "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3",
+    "resource:cpu": 1,
+    "resource:ram": 1024,
+    "resource:disk": 10,
+    "resource:instanceType": "Medium"
+  },
+
+  "run": {
+    "href": "run/aaa-bbb-ccc",
+    "user": {
+      "href": "user/test"
+    }
+  },
+
+  "acl": {
+    "owner": {
+      "principal": "ADMIN",
+      "type": "ROLE"
+    },
+    "rules": [
+      {
+        "principal": "realm:accounting_manager",
+        "type": "ROLE",
+        "right": "VIEW"
+      },
+      {
+        "principal": "test",
+        "type": "USER",
+        "right": "VIEW"
+      },
+      {
+        "principal": "realm:my-accounting-group",
+        "type": "ROLE",
+        "right": "VIEW"
+      }
+    ]
+  }
+
+}
