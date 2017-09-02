@@ -6,7 +6,8 @@
     [cljsjs.codemirror]
     [cljsjs.codemirror.mode.clojure]
     [cljsjs.codemirror.mode.javascript]
-    [sixsq.slipstream.webui.widget.editor :as editor]))
+    [sixsq.slipstream.webui.widget.editor :as editor]
+    [sixsq.slipstream.webui.components.core :refer [column]]))
 
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
@@ -162,30 +163,21 @@
   [k]
   (last (re-matches #"(?:([^:]*):)?(.*)" (name k))))
 
-(defn group-data-field [v]
-  (fn []
-    [box
-     :align :start
-     :child [label :label (or v "\u00a0")]]))
-
-(defn group-kv-with-key [tag [k v]]
-  (let [react-key (str "data-" tag "-" k)]
-    ^{:key react-key} [group-data-field (str v)]))
-
-(defn group-column-with-key [tag class-name column-data]
-  ^{:key (str "column-" tag)}
-  [v-box
-   :class (str "webui-column " class-name)
-   :children (vec (map (partial group-kv-with-key tag) column-data))])
-
 (defn group-table
   [group-data]
-  (let [value-column-data (sort-by first group-data)
-        key-column-data (map (fn [[k _]] [k (strip-attr-ns k)]) value-column-data)]
+  (let [data (sort-by first group-data)]
     [h-box
      :class "webui-column-table"
-     :children [[group-column-with-key "resource-keys" "webui-row-header" key-column-data]
-                [group-column-with-key "resource-vals" "" value-column-data]]]))
+     :gap "1ex"
+     :children [[column
+                 :model data
+                 :key-fn first
+                 :value-fn (comp strip-attr-ns first)
+                 :value-class "webui-row-header"]
+                [column
+                 :model data
+                 :key-fn first
+                 :value-fn second]]]))
 
 (defn format-group [[group data]]
   ^{:key group}
@@ -194,12 +186,6 @@
                      :level :level2
                      :underline? true]
                     [group-table data]]])
-
-(defn format-common [data]
-  (let [common-data (select-keys data #{:name :description
-                                        :id :resourceURI
-                                        :created :updated})]
-    (group-table common-data)))
 
 (defn reformat-acl [{{:keys [owner rules] :as acl} :acl :as data}]
   (let [own ["acl:owner" (str (:principal owner) " (" (:type owner) ")")]
