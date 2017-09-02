@@ -62,12 +62,12 @@
 (defn login-button
   "Button to initiate the login process by submitting the form associated with
    the login method. This also clears the form data and any error message."
-  [{:keys [id label description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
+  [{:keys [id label group description] :or {id "UNKNOWN_ID", label "UNKNOWN_NAME"} :as method}]
   [box
    :class "webui-block-button"
    :size "auto"
    :child [button
-           :label label
+           :label (or group label)
            :class "btn btn-primary btn-block"
            :disabled? false
            :on-click (fn []
