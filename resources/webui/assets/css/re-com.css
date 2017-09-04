@@ -26,7 +26,7 @@ html, body {
     letter-spacing: 0.002em;
     height:         100%;
     margin:         0px;
-    /* padding:        0px; */  /*** Doesn't play well with old UI stylesheets. ***/
+    padding:        0px;
 }
 
 /*----------------------------------------------------------------------------------------
@@ -151,6 +151,16 @@ html, body {
 }
 .chosen-container .chosen-results .no-results {
   background: #eeeeee;
+  display: list-item;
+}
+.chosen-container .chosen-results .error {
+  text-align: center;
+  background: #f2dede;
+  display: list-item;
+}
+.chosen-container .chosen-results .loading {
+  text-align: center;
+  color: #ccc;
   display: list-item;
 }
 .chosen-container .chosen-results-scroll {
@@ -1327,6 +1337,8 @@ code {
 }
 
 .rc-typeahead-suggestions-container {
+    position: absolute;
+    width: 100%;
     background-color: #eee;
 }
 
@@ -1337,13 +1349,4 @@ code {
 
 .rc-typeahead-suggestion.active {
     background-color: #ddd;
-}
-
-
-/*----------------------------------------------------------------------------------------
-  Only required for re-demo
-----------------------------------------------------------------------------------------*/
-
-.inline-hyperlink > div {
-    display: inline;
 }

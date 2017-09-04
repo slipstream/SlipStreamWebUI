@@ -7,6 +7,9 @@
 (reg-sub :webui.authn/show-modal?
          (fn [db _] (-> db :authn :show-modal?)))
 
+(reg-sub :webui.authn/chooser-view?
+         (fn [db _] (-> db :authn :chooser-view?)))
+
 (reg-sub :webui.authn/error-message
          (fn [db _] (-> db :authn :error-message)))
 
@@ -18,6 +21,13 @@
 
 (reg-sub :webui.authn/count
          (fn [db _] (-> db :authn :count)))
+
+(reg-sub :webui.authn/loading?
+         (fn [_ _]
+           [(subscribe [:webui.authn/count])
+            (subscribe [:webui.authn/total])])
+         (fn [[count total] _] false                        ;(or (zero? total) (not= count total))
+           ))
 
 (reg-sub :webui.authn/methods
          (fn [db _] (-> db :authn :methods)))

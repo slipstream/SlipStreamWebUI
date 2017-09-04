@@ -6,7 +6,7 @@
 
     [sixsq.slipstream.authn.main.events]
     [sixsq.slipstream.authn.main.subs]
-    [sixsq.slipstream.webui.panel.authn.views-forms :as forms]
+    [sixsq.slipstream.webui.panel.authn.views :as forms]
     [sixsq.slipstream.webui.panel.authn.views-session :as session]
     [reagent.core :as reagent]))
 
