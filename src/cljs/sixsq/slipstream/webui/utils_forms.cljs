@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.utils-forms
   (:require
-    [re-com.core :refer [h-box v-box box input-text input-password label alert-box progress-bar
-                         button info-button modal-panel single-dropdown title line gap]]
+    [re-com.core :refer [h-box v-box box input-text input-password label alert-box
+                         button info-button modal-panel single-dropdown title line gap checkbox]]
     [re-com.util :refer [deref-or-value]]
     [re-com.validate :refer-macros [validate-args-macro]]
     [reagent.core :as reagent]
@@ -51,6 +51,17 @@
                 :placeholder displayName
                 :change-on-blur? true
                 :on-change #(update-form-data-fn form-id param-name %)]
+    "int" [input-text
+           :attr {:name param-name}
+           :width "100%"
+           :model (reagent/atom (or data ""))
+           :placeholder displayName
+           :change-on-blur? true
+           :on-change #(update-form-data-fn form-id param-name (utils/str->int %))]
+    "boolean" [checkbox
+               :model (reagent/atom false)
+               :label displayName
+               :on-change #(update-form-data-fn form-id param-name (boolean %))]
     [input-text
      :attr {:name param-name}
      :width "100%"
@@ -147,9 +158,9 @@
   "Provides an editor component based on Codemirror. To use modes other than
    javascript, you will have to require the mode explicitly in your code."
   [& {:keys [descriptions on-submit on-cancel]
-      :or {on-submit #()
-           on-cancel #()}
-      :as args}]
+      :or   {on-submit #()
+             on-cancel #()}
+      :as   args}]
   {:pre [(validate-args-macro form-args-desc args "form")]}
   [credential-form-container-inner descriptions on-submit on-cancel])
 

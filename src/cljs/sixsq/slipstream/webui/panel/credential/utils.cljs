@@ -25,8 +25,8 @@
 (defn absolute-url [baseURI relative-url]
   (str baseURI relative-url))
 
-(defn keep-param-desc? [[k {:keys [mandatory readOnly]}]]
-  (and mandatory (not readOnly)))
+(defn keep-param-desc? [[k {:keys [type readOnly]}]]
+  (and (not readOnly) (not= "map" type) (not= "list" type)))
 
 (defn filter-params-desc [desc]
   (into {} (filter keep-param-desc? desc)))
@@ -38,7 +38,7 @@
       (let [params-desc (<! (http/get describe-url {:chan (chan 1 (json/body-as-json) identity)}))]
         (when-not (instance? js/Error params-desc)
           (-> tpl
-              (assoc :params-desc (filter-params-desc params-desc))
+              (assoc :params-desc (filter-params-desc (dissoc params-desc :acl)))
               (dissoc :describe-url)))))))
 
 (defn prepare-session-template
@@ -58,10 +58,6 @@
           credential-templates (:credentialTemplates (<! (cimi/search client :credentialTemplates)))]
       (when-not (instance? js/Error credential-templates)
         (map (partial prepare-session-template baseURI) credential-templates)))))
-
-(defn is-common-attribute?
-  [attr]
-  (#{:name :description :properties} attr))
 
 (defn split-form-data
   [form-data]
