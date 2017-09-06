@@ -13,4 +13,7 @@
 (reg-sub :cloud-entry-point
          (fn [db _] (-> db :cloud-entry-point)))
 
+(reg-sub :webui.main/alert
+         (fn [db _] (-> db :alert)))
+
 

@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.main.effects :as effects]
     [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.panel.cimi.utils :as u]))
+    [sixsq.slipstream.webui.panel.cimi.utils :as u]
+    [taoensso.timbre :as log]))
 
 ;; usage:  (dispatch [:initialize-db])
 ;; creates initial state of database
@@ -93,3 +94,17 @@
   [db/debug-interceptors trim-v]
   (fn [cofx [path-prefix]]
     (assoc cofx :fx.webui.main/set-host-theme [])))
+
+(reg-event-db
+  :evt.webui.main/clear-alert
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc db :alert nil)))
+
+(reg-event-db
+  :evt.webui.main/raise-alert
+  [db/debug-interceptors trim-v]
+  (fn [db [alert]]
+    (log/error "ALERT" alert)
+    (assoc db :alert alert)))
+
