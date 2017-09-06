@@ -10,16 +10,12 @@
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [taoensso.timbre :as log]))
 
-;; usage:  (dispatch [:initialize-db])
-;; creates initial state of database
 (reg-event-fx
   :evt.webui.main/initialize-db
   [db/debug-interceptors]
   (fn [_ _]
     {:db db/default-value}))
 
-;; usage:  (dispatch [:initialize-client])
-;; creates and adds a SlipStream client to the database
 (reg-event-db
   :evt.webui.main/initialize-client
   [db/debug-interceptors trim-v]
@@ -105,6 +101,5 @@
   :evt.webui.main/raise-alert
   [db/debug-interceptors trim-v]
   (fn [db [alert]]
-    (log/error "ALERT" alert)
     (assoc db :alert alert)))
 

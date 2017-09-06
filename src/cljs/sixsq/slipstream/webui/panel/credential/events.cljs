@@ -27,16 +27,6 @@
       (assoc cofx :fx.webui.credential/get-templates [cimi-client]))))
 
 (reg-event-db
-  :evt.webui.credential/update-form-data
-  [db/debug-interceptors trim-v]
-  (fn [{{:keys [form-data]} :credentials :as db} [form-id param value]]
-    (let [data (cond-> {:href form-id}
-                       param (merge {param value}))]
-      (if (= form-id (:href form-data))
-        (update-in db [:credentials :form-data] merge data)
-        (assoc-in db [:credentials :form-data] data)))))
-
-(reg-event-db
   :evt.webui.credential/hide-modal
   [db/debug-interceptors]
   (fn [db _]

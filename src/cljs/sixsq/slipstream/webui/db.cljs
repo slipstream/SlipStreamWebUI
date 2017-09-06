@@ -139,10 +139,8 @@
 ;; simple credential template schema (TEMPORARY)
 ;;
 (s/def :webui.credential/show-modal? boolean?)
-(s/def :webui.credential/form-data (s/nilable (s/map-of keyword? any?)))
-(s/def :webui.credential/descriptions (s/nilable (s/map-of string? map?)))
+(s/def :webui.credential/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
 (s/def :webui/credentials (only-keys :req-un [:webui.credential/show-modal?
-                                              :webui.credential/form-data
                                               :webui.credential/descriptions]))
 
 ;;
@@ -221,5 +219,4 @@
                            :selected-fields  #{"id"}}
 
    :credentials           {:show-modal?  false
-                           :form-data    nil
                            :descriptions nil}})

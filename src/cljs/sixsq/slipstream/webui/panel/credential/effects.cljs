@@ -23,15 +23,24 @@
         (doseq [result results]
           (dispatch [:evt.webui.credential/get-description result]))))))
 
+(defn format-field [[k v]]
+  [:div [:h2 k] [:pre v]])
+
+(defn other-fields-hiccup [response]
+  (into [:div] (vec (map format-field (remove #(contains? #{:status :message :resource-id} (first %)) response)))))
+
 (reg-fx
   :fx.webui.credential/create-credential
   (fn [[client request-body]]
     (go
-      (let [response (<! (cimi/add client :credentials request-body))]
-        (log/error "Create credential response:\n" (with-out-str (cljs.pprint/pprint response)))
-        (let [alert-type :danger
-              heading "Create Credential Result"
-              body (with-out-str (cljs.pprint/pprint response))]
+      (let [{:keys [status message resource-id] :as response} (<! (cimi/add client :credentials request-body))]
+        (let [other-fields (other-fields-hiccup response)
+              alert-type (if (= 201 status) :info :danger)
+              heading (if (= 201 status) "Success" "Failure")
+              body [:div [:p message] other-fields]
+              alert {:alert-type alert-type
+                     :heading heading
+                     :body body}]
           (dispatch [:evt.webui.main/raise-alert {:alert-type alert-type
                                                   :heading heading
                                                   :body body}]))))))
