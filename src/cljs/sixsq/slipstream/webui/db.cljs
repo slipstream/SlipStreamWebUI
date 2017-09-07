@@ -34,6 +34,8 @@
 
 (s/def ::message (s/nilable string?))
 
+(s/def :webui.main/alert (s/nilable map?))
+
 (s/def ::resource-data (s/nilable any?))
 
 (s/def ::runs-data (s/nilable any?))
@@ -134,6 +136,14 @@
 (s/def ::resource-query-params (s/nilable map?))
 
 ;;
+;; simple credential template schema (TEMPORARY)
+;;
+(s/def :webui.credential/show-modal? boolean?)
+(s/def :webui.credential/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
+(s/def :webui/credentials (only-keys :req-un [:webui.credential/show-modal?
+                                              :webui.credential/descriptions]))
+
+;;
 ;; internationalization parameters
 ;;
 
@@ -143,12 +153,15 @@
 
 (s/def ::db (only-keys :req-un [:webui.i18n/i18n
                                 :cimi/cloud-entry-point
-                                ::clients ::message ::resource-data ::resource-path ::resource-query-params
+                                ::clients ::message
+                                :webui.main/alert
+                                ::resource-data ::resource-path ::resource-query-params
                                 ::runs-data ::runs-params
                                 ::modules-data
                                 :webui.authn/authn
                                 ::search-data ::search
-                                ::offer-data ::offer]))
+                                ::offer-data ::offer
+                                :webui/credentials]))
 
 ;;
 ;; initial database value
@@ -160,6 +173,7 @@
 
    :clients               nil
    :message               nil
+   :alert                 nil
    :resource-data         nil
    :resource-path         []
    :resource-query-params nil
@@ -202,4 +216,7 @@
                            :completed?       true
                            :available-fields [{:id "id" :label "id"}
                                               {:id "beta" :label "beta"}]
-                           :selected-fields  #{"id"}}})
+                           :selected-fields  #{"id"}}
+
+   :credentials           {:show-modal?  false
+                           :descriptions nil}})

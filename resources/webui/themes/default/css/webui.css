@@ -66,7 +66,7 @@ html, body {
   formatted display of resource documents.
 */
 .webui-column {
-    padding: 1em;
+    padding: 0.25em;
 }
 
 .webui-column-header {
@@ -79,6 +79,15 @@ html, body {
 
 .webui-row-header {
     font-weight: bold;
+}
+
+/* FIXME: width and max-width are not allowed on span elements (that come from rc-com labels) */
+.webui-column-value {
+    max-width: "35ex";
+    width: "35ex";
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /*

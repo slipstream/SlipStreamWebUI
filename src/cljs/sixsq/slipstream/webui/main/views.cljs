@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
-    [re-com.core :refer [box h-box v-box button label modal-panel]]
+    [re-com.core :refer [box h-box v-box button label modal-panel alert-box]]
     [sixsq.slipstream.webui.components.core :refer [breadcrumbs]]
 
     [re-frame.core :refer [subscribe dispatch]]
@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
+    [sixsq.slipstream.webui.panel.credential.views :as credential-views]
     [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.empty.views :as empty-views]
     [sixsq.slipstream.webui.panel.offer.views :as offer-views]
@@ -46,8 +47,9 @@
                     (for [[label-kw url] [[:app "application"]
                                           [:deployment "deployment"]
                                           [:offer "offer"]
-                                          [:cimi "cimi"]]]
-                      [panel-link label-kw url]))]])))
+                                          [:cimi "cimi"]
+                                          [:credential "credential"]]]
+                      ^{:key (name label-kw)} [panel-link label-kw url]))]])))
 
 (defn page-header []
   [h-box
@@ -77,6 +79,20 @@
          :child @message
          :wrap-nicely? true
          :backdrop-on-click #(dispatch [:clear-message])]))))
+
+(defn alert
+  []
+  (let [alert (subscribe [:webui.main/alert])]
+    (fn []
+      (if @alert
+        (let [{:keys [alert-type heading body]
+               :or   {alert-type :none, heading "Alert", body ""}} @alert]
+          [alert-box
+           :alert-type alert-type
+           :heading heading
+           :body body
+           :closeable? true
+           :on-close #(dispatch [:evt.webui.main/clear-alert])])))))
 
 (defn resource-panel
   []
@@ -108,5 +124,6 @@
 
 (defn app []
   [v-box
-   :children [[message-modal]
+   :children [[alert]
+              [message-modal]
               [resource-panel]]])
