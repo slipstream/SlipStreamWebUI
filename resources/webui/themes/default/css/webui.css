@@ -135,3 +135,11 @@ html, body {
     background-color: rgba(255, 255, 255, 0.25);
     text-decoration: none;
 }
+
+/*
+   Overrides the colors set in the header, when modal panels
+   are anchored there.
+*/
+.rc-modal-panel {
+    color: black;
+}

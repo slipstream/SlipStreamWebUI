@@ -51,6 +51,7 @@
   (log/info "using slipstream server:" @SLIPSTREAM_URL)
   (log/info "using path prefix:" @PATH_PREFIX)
   (dispatch-sync [:evt.webui.main/initialize-db])
+  (dispatch-sync [:evt.webui.authn/no-modal-login])
   (dispatch-sync [:evt.webui.main/initialize-client @SLIPSTREAM_URL])
   (dispatch-sync [:evt.webui.main/load-cloud-entry-point])
   (dispatch-sync [:evt.webui.history/initialize @PATH_PREFIX])

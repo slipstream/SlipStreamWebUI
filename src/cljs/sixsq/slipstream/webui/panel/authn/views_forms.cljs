@@ -81,11 +81,15 @@
   []
   (let [methods (subscribe [:webui.authn/methods])
         cep (subscribe [:cloud-entry-point])
-        redirect-uri (subscribe [:webui.authn/redirect-uri])]
+        redirect-uri (subscribe [:webui.authn/redirect-uri])
+        use-modal? (subscribe [:webui.authn/use-modal?])
+        path (subscribe [:resource-path])]
     (fn [{:keys [id] :as method}]
       (log/info "creating login form for method" id)
       (let [{:keys [baseURI collection-href]} @cep
-            redirect-uri @redirect-uri
+            redirect-uri (if @use-modal?
+                           (str/join "/" (into ["" "webui"] @path))
+                           @redirect-uri)
             post-uri (str baseURI (:sessions collection-href)) ;; FIXME: Should be part of CIMI API.
             simple-method (second (re-matches #"session-template/(.*)" id))
             [hidden-params visible-params] (ordered-params method)
@@ -93,6 +97,8 @@
                             hidden-params
                             ["href" {:displayName "href" :data id :type "hidden"}]
                             ["redirectURI" {:displayName "redirectURI" :data redirect-uri :type "hidden"}])]
+
+        (log/info "using redirect url" redirect-uri)
         [:form {:id       (str "login_" id)
                 :method   "post"
                 :action   post-uri
