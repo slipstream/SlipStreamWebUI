@@ -11,7 +11,6 @@
 (defn empty-panel
   []
   (fn []
-    (dispatch [:evt.webui.empty/redirect-login])
     [v-box
      :children [[:div]]]))
 

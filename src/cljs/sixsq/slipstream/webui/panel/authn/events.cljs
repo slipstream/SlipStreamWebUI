@@ -133,3 +133,21 @@
   (fn [db [_]]
     (assoc-in db [:authn :error-message] nil)))
 
+(reg-event-db
+  :evt.webui.authn/no-modal-login
+  [db/debug-interceptors trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :use-modal?] false)))
+
+(reg-event-db
+  :evt.webui.authn/show-modal
+  [db/debug-interceptors trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :show-modal?] true)))
+
+(reg-event-db
+  :evt.webui.authn/hide-modal
+  [db/debug-interceptors trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :show-modal?] false)))
+

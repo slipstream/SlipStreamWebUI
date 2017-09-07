@@ -52,7 +52,6 @@
 ;; authentication state
 ;;
 
-
 (s/def :webui.authn/id string?)
 (s/def :webui.authn/label string?)
 (s/def :webui.authn/group (s/nilable string?))
@@ -67,6 +66,8 @@
                                                     :webui.authn/params-desc]))
 
 
+(s/def :webui.authn/use-modal? boolean?)
+(s/def :webui.authn/show-modal? boolean?)
 (s/def :webui.authn/total nat-int?)
 (s/def :webui.authn/count nat-int?)
 (s/def :webui.authn/redirect-uri string?)
@@ -75,7 +76,9 @@
 (s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
 (s/def :webui.authn/forms (s/map-of string? map?))
 
-(s/def :webui.authn/authn (only-keys :req-un [:webui.authn/total
+(s/def :webui.authn/authn (only-keys :req-un [:webui.authn/use-modal?
+                                              :webui.authn/show-modal?
+                                              :webui.authn/total
                                               :webui.authn/count
                                               :webui.authn/redirect-uri
                                               :webui.authn/error-message
@@ -186,7 +189,9 @@
 
    :modules-data          nil
 
-   :authn                 {:total         0
+   :authn                 {:use-modal?    true
+                           :show-modal?   false
+                           :total         0
                            :count         0
                            :redirect-uri  "/webui/login"
                            :error-message nil

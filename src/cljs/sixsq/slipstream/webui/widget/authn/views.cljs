@@ -8,22 +8,25 @@
     [sixsq.slipstream.webui.panel.authn.subs]
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.utils :as utils]))
+    [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.panel.authn.views :as authn-views]))
 
 (defn logout-button
   "Button shown when the user has an active session to allow the user to
    logout."
   []
   (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
+        session (subscribe [:webui.authn/session])
+        use-modal? (subscribe [:webui.authn/use-modal?])]
     (fn []
       (when @session
         [button
          :label (@tr [:logout])
          :class "btn-link webui-nav-link"
          :on-click (fn []
-                     (dispatch [:evt.webui.authn/logout])
-                     (history/navigate "login"))]))))
+                     (let [redirect-page (if @use-modal? "welcome" "login")]
+                       (dispatch [:evt.webui.authn/logout])
+                       (history/navigate redirect-page)))]))))
 
 (defn login-button
   "Button that sends the user to the login page. The label (and contents of
@@ -31,7 +34,8 @@
    label is 'login' if no session is active, otherwise it is the username.)"
   []
   (let [tr (subscribe [:webui.i18n/tr])
-        session (subscribe [:webui.authn/session])]
+        session (subscribe [:webui.authn/session])
+        use-modal? (subscribe [:webui.authn/use-modal?])]
     (fn []
       (let [button-text (if @session
                           (-> @session
@@ -42,7 +46,9 @@
         [button
          :label button-text
          :class "btn-link webui-nav-link"
-         :on-click #(history/navigate "login")]))))
+         :on-click (if @use-modal?
+                     #(dispatch [:evt.webui.authn/show-modal])
+                     #(history/navigate "login"))]))))
 
 (defn authn-buttons
   "Contains two buttons: one to login and one to logout. The login button
@@ -51,7 +57,10 @@
    show the login forms or session information as appropriate. The logout
    button will only appear if there is an active session."
   []
-  [h-box
-   :gap "0.25ex"
-   :children [[login-button]
-              [logout-button]]])
+  (let [use-modal? (subscribe [:webui.authn/use-modal?])]
+    (fn []
+      [h-box
+       :gap "0.25ex"
+       :children [[login-button]
+                  [logout-button]
+                  (when @use-modal? [authn-views/login-resource])]])))
