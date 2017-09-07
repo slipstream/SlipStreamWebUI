@@ -35,13 +35,13 @@
    {:name        :key-fn
     :required    false
     :type        "key fn"
-    :validate-fn fn?
+    :validate-fn #(or (fn? %) (keyword? %))
     :description "function to extract key value from element of collection, defaults to :key"}
 
    {:name        :value-fn
     :required    false
     :type        "value fn"
-    :validate-fn fn?
+    :validate-fn #(or (fn? %) (keyword? %))
     :description "function to extract value from element of collection, defaults to :value"}
 
    {:name        :header
@@ -53,7 +53,7 @@
    {:name        :on-remove
     :required    false
     :type        "remove fn"
-    :validate-fn fn?
+    :validate-fn #(or (fn? %) (keyword? %))
     :description "function called when the column is removed"}
 
    {:name        :class
