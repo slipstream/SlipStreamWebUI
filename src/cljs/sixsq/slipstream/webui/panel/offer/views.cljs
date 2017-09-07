@@ -3,8 +3,10 @@
     [re-com.core :refer [h-box v-box box input-text
                          button row-button label modal-panel throbber
                          hyperlink scroller selection-list title]]
+    [sixsq.slipstream.webui.components.core :refer [column]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
+    [clojure.pprint :refer [pprint]]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.offer.effects]
     [sixsq.slipstream.webui.panel.offer.events]
@@ -16,93 +18,35 @@
     [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
     [taoensso.timbre :as log]))
 
-(defn format-operations
-  [ops]
-  [h-box
-   :gap "1ex"
-   :children
-   (doall (map (fn [{:keys [rel href]}] [hyperlink
-                                         :label rel
-                                         :on-click #(js/alert (str "Operation: " rel " on URL " href))]) ops))])
-
-(declare format-data)
-
-(defn format-list-entry
-  [prefix k v]
-  (let [id (:id v)]
-    ^{:key (str prefix "-" k)}
-    [:li [:strong (or id k)] (format-data prefix v)]))
-
-(defn format-map-entry
-  [prefix [k v]]
-  ^{:key (str prefix "-" k)}
-  [:li [:strong k] " : " (if (= k :operations)
-                           (format-operations v)
-                           (format-data prefix v))])
-
-(defn as-map [prefix m]
-  [:ul (doall (map (partial format-map-entry prefix) m))])
-
-(defn as-vec [prefix v]
-  [:ul (doall (map (partial format-list-entry prefix) (range) v))])
-
-(defn format-data
-  ([v]
-   (format-data (str (random-uuid)) v))
-  ([prefix v]
-   (cond
-     (map? v) (as-map prefix v)
-     (vector? v) (as-vec prefix v)
-     :else (str v))))
-
 (defn format-id [id]
   (second (re-matches #"[^/]+/(.{8}).*" id)))
 
 (defn offer-uuid [id]
   (second (re-matches #"[^/]+/(.+)" id)))
 
-(defn data-field [selected-field entry]
-  (fn []
-    (let [v (or (get-in entry (utils/id->path selected-field)) "\u00a0")
-          align (if (re-matches #"[0-9\.-]+" (str v)) :end :start)]
-      (if (= "id" selected-field)
-        [box :align align :child [hyperlink
-                                  :label (format-id v)
-                                  :on-click #(history/navigate (str "offer/" (offer-uuid v)))]]
-        [box :align align :child [label :label v]]))))
-
-(defn column-header-with-key [selected-field]
-  (let [tr (subscribe [:webui.i18n/tr])]
-    (fn []
-      ^{:key (str "column-header-" selected-field)}
-      [h-box
-       :justify :between
-       :gap "1ex"
-       :align :center
-       :class "webui-column-header"
-       :children [[label :label selected-field]
-                  (if-not (= "id" selected-field)
-                    [row-button
-                     :md-icon-name "zmdi zmdi-close"
-                     :mouse-over-row? true
-                     :tooltip (@tr [:remove-column])
-                     :on-click #(dispatch [:evt.webui.offer/remove-selected-field selected-field])])]])))
-
-(defn data-field-with-key [selected-field entry]
-  (let [k (str "data-" selected-field "-" (:id entry))]
-    ^{:key k} [data-field selected-field entry]))
-
-(defn data-column-with-key [entries selected-field]
-  ^{:key (str "column-" selected-field)}
-  [v-box
-   :class "webui-column"
-   :children [[column-header-with-key selected-field]
-              (doall (map (partial data-field-with-key selected-field) entries))]])
+(defn id-selector-formatter [entry]
+  (let [v (:id entry)]
+    [box :align :start
+     :child [hyperlink
+             :label (format-id v)
+             :on-click #(history/navigate (str "offer/" (offer-uuid v)))]]))
 
 (defn vertical-data-table [selected-fields entries]
   [h-box
    :class "webui-column-table"
-   :children [(doall (map (partial data-column-with-key entries) selected-fields))]])
+   :children [(doall
+                (for [selected-field selected-fields]
+                  ^{:key selected-field} [column
+                                          :model entries
+                                          :key-fn :id
+                                          :value-fn (if (= "id" selected-field)
+                                                      id-selector-formatter
+                                                      (keyword selected-field))
+                                          :on-remove #(dispatch [:remove-selected-field selected-field])
+                                          :header selected-field
+                                          :class "webui-column"
+                                          :header-class "webui-column-header"
+                                          :value-class "webui-column-value"]))]])
 
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:offer-listing])
@@ -116,7 +60,7 @@
           [scroller
            :scroll :auto
            :child (if (instance? js/Error results)
-                    [box :child (format-data (ex-data results))]
+                    [box :child [:pre (with-out-str (pprint (ex-data results)))]]
                     (let [entries (get results (collection-key @collection-name) [])]
                       [vertical-data-table @selected-fields entries]))])))))
 
