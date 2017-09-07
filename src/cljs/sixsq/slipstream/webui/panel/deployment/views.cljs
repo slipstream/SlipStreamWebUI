@@ -1,8 +1,9 @@
 (ns sixsq.slipstream.webui.panel.deployment.views
   (:require
     [re-com.core :refer [h-box v-box input-text button row-button label
-                         hyperlink-href checkbox popover-tooltip]
+                         hyperlink-href checkbox popover-tooltip scroller]
      :refer-macros [handler-fn]]
+    [sixsq.slipstream.webui.components.core :refer [column]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
 
@@ -67,21 +68,8 @@
                 [hyperlink-href
                  :label [:i {:class (str "zmdi zmdi-hc-fw-rc zmdi-mail-reply")}]
                  :href url
-                 :target "_blank"])]])
-
-(def curr-position (reagent/atom :below-center))
-(def positions [{:id :above-left :label ":above-left  "}
-                {:id :above-center :label ":above-center"}
-                {:id :above-right :label ":above-right "}
-                {:id :below-left :label ":below-left  "}
-                {:id :below-center :label ":below-center"}
-                {:id :below-right :label ":below-right "}
-                {:id :left-above :label ":left-above  "}
-                {:id :left-center :label ":left-center "}
-                {:id :left-below :label ":left-below  "}
-                {:id :right-above :label ":right-above "}
-                {:id :right-center :label ":right-center"}
-                {:id :right-below :label ":right-below "}])
+                 :target "_blank"]
+                "\u00a0")]])
 
 (defn format-module
   [module]
@@ -118,12 +106,13 @@
     [h-box
      :width "2ex"
      :justify :center
-     :children [(when-not (str/blank? message)
+     :children [(if-not (str/blank? message)
                   [row-button
                    :md-icon-name "zmdi zmdi-notifications-active"
                    :mouse-over-row? true
                    :tooltip message
-                   :on-click #()])]]))
+                   :on-click #()]
+                  [label :label "\u00a0"])]]))
 
 (defn deployment-icon [type]
   (let [icon (case type
@@ -135,58 +124,39 @@
      :mouse-over-row? true
      :on-click #()]))
 
-(defn format-run
-  [{:keys [cloudServiceNames
-           tags
-           resourceUri
-           startTime
-           username
-           type
-           activeVm
-           abort
-           moduleResourceUri
-           status
-           uuid
-           serviceUrl] :as run}]
-  [h-box
-   :gap "0.25ex"
-   :children [[label :width "2em" :label [deployment-icon type]]
-              [abort-popup abort]
-              (service-url serviceUrl status)
-              [format-uuid uuid]
-              [format-module moduleResourceUri]
-              [label :width "5em" :label activeVm]
-              [label :width "10em" :label status]
-              [label :width "10em" :label username]
-              [label :width "20em" :label startTime]
-              [label :width "20em" :label cloudServiceNames]
-              [label :width "40em" :label tags]]])
+(def column-kws [:type :error :url :id :module :vms :status :username :start :cloud :tags])
 
-(defn header-label
-  [size kw]
-  (let [tr (subscribe [:webui.i18n/tr])]
-    [h-box
-     :class "webui-column-header"
-     :justify :between
-     :children [[label :width size :label (@tr [kw])]
-                [label :width "1em" :label "\u00a0"]]]))
+(defn value-fn
+  [column-kw entry]
+  (case column-kw
+    :type [label :label [deployment-icon (:type entry)]]
+    :error [abort-popup (:abort entry)]
+    :url [service-url (:serviceUrl entry) (:status entry)]
+    :id [format-uuid (:uuid entry)]
+    :module [format-module (:moduleResourceUri entry)]
+    :vms (:activeVm entry)
+    :start (:startTime entry)
+    :cloud (:cloudServiceNames entry)
+    (column-kw entry)))
 
-(defn run-header []
+(defn vertical-data-table
+  [entries]
   (let [tr (subscribe [:webui.i18n/tr])]
-    (fn []
-      [h-box
-       :gap "0.25ex"
-       :children [[header-label "1em" :empty]
-                  [abort-popup ""]
-                  (service-url "" "")
-                  [header-label "5em" :id]
-                  [header-label "14em" :module]
-                  [header-label "4em" :vms]
-                  [header-label "9em" :status]
-                  [header-label "9em" :username]
-                  [header-label "19em" :start]
-                  [header-label "19em" :cloud]
-                  [header-label "39px" :tag]]])))
+    (fn [entries]
+      [scroller
+       :scroll :auto
+       :child [h-box
+               :class "webui-column-table"
+               :children [(doall
+                            (for [column-kw column-kws]
+                              ^{:key (name column-kw)} [column
+                                                        :model entries
+                                                        :key-fn :uuid
+                                                        :value-fn (partial value-fn column-kw)
+                                                        :header (@tr [column-kw])
+                                                        :class "webui-column"
+                                                        :header-class "webui-column-header"
+                                                        :value-class "webui-column-value"]))]]])))
 
 (defn runs-display
   []
@@ -198,8 +168,7 @@
            :gap "0.25ex"
            :children [[label
                        :label (str count "/" totalCount)]
-                      [v-box
-                       :children (concat [[run-header]] (vec (map format-run item)))]]])))))
+                      [vertical-data-table item]]])))))
 
 (defn deployment-resource
   []
