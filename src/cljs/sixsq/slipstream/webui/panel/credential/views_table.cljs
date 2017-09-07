@@ -1,24 +1,20 @@
 (ns sixsq.slipstream.webui.panel.credential.views-table
   (:require
-    [re-com.core :refer [h-box v-box box gap input-text title
-                         button row-button label modal-panel throbber
-                         single-dropdown hyperlink
-                         scroller selection-list]]
+    [re-com.core :refer [h-box v-box input-text button modal-panel scroller selection-list]]
     [sixsq.slipstream.webui.components.core :refer [column]]
+
     [reagent.core :as reagent]
-    [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [subscribe dispatch]]
-    [sixsq.slipstream.webui.utils :as utils]
+
+    [clojure.pprint :refer [pprint]]
+    [clojure.string :as str]
+
     [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
 
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.resource :as resource]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.widget.history.utils :as history]
-    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.resource :as resource]))
 
 (defn id-selector-formatter
   [entry]
@@ -55,7 +51,7 @@
         [scroller
          :scroll :auto
          :child (if (instance? js/Error results)
-                  [:pre (with-out-str (cljs.pprint/pprint (ex-data results)))]
+                  [:pre (with-out-str (pprint (ex-data results)))]
                   (let [entries (get results resource-collection-key [])]
                     [vertical-data-table @selected-fields entries]))]))))
 
