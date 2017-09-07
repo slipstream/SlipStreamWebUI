@@ -13,7 +13,7 @@
                                    sixsq-nexus-url]])
 
 (set-env!
-  :source-paths #{"src/cljs" "src/cljc"}
+  :source-paths #{"src/clj" "src/cljs" "src/cljc"}
   :resource-paths #{"resources"}
 
   :repositories
@@ -50,6 +50,7 @@
                     [doo]
                     [onetom/boot-lein-generate]
                     [org.clojure/tools.nrepl]
+                    [org.martinklepsch/boot-garden]
                     [pandeiro/boot-http]
                     [tolitius/boot-check]
                     [weasel]]))))
@@ -66,7 +67,8 @@
                                 with-kibit
                                 with-bikeshed]]
   '[boot-deps :refer [ancient]]
-  '[boot.lein :refer [generate]])
+  '[boot.lein :refer [generate]]
+  '[org.martinklepsch.boot-garden :refer [garden]])
 
 (task-options!
   pom {:project (get-env :project)
@@ -119,6 +121,9 @@
 (deftask build []
          (comp (pom)
                (write-version-css)
+               (garden :styles-var 'sixsq.slipstream.webui.styles/base
+                       :pretty-print true
+                       :output-to "webui/themes/default/css/base.css")
                (sift :add-jar {'cljsjs/codemirror #"cljsjs/codemirror/development/codemirror.css"})
                (sift :move {#"cljsjs/codemirror/development/codemirror.css" "webui/assets/css/codemirror.css"})
                (production)
@@ -139,6 +144,9 @@
                (sift :move {#"cljsjs/codemirror/development/codemirror.css" "webui/assets/css/codemirror.css"})
                (serve :not-found 'sixsq.slipstream.webui.run/index-handler)
                (watch)
+               (garden :styles-var 'sixsq.slipstream.webui.styles/base
+                       :pretty-print true
+                       :output-to "webui/themes/default/css/base.css")
                (cljs-repl)
                (reload)
                (speak)
