@@ -2,9 +2,14 @@
   (:require
     [re-com.core :refer [h-box v-box label row-button]]
     [re-com.util :refer [deref-or-value]]
-    [re-com.validate :refer-macros [validate-args-macro]]))
+    [re-com.validate :refer-macros [validate-args-macro]]
+    [clojure.string :as str]))
 
 (def ^:const nbsp "\u00a0")
+
+(defn replace-empty-value
+  [v]
+  (if (or (nil? v) (and (string? v) (str/blank? v))) nbsp v))
 
 (defn column-header [header-class value on-remove]
   [h-box
@@ -24,7 +29,7 @@
         v (value-fn entry)]
     ^{:key k} [label
                :class value-class
-               :label (if (nil? v) nbsp v)]))
+               :label (replace-empty-value v)]))
 
 (def column-args-desc
   [{:name        :model
@@ -35,13 +40,13 @@
    {:name        :key-fn
     :required    false
     :type        "key fn"
-    :validate-fn fn?
+    :validate-fn #(or (fn? %) (keyword? %))
     :description "function to extract key value from element of collection, defaults to :key"}
 
    {:name        :value-fn
     :required    false
     :type        "value fn"
-    :validate-fn fn?
+    :validate-fn #(or (fn? %) (keyword? %))
     :description "function to extract value from element of collection, defaults to :value"}
 
    {:name        :header
@@ -53,7 +58,7 @@
    {:name        :on-remove
     :required    false
     :type        "remove fn"
-    :validate-fn fn?
+    :validate-fn #(or (fn? %) (keyword? %))
     :description "function called when the column is removed"}
 
    {:name        :class
