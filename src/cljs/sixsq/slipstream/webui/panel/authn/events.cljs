@@ -128,6 +128,12 @@
         (assoc-in [:authn :error-message] error-message))))
 
 (reg-event-db
+  :evt.webui.authn/set-error-message
+  [db/debug-interceptors trim-v]
+  (fn [db [error-message]]
+    (assoc-in db [:authn :error-message] error-message)))
+
+(reg-event-db
   :evt.webui.authn/clear-error-message
   [db/debug-interceptors trim-v]
   (fn [db [_]]

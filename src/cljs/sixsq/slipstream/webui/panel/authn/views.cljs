@@ -15,8 +15,13 @@
   []
   (let [session (subscribe [:webui.authn/session])
         use-modal? (subscribe [:webui.authn/use-modal?])
-        show-modal? (subscribe [:webui.authn/show-modal?])]
+        show-modal? (subscribe [:webui.authn/show-modal?])
+        error-message (subscribe [:webui.authn/error-message])]
     (fn []
+      (if @error-message
+        (if @session
+          (dispatch [:evt.webui.authn/clear-error-message])
+          (dispatch [:evt.webui.authn/show-modal])))
       (if @use-modal?
         (when @show-modal?
           [modal-panel
