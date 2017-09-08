@@ -67,7 +67,7 @@
    :class "webui-block-button"
    :size "auto"
    :child [button
-           :label (or group label)
+           :label label
            :class "btn btn-primary btn-block"
            :disabled? false
            :on-click (fn []
