@@ -83,8 +83,8 @@ html, body {
 
 /* FIXME: width and max-width are not allowed on span elements (that come from rc-com labels) */
 .webui-column-value {
-    max-width: "2000px";
-    width: "2000px";
+    max-width: "35ex";
+    width: "35ex";
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
