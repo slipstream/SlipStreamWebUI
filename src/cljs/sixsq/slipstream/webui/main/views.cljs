@@ -159,6 +159,3 @@
                 :children [[header]
                            [app]
                            [footer]]]]])
-
-;(defn main []
-;  [accordeon-menu])
