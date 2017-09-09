@@ -104,3 +104,17 @@
           (assoc-in [:db :search :completed?] false)
           (assoc :fx.webui.cimi/search [cimi-client (collection-key collection-name) (utils/prepare-params params)])))))
 
+(reg-event-fx
+  :evt.webui.cimi/delete
+  [db/debug-interceptors trim-v]
+  (fn [cofx [resource-id]]
+    (let [cimi-client (-> cofx :db :clients :cimi)]
+      (assoc cofx :fx.webui.cimi/delete [cimi-client resource-id]))))
+
+(reg-event-fx
+  :evt.webui.cimi/edit
+  [db/debug-interceptors trim-v]
+  (fn [cofx [resource-id data]]
+    (let [cimi-client (-> cofx :db :clients :cimi)]
+      (assoc cofx :fx.webui.cimi/edit [cimi-client resource-id data]))))
+
