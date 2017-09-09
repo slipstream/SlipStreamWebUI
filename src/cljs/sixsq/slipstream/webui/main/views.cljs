@@ -45,31 +45,6 @@
 (defn accordeon-menu-ctrl []
   [accordeon-menu-widget/accordeon-menu-ctrl "main-menu"])
 
-(defn panel-controls []
-  (let [tr (subscribe [:webui.i18n/tr])
-        model (subscribe [:resource-path])]
-    (fn []
-      [h-box
-       :gap "2px"
-       :children [[accordeon-menu-ctrl]
-                  (doall
-                    (for [[label-kw url] [[:app "application"]
-                                          [:deployment "deployment"]
-                                          [:offer "offer"]
-                                          [:cimi "cimi"]
-                                          [:credential "credential"]]]
-                      ^{:key (name label-kw)} [panel-link label-kw url]))]])))
-
-(defn page-header []
-  [h-box
-   :class "webui-header"
-   :justify :between
-   :children [[panel-controls]
-              [h-box
-               :gap "2em"
-               :children [[authn-widget/authn-buttons]
-                          [i18n-views/locale-selector]]]]])
-
 (defn page-footer []
   (let [tr (subscribe [:webui.i18n/tr])]
     (fn []
@@ -112,20 +87,31 @@
        :class "webui-contents"
        :children [(resource/render @resource-path @resource-query-params)]])))
 
+(defn filter-widget []
+  [:i.material-icons.md-light "filter_list"])
+
+(defn gap []
+  [:div {:style {:flex-grow 1000}}])
+
 (defn header []
   (let [path (subscribe [:resource-path])]
     (fn []
-      [v-box
-       :children [[page-header]
-
-                  ;; FIXME: rely only on CSS for the styling
+      [h-box
+       :class "webui-header"
+       :justify :between
+       :align :center
+       :children [;; FIXME: rely only on CSS for the styling
+                  [accordeon-menu-ctrl]
                   [breadcrumbs
                    :model path
                    :class "webui-breadcrumbs"
                    :separator "\u2022"
                    :separator-class "webui-breadcrumbs-separator"
                    :breadcrumb-class "webui-breadcrumb-element"
-                   :on-change #(dispatch [:set-resource-path-vec %])]]])))
+                   :on-change #(dispatch [:set-resource-path-vec %])]
+                  [gap]
+                  [filter-widget]
+                  [authn-widget/authn-buttons]]])))
 
 (defn footer []
   [v-box
@@ -135,16 +121,26 @@
   [accordeon-menu-widget/accordeon-menu
    {:component-name "main-menu"
     :open-sections #{0 1}}
+   "Dashboard"    [{:content [:p "Overview"] :data-dispatch :navigation/dashboard}
+                   {:content [:p "Apps"] :data-dispatch :navigation/dashboard}
+                   {:content [:p "Virtual machines"] :data-dispatch :navigation/dashboard}]
+   "App Store"    [{:content [:p "All"] :data-dispatch :navigation/appstore}
+                   {:content [:p "Public"] :data-dispatch :navigation/appstore}
+                   {:content [:p "Private"] :data-dispatch :navigation/appstore}]
    "Applications" [{:content [:p "All"] :data-dispatch :navigation/application}
-                   {:content [:p "My apps"] :data-dispatch :choice-ab}
-                   {:content [:p "Shared with me"] :data-dispatch :choice-ab}
-                  {:content [:p "Public"] :data-dispatch :choice-ac}]
-   "Deployments" [{:content [:p "All"] :data-dispatch :navigation/deployment}
-                  {:content [:p "Choice BB"] :data-dispatch :choice-bb}
-                  {:content [:p "Choice BC"] :data-dispatch :choice-bc}]
-   "Menu item 3" [{:content [:p "Choice CA"] :data-dispatch :choice-ca}
-                  {:content [:p "Choice CB"] :data-dispatch :choice-cb}
-                  {:content [:p "Choice CC"] :data-dispatch :choice-cc}]])
+                   {:content [:p "My apps"] :data-dispatch :navigation/application}
+                   {:content [:p "Shared with me"] :data-dispatch :navigation/application}
+                   {:content [:p "Public"] :data-dispatch :navigation/application}]
+   "Deployments"  [{:content [:p "All"] :data-dispatch :navigation/deployment}
+                   {:content [:p "Ready"] :data-dispatch :navigation/deployment}
+                   {:content [:p "Completed"] :data-dispatch :navigation/deployment}
+                   {:content [:p "Failed"] :data-dispatch :navigation/deployment}]
+   "Offers"       [{:content [:p "All"] :data-dispatch :navigation/offer}
+                   {:content [:p "Cheaper"] :data-dispatch :navigation/offer}
+                   {:content [:p "Latest"] :data-dispatch :navigation/offer}]
+   "CIMI"         [{:content [:p "All"] :data-dispatch :navigation/cimi}
+                   {:content [:p "Usage"] :data-dispatch :navigation/cini}
+                   {:content [:p "Credentials"] :data-dispatch :navigation/cimi}]])
 
 (defn app []
   [v-box
@@ -156,10 +152,24 @@
               [resource-panel]]])
 
 (defn main []
+
   [h-box
+   :size "auto"
+   :style {:background-color "gray"}
    :children [[accordeon-menu]
               [v-box
-                :size "auto"
-                :children [[header]
-                           [app]
-                           [footer]]]]])
+               :size "auto"
+               :children [[header]
+                          [app]
+                          [gap]
+                          [footer]]]]]
+
+  ;[h-box
+  ; :children [
+  ;            [v-box
+  ;              :size "auto"
+  ;              :children [[header]
+  ;                         [app]
+  ;                         [gap]
+  ;                         [footer]]]]]
+  )

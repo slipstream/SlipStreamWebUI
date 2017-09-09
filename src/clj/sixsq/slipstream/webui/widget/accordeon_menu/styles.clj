@@ -4,6 +4,7 @@
             [garden.units :refer [px]]))
 
 (def header-height "50px")
+(def main-theme-color "#36454f")
 
 (defstyles main-menu
   [:#main-menu {}])
@@ -18,7 +19,7 @@
                                 :opacity          0.5
                                 :z-index          1}]
 
-  [:.accordeon-header {:background-color "#36454f"
+  [:.accordeon-header {:background-color main-theme-color
                        :padding "10px"
                        :height header-height}]
 
@@ -37,11 +38,13 @@
 
   [:.accordeon-menu-sub [:a {:text-decoration "none"}]]
 
-  (at-media {:max-width (px 800)}
+  [:.accordeon-menu-ctrl [:i {:color "white"}]]
+
+  (at-media {:screen :only :min-device-width (px 375) :max-device-width (px 800)}
     [:.accordeon-menu-container {:position "fixed"}]
     [:.accordeon-menu-background {:display "none"}])
 
-  (at-media {:min-width (px 800)}
+  (at-media {:screen :only :min-device-width (px 800)}
     [:.accordeon-menu-container {:position "block"
                                  :height "100%"}]
     [:.accordeon-menu-background {:display "none"}]

@@ -8,12 +8,6 @@
   (fn [_ _]
     {}))
 
-(rf/reg-event-fx
-  :choice-aa
-  (fn [_ [_ data]]
-    (js/console.log data)
-    {}))
-
 (defn sub-key [header sub]
   (str header "-" sub))
 
@@ -32,6 +26,9 @@
   "Construct the name of the dispatch target. Use display since it sets the status of
    the menu display"
   (keyword (str target "/display")))
+
+(defn gap []
+  [:div {:style {:flex-grow 1000}}])
 
 ;;--------------------------------------------------------------------------------------------------
 ;; Component: accordeon-menu
@@ -55,13 +52,15 @@
                                                    :z-index         1020
                                                    :justify-content "space-between"
                                                    :top             "-100px"
-                                                   :left            "-300px"}
+                                                   :left            "-300px"
+                                                   }
                                            :id (str component-name "-container")}
             [:div.accordeon-menu {:style {:position (if (= :show display) "fixed" "static")
                                           :left     "0px"
                                           :top      "0px"
                                           :width    "200px"
-                                          :z-index  1020}
+                                          :z-index  1020
+                                          :height "100vh"}
                                   :id component-name}
              [:div.accordeon-header
               [:div.webui-logo {:style {:width  "20ex"

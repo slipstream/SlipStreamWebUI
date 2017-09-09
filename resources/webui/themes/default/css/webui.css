@@ -18,7 +18,7 @@ html, body {
 #webui-wrapper {
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 }
 
 #webui-container {
@@ -37,12 +37,9 @@ html, body {
 }
 
 .webui-header {
-    color: white;
+    height: 50px; /* from garden: header-height */
+    color: whitesmoke;
     background-color: #36454f;
-    padding: 0.5em;
-    border-style: solid none;
-    border-width: 1px;
-    border-color: #d3d3d3;
 }
 
 .webui-footer {
@@ -104,16 +101,16 @@ html, body {
 */
 
 .webui-breadcrumbs {
-    background-color: lightgray;
-    padding: 1ex;
+    padding-left: 2ex;
+    font-size: 1.5em;
+    color: white;
 }
 
 .webui-breadcrumb-element {
-    color: black !important;
+    color: whitesmoke important!;
 }
 
 .webui-breadcrumbs-separator {
-    color: black !important;
 }
 
 /*
