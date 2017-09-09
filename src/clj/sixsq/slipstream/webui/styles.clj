@@ -1,10 +1,7 @@
 (ns sixsq.slipstream.webui.styles
   (:require [garden.def :refer [defrule defstyles]]
-            [garden.stylesheet :refer [rule]]))
+            [garden.stylesheet :refer [rule]]
+            [sixsq.slipstream.webui.widget.accordeon-menu.styles :as accordeon-menu-styles]))
 
 (defstyles base
-           (let [body (rule :body)]
-             (body
-               {:font-family "Helvetica Neue"
-                :font-size   "16px"
-                :line-height 1.5})))
+  accordeon-menu-styles/css)

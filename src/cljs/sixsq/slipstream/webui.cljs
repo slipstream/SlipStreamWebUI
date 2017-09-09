@@ -58,9 +58,12 @@
   (dispatch [:evt.webui.authn/check-session])
   ;; FIXME: TESTING
   (dispatch [:evt.webui.credential/get-templates])
-  (when-let [header-element (.getElementById js/document "webui-header")]
-    (reagent/render [sixsq.slipstream.webui.main.views/header] header-element))
-  (when-let [footer-element (.getElementById js/document "webui-footer")]
-    (reagent/render [sixsq.slipstream.webui.main.views/footer] footer-element))
-  (when-let [container-element (.getElementById js/document "webui-container")]
-    (reagent/render [sixsq.slipstream.webui.main.views/app] container-element)))
+  (when-let [webui-wrapper-element (.getElementById js/document "webui-wrapper")]
+    (reagent/render [sixsq.slipstream.webui.main.views/main] webui-wrapper-element))
+  ;(when-let [header-element (.getElementById js/document "webui-header")]
+  ;  (reagent/render [sixsq.slipstream.webui.main.views/header] header-element))
+  ;(when-let [footer-element (.getElementById js/document "webui-footer")]
+  ;  (reagent/render [sixsq.slipstream.webui.main.views/footer] footer-element))
+  ;(when-let [container-element (.getElementById js/document "webui-container")]
+  ;  (reagent/render [sixsq.slipstream.webui.main.views/app] container-element))
+  )

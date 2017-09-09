@@ -139,6 +139,12 @@
 (s/def ::resource-query-params (s/nilable map?))
 
 ;;
+;; navigation
+;;
+(s/def ::main-menu         (s/nilable any?)) ;(only-keys :req-un [:show :hide]))
+;(s/def :main-menu/display (s/nilable any?)) ;(only-keys :req-un [:show :hide]))
+
+;;
 ;; simple credential template schema (TEMPORARY)
 ;;
 (s/def :webui.credential/show-modal? boolean?)
@@ -164,7 +170,8 @@
                                 :webui.authn/authn
                                 ::search-data ::search
                                 ::offer-data ::offer
-                                :webui/credentials]))
+                                :webui/credentials
+                                ::main-menu]))
 
 ;;
 ;; initial database value
@@ -224,4 +231,5 @@
                            :selected-fields  #{"id"}}
 
    :credentials           {:show-modal?  false
-                           :descriptions nil}})
+                           :descriptions nil}
+   :main-menu             {:display :hide}})

@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.main.effects :as effects]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
+    [sixsq.slipstream.webui.widget.history.utils :as history]
     [taoensso.timbre :as log]))
 
 (reg-event-fx
@@ -103,3 +104,27 @@
   (fn [db [alert]]
     (assoc db :alert alert)))
 
+(reg-event-fx
+  :navigation/application
+  (fn [db [target args]]
+    (history/navigate "application")))
+
+(reg-event-fx
+  :navigation/deployment
+  (fn [db [target args]]
+    (history/navigate "deployment")))
+
+(reg-event-fx
+  :navigation/offer
+  (fn [db [target args]]
+    (history/navigate "offer")))
+
+(reg-event-fx
+  :navigation/cimi
+  (fn [db [target args]]
+    (history/navigate "cimi")))
+
+(reg-event-fx
+  :navigation/credential
+  (fn [db [target args]]
+    (history/navigate "credential")))

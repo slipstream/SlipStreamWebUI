@@ -5,6 +5,8 @@
 
     [re-frame.core :refer [subscribe dispatch]]
 
+    [sixsq.slipstream.webui.main.events]
+
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
@@ -19,6 +21,10 @@
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.widget.history.events]
     [sixsq.slipstream.webui.widget.history.effects]
+
+    [sixsq.slipstream.webui.widget.accordeon-menu.events]
+    [sixsq.slipstream.webui.widget.accordeon-menu.subs]
+    [sixsq.slipstream.webui.widget.accordeon-menu.views :as accordeon-menu-widget]
 
     [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.widget.i18n.subs]
@@ -36,13 +42,16 @@
        :label (@tr [label-kw])
        :on-click #(history/navigate url)])))
 
+(defn accordeon-menu-ctrl []
+  [accordeon-menu-widget/accordeon-menu-ctrl "main-menu"])
+
 (defn panel-controls []
   (let [tr (subscribe [:webui.i18n/tr])
         model (subscribe [:resource-path])]
     (fn []
       [h-box
        :gap "2px"
-       :children [[logo]
+       :children [[accordeon-menu-ctrl]
                   (doall
                     (for [[label-kw url] [[:app "application"]
                                           [:deployment "deployment"]
@@ -122,8 +131,34 @@
   [v-box
    :children [[page-footer]]])
 
+(defn accordeon-menu []
+  [accordeon-menu-widget/accordeon-menu
+   {:component-name "main-menu"
+    :open-sections #{0 1}}
+   "Applications" [{:content [:p "All"] :data-dispatch :navigation/application}
+                   {:content [:p "My apps"] :data-dispatch :choice-ab}
+                   {:content [:p "Shared with me"] :data-dispatch :choice-ab}
+                  {:content [:p "Public"] :data-dispatch :choice-ac}]
+   "Deployments" [{:content [:p "All"] :data-dispatch :navigation/deployment}
+                  {:content [:p "Choice BB"] :data-dispatch :choice-bb}
+                  {:content [:p "Choice BC"] :data-dispatch :choice-bc}]
+   "Menu item 3" [{:content [:p "Choice CA"] :data-dispatch :choice-ca}
+                  {:content [:p "Choice CB"] :data-dispatch :choice-cb}
+                  {:content [:p "Choice CC"] :data-dispatch :choice-cc}]])
+
 (defn app []
   [v-box
    :children [[alert]
               [message-modal]
               [resource-panel]]])
+
+(defn main []
+  [h-box
+   :children [[accordeon-menu]
+              [v-box
+                :children [[header]
+                           [app]
+                           [footer]]]]])
+
+;(defn main []
+;  [accordeon-menu])
