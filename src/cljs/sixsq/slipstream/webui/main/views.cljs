@@ -148,6 +148,9 @@
 
 (defn app []
   [v-box
+   :max-width "1100px"
+   :width "100%"
+   :align-self :center
    :children [[alert]
               [message-modal]
               [resource-panel]]])
@@ -156,6 +159,7 @@
   [h-box
    :children [[accordeon-menu]
               [v-box
+                :size "auto"
                 :children [[header]
                            [app]
                            [footer]]]]])
