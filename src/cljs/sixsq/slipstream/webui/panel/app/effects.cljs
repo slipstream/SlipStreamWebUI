@@ -7,10 +7,21 @@
     [sixsq.slipstream.client.api.modules :as modules]
     [taoensso.timbre :as log]))
 
+(def ^:const module-fields #{:shortName :description :category :creation :version :logoLink})
+
 (reg-fx
   :fx.webui.app/search
   (fn [[client url]]
     (go
-      (let [results (<! (modules/get-children client url))]
-        (log/info (count results) "returned for url" url)
-        (dispatch [:set-modules-data results])))))
+      (let [module (if (nil? url) {} (<! (modules/get client url)))
+            module-meta (select-keys (first (vals module)) module-fields)
+            module-kids (if (nil? url)
+                          (<! (modules/get-children client url))
+                          (->> module
+                               vals
+                               first
+                               :children
+                               :item
+                               (map :name)))]
+        (log/info (count module-kids) "returned for url" url)
+        (dispatch [:set-modules-data (assoc module-meta :children module-kids)])))))
