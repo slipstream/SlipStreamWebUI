@@ -27,14 +27,16 @@
 
 (defn credential-resource
   []
-  [v-box
-   :gap "2ex"
-   :children [[button
-               :class "btn btn-primary"
-               :label "Add"
-               :on-click #(dispatch [:evt.webui.credential/show-modal])]
-              [credential-forms]
-              [table/cimi-resource]]])
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn []
+      [v-box
+       :gap "2ex"
+       :children [[button
+                   :class "btn btn-primary"
+                   :label (@tr [:create])
+                   :on-click #(dispatch [:evt.webui.credential/show-modal])]
+                  [credential-forms]
+                  [table/credential-resource]]])))
 
 (defmethod resource/render "credential"
   [path query-params]
