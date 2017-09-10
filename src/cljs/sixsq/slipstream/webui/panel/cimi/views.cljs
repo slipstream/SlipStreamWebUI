@@ -7,7 +7,6 @@
     [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
 
@@ -112,7 +111,7 @@
         selections (reagent/atom #{})
         show? (reagent/atom false)]
     (fn []
-      (reset! selections @selected-fields)
+      (reset! selections (set @selected-fields))
       [h-box
        :children [[button
                    :label (@tr [:fields])

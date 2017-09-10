@@ -19,31 +19,32 @@
 
 (defn format-meta [module-meta]
   (let [data (sort-by first (dissoc module-meta :logoLink))]
-    [border
-     :child [h-box
-             :gap "1ex"
-             :justify :between
-             :children [[h-box
-                         :class "webui-column-table"
-                         :padding "1ex 1ex 1ex 1ex"
-                         :gap "1ex"
-                         :children [[column
-                                     :model data
-                                     :key-fn first
-                                     :value-fn first
-                                     :value-class "webui-row-header"]
-                                    [column
-                                     :model data
-                                     :key-fn first
-                                     :value-fn second]]]
-                        (when-let [{:keys [logoLink]} module-meta]
-                          [box
-                           :width "30ex"
-                           :style {:background-image    (str "url(\"" logoLink "\")")
-                                   :background-size     "contain"
-                                   :background-repeat   "no-repeat"
-                                   :background-position "50% 50%"}
-                           :child [:div]])]]]))
+    (when (pos? (count data))
+      [border
+       :child [h-box
+               :gap "1ex"
+               :justify :between
+               :children [[h-box
+                           :class "webui-column-table"
+                           :padding "1ex 1ex 1ex 1ex"
+                           :gap "1ex"
+                           :children [[column
+                                       :model data
+                                       :key-fn first
+                                       :value-fn first
+                                       :value-class "webui-row-header"]
+                                      [column
+                                       :model data
+                                       :key-fn first
+                                       :value-fn second]]]
+                          (when-let [{:keys [logoLink]} module-meta]
+                            [box
+                             :width "30ex"
+                             :style {:background-image    (str "url(\"" logoLink "\")")
+                                     :background-size     "contain"
+                                     :background-repeat   "no-repeat"
+                                     :background-position "50% 50%"}
+                             :child [:div]])]]])))
 
 (defn module-resource []
   (let [data (subscribe [:modules-data])]

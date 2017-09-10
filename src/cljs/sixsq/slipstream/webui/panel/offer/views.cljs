@@ -110,7 +110,7 @@
         selections (reagent/atom #{})
         show? (reagent/atom false)]
     (fn []
-      (reset! selections @selected-fields)
+      (reset! selections (set @selected-fields))
       [h-box
        :children [[button
                    :label (@tr [:fields])

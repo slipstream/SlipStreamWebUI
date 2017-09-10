@@ -9,7 +9,6 @@
     [clojure.pprint :refer [pprint]]
     [clojure.string :as str]
 
-    [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
 
@@ -141,14 +140,10 @@
    :children [[select-controls]
               [search-header]]])
 
-(defn cimi-resource
+(defn credential-resource
   []
   (dispatch [:set-collection-name "credential"])
   [v-box
    :gap "1ex"
    :children [[control-bar]
               [search-vertical-result-table]]])
-
-(defmethod resource/render "cimi"
-  [path query-params]
-  [cimi-resource])

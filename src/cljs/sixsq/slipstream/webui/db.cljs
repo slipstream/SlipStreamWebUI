@@ -107,32 +107,45 @@
                                                               :cimi.cep/collection-key
                                                               :cimi.cep/collection-href])))
 
-(s/def ::cimi-filter (s/nilable string?))
-(s/def ::page nat-int?)
-(s/def ::page-size (s/int-in 1 50))
+;;
+;; query parameters for CIMI searches
+;;
+(s/def :cimi.search.query-params/$first nat-int?)
+(s/def :cimi.search.query-params/$last nat-int?)
+(s/def :cimi.search.query-params/$filter (s/nilable string?))
+(s/def :cimi.search.query-params/$orderby (s/nilable string?))
+(s/def :cimi.search.query-params/$aggregation (s/nilable string?))
+(s/def :cimi.search.query-params/$select (s/nilable string?))
 
-(s/def ::webui (only-keys :req-un [::cimi-filter ::page ::page-size]))
+(s/def :cimi.search/query-params (only-keys :req-un [:cimi.search.query-params/$first
+                                                     :cimi.search.query-params/$last
+                                                     :cimi.search.query-params/$filter
+                                                     :cimi.search.query-params/$orderby
+                                                     :cimi.search.query-params/$aggregation
+                                                     :cimi.search.query-params/$select]))
 
-(s/def ::$first nat-int?)
-(s/def ::$last nat-int?)
-(s/def ::$filter (s/nilable string?))
+(s/def :cimi.search.cache/resource (s/nilable any?))
+(s/def :cimi.search.cache/resources (s/nilable any?))
+(s/def :cimi.search/cache (only-keys :req-un [:cimi.search.cache/resource
+                                              :cimi.search.cache/resources]))
 
-(s/def ::params (only-keys :req-un [::$first ::$last ::$filter]))
+(s/def :cimi.search.fields/available (s/coll-of string? :kind vector?))
+(s/def :cimi.search.fields/selected (s/coll-of string? :kind vector?))
+(s/def :cimi.search/fields (only-keys :req-un [:cimi.search.fields/available
+                                               :cimi.search.fields/selected]))
 
 (s/def ::collection-name (s/nilable string?))
-(s/def ::listing (s/nilable any?))
 (s/def ::completed? boolean?)
 
 (s/def ::label string?)
 (s/def ::choice (only-keys :req-un [::id ::label]))
-(s/def ::available-fields (s/coll-of ::choice))
-(s/def ::selected-fields (s/coll-of ::id))
-(s/def ::search-data (s/nilable any?))
 
-(s/def ::search (only-keys :req-un [::collection-name ::params ::listing ::completed?
-                                    ::available-fields ::selected-fields]))
+(s/def ::search (only-keys :req-un [::collection-name
+                                    :cimi.search/query-params
+                                    :cimi.search/cache
+                                    :cimi.search/fields
+                                    ::completed?]))
 
-(s/def ::offer-data (s/nilable any?))
 (s/def ::offer ::search)
 
 (s/def ::resource-path (s/coll-of string? :kind vector?))
@@ -162,8 +175,8 @@
                                 ::runs-data ::runs-params
                                 ::modules-data
                                 :webui.authn/authn
-                                ::search-data ::search
-                                ::offer-data ::offer
+                                ::search
+                                ::offer
                                 :webui/credentials]))
 
 ;;
@@ -201,27 +214,33 @@
 
    :cloud-entry-point     nil
 
-   :search-data           nil
    :search                {:collection-name  "session"
-                           :params           {:$first  1
-                                              :$last   20
-                                              :$filter nil}
-                           :listing          nil
-                           :completed?       true
-                           :available-fields [{:id "id" :label "id"}
-                                              {:id "beta" :label "beta"}]
-                           :selected-fields  #{"id"}}
+                           :query-params     {:$first       1
+                                              :$last        20
+                                              :$filter      nil
+                                              :$orderby     nil
+                                              :$aggregation nil
+                                              :$select      nil}
+                           :cache            {:resource  nil
+                                              :resources nil}
+                           :fields {:available ["id"]
+                                    :selected ["id"]}
 
-   :offer-data            nil
+                           :completed?       true}
+
    :offer                 {:collection-name  "service-offer"
-                           :params           {:$first  1
-                                              :$last   20
-                                              :$filter nil}
-                           :listing          nil
-                           :completed?       true
-                           :available-fields [{:id "id" :label "id"}
-                                              {:id "beta" :label "beta"}]
-                           :selected-fields  #{"id"}}
+                           :query-params     {:$first       1
+                                              :$last        20
+                                              :$filter      nil
+                                              :$orderby     nil
+                                              :$aggregation nil
+                                              :$select      nil}
+                           :cache            {:resource  nil
+                                              :resources nil}
+                           :fields {:available ["id"]
+                                    :selected ["id"]}
+
+                           :completed?       true}
 
    :credentials           {:show-modal?  false
                            :descriptions nil}})

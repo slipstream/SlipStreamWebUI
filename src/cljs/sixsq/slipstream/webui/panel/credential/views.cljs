@@ -34,7 +34,7 @@
                :label "Add"
                :on-click #(dispatch [:evt.webui.credential/show-modal])]
               [credential-forms]
-              [table/cimi-resource]]])
+              [table/credential-resource]]])
 
 (defmethod resource/render "credential"
   [path query-params]

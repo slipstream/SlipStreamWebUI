@@ -69,7 +69,7 @@
 
         :active? "active?"
         :add-column "ajouter une colonne"
-        :app "applications"
+        :app "application"
         :back "précédent"
         :cancel "annuler"
         :cimi "cimi"
