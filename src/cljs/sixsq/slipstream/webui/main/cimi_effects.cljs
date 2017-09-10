@@ -15,12 +15,14 @@
     (go
       (callback (<! (cimi/cloud-entry-point client))))))
 
+(defn sanitize-params [params]
+  (into {} (remove (comp nil? second) params)))
+
 (reg-fx
   :fx.webui.main.cimi/search
-  ;; FIXME: Parameters should not need to be filtered to work!
   (fn [[client resource-type params callback]]
     (go
-      (callback (<! (cimi/search client resource-type (select-keys params #{:$first :$last :$filter})))))))
+      (callback (<! (cimi/search client resource-type (sanitize-params params)))))))
 
 (reg-fx
   :fx.webui.main.cimi/delete

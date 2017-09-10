@@ -10,6 +10,9 @@
 (reg-sub :search-completed?
          (fn [db _] (-> db :search :completed?)))
 
+(reg-sub :webui.cimi/aggregations
+         (fn [db _] (-> db :search :cache :aggregations)))
+
 (reg-sub :search-listing
          (fn [db _] (-> db :search :cache :resources)))
 

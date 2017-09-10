@@ -124,9 +124,11 @@
                                                      :cimi.search.query-params/$aggregation
                                                      :cimi.search.query-params/$select]))
 
+(s/def :cimi.search.cache/aggregations (s/nilable any?))
 (s/def :cimi.search.cache/resource (s/nilable any?))
 (s/def :cimi.search.cache/resources (s/nilable any?))
-(s/def :cimi.search/cache (only-keys :req-un [:cimi.search.cache/resource
+(s/def :cimi.search/cache (only-keys :req-un [:cimi.search.cache/aggregations
+                                              :cimi.search.cache/resource
                                               :cimi.search.cache/resources]))
 
 (s/def :cimi.search.fields/available (s/coll-of string? :kind vector?))
@@ -227,8 +229,9 @@
                                              :$orderby     nil
                                              :$aggregation nil
                                              :$select      nil}
-                           :cache           {:resource  nil
-                                             :resources nil}
+                           :cache           {:aggregations nil
+                                             :resource     nil
+                                             :resources    nil}
                            :fields          {:available ["id"]
                                              :selected  ["id"]}
 
@@ -241,8 +244,9 @@
                                              :$orderby     nil
                                              :$aggregation nil
                                              :$select      nil}
-                           :cache           {:resource  nil
-                                             :resources nil}
+                           :cache           {:aggregations nil
+                                             :resource     nil
+                                             :resources    nil}
                            :fields          {:available ["id"]
                                              :selected  ["id"]}
 
@@ -258,8 +262,9 @@
                                              :$orderby     nil
                                              :$aggregation nil
                                              :$select      nil}
-                           :cache           {:resource  nil
-                                             :resources nil}
+                           :cache           {:aggregations nil
+                                             :resource     nil
+                                             :resources    nil}
                            :fields          {:available ["id"]
                                              :selected  ["id"]}
 

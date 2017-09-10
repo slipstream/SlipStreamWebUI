@@ -5,7 +5,9 @@
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
-    [clojure.set :as set]))
+    [clojure.set :as set]
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 (reg-event-db
   :set-resource-data
@@ -24,8 +26,11 @@
   [db/debug-interceptors trim-v]
   (fn [db [resource-type listing]]
     (let [entries (get listing (keyword resource-type) [])
+          aggregations (:aggregations listing)
           fields (utils/merge-keys (conj entries {:id "id"}))]
+      (log/error (with-out-str (cljs.pprint/pprint listing)))
       (-> db
+          (assoc-in [:search :cache :aggregations] aggregations)
           (assoc-in [:search :cache :resources] listing)
           (assoc-in [:search :completed?] true)
           (assoc-in [:search :fields :available] fields)))))
@@ -49,6 +54,30 @@
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (assoc-in db [:search :query-params :$filter] v)))
+
+(reg-event-db
+  :evt.webui.cimi/set-orderby
+  [db/debug-interceptors trim-v]
+  (fn [db [v]]
+    (assoc-in db [:search :query-params :$orderby] v)))
+
+(reg-event-db
+  :evt.webui.cimi/set-select
+  [db/debug-interceptors trim-v]
+  (fn [db [v]]
+    (if (str/blank? v)
+      (assoc-in db [:search :query-params :$select] nil)
+      (let [v (str/join "," (->> (str/split v #"\s*,\s*")
+                                 (map str/trim)
+                                 set
+                                 (cons "id")))]
+        (assoc-in db [:search :query-params :$select] v)))))
+
+(reg-event-db
+  :evt.webui.cimi/set-aggregation
+  [db/debug-interceptors trim-v]
+  (fn [db [v]]
+    (assoc-in db [:search :query-params :$aggregation] v)))
 
 (reg-event-db
   :set-selected-fields
@@ -78,7 +107,7 @@
           cimi-client (:cimi clients)
           {:keys [collection-name params]} search]
       (-> cofx
-          (update-in [:db :search :completed?] (constantly false))
+          (assoc-in [:db :search :completed?] false)
           (assoc :fx.webui.main.cimi/search [cimi-client
                                              collection-name
                                              (utils/prepare-params params)
