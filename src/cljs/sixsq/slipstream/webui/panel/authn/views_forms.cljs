@@ -80,7 +80,7 @@
    the login method description."
   []
   (let [methods (subscribe [:webui.authn/methods])
-        cep (subscribe [:cloud-entry-point])
+        cep (subscribe [:webui.main/cloud-entry-point])
         redirect-uri (subscribe [:webui.authn/redirect-uri])
         use-modal? (subscribe [:webui.authn/use-modal?])
         path (subscribe [:resource-path])]

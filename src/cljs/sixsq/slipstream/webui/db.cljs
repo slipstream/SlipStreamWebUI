@@ -134,17 +134,17 @@
 (s/def :cimi.search/fields (only-keys :req-un [:cimi.search.fields/available
                                                :cimi.search.fields/selected]))
 
-(s/def ::collection-name (s/nilable string?))
-(s/def ::completed? boolean?)
+(s/def :cimi.search/collection-name (s/nilable string?))
+(s/def :cimi.search/completed? boolean?)
 
 (s/def ::label string?)
 (s/def ::choice (only-keys :req-un [::id ::label]))
 
-(s/def ::search (only-keys :req-un [::collection-name
+(s/def ::search (only-keys :req-un [:cimi.search/collection-name
                                     :cimi.search/query-params
                                     :cimi.search/cache
                                     :cimi.search/fields
-                                    ::completed?]))
+                                    :cimi.search/completed?]))
 
 (s/def ::offer ::search)
 
@@ -156,8 +156,14 @@
 ;;
 (s/def :webui.credential/show-modal? boolean?)
 (s/def :webui.credential/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
-(s/def :webui/credentials (only-keys :req-un [:webui.credential/show-modal?
-                                              :webui.credential/descriptions]))
+(s/def :webui/credential (only-keys :req-un [:webui.credential/show-modal?
+                                             :webui.credential/descriptions
+
+                                             :cimi.search/collection-name
+                                             :cimi.search/query-params
+                                             :cimi.search/cache
+                                             :cimi.search/fields
+                                             :cimi.search/completed?]))
 
 ;;
 ;; internationalization parameters
@@ -177,7 +183,7 @@
                                 :webui.authn/authn
                                 ::search
                                 ::offer
-                                :webui/credentials]))
+                                :webui/credential]))
 
 ;;
 ;; initial database value
@@ -214,33 +220,48 @@
 
    :cloud-entry-point     nil
 
-   :search                {:collection-name  "session"
-                           :query-params     {:$first       1
-                                              :$last        20
-                                              :$filter      nil
-                                              :$orderby     nil
-                                              :$aggregation nil
-                                              :$select      nil}
-                           :cache            {:resource  nil
-                                              :resources nil}
-                           :fields {:available ["id"]
-                                    :selected ["id"]}
+   :search                {:collection-name "session"
+                           :query-params    {:$first       1
+                                             :$last        20
+                                             :$filter      nil
+                                             :$orderby     nil
+                                             :$aggregation nil
+                                             :$select      nil}
+                           :cache           {:resource  nil
+                                             :resources nil}
+                           :fields          {:available ["id"]
+                                             :selected  ["id"]}
 
-                           :completed?       true}
+                           :completed?      true}
 
-   :offer                 {:collection-name  "service-offer"
-                           :query-params     {:$first       1
-                                              :$last        20
-                                              :$filter      nil
-                                              :$orderby     nil
-                                              :$aggregation nil
-                                              :$select      nil}
-                           :cache            {:resource  nil
-                                              :resources nil}
-                           :fields {:available ["id"]
-                                    :selected ["id"]}
+   :offer                 {:collection-name "service-offer"
+                           :query-params    {:$first       1
+                                             :$last        20
+                                             :$filter      nil
+                                             :$orderby     nil
+                                             :$aggregation nil
+                                             :$select      nil}
+                           :cache           {:resource  nil
+                                             :resources nil}
+                           :fields          {:available ["id"]
+                                             :selected  ["id"]}
 
-                           :completed?       true}
+                           :completed?      true}
 
-   :credentials           {:show-modal?  false
-                           :descriptions nil}})
+   :credential            {:show-modal?     false
+                           :descriptions    nil
+
+                           :collection-name "credential"
+                           :query-params    {:$first       1
+                                             :$last        20
+                                             :$filter      nil
+                                             :$orderby     nil
+                                             :$aggregation nil
+                                             :$select      nil}
+                           :cache           {:resource  nil
+                                             :resources nil}
+                           :fields          {:available ["id"]
+                                             :selected  ["id"]}
+
+                           :completed?      true
+                           }})

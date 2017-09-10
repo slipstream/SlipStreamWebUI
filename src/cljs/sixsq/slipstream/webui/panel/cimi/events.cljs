@@ -35,20 +35,20 @@
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 1)]
-      (update-in db [:search :query-params :$first] (constantly n)))))
+      (assoc-in db [:search :query-params :$first] n))))
 
 (reg-event-db
   :set-search-last
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 20)]
-      (update-in db [:search :query-params :$last] (constantly n)))))
+      (assoc-in db [:search :query-params :$last] n))))
 
 (reg-event-db
   :set-search-filter
   [db/debug-interceptors trim-v]
   (fn [db [v]]
-    (update-in db [:search :query-params :$filter] (constantly v))))
+    (assoc-in db [:search :query-params :$filter] v)))
 
 (reg-event-db
   :set-selected-fields
@@ -103,7 +103,7 @@
           (assoc :fx.webui.main.cimi/search [cimi-client
                                              (collection-key collection-name)
                                              (utils/prepare-params query-params)
-                                             #(dispatch [:show-search-results collection-name %])])))))
+                                             #(dispatch [:show-search-results (collection-key collection-name) %])])))))
 
 (reg-event-fx
   :evt.webui.cimi/delete

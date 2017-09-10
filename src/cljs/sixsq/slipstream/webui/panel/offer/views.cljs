@@ -42,7 +42,7 @@
                                           :value-fn (if (= "id" selected-field)
                                                       id-selector-formatter
                                                       (keyword selected-field))
-                                          :on-remove #(dispatch [:remove-selected-field selected-field])
+                                          :on-remove #(dispatch [:evt.webui.offer/remove-selected-field selected-field])
                                           :header selected-field
                                           :class "webui-column"
                                           :header-class "webui-column-header"
@@ -52,7 +52,7 @@
   (let [search-results (subscribe [:offer-listing])
         collection-name (subscribe [:offer-collection-name])
         selected-fields (subscribe [:offer-selected-fields])
-        cloud-entry-point (subscribe [:cloud-entry-point])]
+        cloud-entry-point (subscribe [:webui.main/cloud-entry-point])]
     (fn []
       (let [results @search-results
             {:keys [collection-key]} @cloud-entry-point]
@@ -122,6 +122,7 @@
                                           (dispatch [:evt.webui.offer/set-selected-fields @selections]))
                      :child [v-box
                              :width "350px"
+                             :gap "1ex"
                              :children [[selection-list
                                          :model selections
                                          :choices available-fields
@@ -130,8 +131,7 @@
                                          :height "200px"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :end
-                                         :gap "3px"
+                                         :justify :between
                                          :children [[button
                                                      :label (@tr [:cancel])
                                                      :on-click (fn []
@@ -173,7 +173,7 @@
 
 (defn offer-panel
   []
-  (let [cep (subscribe [:cloud-entry-point])
+  (let [cep (subscribe [:webui.main/cloud-entry-point])
         path (subscribe [:resource-path])
         data (subscribe [:offer-data])]
     (fn []

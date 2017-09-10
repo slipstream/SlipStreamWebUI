@@ -9,7 +9,6 @@
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
-
     [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.resource :as resource]
     [sixsq.slipstream.webui.widget.history.utils :as history]
@@ -56,7 +55,7 @@
   (let [search-results (subscribe [:search-listing])
         collection-name (subscribe [:search-collection-name])
         selected-fields (subscribe [:search-selected-fields])
-        cep (subscribe [:cloud-entry-point])]
+        cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
       (let [{:keys [collection-key]} @cep
             resource-collection-key (get collection-key @collection-name)
@@ -123,6 +122,7 @@
                                           (dispatch [:set-selected-fields @selections]))
                      :child [v-box
                              :width "350px"
+                             :gap "1ex"
                              :children [[selection-list
                                          :model selections
                                          :choices available-fields
@@ -131,7 +131,7 @@
                                          :height "200px"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :end
+                                         :justify :between
                                          :children [[button
                                                      :label (@tr [:cancel])
                                                      :on-click (fn []
@@ -146,7 +146,7 @@
 (defn cloud-entry-point
   []
   (let [tr (subscribe [:webui.i18n/tr])
-        cep (subscribe [:cloud-entry-point])
+        cep (subscribe [:webui.main/cloud-entry-point])
         selected-id (subscribe [:search-collection-name])]
     (fn []
       [h-box
@@ -196,7 +196,7 @@
 
 (defn cimi-resource
   []
-  (let [cep (subscribe [:cloud-entry-point])
+  (let [cep (subscribe [:webui.main/cloud-entry-point])
         path (subscribe [:resource-path])
         data (subscribe [:resource-data])]
     (fn []
