@@ -25,11 +25,3 @@
   :fx.webui.main/set-host-theme
   (fn [[arg]]
     (utils/add-host-theme)))
-
-(reg-fx
-  :fx.webui.main/cloud-entry-point
-  (fn [[client]]
-    (go
-      (if-let [cep (<! (cimi/cloud-entry-point client))]
-        (dispatch [:evt.webui.main/set-cloud-entry-point cep])
-        (dispatch [:message "loading cloud-entry-point failed"])))))

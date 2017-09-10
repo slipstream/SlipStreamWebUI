@@ -1,7 +1,8 @@
 (ns sixsq.slipstream.webui.panel.app.views
   (:require
+    [sixsq.slipstream.webui.components.core :refer [column]]
     [clojure.string :as str]
-    [re-com.core :refer [v-box hyperlink]]
+    [re-com.core :refer [box h-box v-box border hyperlink]]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.panel.app.effects]
     [sixsq.slipstream.webui.panel.app.events]
@@ -16,10 +17,45 @@
      :label module
      :on-click #(dispatch [:push-breadcrumb module])]))
 
+(defn format-meta [module-meta]
+  (let [data (sort-by first (dissoc module-meta :logoLink))]
+    (when (pos? (count data))
+      [border
+       :child [h-box
+               :gap "1ex"
+               :justify :between
+               :children [[h-box
+                           :class "webui-column-table"
+                           :padding "1ex 1ex 1ex 1ex"
+                           :gap "1ex"
+                           :children [[column
+                                       :model data
+                                       :key-fn first
+                                       :value-fn first
+                                       :value-class "webui-row-header"]
+                                      [column
+                                       :model data
+                                       :key-fn first
+                                       :value-fn second]]]
+                          (when-let [{:keys [logoLink]} module-meta]
+                            [box
+                             :width "30ex"
+                             :style {:background-image    (str "url(\"" logoLink "\")")
+                                     :background-size     "contain"
+                                     :background-repeat   "no-repeat"
+                                     :background-position "50% 50%"}
+                             :child [:div]])]]])))
+
 (defn module-resource []
   (let [data (subscribe [:modules-data])]
     (fn []
-      [v-box :children (doall (map format-module @data))])))
+      (let [module-meta (dissoc @data :children)
+            module-children (:children @data)]
+        [v-box
+         :gap "3ex"
+         :children [[format-meta module-meta]
+                    [v-box
+                     :children (doall (map format-module module-children))]]]))))
 
 (defmethod resource/render "application"
   [path query-params]

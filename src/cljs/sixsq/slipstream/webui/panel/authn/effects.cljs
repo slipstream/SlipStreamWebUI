@@ -8,38 +8,6 @@
     [sixsq.slipstream.webui.panel.authn.utils :as au]
     [taoensso.timbre :as log]))
 
-(reg-fx
-  :fx.webui.authn/logout
-  (fn [[client]]
-    (go
-      (let [resp (<! (cimi/logout client))]
-        (if (= 200 (:status resp))
-          (dispatch [:evt.webui.authn/logged-out])
-          (dispatch [:message "logout failed"]))))))
-
-(reg-fx
-  :fx.webui.authn/login
-  (fn [[client creds]]
-    (go
-      (let [resp (<! (cimi/login client creds))]
-        (case (:status resp)
-          201 (let [session (<! (au/get-current-session client))]
-                (dispatch [:evt.webui.authn/logged-in session]))
-          303 (let [session (<! (au/get-current-session client))]
-                (dispatch [:evt.webui.authn/logged-in session]))
-          (do
-            (log/error "Error login response:" (with-out-str (cljs.pprint/pprint resp)))
-            (dispatch [:message "login failed"])))))))
-
-(reg-fx
-  :fx.webui.authn/check-session
-  (fn [[client]]
-    (go
-      (let [session (<! (au/get-current-session client))]
-        (if session
-          (dispatch [:evt.webui.authn/logged-in session])
-          (dispatch [:evt.webui.authn/logged-out]))))))
-
 ;;
 ;; Downloads the session templates from the server.  Strips unnecessary
 ;; information and provides absolute URL for the parameter description.

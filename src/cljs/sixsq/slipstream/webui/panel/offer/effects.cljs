@@ -4,19 +4,17 @@
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
-    [sixsq.slipstream.client.api.cimi :as cimi]))
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [taoensso.timbre :as log]))
 
-;; usage: (dispatch [:cimi/offer client resource-type])
-;; queries the given resource
 (reg-fx
   :fx.webui.offer/list
   (fn [[client resource-type params]]
+    (log/error "DEBUG:" (with-out-str (cljs.pprint/pprint params)))
     (go
-      (let [results (<! (cimi/search client resource-type params))]
+      (let [results (<! (cimi/search client resource-type (select-keys params #{:$first :$last :$filter})))]
         (dispatch [:evt.webui.offer/show-results resource-type results])))))
 
-;; usage: (dispatch [:cimi/offer-detail client resource-type])
-;; queries the given resource
 (reg-fx
   :fx.webui.offer/detail
   (fn [[client resource-type uuid]]

@@ -1,142 +1,117 @@
 (ns sixsq.slipstream.webui.doc-render-utils
   (:require
     [re-com.core :refer [h-box v-box box label title button modal-panel p scroller gap]]
+    [re-frame.core :refer [dispatch]]
     [taoensso.timbre :as log]
     [reagent.core :as reagent]
     [cljsjs.codemirror]
     [cljsjs.codemirror.mode.clojure]
     [cljsjs.codemirror.mode.javascript]
-    [sixsq.slipstream.webui.widget.editor :as editor]
+    [sixsq.slipstream.webui.components.editor :as editor]
     [sixsq.slipstream.webui.components.core :refer [column]]))
+
+(defn action-buttons
+  [confirm-label cancel-label on-confirm on-cancel]
+  [h-box
+   :justify :between
+   :children [[button
+               :label cancel-label
+               :class "btn btn-default"
+               :disabled? false
+               :on-click on-cancel]
+              [button
+               :label confirm-label
+               :class "btn btn-primary"
+               :disabled? false
+               :on-click on-confirm]]])
+
+(defn action-button
+  [label title-text body on-confirm on-cancel]
+  (let [show? (reagent/atom false)]
+    (fn [label title-text body on-confirm on-cancel]
+      (let [action-fn (fn []
+                        (reset! show? false)
+                        (on-confirm))
+            cancel-fn (fn []
+                        (reset! show? false)
+                        (on-cancel))]
+        [v-box
+         :children [[button
+                     :label label
+                     :class "btn-primary"
+                     :on-click #(reset! show? true)]
+                    (when @show?
+                      [modal-panel
+                       :backdrop-on-click #(reset! show? false)
+                       :child [v-box
+                               :gap "2ex"
+                               :width "auto"
+                               :children [[title
+                                           :level :level2
+                                           :label title-text]
+                                          body
+                                          [action-buttons
+                                           label
+                                           "cancel"
+                                           action-fn
+                                           cancel-fn]]]])]]))))
+
 
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
    modified resource when saved."
   [data action-fn]
-  (let [show? (reagent/atom false)]
-    (fn []
-      [v-box
-       :children [[button
-                   :label "edit"
-                   :class "btn-primary"
-                   :on-click #(reset! show? true)]
-                  (when @show?
-                    [modal-panel
-                     :backdrop-on-click #(reset! show? false)
-                     :child [v-box
-                             :gap "2ex"
-                             :size "auto"
-                             :children [[scroller
-                                         :min-width "80ex"
-                                         :min-height "10em"
-                                         :child [v-box
-                                                 :gap "1ex"
-                                                 :children [[editor/cm-outer {:data data}]
-                                                            [gap :size "2ex"]
-                                                            [box
-                                                             :class "webui-block-button"
-                                                             :size "auto"
-                                                             :child [button
-                                                                     :label "save"
-                                                                     :class "btn btn-primary btn-block"
-                                                                     :disabled? false
-                                                                     :on-click (fn []
-                                                                                 (action-fn)
-                                                                                 (reset! show? false))]]
-                                                            [box
-                                                             :class "webui-block-button"
-                                                             :size "auto"
-                                                             :child [button
-                                                                     :label "cancel"
-                                                                     :class "btn btn-default btn-block"
-                                                                     :disabled? false
-                                                                     :on-click (fn []
-                                                                                 (reset! show? false))]]]]]]]])]])))
+  (let [text (reagent/atom "")]
+    (fn [data action-fn]
+      (reset! text (.stringify js/JSON (clj->js data) nil 2))
+      [action-button
+       "edit"
+       (str "Editing " (:id data))
+       [scroller
+        :min-width "80ex"
+        :min-height "10em"
+        :child [v-box
+                :gap "1ex"
+                :children [[editor/json-editor
+                            :text text
+                            :on-change #(reset! text %)]]]]
+       (fn []
+         (try
+           (let [data (js->clj (.parse js/JSON @text))]
+             (action-fn data))
+           (catch js/Error e
+             (action-fn e))))
+       (constantly nil)])))
 
 (defn delete-button
   "Creates a button that will bring up a delete dialog and will execute the
    delete when confirmed."
   [data action-fn]
-  (let [show? (reagent/atom false)]
-    (fn []
-      [v-box
-       :children [[button
-                   :label "delete"
-                   :class "btn-primary"
-                   :on-click #(reset! show? true)]
-                  (when @show?
-                    [modal-panel
-                     :backdrop-on-click #(reset! show? false)
-                     :child [v-box
-                             :gap "2ex"
-                             :width "auto"
-                             :children [[title :level :level2 :label "Delete resource?"]
-                                        [p "The resource identifier is " [:strong (:id data)] ". "
-                                         "Delete operations " [:strong "cannot"] " be undone."]
-                                        [box
-                                         :class "webui-block-button"
-                                         :size "auto"
-                                         :child [button
-                                                 :label "confirm"
-                                                 :class "btn btn-danger btn-block"
-                                                 :disabled? false
-                                                 :on-click (fn []
-                                                             (action-fn)
-                                                             (reset! show? false))]]
-                                        [box
-                                         :class "webui-block-button"
-                                         :size "auto"
-                                         :child [button
-                                                 :label "cancel"
-                                                 :class "btn btn-default btn-block"
-                                                 :disabled? false
-                                                 :on-click (fn []
-                                                             (reset! show? false))]]]]])]])))
+  [action-button
+   "delete"
+   "Delete resource?"
+   [p "The resource identifier is " [:strong (:id data)] ". "
+    "Delete operations " [:strong "cannot"] " be undone."]
+   action-fn
+   (constantly nil)])
 
 (defn other-button
   "Creates a button that will bring up a dialog to confirm the given action."
   [label data action-fn]
-  (let [show? (reagent/atom false)]
-    (fn []
-      [v-box
-       :children [[button
-                   :label label
-                   :class "btn-primary"
-                   :on-click #(reset! show? true)]
-                  (when @show?
-                    [modal-panel
-                     :backdrop-on-click #(reset! show? false)
-                     :child [v-box
-                             :gap "2ex"
-                             :width "auto"
-                             :children [[title :level :level2 :label (str "Execute action " label "?")]
-                                        [p "Confirm executing action " [:strong label] " on " [:strong (:id data)] "."]
-                                        [box
-                                         :class "webui-block-button"
-                                         :size "auto"
-                                         :child [button
-                                                 :label "confirm"
-                                                 :class "btn btn-danger btn-block"
-                                                 :disabled? false
-                                                 :on-click (fn []
-                                                             (action-fn)
-                                                             (reset! show? false))]]
-                                        [box
-                                         :class "webui-block-button"
-                                         :size "auto"
-                                         :child [button
-                                                 :label "cancel"
-                                                 :class "btn btn-default btn-block"
-                                                 :disabled? false
-                                                 :on-click (fn []
-                                                             (reset! show? false))]]]]])]])))
+  [action-button
+   label
+   (str "Execute action " label "?")
+   [p "Confirm executing action " [:strong label] " on " [:strong (:id data)] "."]
+   action-fn
+   (constantly nil)])
+
 (defn operation-name [op-uri]
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 (defn operation-button [data [label href]]
   (case label
-    "edit" [edit-button data #(js/alert "edit operation not implemented yet")]
-    "delete" [delete-button data #(js/alert "delete operation not implemented yet")]
+    "edit" [edit-button data #(dispatch [:evt.webui.cimi/edit (:id data) %])]
+    "delete" [delete-button data #(dispatch [:evt.webui.cimi/delete (:id data)])]
     [other-button label data #(js/alert "operation not implemented yet")]))
 
 (defn format-operations [{:keys [operations] :as data} baseURI]
