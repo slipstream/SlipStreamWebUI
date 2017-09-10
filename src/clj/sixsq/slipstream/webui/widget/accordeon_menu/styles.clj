@@ -10,7 +10,9 @@
   [:#main-menu {}])
 
 (defstyles accordeon-menu
-  [:.accordeon-menu {:width "200px"}]
+  [:.accordeon-menu {:width "200px"
+                     :min-height "100vh"
+                     :background-color "Gainsboro"}]
 
   [:.accordeon-menu-background {:position         "fixed"
                                 :width            "100%"

@@ -42,8 +42,8 @@
        :label (@tr [label-kw])
        :on-click #(history/navigate url)])))
 
-(defn accordeon-menu-ctrl []
-  [accordeon-menu-widget/accordeon-menu-ctrl "main-menu"])
+;(defn accordeon-menu-ctrl []
+;  [accordeon-menu-widget/accordeon-menu-ctrl "main-menu"])
 
 (defn page-footer []
   (let [tr (subscribe [:webui.i18n/tr])]
@@ -101,7 +101,7 @@
        :justify :between
        :align :center
        :children [;; FIXME: rely only on CSS for the styling
-                  [accordeon-menu-ctrl]
+                  ;[accordeon-menu-ctrl]
                   [breadcrumbs
                    :model path
                    :class "webui-breadcrumbs"
