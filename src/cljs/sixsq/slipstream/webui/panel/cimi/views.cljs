@@ -97,6 +97,7 @@
 
 (defn search-header []
   (let [tr (subscribe [:webui.i18n/tr])
+        query-params (subscribe [:search-params])
         first-value (reagent/atom "1")
         last-value (reagent/atom "20")
         filter-value (reagent/atom "")
@@ -104,6 +105,14 @@
         select-value (reagent/atom "")
         aggregation-value (reagent/atom "")]
     (fn []
+      ;; reset visible values of parameters
+      (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
+        (reset! first-value (str (or $first "")))
+        (reset! last-value (str (or $last "")))
+        (reset! filter-value (str (or $filter "")))
+        (reset! orderby-value (str (or $orderby "")))
+        (reset! select-value (str (or $select "")))
+        (reset! aggregation-value (str (or $aggregation ""))))
       [v-box
        :gap "1ex"
        :children [[h-box
@@ -254,7 +263,7 @@
                          :level :level3
                          :label "Results: ?? / ??"])
                       [gap :size "1"]
-                      (if-let [ops (:operations resources)]
+                      #_(if-let [ops (:operations resources)]
                         (format-operations ops))]])))))
 
 (defn cimi-resource

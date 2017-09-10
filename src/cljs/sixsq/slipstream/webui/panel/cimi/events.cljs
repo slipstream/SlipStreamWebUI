@@ -28,7 +28,6 @@
     (let [entries (get listing (keyword resource-type) [])
           aggregations (:aggregations listing)
           fields (utils/merge-keys (conj entries {:id "id"}))]
-      (log/error (with-out-str (cljs.pprint/pprint listing)))
       (-> db
           (assoc-in [:search :cache :aggregations] aggregations)
           (assoc-in [:search :cache :resources] listing)
