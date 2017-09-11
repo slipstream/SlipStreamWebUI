@@ -6,8 +6,3 @@
  :name
  (fn [db]
    (:name db)))
-
-(rf/reg-sub
-  :main-menu/display
-  (fn [db]
-    (:main-menu/display db)))

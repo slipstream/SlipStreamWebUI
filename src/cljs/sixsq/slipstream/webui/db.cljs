@@ -156,8 +156,7 @@
 ;;
 ;; navigation
 ;;
-(s/def ::main-menu         (s/nilable any?)) ;(only-keys :req-un [:show :hide]))
-;(s/def :main-menu/display (s/nilable any?)) ;(only-keys :req-un [:show :hide]))
+(s/def ::main-menu (s/nilable any?))
 
 ;;
 ;; simple credential template schema (TEMPORARY)
@@ -274,6 +273,4 @@
                            :fields          {:available ["id"]
                                              :selected  ["id"]}
 
-                           :completed?      true
-                           }
-   :main-menu             {:display :hide}})
+                           :completed?      true}})
