@@ -11,29 +11,22 @@
 (defn sub-key [header sub]
   (str header "-" sub))
 
-(defn- display-dispatch-target-name [target]
-  "Construct the name of the dispatch target. Use display since it sets the status of
-   the menu display"
-  (keyword (str target "/display")))
-
 (defn gap []
   [:div {:style {:flex-grow 1000}}])
 
-(defn subsections-menu [header subsections component-name s]
-  (let [dispatch-target (display-dispatch-target-name component-name)]
-    (doall (for [[sub j] (#(map list % (range)) subsections)]
-             [rc/box
-              :attr {:key (sub-key header sub)}
-              :child [:a
-                      {:data-dispatch (:data-dispatch sub)
-                       :on-click      (fn []
-                                        (swap! s assoc-in [:last-sub] (sub-key header j))
-                                        (rf/dispatch [(:data-dispatch sub)])
-                                        (rf/dispatch [dispatch-target :hide]))
-                       :style         {:cursor "default"}}
-                      [:div {:class (when (= (:last-sub @s) (sub-key header j))
-                                      :accordeon-menu-sub-selected)}
-                       (:content sub)]]]))))
+(defn subsections-menu [header subsections s]
+  (doall (for [[sub j] (#(map list % (range)) subsections)]
+           [rc/box
+            :attr {:key (sub-key header sub)}
+            :child [:a
+                    {:data-dispatch (:data-dispatch sub)
+                     :on-click      (fn []
+                                      (swap! s assoc-in [:last-sub] (sub-key header j))
+                                      (rf/dispatch [(:data-dispatch sub)]))
+                     :style         {:cursor "default"}}
+                    [:div {:class (when (= (:last-sub @s) (sub-key header j))
+                                    :accordeon-menu-sub-selected)}
+                     (:content sub)]]])))
 
 (defn sections-menu [i-h-s component-name s]
   (doall
@@ -53,10 +46,11 @@
                                                (not (contains? (:open-sections @s) i)))
                                            nil
                                            (if (= % i) nil i))))}
+                   :style {:cursor "default"}
                    :children [[:div header]
                               (if (contains? (:open-sections @s) i)
-                                [:i.material-icons {:style {:cursor "default"}} "keyboard_arrow_down"]
-                                [:i.material-icons {:style {:cursor "default"}} "keyboard_arrow_right"])]]
+                                [:i.material-icons "keyboard_arrow_down"]
+                                [:i.material-icons "keyboard_arrow_right"])]]
                   [rc/v-box
                    :class "accordeon-menu-sub"
                    :style {:height     (if (contains? (:open-sections @s) i)
@@ -67,7 +61,7 @@
                            :transition "all 1s linear 0s"}
                    :attr {:key (sub-key header i)}
                    :children
-                   (subsections-menu header subsections component-name s)]]])))
+                   (subsections-menu header subsections s)]]])))
 
 ;;--------------------------------------------------------------------------------------------------
 ;; Component: accordeon-menu
