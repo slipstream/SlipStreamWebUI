@@ -27,10 +27,8 @@
 ;;
 
 (s/def ::cimi any?)
-(s/def ::runs any?)
-(s/def ::modules any?)
 
-(s/def ::clients (s/nilable (only-keys :req-un [::cimi ::runs ::modules])))
+(s/def ::clients (s/nilable (only-keys :req-un [::cimi])))
 
 (s/def ::message (s/nilable string?))
 

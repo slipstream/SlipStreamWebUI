@@ -17,7 +17,7 @@
   [db/debug-interceptors]
   (fn [cofx _]
     (let [{:keys [clients runs-params]} (:db cofx)
-          client (:runs clients)]
+          client (:cimi clients)]
       (-> cofx
           (assoc :fx.webui.deployment/search [client runs-params])))))
 
