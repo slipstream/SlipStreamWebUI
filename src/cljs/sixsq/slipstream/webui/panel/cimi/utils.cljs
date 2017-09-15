@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.panel.cimi.utils
   (:require
-    [re-frame.core :refer [dispatch]]))
+    [re-frame.core :refer [dispatch]]
+    [cljs.pprint :refer [pprint]]))
 
 (defn collection-href-map
   "Creates a map from the CloudEntryPoint that maps the resource collection
@@ -37,7 +38,7 @@
     (let [error-body (or (ex-data data) (str data))
           alert-type :danger
           heading "Failure"
-          body [:pre (with-out-str (cljs.pprint/pprint error-body))]
+          body [:pre (with-out-str (pprint error-body))]
           alert {:alert-type alert-type
                  :heading    heading
                  :body       body}]
@@ -52,7 +53,7 @@
     (let [error-body (:body (ex-data response))
           alert-type :danger
           heading "Failure"
-          body [:pre (with-out-str (cljs.pprint/pprint error-body))]
+          body [:pre (with-out-str (pprint error-body))]
           alert {:alert-type alert-type
                  :heading    heading
                  :body       body}]
@@ -61,7 +62,7 @@
                                               :body       body}]))
     (let [alert-type :info
           heading "Success"
-          body [:p (with-out-str (cljs.pprint/pprint response))]
+          body [:p (with-out-str (pprint response))]
           alert {:alert-type alert-type
                  :heading    heading
                  :body       body}]

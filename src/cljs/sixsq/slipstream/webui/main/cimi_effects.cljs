@@ -7,6 +7,7 @@
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]
+    [sixsq.slipstream.client.api.authn :as authn]
     [sixsq.slipstream.webui.panel.authn.utils :as au]))
 
 (reg-fx
@@ -40,13 +41,13 @@
   :fx.webui.main.cimi/logout
   (fn [[client callback]]
     (go
-      (callback (<! (cimi/logout client))))))
+      (callback (<! (authn/logout client))))))
 
 (reg-fx
   :fx.webui.main.cimi/login
   (fn [[client creds callback]]
     (go
-      (let [resp (<! (cimi/login client creds))
+      (let [resp (<! (authn/login client creds))
             session (<! (au/get-current-session client))]
         (callback resp session)))))
 

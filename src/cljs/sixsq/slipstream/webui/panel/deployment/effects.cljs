@@ -12,5 +12,5 @@
   :fx.webui.deployment/search
   (fn [[client params]]
     (go
-      (let [results (<! (runs/search client params))]
+      (let [results (<! (runs/search-runs client params))]
         (dispatch [:evt.webui.deployment/set-data results])))))
