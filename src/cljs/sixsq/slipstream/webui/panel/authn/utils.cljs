@@ -5,9 +5,8 @@
     [cljs.core.async :refer [<! >! chan]]
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.client.api.cimi.utils :as cu]
-    [sixsq.slipstream.client.api.utils.http-async :as http]
-    [sixsq.slipstream.client.api.utils.json :as json]
+    [sixsq.slipstream.client.impl.utils.http-async :as http]
+    [sixsq.slipstream.client.impl.utils.json :as json]
     [clojure.walk :as walk]))
 
 (def ^:const common-attrs #{:created :updated :resourceURI :properties :acl :operations})

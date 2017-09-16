@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.main.events
   (:require
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v dispatch]]
-    [sixsq.slipstream.client.api.cimi.async :as cimi-async]
-    [sixsq.slipstream.client.api.runs.async :as runs-async]
-    [sixsq.slipstream.client.api.modules.async :as modules-async]
+    [sixsq.slipstream.client.async :as cimi-async]
+    [sixsq.slipstream.client.async :as runs-async]
+    [sixsq.slipstream.client.async :as modules-async]
     [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.main.effects :as effects]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
@@ -22,13 +22,7 @@
   :evt.webui.main/initialize-client
   [db/debug-interceptors trim-v]
   (fn [db [slipstream-url]]
-    (let [clients {:cimi    (cimi-async/instance (str slipstream-url "/api/cloud-entry-point"))
-                   :runs    (runs-async/instance (str slipstream-url "/run")
-                                                 (str slipstream-url "/auth/login")
-                                                 (str slipstream-url "/auth/logout"))
-                   :modules (modules-async/instance (str slipstream-url "/module")
-                                                    (str slipstream-url "/auth/login")
-                                                    (str slipstream-url "/auth/logout"))}]
+    (let [clients {:cimi (cimi-async/instance (str slipstream-url "/api/cloud-entry-point"))}]
       (assoc db :clients clients))))
 
 (reg-event-fx
