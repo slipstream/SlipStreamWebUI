@@ -173,7 +173,9 @@
   :evt.webui.authn/no-modal-login
   [db/debug-interceptors trim-v]
   (fn [db [_]]
-    (assoc-in db [:authn :use-modal?] false)))
+    (-> db
+        (assoc-in [:authn :use-modal?] false)
+        (assoc-in [:authn :chooser-view?] false))))
 
 (reg-event-db
   :evt.webui.authn/show-modal

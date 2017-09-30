@@ -240,31 +240,25 @@
               [search-header]]])
 
 (defn results-bar []
-  (let [search (subscribe [:search])]
+  (let [search (subscribe [:search])
+        cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
       (let [{:keys [completed? collection-name] {:keys [resources]} :cache} @search]
         (if (instance? js/Error resources)
           [h-box
            :children [[label :label "ERROR"]]]
           [h-box
-           :children [#_[box
-                         :justify :center
-                         :align :center
-                         :width "30px"
-                         :height "30px"
-                         :child (if completed? "" [throbber :size :small])]
-                      (if resources
-                        (let [total (:count resources)
-                              n (count (get resources (keyword collection-name) []))]
+           :children [(if resources
+                        (let [collection-key (get (:collection-key @cep) collection-name)
+                              total (:count resources)
+                              n (count (get resources collection-key []))]
                           [title
                            :level :level3
                            :label (str "Results: " n " / " total)])
                         [title
                          :level :level3
                          :label "Results: ?? / ??"])
-                      [gap :size "1"]
-                      #_(if-let [ops (:operations resources)]
-                        (format-operations ops))]])))))
+                      [gap :size "1"]]])))))
 
 (defn cimi-resource
   []
