@@ -3,6 +3,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [re-frame.core :refer [after]]
+    [expound.alpha :as expound]
     [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]
     [taoensso.timbre :as log]))
 
@@ -14,7 +15,7 @@
   (fn validate-schema [db]
     (let [valid? (s/valid? db-spec db)]
       (when-not valid?
-        (log/error "failed db schema check: " (s/explain-str db-spec db)))
+        (log/error "failed db schema check: " (expound/expound-str db-spec db)))
       valid?)))
 
 (def validate-schema-interceptor (after (schema-validator ::db)))
@@ -229,7 +230,7 @@
                        :forms         {}}
 
    :cloud-entry-point nil
-
+   
    :search            {:collection-name "session"
                        :query-params    {:$first       1
                                          :$last        20

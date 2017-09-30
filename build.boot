@@ -25,25 +25,27 @@
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure]
                     [org.clojure/clojurescript]
+                    [org.clojure/core.async]
 
-                    [binaryage/devtools]
                     [cljsjs/codemirror "5.24.0-1"]
+                    [com.andrewmcveigh/cljs-time]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.taoensso/tempura]
 
-                    [secretary]
-
-                    [org.clojure/core.async]
+                    [expound]
 
                     [reagent]
                     [re-frame]
                     [re-com]
-                    [com.andrewmcveigh/cljs-time]
 
+                    [secretary]
+
+                    ;; boot task and development deps
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
                     [adzerk/boot-reload]
                     [adzerk/boot-test]
+                    [binaryage/devtools]
                     [boot-deps]
                     [com.cemerick/piggieback]
                     [crisptrutski/boot-cljs-test]
