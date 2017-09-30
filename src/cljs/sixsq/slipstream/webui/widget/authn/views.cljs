@@ -9,7 +9,8 @@
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.utils :as utils]))
+    [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.panel.authn.views :as authn-views]))
 
 (defn logout-button
   "Button shown when the user has an active session to allow the user to
@@ -65,5 +66,5 @@
    :gap "0.25ex"
    :children [[login-button]
               [logout-button]
-              (if @(subscribe [:webui.authn/use-modal?])
+              (when @(subscribe [:webui.authn/use-modal?])
                 [authn-views/login-resource])]])

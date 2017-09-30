@@ -16,6 +16,12 @@
 (reg-sub :webui.authn/session
          (fn [db _] (-> db :authn :session)))
 
+(reg-sub :webui.authn/use-modal?
+         (fn [db _] (-> db :authn :use-modal?)))
+
+(reg-sub :webui.authn/show-modal?
+         (fn [db _] (-> db :authn :show-modal?)))
+
 (reg-sub :webui.authn/total
          (fn [db _] (-> db :authn :total)))
 

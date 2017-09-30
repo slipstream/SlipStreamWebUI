@@ -15,7 +15,7 @@
   :modules-search
   [db/debug-interceptors]
   (fn [{{:keys [clients resource-path]} :db :as cofx} _]
-    (let [client (:modules clients)
+    (let [client (:cimi clients)
           module-href (some->> resource-path rest seq (str/join "/"))]
       (log/info "searching modules for " module-href)
       (assoc cofx :fx.webui.app/search [client module-href]))))

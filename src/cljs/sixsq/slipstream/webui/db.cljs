@@ -27,10 +27,8 @@
 ;;
 
 (s/def ::cimi any?)
-(s/def ::runs any?)
-(s/def ::modules any?)
 
-(s/def ::clients (s/nilable (only-keys :req-un [::cimi ::runs ::modules])))
+(s/def ::clients (s/nilable (only-keys :req-un [::cimi])))
 
 (s/def ::message (s/nilable string?))
 
@@ -70,6 +68,8 @@
                                                     :webui.authn/params-desc]))
 
 
+(s/def :webui.authn/use-modal? boolean?)
+(s/def :webui.authn/show-modal? boolean?)
 (s/def :webui.authn/total nat-int?)
 (s/def :webui.authn/count nat-int?)
 (s/def :webui.authn/redirect-uri string?)
@@ -110,32 +110,47 @@
                                                               :cimi.cep/collection-key
                                                               :cimi.cep/collection-href])))
 
-(s/def ::cimi-filter (s/nilable string?))
-(s/def ::page nat-int?)
-(s/def ::page-size (s/int-in 1 50))
+;;
+;; query parameters for CIMI searches
+;;
+(s/def :cimi.search.query-params/$first nat-int?)
+(s/def :cimi.search.query-params/$last nat-int?)
+(s/def :cimi.search.query-params/$filter (s/nilable string?))
+(s/def :cimi.search.query-params/$orderby (s/nilable string?))
+(s/def :cimi.search.query-params/$aggregation (s/nilable string?))
+(s/def :cimi.search.query-params/$select (s/nilable string?))
 
-(s/def ::webui (only-keys :req-un [::cimi-filter ::page ::page-size]))
+(s/def :cimi.search/query-params (only-keys :req-un [:cimi.search.query-params/$first
+                                                     :cimi.search.query-params/$last
+                                                     :cimi.search.query-params/$filter
+                                                     :cimi.search.query-params/$orderby
+                                                     :cimi.search.query-params/$aggregation
+                                                     :cimi.search.query-params/$select]))
 
-(s/def ::$first nat-int?)
-(s/def ::$last nat-int?)
-(s/def ::$filter (s/nilable string?))
+(s/def :cimi.search.cache/aggregations (s/nilable any?))
+(s/def :cimi.search.cache/resource (s/nilable any?))
+(s/def :cimi.search.cache/resources (s/nilable any?))
+(s/def :cimi.search/cache (only-keys :req-un [:cimi.search.cache/aggregations
+                                              :cimi.search.cache/resource
+                                              :cimi.search.cache/resources]))
 
-(s/def ::params (only-keys :req-un [::$first ::$last ::$filter]))
+(s/def :cimi.search.fields/available (s/coll-of string? :kind vector?))
+(s/def :cimi.search.fields/selected (s/coll-of string? :kind vector?))
+(s/def :cimi.search/fields (only-keys :req-un [:cimi.search.fields/available
+                                               :cimi.search.fields/selected]))
 
-(s/def ::collection-name (s/nilable string?))
-(s/def ::listing (s/nilable any?))
-(s/def ::completed? boolean?)
+(s/def :cimi.search/collection-name (s/nilable string?))
+(s/def :cimi.search/completed? boolean?)
 
 (s/def ::label string?)
 (s/def ::choice (only-keys :req-un [::id ::label]))
-(s/def ::available-fields (s/coll-of ::choice))
-(s/def ::selected-fields (s/coll-of ::id))
-(s/def ::search-data (s/nilable any?))
 
-(s/def ::search (only-keys :req-un [::collection-name ::params ::listing ::completed?
-                                    ::available-fields ::selected-fields]))
+(s/def ::search (only-keys :req-un [:cimi.search/collection-name
+                                    :cimi.search/query-params
+                                    :cimi.search/cache
+                                    :cimi.search/fields
+                                    :cimi.search/completed?]))
 
-(s/def ::offer-data (s/nilable any?))
 (s/def ::offer ::search)
 
 (s/def ::resource-path (s/coll-of string? :kind vector?))
@@ -146,8 +161,14 @@
 ;;
 (s/def :webui.credential/show-modal? boolean?)
 (s/def :webui.credential/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
-(s/def :webui/credentials (only-keys :req-un [:webui.credential/show-modal?
-                                              :webui.credential/descriptions]))
+(s/def :webui/credential (only-keys :req-un [:webui.credential/show-modal?
+                                             :webui.credential/descriptions
+
+                                             :cimi.search/collection-name
+                                             :cimi.search/query-params
+                                             :cimi.search/cache
+                                             :cimi.search/fields
+                                             :cimi.search/completed?]))
 
 ;;
 ;; internationalization parameters
@@ -165,9 +186,9 @@
                                 ::runs-data ::runs-params
                                 ::modules-data
                                 :webui.authn/authn
-                                ::search-data ::search
-                                ::offer-data ::offer
-                                :webui/credentials]))
+                                ::search
+                                ::offer
+                                :webui/credential]))
 
 ;;
 ;; initial database value
@@ -205,27 +226,51 @@
 
    :cloud-entry-point     nil
 
-   :search-data           nil
-   :search                {:collection-name  "session"
-                           :params           {:$first  1
-                                              :$last   20
-                                              :$filter nil}
-                           :listing          nil
-                           :completed?       true
-                           :available-fields [{:id "id" :label "id"}
-                                              {:id "beta" :label "beta"}]
-                           :selected-fields  #{"id"}}
+   :search                {:collection-name "session"
+                           :query-params    {:$first       1
+                                             :$last        20
+                                             :$filter      nil
+                                             :$orderby     nil
+                                             :$aggregation nil
+                                             :$select      nil}
+                           :cache           {:aggregations nil
+                                             :resource     nil
+                                             :resources    nil}
+                           :fields          {:available ["id"]
+                                             :selected  ["id"]}
 
-   :offer-data            nil
-   :offer                 {:collection-name  "service-offer"
-                           :params           {:$first  1
-                                              :$last   20
-                                              :$filter nil}
-                           :listing          nil
-                           :completed?       true
-                           :available-fields [{:id "id" :label "id"}
-                                              {:id "beta" :label "beta"}]
-                           :selected-fields  #{"id"}}
+                           :completed?      true}
 
-   :credentials           {:show-modal?  false
-                           :descriptions nil}})
+   :offer                 {:collection-name "service-offer"
+                           :query-params    {:$first       1
+                                             :$last        20
+                                             :$filter      nil
+                                             :$orderby     nil
+                                             :$aggregation nil
+                                             :$select      nil}
+                           :cache           {:aggregations nil
+                                             :resource     nil
+                                             :resources    nil}
+                           :fields          {:available ["id"]
+                                             :selected  ["id"]}
+
+                           :completed?      true}
+
+   :credential            {:show-modal?     false
+                           :descriptions    nil
+
+                           :collection-name "credential"
+                           :query-params    {:$first       1
+                                             :$last        20
+                                             :$filter      nil
+                                             :$orderby     nil
+                                             :$aggregation nil
+                                             :$select      nil}
+                           :cache           {:aggregations nil
+                                             :resource     nil
+                                             :resources    nil}
+                           :fields          {:available ["id"]
+                                             :selected  ["id"]}
+
+                           :completed?      true
+                           }})

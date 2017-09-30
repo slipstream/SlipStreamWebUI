@@ -9,9 +9,8 @@
     [clojure.pprint :refer [pprint]]
     [clojure.string :as str]
 
-    [sixsq.slipstream.webui.panel.cimi.effects]
-    [sixsq.slipstream.webui.panel.cimi.events]
-    [sixsq.slipstream.webui.panel.cimi.subs]
+    [sixsq.slipstream.webui.panel.credential.events]
+    [sixsq.slipstream.webui.panel.credential.subs]
 
     [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.resource :as resource]))
@@ -33,17 +32,17 @@
                                           :value-fn (if (= "id" selected-field)
                                                       id-selector-formatter
                                                       (keyword selected-field))
-                                          :on-remove #(dispatch [:remove-selected-field selected-field])
+                                          :on-remove #(dispatch [:evt.webui.credential/remove-selected-field selected-field])
                                           :header selected-field
                                           :class "webui-column"
                                           :header-class "webui-column-header"
                                           :value-class "webui-column-value"]))]])
 
 (defn search-vertical-result-table []
-  (let [search-results (subscribe [:search-listing])
-        collection-name (subscribe [:search-collection-name])
-        selected-fields (subscribe [:search-selected-fields])
-        cep (subscribe [:cloud-entry-point])]
+  (let [search-results (subscribe [:webui.credential/resources])
+        collection-name (subscribe [:webui.credential/collection-name])
+        selected-fields (subscribe [:webui.credential/selected-fields])
+        cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
       (let [{:keys [collection-key]} @cep
             resource-collection-key (get collection-key @collection-name)
@@ -70,7 +69,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! first-value v)
-                                (dispatch [:set-search-first v]))]
+                                (dispatch [:evt.webui.credential/set-first v]))]
                   [input-text
                    :model last-value
                    :placeholder (@tr [:last])
@@ -78,7 +77,7 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! last-value v)
-                                (dispatch [:set-search-last v]))]
+                                (dispatch [:evt.webui.credential/set-last v]))]
                   [input-text
                    :model filter-value
                    :placeholder (@tr [:filter])
@@ -86,19 +85,19 @@
                    :change-on-blur? true
                    :on-change (fn [v]
                                 (reset! filter-value v)
-                                (dispatch [:set-search-filter v]))]
+                                (dispatch [:evt.webui.credential/set-filter v]))]
                   [button
                    :label (@tr [:search])
-                   :on-click #(dispatch [:search])]]])))
+                   :on-click #(dispatch [:evt.webui.credential/search])]]])))
 
 (defn select-fields []
   (let [tr (subscribe [:webui.i18n/tr])
-        available-fields (subscribe [:search-available-fields])
-        selected-fields (subscribe [:search-selected-fields])
+        available-fields (subscribe [:webui.credential/available-fields])
+        selected-fields (subscribe [:webui.credential/selected-fields])
         selections (reagent/atom #{})
         show? (reagent/atom false)]
     (fn []
-      (reset! selections @selected-fields)
+      (reset! selections (set @selected-fields))
       [h-box
        :children [[button
                    :label (@tr [:fields])
@@ -107,9 +106,10 @@
                     [modal-panel
                      :backdrop-on-click (fn []
                                           (reset! show? false)
-                                          (dispatch [:set-selected-fields @selections]))
+                                          (dispatch [:evt.webui.credential/set-selected-fields @selections]))
                      :child [v-box
                              :width "350px"
+                             :gap "1ex"
                              :children [[selection-list
                                          :model selections
                                          :choices available-fields
@@ -118,7 +118,7 @@
                                          :height "200px"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :end
+                                         :justify :between
                                          :children [[button
                                                      :label (@tr [:cancel])
                                                      :on-click (fn []
@@ -128,7 +128,7 @@
                                                      :class "btn-primary"
                                                      :on-click (fn []
                                                                  (reset! show? false)
-                                                                 (dispatch [:set-selected-fields @selections]))]]]]]])]])))
+                                                                 (dispatch [:evt.webui.credential/set-selected-fields @selections]))]]]]]])]])))
 
 (defn select-controls []
   [h-box
@@ -141,14 +141,9 @@
    :children [[select-controls]
               [search-header]]])
 
-(defn cimi-resource
+(defn credential-resource
   []
-  (dispatch [:set-collection-name "credential"])
   [v-box
    :gap "1ex"
    :children [[control-bar]
               [search-vertical-result-table]]])
-
-(defmethod resource/render "cimi"
-  [path query-params]
-  [cimi-resource])

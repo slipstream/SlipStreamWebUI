@@ -1,9 +1,10 @@
 (ns sixsq.slipstream.webui.panel.authn.events
   (:require
     [sixsq.slipstream.webui.db :as db]
-    [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
+    [re-frame.core :refer [reg-event-db reg-event-fx trim-v dispatch]]
     [sixsq.slipstream.webui.panel.authn.utils :as au]
     [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
     [taoensso.timbre :as log]))
 
 (reg-event-fx
@@ -11,7 +12,11 @@
   [db/debug-interceptors]
   (fn [cofx _]
     (if-let [client (get-in cofx [:db :clients :cimi])]
-      (assoc cofx :fx.webui.authn/logout [client])
+      (assoc cofx :fx.webui.main.cimi/logout
+                  [client (fn [resp]
+                            (if (= 200 (:status resp))
+                              (dispatch [:evt.webui.authn/logged-out])
+                              (dispatch [:message "logout failed"])))])
       cofx)))
 
 (reg-event-db
@@ -32,14 +37,22 @@
   :evt.webui.authn/login
   [db/debug-interceptors trim-v]
   (fn [{:keys [db] :as cofx} _]
-    (if-let [client (get-in cofx [:db :clients :cimi])]
+    (if-let [client (-> cofx :db :clients :cimi)]
       (let [method (-> db :authn :method)
             form-data (-> (get-in db [:authn :forms method])
                           (assoc :href method))
             cleared-form-data (au/clear-form-data (-> db :authn :forms))]
         (-> cofx
             (assoc-in [:db :authn :forms] cleared-form-data)
-            (assoc :fx.webui.authn/login [client form-data])))
+            (assoc :fx.webui.main.cimi/login
+                   [client
+                    form-data
+                    (fn [resp session]
+                      (if session
+                        (dispatch [:evt.webui.authn/logged-in session])
+                        (do
+                          (log/error "Error login response:" (with-out-str (cljs.pprint/pprint resp)))
+                          (dispatch [:message "login failed"]))))])))
       cofx)))
 
 (reg-event-db
@@ -77,7 +90,12 @@
   [db/debug-interceptors]
   (fn [cofx [_]]
     (if-let [client (get-in cofx [:db :clients :cimi])]
-      (assoc cofx :fx.webui.authn/check-session [client])
+      (assoc cofx :fx.webui.main.cimi/session
+                  [client
+                   (fn [session]
+                     (if session
+                       (dispatch [:evt.webui.authn/logged-in session])
+                       (dispatch [:evt.webui.authn/logged-out])))])
       cofx)))
 
 ;;
@@ -140,8 +158,32 @@
         (assoc-in [:authn :error-message] error-message))))
 
 (reg-event-db
+  :evt.webui.authn/set-error-message
+  [db/debug-interceptors trim-v]
+  (fn [db [error-message]]
+    (assoc-in db [:authn :error-message] error-message)))
+
+(reg-event-db
   :evt.webui.authn/clear-error-message
   [db/debug-interceptors trim-v]
   (fn [db [_]]
     (assoc-in db [:authn :error-message] nil)))
+
+(reg-event-db
+  :evt.webui.authn/no-modal-login
+  [db/debug-interceptors trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :use-modal?] false)))
+
+(reg-event-db
+  :evt.webui.authn/show-modal
+  [db/debug-interceptors trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :show-modal?] true)))
+
+(reg-event-db
+  :evt.webui.authn/hide-modal
+  [db/debug-interceptors trim-v]
+  (fn [db [_]]
+    (assoc-in db [:authn :show-modal?] false)))
 

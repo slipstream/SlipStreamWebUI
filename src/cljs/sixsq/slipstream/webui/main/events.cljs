@@ -1,11 +1,12 @@
 (ns sixsq.slipstream.webui.main.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx trim-v]]
-    [sixsq.slipstream.client.api.cimi.async :as cimi-async]
-    [sixsq.slipstream.client.api.runs.async :as runs-async]
-    [sixsq.slipstream.client.api.modules.async :as modules-async]
+    [re-frame.core :refer [reg-event-db reg-event-fx trim-v dispatch]]
+    [sixsq.slipstream.client.async :as cimi-async]
+    [sixsq.slipstream.client.async :as runs-async]
+    [sixsq.slipstream.client.async :as modules-async]
     [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.main.effects :as effects]
+    [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [taoensso.timbre :as log]))
@@ -20,21 +21,19 @@
   :evt.webui.main/initialize-client
   [db/debug-interceptors trim-v]
   (fn [db [slipstream-url]]
-    (let [clients {:cimi    (cimi-async/instance (str slipstream-url "/api/cloud-entry-point"))
-                   :runs    (runs-async/instance (str slipstream-url "/run")
-                                                 (str slipstream-url "/auth/login")
-                                                 (str slipstream-url "/auth/logout"))
-                   :modules (modules-async/instance (str slipstream-url "/module")
-                                                    (str slipstream-url "/auth/login")
-                                                    (str slipstream-url "/auth/logout"))}]
+    (let [clients {:cimi (cimi-async/instance (str slipstream-url "/api/cloud-entry-point"))}]
       (assoc db :clients clients))))
 
 (reg-event-fx
   :evt.webui.main/load-cloud-entry-point
   [db/debug-interceptors]
   (fn [cofx _]
-    (if-let [client (get-in cofx [:db :clients :cimi])]
-      (assoc cofx :fx.webui.main/cloud-entry-point [client])
+    (if-let [client (-> cofx :db :clients :cimi)]
+      (assoc cofx :fx.webui.main.cimi/cloud-entry-point
+                  [client (fn [cep]
+                            (if cep
+                              (dispatch [:evt.webui.main/set-cloud-entry-point cep])
+                              (dispatch [:message "loading cloud-entry-point failed"])))])
       cofx)))
 
 (reg-event-db

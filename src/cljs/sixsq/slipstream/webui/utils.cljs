@@ -31,10 +31,24 @@
   [m]
   (into {} (remove (comp nil? second) m)))
 
+(def ^:const valid-query-params
+  #{:$first :$last :$filter :$orderby :$aggregation :$select})
+
+(defn normalize-query-params [{:keys [:$first :$last :$filter :$orderby :$aggregation :$select] :as params}]
+  (let [$first (str->int $first)
+        $last (str->int $last)
+        params (cond-> (select-keys params valid-query-params)
+                       $first (assoc :$first $first)
+                       (nil? $first) (dissoc $first)
+                       $last (assoc :$last $last)
+                       (nil? $last) (dissoc $last)
+                       (str/blank? $filter) (dissoc $filter)
+                       (str/blank? $orderby) (dissoc $orderby)
+                       (str/blank? $aggregation) (dissoc $aggregation)
+                       (str/blank? $select) (dissoc $select))]))
+
 (defn merge-offer-params [params url-params]
-  {:$first (or (str->int (:$first url-params)) (:$first params))
-   :$last (or (str->int (:$last url-params)) (:$last params))
-   :$filter (or (:$filter url-params) (:$filter params))})
+  (merge params (normalize-query-params url-params)))
 
 (defn keys-in [m]
   (if (map? m)
@@ -56,11 +70,13 @@
 
 (defn merge-keys [coll]
   (->> coll
+       (map #(dissoc % :acl :operations))
        (map all-keys)
        (reduce set/union)
        vec
+       distinct
        sort
-       (map (fn [v] {:id v :label v}))))
+       vec))
 
 (defn id->path [id]
   (map keyword (str/split id #"/")))
