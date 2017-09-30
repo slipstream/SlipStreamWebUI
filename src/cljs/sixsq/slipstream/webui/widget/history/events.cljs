@@ -9,3 +9,9 @@
   [db/debug-interceptors trim-v]
   (fn [cofx [path-prefix]]
     (assoc cofx :fx.webui.history/initialize [path-prefix])))
+
+(reg-event-fx
+  :evt.webui.history/navigate
+  [db/debug-interceptors trim-v]
+  (fn [cofx [relative-url]]
+    (assoc cofx :fx.webui.history/navigate [relative-url])))

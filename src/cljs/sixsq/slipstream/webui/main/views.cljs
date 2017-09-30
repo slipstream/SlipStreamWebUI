@@ -23,7 +23,8 @@
     [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.widget.i18n.subs]
 
-    [sixsq.slipstream.webui.resource :as resource]))
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.utils :as u]))
 
 (defn logo []
   [box :class "webui-logo" :width "20ex" :child ""])
@@ -108,15 +109,13 @@
     (fn []
       [v-box
        :children [[page-header]
-
-                  ;; FIXME: rely only on CSS for the styling
-                  [breadcrumbs
+                  [breadcrumbs                              ;; FIXME: rely only on CSS for the styling
                    :model path
                    :class "webui-breadcrumbs"
                    :separator "\u2022"
                    :separator-class "webui-breadcrumbs-separator"
                    :breadcrumb-class "webui-breadcrumb-element"
-                   :on-change #(dispatch [:set-resource-path-vec %])]]])))
+                   :on-change #(dispatch [:evt.webui.history/navigate (u/breadcrumbs->url %)])]]])))
 
 (defn footer []
   [v-box
