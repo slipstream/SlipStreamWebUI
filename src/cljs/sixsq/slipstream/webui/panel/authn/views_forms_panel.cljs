@@ -115,7 +115,7 @@
   [methods]
   (->> methods
        (sort-by :id)
-       (group-by (or :group :authn-method))
+       (group-by #(or (:group %) (:authn-method %)))
        (sort-by sort-value method-comparator)))
 
 (defn login-form-group
@@ -129,6 +129,13 @@
        :width "35ex"
        :children [[method-form (first methods)]]]
       [model-login-forms method-type methods])))
+
+(defn internal-or-api-key
+  [[_ methods]]
+  (log/error (with-out-str (cljs.pprint/pprint (first methods))))
+  (let [authn-method (:authn-method (first methods))]
+    (log/error "authn-method:" authn-method)
+    (#{"internal" "api-key"} authn-method)))
 
 (defn login-form-container
   "Container that holds all of the login forms. These will be placed into two
@@ -144,9 +151,10 @@
         margin (str "0 3ex " wrapped-row-spacing " 3ex")
         neg-margin (str "0 3ex -" wrapped-row-spacing " 3ex")]
     (fn []
-      (let [methods (order-and-group @methods)
-            internals (first methods)
-            externals (rest methods)
+      (let [method-groups (order-and-group @methods)
+            _ (log/error (with-out-str (cljs.pprint/pprint method-groups)))
+            internals (filter internal-or-api-key method-groups)
+            externals (remove internal-or-api-key method-groups)
             progress (if (zero? @total) 0 (int (* 100. (/ @count @total))))]
         [v-box
          :style {:margin neg-margin}
@@ -158,8 +166,9 @@
                        :class "webui-wrap"
                        :style {:flex-flow "row wrap"}
                        :children [[v-box
+                                   :gap "3ex"
                                    :style {:margin margin}
-                                   :children [[login-form-group (first internals) (second internals)]]]
+                                   :children (vec (map (fn [[k v]] [login-form-group k v]) internals))]
                                   [v-box
                                    :gap "2ex"
                                    :style {:margin margin}

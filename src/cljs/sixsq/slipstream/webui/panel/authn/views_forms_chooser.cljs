@@ -11,10 +11,8 @@
     [sixsq.slipstream.webui.panel.authn.events]
     [sixsq.slipstream.webui.panel.authn.subs]
     [sixsq.slipstream.webui.panel.authn.views-session :as session]
-    [clojure.string :as str]
-    [sixsq.slipstream.webui.utils :as utils]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.panel.authn.utils-forms :as form-utils]))
+    [sixsq.slipstream.webui.panel.authn.utils-forms :as form-utils]
+    [sixsq.slipstream.webui.utils :as utils]))
 
 (defn login-button
   "Button to initiate the login process by submitting the form associated with
@@ -45,10 +43,9 @@
    the login method description."
   []
   (let [methods (subscribe [:webui.authn/methods])
-        cep (subscribe [:cloud-entry-point])
+        cep (subscribe [:webui.main/cloud-entry-point])
         redirect-uri (subscribe [:webui.authn/redirect-uri])]
     (fn [{:keys [id] :as method}]
-      (log/info "creating login form for method" id)
       (let [{:keys [baseURI collection-href]} @cep
             redirect-uri @redirect-uri
             post-uri (str baseURI (:sessions collection-href)) ;; FIXME: Should be part of CIMI API.
@@ -74,18 +71,64 @@
                                          [gap :size "1ex"])])]]]
          [login-button method]]))))
 
+(defn method-label
+  [method]
+  (or (:group method)
+      (:authn-method method)))
+
+(defn group-methods
+  [methods]
+  (group-by method-label methods))
+
+(defn dropdown-choice
+  [[label methods]]
+  {:id      label
+   :label   label
+   :methods methods})
+
+(defn method-group-choices
+  [grouped-methods]
+  (map dropdown-choice grouped-methods))
+
 (defn select-method-by-id
   [id methods]
   (->> methods
        (filter #(= id (:id %)))
-       (first)))
+       first))
 
 (defn login-form-chooser
+  [{:keys [methods] :as selected-method-group}]
+  (if (= 1 (count methods))
+    [v-box
+     :width "35ex"
+     :children [[method-form (first methods)]]]
+    (let [choices (method-group-choices (group-methods methods))
+          selected-method-id (atom (-> methods first :id))
+          selection-method-group (select-method-by-id @selected-method-id methods)]
+      [v-box
+       :align :start
+       :justify :center
+       :style {:min-width "35ex"}
+       :gap "2ex"
+       :children [[single-dropdown
+                   :style {:min-width "35ex"}
+                   :model selected-method-id
+                   :group-fn (constantly nil)
+                   :choices methods
+                   :placeholder "login group"
+                   :on-change #(reset! selected-method-id %)]
+                  (when selection-method-group
+                      [v-box
+                       :width "35ex"
+                       :children [[method-form selection-method-group]]])]])))
+
+(defn login-group-chooser
   []
   (let [methods (subscribe [:webui.authn/methods])
-        selected-method-id (reagent/atom "session-template/internal")]
+        selected-method-group-id (reagent/atom nil)]
     (fn []
-      (let [selected-method-form (select-method-by-id @selected-method-id @methods)]
+      (let [choices (method-group-choices (group-methods @methods))
+            selected-method-group (select-method-by-id @selected-method-group-id choices)]
         [v-box
          :align :start
          :justify :center
@@ -93,15 +136,13 @@
          :gap "2ex"
          :children [[single-dropdown
                      :style {:min-width "35ex"}
-                     :model selected-method-id
+                     :model selected-method-group-id
                      :group-fn (constantly nil)
-                     :choices @methods
+                     :choices choices
                      :placeholder "login method"
-                     :on-change #(reset! selected-method-id %)]
-                    (when selected-method-form
-                      [v-box
-                       :width "35ex"
-                       :children [[method-form selected-method-form]]])]]))))
+                     :on-change #(reset! selected-method-group-id %)]
+                    (when selected-method-group
+                      (login-form-chooser selected-method-group))]]))))
 
 (defn login-form-container
   "Container that holds all of the login forms."
@@ -110,8 +151,8 @@
         loading? (subscribe [:webui.authn/loading?])]
     (fn []
       [v-box
-       :style {:min-width  "35ex"
-               :min-height "15ex"
+       :style {:min-width        "35ex"
+               :min-height       "15ex"
                :background-color "white"}
        :justify :center
        :gap "1ex"
@@ -128,4 +169,4 @@
                     [v-box
                      :align :start
                      :justify :center
-                     :children [[login-form-chooser]]])]])))
+                     :children [[login-group-chooser]]])]])))
