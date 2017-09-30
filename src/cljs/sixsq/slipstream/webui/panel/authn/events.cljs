@@ -154,7 +154,7 @@
   [db/debug-interceptors trim-v]
   (fn [db [error-message]]
     (-> db
-        (assoc :resource-path (utils/parse-resource-path "/login"))
+        (assoc-in [:navigation :path] (utils/parse-resource-path "/login"))
         (assoc-in [:authn :error-message] error-message))))
 
 (reg-event-db

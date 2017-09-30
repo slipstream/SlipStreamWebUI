@@ -9,4 +9,4 @@
           (dispatch [:set-resource (utils/parse-resource-path path) query-params]))
 
 (defroute "*" {path :*}
-          (dispatch [:set-resource-path path]))
+          (dispatch [:evt.webui.main/set-resource-path path]))

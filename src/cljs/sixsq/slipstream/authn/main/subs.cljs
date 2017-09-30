@@ -2,5 +2,5 @@
   (:require
     [re-frame.core :refer [reg-sub]]))
 
-(reg-sub :resource-query-params
-         (fn [db _] (-> db :resource-query-params)))
+(reg-sub :webui.main/nav-query-params
+         (fn [db _] (-> db :navigation :query-params)))

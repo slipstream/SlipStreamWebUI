@@ -17,7 +17,7 @@
 
 (defn message-modal
   []
-  (let [query-params (subscribe [:resource-query-params])
+  (let [query-params (subscribe [:webui.main/nav-query-params])
         show? (reagent/atom true)]
     (fn []
       (let [{:keys [error]} @query-params]

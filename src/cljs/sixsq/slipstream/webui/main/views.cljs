@@ -11,7 +11,6 @@
     [sixsq.slipstream.webui.panel.credential.views :as credential-views]
     [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.empty.views :as empty-views]
-    [sixsq.slipstream.webui.panel.offer.views :as offer-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
 
@@ -39,7 +38,7 @@
 
 (defn panel-controls []
   (let [tr (subscribe [:webui.i18n/tr])
-        model (subscribe [:resource-path])]
+        model (subscribe [:webui.main/nav-path])]
     (fn []
       [h-box
        :gap "2px"
@@ -47,7 +46,6 @@
                   (doall
                     (for [[label-kw url] [[:app "application"]
                                           [:deployment "deployment"]
-                                          [:offer "offer"]
                                           [:cimi "cimi"]
                                           [:credential "credential"]]]
                       ^{:key (name label-kw)} [panel-link label-kw url]))]])))
@@ -97,15 +95,15 @@
 
 (defn resource-panel
   []
-  (let [resource-path (subscribe [:resource-path])
-        resource-query-params (subscribe [:resource-query-params])]
+  (let [resource-path (subscribe [:webui.main/nav-path])
+        resource-query-params (subscribe [:webui.main/nav-query-params])]
     (fn []
       [v-box
        :class "webui-contents"
        :children [(resource/render @resource-path @resource-query-params)]])))
 
 (defn header []
-  (let [path (subscribe [:resource-path])]
+  (let [path (subscribe [:webui.main/nav-path])]
     (fn []
       [v-box
        :children [[page-header]

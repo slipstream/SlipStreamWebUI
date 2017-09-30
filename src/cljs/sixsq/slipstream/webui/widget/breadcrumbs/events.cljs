@@ -9,12 +9,6 @@
     (assoc cofx :fx.webui.history/navigate [relative-url])))
 
 (reg-event-fx
-  :trim-breadcrumbs
-  [db/debug-interceptors trim-v]
-  (fn [{{:keys [resource-path]} :db :as cofx} [n]]
-    (assoc-navigate-fx cofx (take n resource-path))))
-
-(reg-event-fx
   :push-breadcrumb
   [db/debug-interceptors trim-v]
   (fn [{{:keys [resource-path]} :db :as cofx} [crumb]]

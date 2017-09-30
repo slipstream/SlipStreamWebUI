@@ -40,7 +40,7 @@
         cep (subscribe [:webui.main/cloud-entry-point])
         redirect-uri (subscribe [:webui.authn/redirect-uri])
         use-modal? (subscribe [:webui.authn/use-modal?])
-        path (subscribe [:resource-path])]
+        path (subscribe [:webui.main/nav-path])]
     (fn [{:keys [id] :as method}]
       (log/info "creating login form for method" id)
       (let [{:keys [baseURI collection-href]} @cep

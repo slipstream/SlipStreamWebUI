@@ -4,11 +4,11 @@
 (reg-sub :message
          (fn [db _] (-> db :message)))
 
-(reg-sub :resource-path
-         (fn [db _] (-> db :resource-path)))
+(reg-sub :webui.main/nav-path
+         (fn [db _] (-> db :navigation :path)))
 
-(reg-sub :resource-query-params
-         (fn [db _] (-> db :resource-query-params)))
+(reg-sub :webui.main/nav-query-params
+         (fn [db _] (-> db :navigation :query-params)))
 
 (reg-sub :webui.main/cloud-entry-point
          (fn [db _] (-> db :cloud-entry-point)))

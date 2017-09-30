@@ -63,26 +63,25 @@
   (fn [db _]
     (assoc db :message nil)))
 
-;; usage:  (dispatch [:set-resource-path path])
 (reg-event-db
-  :set-resource-path
+  :evt.webui.main/set-resource-path
   [db/debug-interceptors trim-v]
   (fn [db [path]]
-    (assoc db :resource-path (utils/parse-resource-path path))))
+    (assoc-in db [:navigation :path] (utils/parse-resource-path path))))
 
 (reg-event-db
-  :set-resource-path-vec
+  :evt.webui.main/set-resource-path-vec
   [db/debug-interceptors trim-v]
   (fn [db [path]]
-    (assoc db :resource-path path)))
+    (assoc-in db [:navigation :path] path)))
 
 (reg-event-db
   :set-resource
   [db/debug-interceptors trim-v]
   (fn [db [path query-params]]
     (-> db
-        (assoc :resource-path path)
-        (assoc :resource-query-params query-params))))
+        (assoc-in [:navigation :path] path)
+        (assoc-in [:navigation :query-params] query-params))))
 
 (reg-event-fx
   :evt.webui.main/set-host-theme

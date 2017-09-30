@@ -269,7 +269,7 @@
 (defn cimi-resource
   []
   (let [cep (subscribe [:webui.main/cloud-entry-point])
-        path (subscribe [:resource-path])
+        path (subscribe [:webui.main/nav-path])
         data (subscribe [:resource-data])]
     (fn []
       (let [[_ resource-type resource-id] @path]
