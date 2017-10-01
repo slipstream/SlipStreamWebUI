@@ -35,8 +35,6 @@
 
 (s/def :webui.main/alert (s/nilable map?))
 
-(s/def ::resource-data (s/nilable any?))
-
 (s/def ::runs-data (s/nilable any?))
 
 (s/def ::offset string?)
@@ -146,11 +144,17 @@
 (s/def ::label string?)
 (s/def ::choice (only-keys :req-un [::id ::label]))
 
+(s/def :cimi.add/show-modal? boolean?)
+(s/def :cimi.add/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
+
 (s/def ::search (only-keys :req-un [:cimi.search/collection-name
                                     :cimi.search/query-params
                                     :cimi.search/cache
                                     :cimi.search/fields
-                                    :cimi.search/completed?]))
+                                    :cimi.search/completed?
+
+                                    :cimi.add/show-modal?
+                                    :cimi.add/descriptions]))
 
 ;;
 ;; navigation information
@@ -186,7 +190,6 @@
                                 :cimi/cloud-entry-point
                                 ::clients ::message
                                 :webui.main/alert
-                                ::resource-data
                                 :webui/navigation
                                 ::runs-data ::runs-params
                                 ::modules-data
@@ -205,7 +208,6 @@
    :clients           nil
    :message           nil
    :alert             nil
-   :resource-data     nil
 
    :navigation        {:path         []
                        :query-params nil}
@@ -230,7 +232,7 @@
                        :forms         {}}
 
    :cloud-entry-point nil
-   
+
    :search            {:collection-name "session"
                        :query-params    {:$first       1
                                          :$last        20
@@ -244,7 +246,10 @@
                        :fields          {:available ["id"]
                                          :selected  ["id"]}
 
-                       :completed?      true}
+                       :completed?      true
+
+                       :show-modal?     false
+                       :descriptions    nil}
 
    :credential        {:show-modal?     false
                        :descriptions    nil

@@ -7,13 +7,16 @@
     [sixsq.slipstream.webui.components.core :refer [column]]
     [reagent.core :as reagent]
     [re-frame.core :refer [subscribe dispatch]]
-    [sixsq.slipstream.webui.utils :as utils]
+
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
-    [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.widget.history.utils :as history]
-    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]))
+    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
+    [sixsq.slipstream.webui.utils-forms :as form-utils]
+    [taoensso.timbre :as log]))
 
 (defn format-operations
   [ops]
@@ -85,7 +88,7 @@
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:search-listing])
         aggregations (subscribe [:webui.cimi/aggregations])
-        collection-name (subscribe [:search-collection-name])
+        collection-name (subscribe [:webui.cimi/collection-name])
         selected-fields (subscribe [:search-selected-fields])
         cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
@@ -123,41 +126,40 @@
       [v-box
        :gap "1ex"
        :children [[h-box
-                   :gap "3px"
-                   :children [[input-text
-                               :model first-value
-                               :placeholder (@tr [:first])
-                               :width "75px"
-                               :change-on-blur? true
-                               :on-change (fn [v]
-                                            (reset! first-value v)
-                                            (dispatch [:set-search-first v]))]
-                              [input-text
-                               :model last-value
-                               :placeholder (@tr [:last])
-                               :width "75px"
-                               :change-on-blur? true
-                               :on-change (fn [v]
-                                            (reset! last-value v)
-                                            (dispatch [:set-search-last v]))]
+                   :gap "1ex"
+                   :justify :between
+                   :children [[h-box
+                               :gap "1ex"
+                               :children [[input-text
+                                           :model first-value
+                                           :placeholder (@tr [:first])
+                                           :width "8ex"
+                                           :change-on-blur? true
+                                           :on-change (fn [v]
+                                                        (reset! first-value v)
+                                                        (dispatch [:set-search-first v]))]
+                                          [input-text
+                                           :model last-value
+                                           :placeholder (@tr [:last])
+                                           :width "8ex"
+                                           :change-on-blur? true
+                                           :on-change (fn [v]
+                                                        (reset! last-value v)
+                                                        (dispatch [:set-search-last v]))]]]
                               [input-text
                                :model filter-value
                                :placeholder (@tr [:filter])
-                               :width "300px"
+                               :width "51ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! filter-value v)
-                                            (dispatch [:set-search-filter v]))]
-                              [button
-                               :class "btn btn-primary"
-                               :label (@tr [:search])
-                               :on-click #(dispatch [:search])]]]
+                                            (dispatch [:set-search-filter v]))]]]
                   [h-box
-                   :gap "3px"
+                   :gap "1ex"
                    :children [[input-text
                                :model orderby-value
                                :placeholder (@tr [:order])
-                               :width "200px"
+                               :width "25ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! orderby-value v)
@@ -165,7 +167,7 @@
                               [input-text
                                :model select-value
                                :placeholder (@tr [:select])
-                               :width "200px"
+                               :width "25ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! select-value v)
@@ -173,7 +175,7 @@
                               [input-text
                                :model aggregation-value
                                :placeholder (@tr [:aggregation])
-                               :width "200px"
+                               :width "25ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! aggregation-value v)
@@ -197,14 +199,14 @@
                                           (reset! show? false)
                                           (dispatch [:set-selected-fields @selections]))
                      :child [v-box
-                             :width "350px"
+                             :width "40ex"
                              :gap "1ex"
                              :children [[selection-list
                                          :model selections
                                          :choices available-fields
                                          :multi-select? true
                                          :disabled? false
-                                         :height "200px"
+                                         :height "30ex"
                                          :on-change #(reset! selections %)]
                                         [h-box
                                          :justify :between
@@ -223,22 +225,92 @@
   []
   (let [tr (subscribe [:webui.i18n/tr])
         cep (subscribe [:webui.main/cloud-entry-point])
-        selected-id (subscribe [:search-collection-name])]
+        selected-id (subscribe [:webui.cimi/collection-name])]
     (fn []
       [h-box
        :children [[single-dropdown
                    :model selected-id
                    :placeholder (@tr [:resource-type])
-                   :width "250px"
+                   :width "30ex"
                    :choices (vec (map (fn [k] {:id k :label k}) (sort (vals (:collection-href @cep)))))
                    :on-change (fn [id]
+                                (dispatch [:evt.webui.cimi/clear-cache])
                                 (history/navigate (str "cimi/" (name id))))]]])))
 
-(defn select-controls []
-  [h-box
-   :gap "3px"
-   :children [[cloud-entry-point]
-              [select-fields]]])
+(defn template-resource-key
+  "Returns the collection keyword for the template resource associated with
+   the given collection. If there is no template resource, then nil is
+   returned."
+  [cloud-entry-point collection-href]
+  (when-let [href->key (:collection-key cloud-entry-point)]
+    (href->key (str collection-href "-template"))))
+
+(defn resource-add-form
+  []
+  (let [show? (subscribe [:webui.cimi/show-modal?])
+        collection-name (subscribe [:webui.cimi/collection-name])
+        cloud-entry-point (subscribe [:webui.main/cloud-entry-point])
+        descriptions-vector-atom (subscribe [:webui.cimi/descriptions-vector])]
+    (fn []
+      (let [tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
+        (when (and tpl-resource-key (empty? @descriptions-vector-atom))
+          (log/info "retrieving templates for" tpl-resource-key)
+          (dispatch [:evt.webui.cimi/get-templates tpl-resource-key]))
+
+        (when @show?
+          [modal-panel
+           :backdrop-on-click #(dispatch [:evt.webui.cimi/hide-modal])
+           :child (cond
+                    (and tpl-resource-key (seq @descriptions-vector-atom))
+                    [form-utils/credential-form-container
+                     :descriptions descriptions-vector-atom
+                     :on-cancel #(dispatch [:evt.webui.cimi/hide-modal])
+                     :on-submit (fn [data]
+                                  (dispatch [:evt.webui.cimi/create-resource data])
+                                  (dispatch [:evt.webui.cimi/hide-modal]))]
+
+                    (and tpl-resource-key (empty? @descriptions-vector-atom))
+                    [throbber]
+
+                    :else
+                    [label :label "CREATE EDITOR"])])))))
+
+(defn can-add?
+  [ops]
+  (->> ops
+       (map :rel)
+       (filter #(= "add" %))
+       not-empty))
+
+(defn create-button
+  []
+  (let [tr (subscribe [:webui.i18n/tr])
+        search-results (subscribe [:search-listing])]
+    (fn []
+      (when (can-add? (-> @search-results :operations))
+        [button
+         :class "btn btn-primary"
+         :label (@tr [:create])
+         :on-click #(dispatch [:evt.webui.cimi/show-modal])]))))
+
+(defn select-controls
+  []
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn []
+      [v-box
+       :gap "1ex"
+       :children [[h-box
+                   :gap "1ex"
+                   :children [[cloud-entry-point]
+                              [select-fields]]]
+                  [h-box
+                   :gap "1ex"
+                   :children [[button
+                               :class "btn btn-primary"
+                               :label (@tr [:search])
+                               :on-click #(dispatch [:search])]
+                              [create-button]
+                              [resource-add-form]]]]])))
 
 (defn control-bar []
   [h-box
@@ -271,7 +343,7 @@
   []
   (let [cep (subscribe [:webui.main/cloud-entry-point])
         path (subscribe [:webui.main/nav-path])
-        data (subscribe [:resource-data])]
+        data (subscribe [:webui.cimi/resource-data])]
     (fn []
       (let [[_ resource-type resource-id] @path]
         (dispatch [:set-collection-name resource-type]))

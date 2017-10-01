@@ -8,7 +8,6 @@
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
-    [sixsq.slipstream.webui.panel.credential.views :as credential-views]
     [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.empty.views :as empty-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
@@ -46,8 +45,7 @@
                   (doall
                     (for [[label-kw url] [[:app "application"]
                                           [:deployment "deployment"]
-                                          [:cimi "cimi"]
-                                          [:credential "credential"]]]
+                                          [:cimi "cimi"]]]
                       ^{:key (name label-kw)} [panel-link label-kw url]))]])))
 
 (defn page-header []

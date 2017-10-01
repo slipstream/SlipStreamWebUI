@@ -58,6 +58,15 @@
       (when-not (instance? js/Error credential-templates)
         (map (partial prepare-session-template baseURI) credential-templates)))))
 
+(defn get-templates
+  [client collection-keyword]
+  (go
+    (let [baseURI (:baseURI (<! (cimi/cloud-entry-point client)))
+          collection-response (<! (cimi/search client collection-keyword))]
+      (when-not (instance? js/Error collection-response)
+        (->> (get collection-response collection-keyword)
+             (map (partial prepare-session-template baseURI)))))))
+
 (defn split-form-data
   [form-data]
   (let [common-attrs #{:name :description :properties}

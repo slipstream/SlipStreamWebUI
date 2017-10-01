@@ -2,24 +2,26 @@
   (:require
     [sixsq.slipstream.webui.db :as db]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v dispatch]]
+    [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
     [clojure.set :as set]
     [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [sixsq.slipstream.webui.panel.credential.utils :as panel-utils]))
 
 (reg-event-db
   :set-resource-data
   [db/debug-interceptors trim-v]
   (fn [db [data]]
-    (assoc db :resource-data data)))
+    (assoc-in db [:search :cache :resource] data)))
 
 (reg-event-db
   :clear-resource-data
   [db/debug-interceptors]
   (fn [db _]
-    (assoc db :resource-data nil)))
+    (assoc-in db [:search :cache :resource] nil)))
 
 (reg-event-db
   :show-search-results
@@ -148,3 +150,60 @@
       cofx
       (let [cimi-client (-> cofx :db :clients :cimi)]
         (assoc cofx :fx.webui.main.cimi/edit [cimi-client resource-id data u/dispatch-edit-alert])))))
+
+(reg-event-db
+  :evt.webui.cimi/clear-cache
+  [db/debug-interceptors trim-v]
+  (fn [db [description]]
+    (-> db
+        (assoc-in [:search :descriptions] nil)              ;; FIXME: should be in cache
+        (assoc-in [:search :cache :aggregations] nil)
+        (assoc-in [:search :cache :resource] nil)
+        (assoc-in [:search :cache :resources] nil))))
+
+;;
+;; events related to resource creation
+;;
+
+(reg-event-db
+  :evt.webui.cimi/set-description
+  [db/debug-interceptors trim-v]
+  (fn [db [description]]
+    (let [description-map {(:id description) description}]
+      (update-in db [:search :descriptions] merge description-map))))
+
+(reg-event-fx
+  :evt.webui.cimi/get-description
+  [db/debug-interceptors trim-v]
+  (fn [cofx [template]]
+    (assoc cofx :fx.webui.cimi/get-description [template])))
+
+(reg-event-fx
+  :evt.webui.cimi/get-templates
+  [db/debug-interceptors trim-v]
+  (fn [cofx [collection-keyword]]
+    (log/error "EVT GET TEMPLATES" collection-keyword)
+    (when-let [client (-> cofx :db :clients :cimi)]
+      (log/error "EVT GET TEMPLATES" "DISPATCH")
+      (assoc cofx :fx.webui.cimi/get-templates [client collection-keyword]))))
+
+(reg-event-fx
+  :evt.webui.cimi/create-resource
+  [db/debug-interceptors trim-v]
+  (fn [cofx [form-data]]
+    (when-let [cimi-client (-> cofx :db :clients :cimi)]
+      (let [request-body (panel-utils/create-template form-data)]
+        (assoc cofx :fx.webui.cimi/create-resource [cimi-client request-body])))))
+
+(reg-event-db
+  :evt.webui.cimi/hide-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:search :show-modal?] false)))
+
+(reg-event-db
+  :evt.webui.cimi/show-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:search :show-modal?] true)))
+
