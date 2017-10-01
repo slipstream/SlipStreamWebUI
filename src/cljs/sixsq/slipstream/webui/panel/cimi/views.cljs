@@ -1,10 +1,11 @@
 (ns sixsq.slipstream.webui.panel.cimi.views
   (:require
+    [clojure.pprint :refer [pprint]]
+    [clojure.string :as str]
     [re-com.core :refer [h-box v-box box gap input-text button label modal-panel throbber
                          single-dropdown hyperlink scroller selection-list title]]
     [sixsq.slipstream.webui.components.core :refer [column]]
     [reagent.core :as reagent]
-    [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.events]
@@ -34,6 +35,12 @@
                          (dispatch [:set-resource-data entry])
                          (history/navigate (str "cimi/" v)))]]))
 
+(defn field-selector
+  [field]
+  (let [ks (map keyword (str/split field #"/"))]
+    (fn [m]
+      (get-in m ks))))
+
 (defn vertical-data-table [selected-fields entries]
   [h-box
    :class "webui-column-table"
@@ -44,7 +51,7 @@
                                           :key-fn :id
                                           :value-fn (if (= "id" selected-field)
                                                       id-selector-formatter
-                                                      (keyword selected-field))
+                                                      (field-selector selected-field) #_(keyword selected-field))
                                           :on-remove #(dispatch [:remove-selected-field selected-field])
                                           :header selected-field
                                           :class "webui-column"
@@ -254,10 +261,10 @@
                               n (count (get resources collection-key []))]
                           [title
                            :level :level3
-                           :label (str "Results: " n " / " total)])
+                           :label (str "Results: " n "/" total)])
                         [title
                          :level :level3
-                         :label "Results: ?? / ??"])
+                         :label "Results: ?/?"])
                       [gap :size "1"]]])))))
 
 (defn cimi-resource
