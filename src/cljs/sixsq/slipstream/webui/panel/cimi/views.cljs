@@ -266,6 +266,7 @@
                      :descriptions descriptions-vector-atom
                      :on-cancel #(dispatch [:evt.webui.cimi/hide-modal])
                      :on-submit (fn [data]
+                                  ;; FIXME: This must provide the type of resource!
                                   (dispatch [:evt.webui.cimi/create-resource data])
                                   (dispatch [:evt.webui.cimi/hide-modal]))]
 

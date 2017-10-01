@@ -147,14 +147,14 @@
 (s/def :cimi.add/show-modal? boolean?)
 (s/def :cimi.add/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
 
-(s/def ::search (only-keys :req-un [:cimi.search/collection-name
-                                    :cimi.search/query-params
-                                    :cimi.search/cache
-                                    :cimi.search/fields
-                                    :cimi.search/completed?
+(s/def :cimi/search (only-keys :req-un [:cimi.search/collection-name
+                                        :cimi.search/query-params
+                                        :cimi.search/cache
+                                        :cimi.search/fields
+                                        :cimi.search/completed?
 
-                                    :cimi.add/show-modal?
-                                    :cimi.add/descriptions]))
+                                        :cimi.add/show-modal?
+                                        :cimi.add/descriptions]))
 
 ;;
 ;; navigation information
@@ -164,19 +164,6 @@
 (s/def :webui/navigation (only-keys :req-un [:webui.navigation/path
                                              :webui.navigation/query-params]))
 
-;;
-;; simple credential template schema (TEMPORARY)
-;;
-(s/def :webui.credential/show-modal? boolean?)
-(s/def :webui.credential/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
-(s/def :webui/credential (only-keys :req-un [:webui.credential/show-modal?
-                                             :webui.credential/descriptions
-
-                                             :cimi.search/collection-name
-                                             :cimi.search/query-params
-                                             :cimi.search/cache
-                                             :cimi.search/fields
-                                             :cimi.search/completed?]))
 
 ;;
 ;; internationalization parameters
@@ -194,8 +181,7 @@
                                 ::runs-data ::runs-params
                                 ::modules-data
                                 :webui.authn/authn
-                                ::search
-                                :webui/credential]))
+                                :cimi/search]))
 
 ;;
 ;; initial database value
@@ -249,23 +235,4 @@
                        :completed?      true
 
                        :show-modal?     false
-                       :descriptions    nil}
-
-   :credential        {:show-modal?     false
-                       :descriptions    nil
-
-                       :collection-name "credential"
-                       :query-params    {:$first       1
-                                         :$last        20
-                                         :$filter      nil
-                                         :$orderby     nil
-                                         :$aggregation nil
-                                         :$select      nil}
-                       :cache           {:aggregations nil
-                                         :resource     nil
-                                         :resources    nil}
-                       :fields          {:available ["id"]
-                                         :selected  ["id"]}
-
-                       :completed?      true
-                       }})
+                       :descriptions    nil}})

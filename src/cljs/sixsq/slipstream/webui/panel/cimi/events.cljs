@@ -1,14 +1,12 @@
 (ns sixsq.slipstream.webui.panel.cimi.events
   (:require
-    [sixsq.slipstream.webui.db :as db]
+    [clojure.string :as str]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v dispatch]]
+    [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
-    [clojure.set :as set]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]
     [sixsq.slipstream.webui.panel.credential.utils :as panel-utils]))
 
 (reg-event-db
@@ -182,9 +180,7 @@
   :evt.webui.cimi/get-templates
   [db/debug-interceptors trim-v]
   (fn [cofx [collection-keyword]]
-    (log/error "EVT GET TEMPLATES" collection-keyword)
     (when-let [client (-> cofx :db :clients :cimi)]
-      (log/error "EVT GET TEMPLATES" "DISPATCH")
       (assoc cofx :fx.webui.cimi/get-templates [client collection-keyword]))))
 
 (reg-event-fx

@@ -19,9 +19,7 @@
   :fx.webui.cimi/get-templates
   (fn [[client collection-keyword]]
     (go
-      (log/error "FX GET TEMPLATES")
       (when-let [results (<! (utils/get-templates client collection-keyword))]
-        (log/error "FX GET TEMPLATES" (with-out-str (cljs.pprint/pprint results)))
         (doseq [result results]
           (dispatch [:evt.webui.cimi/get-description result]))))))
 
@@ -31,6 +29,7 @@
 (defn other-fields-hiccup [response]
   (into [:div] (vec (map format-field (remove #(contains? #{:status :message :resource-id} (first %)) response)))))
 
+;; FIXME: Problem here with hardcoded credentials!  All creation requests post to :credentials!
 (reg-fx
   :fx.webui.cimi/create-resource
   (fn [[client request-body]]

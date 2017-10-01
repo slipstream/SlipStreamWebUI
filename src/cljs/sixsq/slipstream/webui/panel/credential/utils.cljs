@@ -50,14 +50,6 @@
      :description  description
      :describe-url describe-url}))
 
-(defn extract-template-info
-  [client]
-  (go
-    (let [baseURI (:baseURI (<! (cimi/cloud-entry-point client)))
-          credential-templates (:credentialTemplates (<! (cimi/search client :credentialTemplates)))]
-      (when-not (instance? js/Error credential-templates)
-        (map (partial prepare-session-template baseURI) credential-templates)))))
-
 (defn get-templates
   [client collection-keyword]
   (go
@@ -74,6 +66,7 @@
         template-map (into {} (remove #(common-attrs (first %)) form-data))]
     [common-map template-map]))
 
+;; FIXME: why is :credentialTemplate hardcoded?
 (defn create-template
   [form-data]
   (let [[common-map template-map] (split-form-data form-data)]
