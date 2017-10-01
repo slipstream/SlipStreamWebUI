@@ -24,4 +24,4 @@
                                :item
                                (map :name)))]
         (log/info (count module-kids) "returned for url" url)
-        (dispatch [:set-modules-data (assoc module-meta :children module-kids)])))))
+        (dispatch [:evt.webui.app/set-modules-data (assoc module-meta :children module-kids)])))))

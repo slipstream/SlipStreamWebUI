@@ -188,4 +188,3 @@
   [db/debug-interceptors trim-v]
   (fn [db [_]]
     (assoc-in db [:authn :show-modal?] false)))
-

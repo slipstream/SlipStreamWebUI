@@ -132,9 +132,7 @@
 
 (defn internal-or-api-key
   [[_ methods]]
-  (log/error (with-out-str (cljs.pprint/pprint (first methods))))
   (let [authn-method (:authn-method (first methods))]
-    (log/error "authn-method:" authn-method)
     (#{"internal" "api-key"} authn-method)))
 
 (defn login-form-container
@@ -152,7 +150,6 @@
         neg-margin (str "0 3ex -" wrapped-row-spacing " 3ex")]
     (fn []
       (let [method-groups (order-and-group @methods)
-            _ (log/error (with-out-str (cljs.pprint/pprint method-groups)))
             internals (filter internal-or-api-key method-groups)
             externals (remove internal-or-api-key method-groups)
             progress (if (zero? @total) 0 (int (* 100. (/ @count @total))))]

@@ -38,7 +38,7 @@
 
 (def history
   (doto (Html5History. js/window (create-transformer))
-    (events/listen EventType.NAVIGATE #(secretary/dispatch! (.-token %)))
+    (events/listen EventType.NAVIGATE (fn [evt] (secretary/dispatch! (.-token evt))))
     (.setUseFragment false)
     (.setEnabled false)))
 

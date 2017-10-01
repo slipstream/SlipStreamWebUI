@@ -2,7 +2,7 @@
   (:require
     [sixsq.slipstream.webui.components.core :refer [column]]
     [clojure.string :as str]
-    [re-com.core :refer [box h-box v-box border hyperlink]]
+    [re-com.core :refer [box h-box v-box border hyperlink throbber]]
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.panel.app.effects]
     [sixsq.slipstream.webui.panel.app.events]
@@ -15,7 +15,7 @@
   (when module
     [hyperlink
      :label module
-     :on-click #(dispatch [:push-breadcrumb module])]))
+     :on-click #(dispatch [:evt.webui.breadcrumbs/push-breadcrumb module])]))
 
 (defn format-meta [module-meta]
   (let [data (sort-by first (dissoc module-meta :logoLink))]
@@ -31,7 +31,7 @@
                            :children [[column
                                        :model data
                                        :key-fn first
-                                       :value-fn first
+                                       :value-fn (comp name first)
                                        :value-class "webui-row-header"]
                                       [column
                                        :model data
@@ -49,15 +49,18 @@
 (defn module-resource []
   (let [data (subscribe [:modules-data])]
     (fn []
-      (let [module-meta (dissoc @data :children)
-            module-children (:children @data)]
+      (if @data
+        (let [module-meta (dissoc @data :children)
+              module-children (:children @data)]
+          [v-box
+           :gap "3ex"
+           :children [[format-meta module-meta]
+                      [v-box
+                       :children (doall (map format-module module-children))]]])
         [v-box
-         :gap "3ex"
-         :children [[format-meta module-meta]
-                    [v-box
-                     :children (doall (map format-module module-children))]]]))))
+         :children [[throbber]]]))))
 
 (defmethod resource/render "application"
   [path query-params]
-  (dispatch [:modules-search])
+  (dispatch [:evt.webui.app/modules-search])
   [module-resource])

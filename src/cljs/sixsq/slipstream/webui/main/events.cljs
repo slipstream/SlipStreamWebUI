@@ -8,8 +8,7 @@
     [sixsq.slipstream.webui.main.effects :as effects]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
     [sixsq.slipstream.webui.utils :as utils]
-    [sixsq.slipstream.webui.panel.cimi.utils :as u]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.panel.cimi.utils :as u]))
 
 (reg-event-fx
   :evt.webui.main/initialize-db
@@ -66,22 +65,15 @@
 (reg-event-db
   :evt.webui.main/set-resource-path
   [db/debug-interceptors trim-v]
-  (fn [db [path]]
-    (assoc-in db [:navigation :path] (utils/parse-resource-path path))))
+  (fn [db [path query-params]]
+    (cond-> (assoc-in db [:navigation :path] (utils/parse-resource-path path))
+            query-params (assoc-in [:navigation :query-params] query-params))))
 
 (reg-event-db
   :evt.webui.main/set-resource-path-vec
   [db/debug-interceptors trim-v]
   (fn [db [path]]
     (assoc-in db [:navigation :path] path)))
-
-(reg-event-db
-  :set-resource
-  [db/debug-interceptors trim-v]
-  (fn [db [path query-params]]
-    (-> db
-        (assoc-in [:navigation :path] path)
-        (assoc-in [:navigation :query-params] query-params))))
 
 (reg-event-fx
   :evt.webui.main/set-host-theme

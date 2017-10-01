@@ -6,16 +6,19 @@
     [taoensso.timbre :as log]))
 
 (reg-event-db
-  :set-modules-data
+  :evt.webui.app/set-modules-data
   [db/debug-interceptors trim-v]
   (fn [db [data]]
     (assoc db :modules-data data)))
 
 (reg-event-fx
-  :modules-search
+  :evt.webui.app/modules-search
   [db/debug-interceptors]
-  (fn [{{:keys [clients resource-path]} :db :as cofx} _]
-    (let [client (:cimi clients)
+  (fn [cofx _]
+    (let [resource-path (-> cofx :db :navigation :path)
+          client (-> cofx :db :clients :cimi)
           module-href (some->> resource-path rest seq (str/join "/"))]
-      (log/info "searching modules for " module-href)
-      (assoc cofx :fx.webui.app/search [client module-href]))))
+      (log/info "searching modules for" module-href)
+      (-> cofx
+          (assoc-in [:db :modules-data] nil)
+          (assoc :fx.webui.app/search [client module-href])))))

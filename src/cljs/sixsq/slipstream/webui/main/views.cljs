@@ -34,7 +34,7 @@
       [button
        :class "btn-link webui-nav-link"
        :label (@tr [label-kw])
-       :on-click #(history/navigate url)])))
+       :on-click #(dispatch [:evt.webui.history/navigate url])])))
 
 (defn panel-controls []
   (let [tr (subscribe [:webui.i18n/tr])
