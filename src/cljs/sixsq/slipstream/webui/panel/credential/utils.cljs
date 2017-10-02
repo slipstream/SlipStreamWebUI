@@ -66,8 +66,16 @@
         template-map (into {} (remove #(common-attrs (first %)) form-data))]
     [common-map template-map]))
 
-;; FIXME: why is :credentialTemplate hardcoded?
+(defn collection-key->template-key
+  [collection-keyword]
+  (keyword (str (->> collection-keyword
+                     name
+                     (re-matches #"^(.*)s$")
+                     second)
+                "Template")))
+
 (defn create-template
-  [form-data]
-  (let [[common-map template-map] (split-form-data form-data)]
-    (assoc common-map :credentialTemplate template-map)))
+  [resource-key form-data]
+  (let [[common-map template-map] (split-form-data form-data)
+        template-keyword (collection-key->template-key resource-key)]
+    (assoc common-map template-keyword template-map)))

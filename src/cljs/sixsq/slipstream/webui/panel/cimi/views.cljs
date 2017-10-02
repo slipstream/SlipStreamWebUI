@@ -252,7 +252,8 @@
         cloud-entry-point (subscribe [:webui.main/cloud-entry-point])
         descriptions-vector-atom (subscribe [:webui.cimi/descriptions-vector])]
     (fn []
-      (let [tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
+      (let [resource-key (get (:collection-key @cloud-entry-point) @collection-name)
+            tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
         (when (and tpl-resource-key (empty? @descriptions-vector-atom))
           (log/info "retrieving templates for" tpl-resource-key)
           (dispatch [:evt.webui.cimi/get-templates tpl-resource-key]))
@@ -266,15 +267,14 @@
                      :descriptions descriptions-vector-atom
                      :on-cancel #(dispatch [:evt.webui.cimi/hide-modal])
                      :on-submit (fn [data]
-                                  ;; FIXME: This must provide the type of resource!
-                                  (dispatch [:evt.webui.cimi/create-resource data])
+                                  (dispatch [:evt.webui.cimi/create-resource resource-key data])
                                   (dispatch [:evt.webui.cimi/hide-modal]))]
 
                     (and tpl-resource-key (empty? @descriptions-vector-atom))
                     [throbber]
 
                     :else
-                    [label :label "CREATE EDITOR"])])))))
+                    [label :label "Not implemented yet."])])))))
 
 (defn can-add?
   [ops]

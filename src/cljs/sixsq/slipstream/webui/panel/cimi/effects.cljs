@@ -29,12 +29,12 @@
 (defn other-fields-hiccup [response]
   (into [:div] (vec (map format-field (remove #(contains? #{:status :message :resource-id} (first %)) response)))))
 
-;; FIXME: Problem here with hardcoded credentials!  All creation requests post to :credentials!
 (reg-fx
   :fx.webui.cimi/create-resource
-  (fn [[client request-body]]
+  (fn [[client resource-key request-body]]
     (go
-      (let [{:keys [status message resource-id] :as response} (<! (cimi/add client :credentials request-body))]
+      (log/error "FX CREATE RESOURCE" resource-key (with-out-str (cljs.pprint/pprint request-body)))
+      (let [{:keys [status message resource-id] :as response} (<! (cimi/add client resource-key request-body))]
         (let [other-fields (other-fields-hiccup response)
               alert-type (if (= 201 status) :info :danger)
               heading (if (= 201 status) "Success" "Failure")

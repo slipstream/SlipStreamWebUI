@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
-    [sixsq.slipstream.webui.panel.credential.utils :as panel-utils]))
+    [sixsq.slipstream.webui.panel.credential.utils :as panel-utils]
+    [taoensso.timbre :as log]))
 
 (reg-event-db
   :set-resource-data
@@ -153,6 +154,7 @@
   :evt.webui.cimi/clear-cache
   [db/debug-interceptors trim-v]
   (fn [db [description]]
+    (log/error "CLEARING SEARCH CACHE")
     (-> db
         (assoc-in [:search :descriptions] nil)              ;; FIXME: should be in cache
         (assoc-in [:search :cache :aggregations] nil)
@@ -186,10 +188,11 @@
 (reg-event-fx
   :evt.webui.cimi/create-resource
   [db/debug-interceptors trim-v]
-  (fn [cofx [form-data]]
+  (fn [cofx [resource-key form-data]]
     (when-let [cimi-client (-> cofx :db :clients :cimi)]
-      (let [request-body (panel-utils/create-template form-data)]
-        (assoc cofx :fx.webui.cimi/create-resource [cimi-client request-body])))))
+      (let [request-body (panel-utils/create-template resource-key form-data)]
+        (log/error "EVT CREATE RESOURCE" resource-key (with-out-str (cljs.pprint/pprint form-data)))
+        (assoc cofx :fx.webui.cimi/create-resource [cimi-client resource-key request-body])))))
 
 (reg-event-db
   :evt.webui.cimi/hide-modal
