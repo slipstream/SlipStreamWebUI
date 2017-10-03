@@ -32,4 +32,4 @@
          (fn [db _] (-> db :search :show-modal?)))
 
 (reg-sub :webui.cimi/descriptions-vector
-         (fn [db _] (->> db :search :descriptions vals (sort :id))))
+         (fn [db _] (->> db :search :cache :descriptions vals (sort :id))))

@@ -155,11 +155,7 @@
   [db/debug-interceptors trim-v]
   (fn [db [description]]
     (log/error "CLEARING SEARCH CACHE")
-    (-> db
-        (assoc-in [:search :descriptions] nil)              ;; FIXME: should be in cache
-        (assoc-in [:search :cache :aggregations] nil)
-        (assoc-in [:search :cache :resource] nil)
-        (assoc-in [:search :cache :resources] nil))))
+    (assoc-in db [:search :cache] nil)))
 
 ;;
 ;; events related to resource creation
@@ -170,7 +166,7 @@
   [db/debug-interceptors trim-v]
   (fn [db [description]]
     (let [description-map {(:id description) description}]
-      (update-in db [:search :descriptions] merge description-map))))
+      (update-in db [:search :cache :descriptions] merge description-map))))
 
 (reg-event-fx
   :evt.webui.cimi/get-description

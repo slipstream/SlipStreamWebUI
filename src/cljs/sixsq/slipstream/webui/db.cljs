@@ -126,12 +126,14 @@
                                                      :cimi.search.query-params/$aggregation
                                                      :cimi.search.query-params/$select]))
 
-(s/def :cimi.search.cache/aggregations (s/nilable any?))
-(s/def :cimi.search.cache/resource (s/nilable any?))
-(s/def :cimi.search.cache/resources (s/nilable any?))
-(s/def :cimi.search/cache (only-keys :req-un [:cimi.search.cache/aggregations
-                                              :cimi.search.cache/resource
-                                              :cimi.search.cache/resources]))
+(s/def :cimi.search.cache/aggregations any?)
+(s/def :cimi.search.cache/descriptions (s/map-of string? (s/map-of keyword? any?)))
+(s/def :cimi.search.cache/resource any?)
+(s/def :cimi.search.cache/resources any?)
+(s/def :cimi.search/cache (s/nilable (only-keys :opt-un [:cimi.search.cache/aggregations
+                                                         :cimi.search.cache/descriptions
+                                                         :cimi.search.cache/resource
+                                                         :cimi.search.cache/resources])))
 
 (s/def :cimi.search.fields/available (s/coll-of string? :kind vector?))
 (s/def :cimi.search.fields/selected (s/coll-of string? :kind vector?))
@@ -144,8 +146,7 @@
 (s/def ::label string?)
 (s/def ::choice (only-keys :req-un [::id ::label]))
 
-(s/def :cimi.add/show-modal? boolean?)
-(s/def :cimi.add/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
+(s/def :cimi.search.add/show-modal? boolean?)
 
 (s/def :cimi/search (only-keys :req-un [:cimi.search/collection-name
                                         :cimi.search/query-params
@@ -153,8 +154,7 @@
                                         :cimi.search/fields
                                         :cimi.search/completed?
 
-                                        :cimi.add/show-modal?
-                                        :cimi.add/descriptions]))
+                                        :cimi.search.add/show-modal?]))
 
 ;;
 ;; navigation information
@@ -226,13 +226,10 @@
                                          :$orderby     nil
                                          :$aggregation nil
                                          :$select      nil}
-                       :cache           {:aggregations nil
-                                         :resource     nil
-                                         :resources    nil}
+                       :cache           nil
                        :fields          {:available ["id"]
                                          :selected  ["id"]}
 
                        :completed?      true
 
-                       :show-modal?     false
-                       :descriptions    nil}})
+                       :show-modal?     false}})

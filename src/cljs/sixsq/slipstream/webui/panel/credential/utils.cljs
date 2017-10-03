@@ -7,7 +7,8 @@
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.impl.utils.http-async :as http]
     [sixsq.slipstream.client.impl.utils.json :as json]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 (defn extract-describe-action
   [{:keys [rel href] :as op}]
@@ -40,14 +41,18 @@
               (assoc :params-desc (filter-params-desc (dissoc params-desc :acl)))
               (dissoc :describe-url)))))))
 
+(defn id-without-type
+  [id]
+  (second (str/split id #"/")))
+
 (defn prepare-session-template
   [baseURI {:keys [id name description operations] :as tpl}]
   (when-let [describe-url (->> operations
                                extract-describe-url
                                (absolute-url baseURI))]
     {:id           id
-     :label        name
-     :description  description
+     :label        (or name (id-without-type id) id)
+     :description  (or description (id-without-type id) id)
      :describe-url describe-url}))
 
 (defn get-templates
