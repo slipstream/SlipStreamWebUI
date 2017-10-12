@@ -101,6 +101,7 @@
 ;;
 (deftask production []
          (task-options! cljs {:optimizations    :advanced
+                              :source-map       true
                               :compiler-options {:language-in     :ecmascript5
                                                  :parallel-build  true
                                                  :closure-defines {'sixsq.slipstream.webui.defines/LOGGING_LEVEL "warn"
