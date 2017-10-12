@@ -202,7 +202,8 @@
                                          :height "30ex"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :between
+                                         :justify :end
+                                         :gap "1ex"
                                          :children [[button
                                                      :label (@tr [:cancel])
                                                      :on-click (fn []
@@ -284,7 +285,8 @@
                                            :text text
                                            :on-change #(reset! text %)]
                                           [h-box
-                                           :justify :between
+                                           :justify :end
+                                           :gap "1ex"
                                            :children [[button
                                                        :label (@tr [:cancel])
                                                        :on-click (fn []
@@ -345,13 +347,14 @@
               [search-header]]])
 
 (defn results-bar []
-  (let [search (subscribe [:search])
+  (let [tr (subscribe [:webui.i18n/tr])
+        search (subscribe [:search])
         cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
       (let [{:keys [completed? collection-name] {:keys [resources]} :cache} @search]
         (if (instance? js/Error resources)
           [h-box
-           :children [[label :label "ERROR"]]]
+           :children [[label :label (@tr [:error])]]]
           [h-box
            :children [(if resources
                         (let [collection-key (get (:collection-key @cep) collection-name)
@@ -359,10 +362,10 @@
                               n (count (get resources collection-key []))]
                           [title
                            :level :level3
-                           :label (str "Results: " n "/" total)])
+                           :label (str (@tr [:results]) ": " n "/" total)])
                         [title
                          :level :level3
-                         :label "Results: ?/?"])
+                         :label (str (@tr [:results]) ": ?/?")])
                       [gap :size "1"]]])))))
 
 (defn cimi-resource

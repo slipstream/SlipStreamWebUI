@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.doc-render-utils
   (:require
     [re-com.core :refer [h-box v-box box label title button modal-panel p scroller gap]]
-    [re-frame.core :refer [dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [taoensso.timbre :as log]
     [reagent.core :as reagent]
     [cljsjs.codemirror]
@@ -13,7 +13,8 @@
 (defn action-buttons
   [confirm-label cancel-label on-confirm on-cancel]
   [h-box
-   :justify :between
+   :justify :end
+   :gap "1ex"
    :children [[button
                :label cancel-label
                :class "btn btn-default"
@@ -61,12 +62,13 @@
   "Creates an edit that will bring up an edit dialog and will save the
    modified resource when saved."
   [data action-fn]
-  (let [text (reagent/atom "")]
+  (let [tr (subscribe [:webui.i18n/tr])
+        text (reagent/atom "")]
     (fn [data action-fn]
       (reset! text (.stringify js/JSON (clj->js data) nil 2))
       [action-button
-       "edit"
-       (str "Editing " (:id data))
+       (@tr [:update])
+       (str (@tr [:editing]) " " (:id data))
        [scroller
         :min-width "80ex"
         :min-height "10em"
@@ -88,23 +90,26 @@
   "Creates a button that will bring up a delete dialog and will execute the
    delete when confirmed."
   [data action-fn]
-  [action-button
-   "delete"
-   "Delete resource?"
-   [p "The resource identifier is " [:strong (:id data)] ". "
-    "Delete operations " [:strong "cannot"] " be undone."]
-   action-fn
-   (constantly nil)])
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn [data action-fn]
+      [action-button
+       (@tr [:delete])
+       (@tr [:delete-resource])
+       [p (@tr [:delete-resource-msg] [(:id data)])]
+       action-fn
+       (constantly nil)])))
 
 (defn other-button
   "Creates a button that will bring up a dialog to confirm the given action."
   [label data action-fn]
-  [action-button
-   label
-   (str "Execute action " label "?")
-   [p "Confirm executing action " [:strong label] " on " [:strong (:id data)] "."]
-   action-fn
-   (constantly nil)])
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn [label data action-fn]
+      [action-button
+       label
+       (@tr [:execute-action] [label])
+       [p (@tr [:execute-action-msg] [label (:id data)])]
+       action-fn
+       (constantly nil)])))
 
 (defn operation-name [op-uri]
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
