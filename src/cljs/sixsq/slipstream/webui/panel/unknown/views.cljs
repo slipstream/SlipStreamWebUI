@@ -11,7 +11,7 @@
 (defn unknown-resource
   []
   (let [tr (subscribe [:webui.i18n/tr])
-        resource-path (subscribe [:resource-path])]
+        resource-path (subscribe [:webui.main/nav-path])]
     (fn []
       (let [path (str "/" (str/join "/" @resource-path))]
         [v-box

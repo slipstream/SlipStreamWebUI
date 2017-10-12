@@ -18,38 +18,6 @@
       (dissoc params :$filter)
       params)))
 
-(defn coerce-pos-int [s]
-  (when-let [v (str->int s)]
-    (when (pos? v)
-      v)))
-
-(defn coerse-filter [s]
-  (when-not (str/blank? s)
-    s))
-
-(defn remove-nil-vals
-  [m]
-  (into {} (remove (comp nil? second) m)))
-
-(def ^:const valid-query-params
-  #{:$first :$last :$filter :$orderby :$aggregation :$select})
-
-(defn normalize-query-params [{:keys [:$first :$last :$filter :$orderby :$aggregation :$select] :as params}]
-  (let [$first (str->int $first)
-        $last (str->int $last)
-        params (cond-> (select-keys params valid-query-params)
-                       $first (assoc :$first $first)
-                       (nil? $first) (dissoc $first)
-                       $last (assoc :$last $last)
-                       (nil? $last) (dissoc $last)
-                       (str/blank? $filter) (dissoc $filter)
-                       (str/blank? $orderby) (dissoc $orderby)
-                       (str/blank? $aggregation) (dissoc $aggregation)
-                       (str/blank? $select) (dissoc $select))]))
-
-(defn merge-offer-params [params url-params]
-  (merge params (normalize-query-params url-params)))
-
 (defn keys-in [m]
   (if (map? m)
     (vec
@@ -77,9 +45,6 @@
        distinct
        sort
        vec))
-
-(defn id->path [id]
-  (map keyword (str/split id #"/")))
 
 (declare xml->json)
 

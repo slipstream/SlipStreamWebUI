@@ -56,8 +56,6 @@
   (dispatch-sync [:evt.webui.authn/initialize])
   (dispatch-sync [:evt.webui.authn/set-redirect-uri "/webui/login"])
   (dispatch [:evt.webui.authn/check-session])
-  ;; FIXME: TESTING
-  (dispatch [:evt.webui.credential/get-templates])
   (when-let [header-element (.getElementById js/document "webui-header")]
     (reagent/render [sixsq.slipstream.webui.main.views/header] header-element))
   (when-let [footer-element (.getElementById js/document "webui-footer")]

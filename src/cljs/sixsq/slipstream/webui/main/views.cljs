@@ -8,10 +8,8 @@
     [sixsq.slipstream.webui.panel.app.views :as app-views]
     [sixsq.slipstream.webui.panel.authn.views :as authn-views]
     [sixsq.slipstream.webui.panel.cimi.views :as cimi-views]
-    [sixsq.slipstream.webui.panel.credential.views :as credential-views]
     [sixsq.slipstream.webui.panel.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.panel.empty.views :as empty-views]
-    [sixsq.slipstream.webui.panel.offer.views :as offer-views]
     [sixsq.slipstream.webui.panel.unknown.views :as unknown-views]
     [sixsq.slipstream.webui.panel.welcome.views :as welcome-views]
 
@@ -23,7 +21,8 @@
     [sixsq.slipstream.webui.widget.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.widget.i18n.subs]
 
-    [sixsq.slipstream.webui.resource :as resource]))
+    [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.widget.breadcrumbs.utils :as u]))
 
 (defn logo []
   [box :class "webui-logo" :width "20ex" :child ""])
@@ -34,11 +33,11 @@
       [button
        :class "btn-link webui-nav-link"
        :label (@tr [label-kw])
-       :on-click #(history/navigate url)])))
+       :on-click #(dispatch [:evt.webui.history/navigate url])])))
 
 (defn panel-controls []
   (let [tr (subscribe [:webui.i18n/tr])
-        model (subscribe [:resource-path])]
+        model (subscribe [:webui.main/nav-path])]
     (fn []
       [h-box
        :gap "2px"
@@ -46,9 +45,7 @@
                   (doall
                     (for [[label-kw url] [[:app "application"]
                                           [:deployment "deployment"]
-                                          [:offer "offer"]
-                                          [:cimi "cimi"]
-                                          [:credential "credential"]]]
+                                          [:cimi "cimi"]]]
                       ^{:key (name label-kw)} [panel-link label-kw url]))]])))
 
 (defn page-header []
@@ -96,27 +93,25 @@
 
 (defn resource-panel
   []
-  (let [resource-path (subscribe [:resource-path])
-        resource-query-params (subscribe [:resource-query-params])]
+  (let [resource-path (subscribe [:webui.main/nav-path])
+        resource-query-params (subscribe [:webui.main/nav-query-params])]
     (fn []
       [v-box
        :class "webui-contents"
        :children [(resource/render @resource-path @resource-query-params)]])))
 
 (defn header []
-  (let [path (subscribe [:resource-path])]
+  (let [path (subscribe [:webui.main/nav-path])]
     (fn []
       [v-box
        :children [[page-header]
-
-                  ;; FIXME: rely only on CSS for the styling
-                  [breadcrumbs
+                  [breadcrumbs                              ;; FIXME: rely only on CSS for the styling
                    :model path
                    :class "webui-breadcrumbs"
                    :separator "\u2022"
                    :separator-class "webui-breadcrumbs-separator"
                    :breadcrumb-class "webui-breadcrumb-element"
-                   :on-change #(dispatch [:set-resource-path-vec %])]]])))
+                   :on-change #(dispatch [:evt.webui.history/navigate (u/breadcrumbs->url %)])]]])))
 
 (defn footer []
   [v-box

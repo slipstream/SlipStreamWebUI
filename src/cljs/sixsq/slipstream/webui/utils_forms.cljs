@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.utils-forms
   (:require
-    [re-com.core :refer [h-box v-box box input-text input-password label alert-box
+    [re-com.core :refer [h-box v-box box input-text input-password label alert-box scroller
                          button info-button modal-panel single-dropdown title line gap checkbox]]
     [re-com.util :refer [deref-or-value]]
     [re-com.validate :refer-macros [validate-args-macro]]
@@ -82,14 +82,18 @@
   (let [[hidden-params visible-params] (ordered-params description)
         update-data-fn (partial update-data form-data-atom)
         form-component-fn (partial form-component update-data-fn id)]
-    [v-box
-     :children [(when (pos? (count hidden-params))
-                  [v-box
-                   :children (vec (map form-component-fn hidden-params))])
-                (when (pos? (count visible-params))
-                  [v-box
-                   :gap "0.5ex"
-                   :children (vec (map form-component-fn visible-params))])]]))
+    [scroller
+     :max-height "25ex"
+     :v-scroll :auto
+     :h-scroll :off
+     :child [v-box
+             :children [(when (pos? (count hidden-params))
+                          [v-box
+                           :children (vec (map form-component-fn hidden-params))])
+                        (when (pos? (count visible-params))
+                          [v-box
+                           :gap "0.5ex"
+                           :children (vec (map form-component-fn visible-params))])]]]))
 
 (defn credential-template-selector
   [update-form-data-fn selected-id-atom descriptions]
@@ -99,7 +103,7 @@
    :on-change (fn [new-id]
                 (reset! selected-id-atom new-id)
                 (update-form-data-fn new-id nil nil))
-   :placeholder "type of credential"
+   :placeholder "resource template"
    :style {:min-width "40ex"}])
 
 (defn action-buttons
@@ -155,8 +159,6 @@
    ])
 
 (defn credential-form-container
-  "Provides an editor component based on Codemirror. To use modes other than
-   javascript, you will have to require the mode explicitly in your code."
   [& {:keys [descriptions on-submit on-cancel]
       :or   {on-submit #()
              on-cancel #()}

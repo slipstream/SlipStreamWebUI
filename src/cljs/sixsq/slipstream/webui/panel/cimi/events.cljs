@@ -1,25 +1,29 @@
 (ns sixsq.slipstream.webui.panel.cimi.events
   (:require
-    [sixsq.slipstream.webui.db :as db]
+    [clojure.string :as str]
     [re-frame.core :refer [reg-event-db reg-event-fx trim-v dispatch]]
+    [sixsq.slipstream.webui.db :as db]
+    [sixsq.slipstream.webui.panel.cimi.effects]
     [sixsq.slipstream.webui.utils :as utils]
     [sixsq.slipstream.webui.panel.cimi.utils :as u]
     [sixsq.slipstream.webui.main.cimi-effects :as cimi-effects]
-    [clojure.set :as set]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.panel.credential.utils :as panel-utils]
+    [taoensso.timbre :as log]))
+
 
 (reg-event-db
   :set-resource-data
   [db/debug-interceptors trim-v]
   (fn [db [data]]
-    (assoc db :resource-data data)))
+    (assoc-in db [:search :cache :resource] data)))
+
 
 (reg-event-db
   :clear-resource-data
   [db/debug-interceptors]
   (fn [db _]
-    (assoc db :resource-data nil)))
+    (assoc-in db [:search :cache :resource] nil)))
+
 
 (reg-event-db
   :show-search-results
@@ -34,12 +38,14 @@
           (assoc-in [:search :completed?] true)
           (assoc-in [:search :fields :available] fields)))))
 
+
 (reg-event-db
   :set-search-first
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (let [n (or (utils/str->int v) 1)]
       (assoc-in db [:search :query-params :$first] n))))
+
 
 (reg-event-db
   :set-search-last
@@ -48,17 +54,20 @@
     (let [n (or (utils/str->int v) 20)]
       (assoc-in db [:search :query-params :$last] n))))
 
+
 (reg-event-db
   :set-search-filter
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (assoc-in db [:search :query-params :$filter] v)))
 
+
 (reg-event-db
   :evt.webui.cimi/set-orderby
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (assoc-in db [:search :query-params :$orderby] v)))
+
 
 (reg-event-db
   :evt.webui.cimi/set-select
@@ -72,11 +81,13 @@
                                  (cons "id")))]
         (assoc-in db [:search :query-params :$select] v)))))
 
+
 (reg-event-db
   :evt.webui.cimi/set-aggregation
   [db/debug-interceptors trim-v]
   (fn [db [v]]
     (assoc-in db [:search :query-params :$aggregation] v)))
+
 
 (reg-event-db
   :set-selected-fields
@@ -89,6 +100,7 @@
                      vec)]
       (assoc-in db [:search :fields :selected] fields))))
 
+
 (reg-event-db
   :remove-selected-field
   [db/debug-interceptors trim-v]
@@ -96,6 +108,7 @@
     (let [current-fields (-> db :search :fields :selected)
           fields (vec (remove #(= % field) current-fields))]
       (assoc-in db [:search :fields :selected] fields))))
+
 
 (reg-event-fx
   :new-search
@@ -112,11 +125,13 @@
                                              (utils/prepare-params params)
                                              #(dispatch [:show-search-results collection-name %])])))))
 
+
 (reg-event-db
   :set-collection-name
   [db/debug-interceptors trim-v]
   (fn [db [new-collection-name]]
     (assoc-in db [:search :collection-name] new-collection-name)))
+
 
 (reg-event-fx
   :search
@@ -133,12 +148,14 @@
                                              (utils/prepare-params query-params)
                                              #(dispatch [:show-search-results (collection-key collection-name) %])])))))
 
+
 (reg-event-fx
   :evt.webui.cimi/delete
   [db/debug-interceptors trim-v]
   (fn [cofx [resource-id]]
     (let [cimi-client (-> cofx :db :clients :cimi)]
       (assoc cofx :fx.webui.main.cimi/delete [cimi-client resource-id u/dispatch-alert]))))
+
 
 (reg-event-fx
   :evt.webui.cimi/edit
@@ -148,3 +165,76 @@
       cofx
       (let [cimi-client (-> cofx :db :clients :cimi)]
         (assoc cofx :fx.webui.main.cimi/edit [cimi-client resource-id data u/dispatch-edit-alert])))))
+
+
+(reg-event-fx
+  :evt.webui.cimi/operation
+  [db/debug-interceptors trim-v]
+  (fn [cofx [resource-id operation-uri]]
+    (let [cimi-client (-> cofx :db :clients :cimi)]
+      (assoc cofx :fx.webui.main.cimi/operation [cimi-client resource-id operation-uri u/dispatch-alert-document]))))
+
+
+(reg-event-db
+  :evt.webui.cimi/clear-cache
+  [db/debug-interceptors trim-v]
+  (fn [db [description]]
+    (assoc-in db [:search :cache] nil)))
+
+;;
+;; events related to resource creation
+;;
+
+(reg-event-db
+  :evt.webui.cimi/set-description
+  [db/debug-interceptors trim-v]
+  (fn [db [description]]
+    (let [description-map {(:id description) description}]
+      (update-in db [:search :cache :descriptions] merge description-map))))
+
+
+(reg-event-fx
+  :evt.webui.cimi/get-description
+  [db/debug-interceptors trim-v]
+  (fn [cofx [template]]
+    (assoc cofx :fx.webui.cimi/get-description [template])))
+
+
+(reg-event-fx
+  :evt.webui.cimi/get-templates
+  [db/debug-interceptors trim-v]
+  (fn [cofx [collection-keyword]]
+    (when-let [client (-> cofx :db :clients :cimi)]
+      (assoc cofx :fx.webui.cimi/get-templates [client collection-keyword]))))
+
+
+(reg-event-fx
+  :evt.webui.cimi/create-resource
+  [db/debug-interceptors trim-v]
+  (fn [cofx [resource-key form-data]]
+    (when-let [cimi-client (-> cofx :db :clients :cimi)]
+      (let [request-body (panel-utils/create-template resource-key form-data)]
+        (assoc cofx :fx.webui.cimi/create-resource [cimi-client resource-key request-body])))))
+
+
+(reg-event-fx
+  :evt.webui.cimi/create-resource-no-tpl
+  [db/debug-interceptors trim-v]
+  (fn [cofx [resource-key data]]
+    (when-let [cimi-client (-> cofx :db :clients :cimi)]
+      (assoc cofx :fx.webui.cimi/create-resource [cimi-client resource-key data]))))
+
+
+(reg-event-db
+  :evt.webui.cimi/hide-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:search :show-modal?] false)))
+
+
+(reg-event-db
+  :evt.webui.cimi/show-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:search :show-modal?] true)))
+

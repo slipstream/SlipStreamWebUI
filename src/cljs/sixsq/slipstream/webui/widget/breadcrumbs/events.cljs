@@ -4,18 +4,10 @@
     [sixsq.slipstream.webui.db :as db]
     [sixsq.slipstream.webui.widget.breadcrumbs.utils :as u]))
 
-(defn- assoc-navigate-fx [cofx path]
-  (let [relative-url (u/breadcrumbs->url path)]
-    (assoc cofx :fx.webui.history/navigate [relative-url])))
-
 (reg-event-fx
-  :trim-breadcrumbs
+  :evt.webui.breadcrumbs/push-breadcrumb
   [db/debug-interceptors trim-v]
-  (fn [{{:keys [resource-path]} :db :as cofx} [n]]
-    (assoc-navigate-fx cofx (take n resource-path))))
-
-(reg-event-fx
-  :push-breadcrumb
-  [db/debug-interceptors trim-v]
-  (fn [{{:keys [resource-path]} :db :as cofx} [crumb]]
-    (assoc-navigate-fx cofx (conj resource-path crumb))))
+  (fn [cofx [crumb]]
+    (let [path (-> cofx :db :navigation :path (conj crumb))
+          relative-url (u/breadcrumbs->url path)]
+      (assoc cofx :fx.webui.history/navigate [relative-url]))))

@@ -1,27 +1,24 @@
 (ns sixsq.slipstream.webui.panel.cimi.views
   (:require
+    [clojure.pprint :refer [pprint]]
+    [clojure.string :as str]
     [re-com.core :refer [h-box v-box box gap input-text button label modal-panel throbber
                          single-dropdown hyperlink scroller selection-list title]]
     [sixsq.slipstream.webui.components.core :refer [column]]
     [reagent.core :as reagent]
-    [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [subscribe dispatch]]
-    [sixsq.slipstream.webui.utils :as utils]
+
     [sixsq.slipstream.webui.panel.cimi.events]
     [sixsq.slipstream.webui.panel.cimi.subs]
-    [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.resource :as resource]
+    [sixsq.slipstream.webui.utils :as utils]
+    [sixsq.slipstream.webui.widget.i18n.subs]
     [sixsq.slipstream.webui.widget.history.utils :as history]
-    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]))
+    [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
+    [sixsq.slipstream.webui.utils-forms :as form-utils]
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.components.editor :as editor]))
 
-(defn format-operations
-  [ops]
-  [h-box
-   :gap "1ex"
-   :children
-   (doall (map (fn [{:keys [rel href]}] [hyperlink
-                                         :label rel
-                                         :on-click #(js/alert (str "Operation: " rel " on URL " href))]) ops))])
 
 (defn id-selector-formatter [entry]
   (let [v (:id entry)]
@@ -34,6 +31,12 @@
                          (dispatch [:set-resource-data entry])
                          (history/navigate (str "cimi/" v)))]]))
 
+(defn field-selector
+  [field]
+  (let [ks (map keyword (str/split field #"/"))]
+    (fn [m]
+      (get-in m ks))))
+
 (defn vertical-data-table [selected-fields entries]
   [h-box
    :class "webui-column-table"
@@ -44,7 +47,7 @@
                                           :key-fn :id
                                           :value-fn (if (= "id" selected-field)
                                                       id-selector-formatter
-                                                      (keyword selected-field))
+                                                      (field-selector selected-field) #_(keyword selected-field))
                                           :on-remove #(dispatch [:remove-selected-field selected-field])
                                           :header selected-field
                                           :class "webui-column"
@@ -78,7 +81,7 @@
 (defn search-vertical-result-table []
   (let [search-results (subscribe [:search-listing])
         aggregations (subscribe [:webui.cimi/aggregations])
-        collection-name (subscribe [:search-collection-name])
+        collection-name (subscribe [:webui.cimi/collection-name])
         selected-fields (subscribe [:search-selected-fields])
         cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
@@ -116,41 +119,40 @@
       [v-box
        :gap "1ex"
        :children [[h-box
-                   :gap "3px"
-                   :children [[input-text
-                               :model first-value
-                               :placeholder (@tr [:first])
-                               :width "75px"
-                               :change-on-blur? true
-                               :on-change (fn [v]
-                                            (reset! first-value v)
-                                            (dispatch [:set-search-first v]))]
-                              [input-text
-                               :model last-value
-                               :placeholder (@tr [:last])
-                               :width "75px"
-                               :change-on-blur? true
-                               :on-change (fn [v]
-                                            (reset! last-value v)
-                                            (dispatch [:set-search-last v]))]
+                   :gap "1ex"
+                   :justify :between
+                   :children [[h-box
+                               :gap "1ex"
+                               :children [[input-text
+                                           :model first-value
+                                           :placeholder (@tr [:first])
+                                           :width "8ex"
+                                           :change-on-blur? true
+                                           :on-change (fn [v]
+                                                        (reset! first-value v)
+                                                        (dispatch [:set-search-first v]))]
+                                          [input-text
+                                           :model last-value
+                                           :placeholder (@tr [:last])
+                                           :width "8ex"
+                                           :change-on-blur? true
+                                           :on-change (fn [v]
+                                                        (reset! last-value v)
+                                                        (dispatch [:set-search-last v]))]]]
                               [input-text
                                :model filter-value
                                :placeholder (@tr [:filter])
-                               :width "300px"
+                               :width "51ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! filter-value v)
-                                            (dispatch [:set-search-filter v]))]
-                              [button
-                               :class "btn btn-primary"
-                               :label (@tr [:search])
-                               :on-click #(dispatch [:search])]]]
+                                            (dispatch [:set-search-filter v]))]]]
                   [h-box
-                   :gap "3px"
+                   :gap "1ex"
                    :children [[input-text
                                :model orderby-value
                                :placeholder (@tr [:order])
-                               :width "200px"
+                               :width "25ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! orderby-value v)
@@ -158,7 +160,7 @@
                               [input-text
                                :model select-value
                                :placeholder (@tr [:select])
-                               :width "200px"
+                               :width "25ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! select-value v)
@@ -166,7 +168,7 @@
                               [input-text
                                :model aggregation-value
                                :placeholder (@tr [:aggregation])
-                               :width "200px"
+                               :width "25ex"
                                :change-on-blur? true
                                :on-change (fn [v]
                                             (reset! aggregation-value v)
@@ -190,17 +192,18 @@
                                           (reset! show? false)
                                           (dispatch [:set-selected-fields @selections]))
                      :child [v-box
-                             :width "350px"
+                             :width "40ex"
                              :gap "1ex"
                              :children [[selection-list
                                          :model selections
                                          :choices available-fields
                                          :multi-select? true
                                          :disabled? false
-                                         :height "200px"
+                                         :height "30ex"
                                          :on-change #(reset! selections %)]
                                         [h-box
-                                         :justify :between
+                                         :justify :end
+                                         :gap "1ex"
                                          :children [[button
                                                      :label (@tr [:cancel])
                                                      :on-click (fn []
@@ -212,26 +215,130 @@
                                                                  (reset! show? false)
                                                                  (dispatch [:set-selected-fields @selections]))]]]]]])]])))
 
+
 (defn cloud-entry-point
   []
   (let [tr (subscribe [:webui.i18n/tr])
         cep (subscribe [:webui.main/cloud-entry-point])
-        selected-id (subscribe [:search-collection-name])]
+        selected-id (subscribe [:webui.cimi/collection-name])]
     (fn []
       [h-box
        :children [[single-dropdown
                    :model selected-id
                    :placeholder (@tr [:resource-type])
-                   :width "250px"
+                   :width "30ex"
                    :choices (vec (map (fn [k] {:id k :label k}) (sort (vals (:collection-href @cep)))))
                    :on-change (fn [id]
+                                (dispatch [:evt.webui.cimi/clear-cache])
                                 (history/navigate (str "cimi/" (name id))))]]])))
 
-(defn select-controls []
-  [h-box
-   :gap "3px"
-   :children [[cloud-entry-point]
-              [select-fields]]])
+
+(defn template-resource-key
+  "Returns the collection keyword for the template resource associated with
+   the given collection. If there is no template resource, then nil is
+   returned."
+  [cloud-entry-point collection-href]
+  (when-let [href->key (:collection-key cloud-entry-point)]
+    (href->key (str collection-href "-template"))))
+
+
+(defn resource-add-form
+  []
+  (let [tr (subscribe [:webui.i18n/tr])
+        show? (subscribe [:webui.cimi/show-modal?])
+        collection-name (subscribe [:webui.cimi/collection-name])
+        cloud-entry-point (subscribe [:webui.main/cloud-entry-point])
+        descriptions-vector-atom (subscribe [:webui.cimi/descriptions-vector])
+        text (reagent/atom "")]
+    (fn []
+      (let [resource-key (get (:collection-key @cloud-entry-point) @collection-name)
+            tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
+        (when (and tpl-resource-key (empty? @descriptions-vector-atom))
+          (log/info "retrieving templates for" tpl-resource-key)
+          (dispatch [:evt.webui.cimi/get-templates tpl-resource-key]))
+
+        (when @show?
+          [modal-panel
+           :backdrop-on-click #(dispatch [:evt.webui.cimi/hide-modal])
+           :child (cond
+                    (and tpl-resource-key (seq @descriptions-vector-atom))
+                    [form-utils/credential-form-container
+                     :descriptions descriptions-vector-atom
+                     :on-cancel #(dispatch [:evt.webui.cimi/hide-modal])
+                     :on-submit (fn [data]
+                                  (dispatch [:evt.webui.cimi/create-resource resource-key data])
+                                  (dispatch [:evt.webui.cimi/hide-modal]))]
+
+                    (and tpl-resource-key (empty? @descriptions-vector-atom))
+                    [throbber]
+
+                    :else
+                    (do
+                      (reset! text (.stringify js/JSON (clj->js {:key "value"}) nil 2))
+                      [scroller
+                       :min-width "80ex"
+                       :min-height "10em"
+                       :child [v-box
+                               :gap "1ex"
+                               :width "80ex"
+                               :children [[editor/json-editor
+                                           :text text
+                                           :on-change #(reset! text %)]
+                                          [h-box
+                                           :justify :end
+                                           :gap "1ex"
+                                           :children [[button
+                                                       :label (@tr [:cancel])
+                                                       :on-click (fn []
+                                                                   (dispatch [:evt.webui.cimi/hide-modal]))]
+                                                      [button
+                                                       :label (@tr [:create])
+                                                       :class "btn-primary"
+                                                       :on-click (fn []
+                                                                   (try
+                                                                     (let [data (js->clj (.parse js/JSON @text))]
+                                                                       (dispatch [:evt.webui.cimi/create-resource-no-tpl resource-key data]))
+                                                                     (catch js/Error e
+                                                                       (dispatch [:evt.main/raise-alert (str e)]))
+                                                                     (finally
+                                                                       (dispatch [:evt.webui.cimi/hide-modal]))))]]]]]]))])))))
+
+(defn can-add?
+  [ops]
+  (->> ops
+       (map :rel)
+       (filter #(= "add" %))
+       not-empty))
+
+(defn create-button
+  []
+  (let [tr (subscribe [:webui.i18n/tr])
+        search-results (subscribe [:search-listing])]
+    (fn []
+      (when (can-add? (-> @search-results :operations))
+        [button
+         :class "btn btn-primary"
+         :label (@tr [:create])
+         :on-click #(dispatch [:evt.webui.cimi/show-modal])]))))
+
+(defn select-controls
+  []
+  (let [tr (subscribe [:webui.i18n/tr])]
+    (fn []
+      [v-box
+       :gap "1ex"
+       :children [[h-box
+                   :gap "1ex"
+                   :children [[cloud-entry-point]
+                              [select-fields]]]
+                  [h-box
+                   :gap "1ex"
+                   :children [[button
+                               :class "btn btn-primary"
+                               :label (@tr [:search])
+                               :on-click #(dispatch [:search])]
+                              [create-button]
+                              [resource-add-form]]]]])))
 
 (defn control-bar []
   [h-box
@@ -240,37 +347,32 @@
               [search-header]]])
 
 (defn results-bar []
-  (let [search (subscribe [:search])]
+  (let [tr (subscribe [:webui.i18n/tr])
+        search (subscribe [:search])
+        cep (subscribe [:webui.main/cloud-entry-point])]
     (fn []
       (let [{:keys [completed? collection-name] {:keys [resources]} :cache} @search]
         (if (instance? js/Error resources)
           [h-box
-           :children [[label :label "ERROR"]]]
+           :children [[label :label (@tr [:error])]]]
           [h-box
-           :children [#_[box
-                         :justify :center
-                         :align :center
-                         :width "30px"
-                         :height "30px"
-                         :child (if completed? "" [throbber :size :small])]
-                      (if resources
-                        (let [total (:count resources)
-                              n (count (get resources (keyword collection-name) []))]
+           :children [(if resources
+                        (let [collection-key (get (:collection-key @cep) collection-name)
+                              total (:count resources)
+                              n (count (get resources collection-key []))]
                           [title
                            :level :level3
-                           :label (str "Results: " n " / " total)])
+                           :label (str (@tr [:results]) ": " n "/" total)])
                         [title
                          :level :level3
-                         :label "Results: ?? / ??"])
-                      [gap :size "1"]
-                      #_(if-let [ops (:operations resources)]
-                        (format-operations ops))]])))))
+                         :label (str (@tr [:results]) ": ?/?")])
+                      [gap :size "1"]]])))))
 
 (defn cimi-resource
   []
   (let [cep (subscribe [:webui.main/cloud-entry-point])
-        path (subscribe [:resource-path])
-        data (subscribe [:resource-data])]
+        path (subscribe [:webui.main/nav-path])
+        data (subscribe [:webui.cimi/resource-data])]
     (fn []
       (let [[_ resource-type resource-id] @path]
         (dispatch [:set-collection-name resource-type]))

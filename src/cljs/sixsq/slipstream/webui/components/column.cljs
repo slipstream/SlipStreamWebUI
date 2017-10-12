@@ -7,9 +7,20 @@
 
 (def ^:const nbsp "\u00a0")
 
+;; FIXME: Provide a better way of determining if the value is a hiccup expression.
+(defn is-hiccup? [v]
+  (and (vector? v)
+       (ifn? (first v))
+       (not (map? (first v)))))
+
 (defn replace-empty-value
   [v]
-  (if (or (nil? v) (and (string? v) (str/blank? v))) nbsp v))
+  (cond
+    (nil? v) nbsp
+    (and (string? v) (str/blank? v)) nbsp
+    (not (vector? v)) (str v)
+    (not (is-hiccup? v)) (str v)
+    :else v))
 
 (defn column-header [header-class value on-remove]
   [h-box

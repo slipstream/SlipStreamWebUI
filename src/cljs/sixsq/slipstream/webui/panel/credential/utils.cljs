@@ -7,7 +7,8 @@
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.impl.utils.http-async :as http]
     [sixsq.slipstream.client.impl.utils.json :as json]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 (defn extract-describe-action
   [{:keys [rel href] :as op}]
@@ -40,23 +41,28 @@
               (assoc :params-desc (filter-params-desc (dissoc params-desc :acl)))
               (dissoc :describe-url)))))))
 
+(defn id-without-type
+  [id]
+  (second (str/split id #"/")))
+
 (defn prepare-session-template
   [baseURI {:keys [id name description operations] :as tpl}]
   (when-let [describe-url (->> operations
                                extract-describe-url
                                (absolute-url baseURI))]
     {:id           id
-     :label        name
-     :description  description
+     :label        (or name (id-without-type id) id)
+     :description  (or description (id-without-type id) id)
      :describe-url describe-url}))
 
-(defn extract-template-info
-  [client]
+(defn get-templates
+  [client collection-keyword]
   (go
     (let [baseURI (:baseURI (<! (cimi/cloud-entry-point client)))
-          credential-templates (:credentialTemplates (<! (cimi/search client :credentialTemplates)))]
-      (when-not (instance? js/Error credential-templates)
-        (map (partial prepare-session-template baseURI) credential-templates)))))
+          collection-response (<! (cimi/search client collection-keyword))]
+      (when-not (instance? js/Error collection-response)
+        (->> (get collection-response collection-keyword)
+             (map (partial prepare-session-template baseURI)))))))
 
 (defn split-form-data
   [form-data]
@@ -65,7 +71,16 @@
         template-map (into {} (remove #(common-attrs (first %)) form-data))]
     [common-map template-map]))
 
+(defn collection-key->template-key
+  [collection-keyword]
+  (keyword (str (->> collection-keyword
+                     name
+                     (re-matches #"^(.*)s$")
+                     second)
+                "Template")))
+
 (defn create-template
-  [form-data]
-  (let [[common-map template-map] (split-form-data form-data)]
-    (assoc common-map :credentialTemplate template-map)))
+  [resource-key form-data]
+  (let [[common-map template-map] (split-form-data form-data)
+        template-keyword (collection-key->template-key resource-key)]
+    (assoc common-map template-keyword template-map)))

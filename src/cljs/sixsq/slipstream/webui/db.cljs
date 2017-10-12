@@ -3,6 +3,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [re-frame.core :refer [after]]
+    [expound.alpha :as expound]
     [sixsq.slipstream.webui.widget.i18n.dictionary :as dictionary]
     [taoensso.timbre :as log]))
 
@@ -14,7 +15,7 @@
   (fn validate-schema [db]
     (let [valid? (s/valid? db-spec db)]
       (when-not valid?
-        (log/error "failed db schema check: " (s/explain-str db-spec db)))
+        (log/error "failed db schema check: " (expound/expound-str db-spec db)))
       valid?)))
 
 (def validate-schema-interceptor (after (schema-validator ::db)))
@@ -34,8 +35,6 @@
 
 (s/def :webui.main/alert (s/nilable map?))
 
-(s/def ::resource-data (s/nilable any?))
-
 (s/def ::runs-data (s/nilable any?))
 
 (s/def ::offset string?)
@@ -49,6 +48,10 @@
 ;;
 ;; authentication state
 ;;
+
+(s/def :webui.authn/use-modal? boolean?)
+(s/def :webui.authn/show-modal? boolean?)
+(s/def :webui.authn/chooser-view? boolean?)
 
 (s/def :webui.authn/id string?)
 (s/def :webui.authn/label string?)
@@ -71,11 +74,12 @@
 (s/def :webui.authn/redirect-uri string?)
 (s/def :webui.authn/error-message (s/nilable string?))
 (s/def :webui.authn/session (s/nilable (s/map-of keyword? any?)))
-(s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn))
+(s/def :webui.authn/methods (s/coll-of :webui.authn/method-defn :kind vector?))
 (s/def :webui.authn/forms (s/map-of string? map?))
 
 (s/def :webui.authn/authn (only-keys :req-un [:webui.authn/use-modal?
                                               :webui.authn/show-modal?
+                                              :webui.authn/chooser-view?
                                               :webui.authn/total
                                               :webui.authn/count
                                               :webui.authn/redirect-uri
@@ -122,12 +126,14 @@
                                                      :cimi.search.query-params/$aggregation
                                                      :cimi.search.query-params/$select]))
 
-(s/def :cimi.search.cache/aggregations (s/nilable any?))
-(s/def :cimi.search.cache/resource (s/nilable any?))
-(s/def :cimi.search.cache/resources (s/nilable any?))
-(s/def :cimi.search/cache (only-keys :req-un [:cimi.search.cache/aggregations
-                                              :cimi.search.cache/resource
-                                              :cimi.search.cache/resources]))
+(s/def :cimi.search.cache/aggregations any?)
+(s/def :cimi.search.cache/descriptions (s/map-of string? (s/map-of keyword? any?)))
+(s/def :cimi.search.cache/resource any?)
+(s/def :cimi.search.cache/resources any?)
+(s/def :cimi.search/cache (s/nilable (only-keys :opt-un [:cimi.search.cache/aggregations
+                                                         :cimi.search.cache/descriptions
+                                                         :cimi.search.cache/resource
+                                                         :cimi.search.cache/resources])))
 
 (s/def :cimi.search.fields/available (s/coll-of string? :kind vector?))
 (s/def :cimi.search.fields/selected (s/coll-of string? :kind vector?))
@@ -140,30 +146,24 @@
 (s/def ::label string?)
 (s/def ::choice (only-keys :req-un [::id ::label]))
 
-(s/def ::search (only-keys :req-un [:cimi.search/collection-name
-                                    :cimi.search/query-params
-                                    :cimi.search/cache
-                                    :cimi.search/fields
-                                    :cimi.search/completed?]))
+(s/def :cimi.search.add/show-modal? boolean?)
 
-(s/def ::offer ::search)
+(s/def :cimi/search (only-keys :req-un [:cimi.search/collection-name
+                                        :cimi.search/query-params
+                                        :cimi.search/cache
+                                        :cimi.search/fields
+                                        :cimi.search/completed?
 
-(s/def ::resource-path (s/coll-of string? :kind vector?))
-(s/def ::resource-query-params (s/nilable map?))
+                                        :cimi.search.add/show-modal?]))
 
 ;;
-;; simple credential template schema (TEMPORARY)
+;; navigation information
 ;;
-(s/def :webui.credential/show-modal? boolean?)
-(s/def :webui.credential/descriptions (s/nilable (s/map-of string? (s/map-of keyword? any?))))
-(s/def :webui/credential (only-keys :req-un [:webui.credential/show-modal?
-                                             :webui.credential/descriptions
+(s/def :webui.navigation/path (s/coll-of string? :kind vector?))
+(s/def :webui.navigation/query-params (s/nilable map?))
+(s/def :webui/navigation (only-keys :req-un [:webui.navigation/path
+                                             :webui.navigation/query-params]))
 
-                                             :cimi.search/collection-name
-                                             :cimi.search/query-params
-                                             :cimi.search/cache
-                                             :cimi.search/fields
-                                             :cimi.search/completed?]))
 
 ;;
 ;; internationalization parameters
@@ -177,94 +177,59 @@
                                 :cimi/cloud-entry-point
                                 ::clients ::message
                                 :webui.main/alert
-                                ::resource-data ::resource-path ::resource-query-params
+                                :webui/navigation
                                 ::runs-data ::runs-params
                                 ::modules-data
                                 :webui.authn/authn
-                                ::search
-                                ::offer
-                                :webui/credential]))
+                                :cimi/search]))
 
 ;;
 ;; initial database value
 ;;
 
 (def default-value
-  {:i18n                  {:locale "en"
-                           :tr     (dictionary/create-tr-fn "en")}
+  {:i18n              {:locale "en"
+                       :tr     (dictionary/create-tr-fn "en")}
 
-   :clients               nil
-   :message               nil
-   :alert                 nil
-   :resource-data         nil
-   :resource-path         []
-   :resource-query-params nil
+   :clients           nil
+   :message           nil
+   :alert             nil
 
-   :runs-data             nil
-   :runs-params           {:offset     "0"
-                           :limit      "10"
-                           :cloud      ""
-                           :activeOnly 1}
+   :navigation        {:path         []
+                       :query-params nil}
 
-   :modules-data          nil
+   :runs-data         nil
+   :runs-params       {:offset     "0"
+                       :limit      "10"
+                       :cloud      ""
+                       :activeOnly 1}
 
-   :authn                 {:use-modal?    true
-                           :show-modal?   false
-                           :total         0
-                           :count         0
-                           :redirect-uri  "/webui/login"
-                           :error-message nil
-                           :session       nil
-                           :methods       []
-                           :forms         {}}
+   :modules-data      nil
 
-   :cloud-entry-point     nil
+   :authn             {:use-modal?    true
+                       :show-modal?   false
+                       :chooser-view? true
+                       :total         0
+                       :count         0
+                       :redirect-uri  "/webui/login"
+                       :error-message nil
+                       :session       nil
+                       :methods       []
+                       :forms         {}}
 
-   :search                {:collection-name "session"
-                           :query-params    {:$first       1
-                                             :$last        20
-                                             :$filter      nil
-                                             :$orderby     nil
-                                             :$aggregation nil
-                                             :$select      nil}
-                           :cache           {:aggregations nil
-                                             :resource     nil
-                                             :resources    nil}
-                           :fields          {:available ["id"]
-                                             :selected  ["id"]}
+   :cloud-entry-point nil
 
-                           :completed?      true}
+   :search            {:collection-name "session"
+                       :query-params    {:$first       1
+                                         :$last        20
+                                         :$filter      nil
+                                         :$orderby     nil
+                                         :$aggregation nil
+                                         :$select      nil}
+                       :cache           nil
+                       :fields          {:available ["id"]
+                                         :selected  ["id"]}
 
-   :offer                 {:collection-name "service-offer"
-                           :query-params    {:$first       1
-                                             :$last        20
-                                             :$filter      nil
-                                             :$orderby     nil
-                                             :$aggregation nil
-                                             :$select      nil}
-                           :cache           {:aggregations nil
-                                             :resource     nil
-                                             :resources    nil}
-                           :fields          {:available ["id"]
-                                             :selected  ["id"]}
+                       :completed?      true
 
-                           :completed?      true}
-
-   :credential            {:show-modal?     false
-                           :descriptions    nil
-
-                           :collection-name "credential"
-                           :query-params    {:$first       1
-                                             :$last        20
-                                             :$filter      nil
-                                             :$orderby     nil
-                                             :$aggregation nil
-                                             :$select      nil}
-                           :cache           {:aggregations nil
-                                             :resource     nil
-                                             :resources    nil}
-                           :fields          {:available ["id"]
-                                             :selected  ["id"]}
-
-                           :completed?      true
-                           }})
+                       :show-modal?     false}})

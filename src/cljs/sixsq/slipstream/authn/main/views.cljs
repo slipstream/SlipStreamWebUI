@@ -6,7 +6,7 @@
 
     [sixsq.slipstream.authn.main.events]
     [sixsq.slipstream.authn.main.subs]
-    [sixsq.slipstream.webui.panel.authn.views-forms :as forms]
+    [sixsq.slipstream.webui.panel.authn.views :as forms]
     [sixsq.slipstream.webui.panel.authn.views-session :as session]
     [reagent.core :as reagent]))
 
@@ -17,7 +17,7 @@
 
 (defn message-modal
   []
-  (let [query-params (subscribe [:resource-query-params])
+  (let [query-params (subscribe [:webui.main/nav-query-params])
         show? (reagent/atom true)]
     (fn []
       (let [{:keys [error]} @query-params]

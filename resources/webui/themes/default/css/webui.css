@@ -137,9 +137,19 @@ html, body {
 }
 
 /*
-   Overrides the colors set in the header, when modal panels
-   are anchored there.
+  Modal panel properties.  May be embedded in the header, footer, etc., so
+  the styles may need to be set explicitly.
 */
-.rc-modal-panel {
+
+.webui-modal {
     color: black;
+}
+
+/*
+  This makes the throbber visible.  Need to understand why this is
+  necessary.
+*/
+
+.loader li {
+    opacity: 1;
 }

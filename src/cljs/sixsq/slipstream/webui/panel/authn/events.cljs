@@ -69,6 +69,18 @@
     (let [client (get-in cofx [:db :clients :cimi])]
       (assoc cofx :fx.webui.authn/initialize [client]))))
 
+(reg-event-db
+  :evt.webui.authn/show-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:authn :show-modal?] true)))
+
+(reg-event-db
+  :evt.webui.authn/hide-modal
+  [db/debug-interceptors]
+  (fn [db _]
+    (assoc-in db [:authn :show-modal?] false)))
+
 ;;
 ;; checks current session, marks user logged in/out as appropriate
 ;; used during initialization
@@ -142,7 +154,7 @@
   [db/debug-interceptors trim-v]
   (fn [db [error-message]]
     (-> db
-        (assoc :resource-path (utils/parse-resource-path "/login"))
+        (assoc-in [:navigation :path] (utils/parse-resource-path "/login"))
         (assoc-in [:authn :error-message] error-message))))
 
 (reg-event-db
@@ -161,7 +173,9 @@
   :evt.webui.authn/no-modal-login
   [db/debug-interceptors trim-v]
   (fn [db [_]]
-    (assoc-in db [:authn :use-modal?] false)))
+    (-> db
+        (assoc-in [:authn :use-modal?] false)
+        (assoc-in [:authn :chooser-view?] false))))
 
 (reg-event-db
   :evt.webui.authn/show-modal
@@ -174,4 +188,3 @@
   [db/debug-interceptors trim-v]
   (fn [db [_]]
     (assoc-in db [:authn :show-modal?] false)))
-
