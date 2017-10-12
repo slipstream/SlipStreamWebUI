@@ -83,6 +83,7 @@
              (action-fn e))))
        (constantly nil)])))
 
+
 (defn delete-button
   "Creates a button that will bring up a delete dialog and will execute the
    delete when confirmed."
@@ -108,14 +109,14 @@
 (defn operation-name [op-uri]
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
-(defn operation-button [data [label href]]
+(defn operation-button [data [label href operation-uri]]
   (case label
     "edit" [edit-button data #(dispatch [:evt.webui.cimi/edit (:id data) %])]
     "delete" [delete-button data #(dispatch [:evt.webui.cimi/delete (:id data)])]
-    [other-button label data #(js/alert "operation not implemented yet")]))
+    [other-button label data #(dispatch [:evt.webui.cimi/operation (:id data) operation-uri])]))
 
 (defn format-operations [{:keys [operations] :as data} baseURI]
-  (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %))) operations)]
+  (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
     [h-box
      :gap "1ex"
      :children (map (partial operation-button data) ops)]))

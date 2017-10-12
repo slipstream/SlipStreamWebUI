@@ -1,7 +1,8 @@
 (ns sixsq.slipstream.webui.panel.cimi.utils
   (:require
     [re-frame.core :refer [dispatch]]
-    [cljs.pprint :refer [pprint]]))
+    [cljs.pprint :refer [pprint]]
+    [taoensso.timbre :as log]))
 
 (defn collection-href-map
   "Creates a map from the CloudEntryPoint that maps the resource collection
@@ -21,6 +22,15 @@
                   collection-href-map
                   (map (juxt second first))))))
 
+(defn dispatch-alert-document
+  [result]
+  (let [[alert-type heading] [:info "Response"]
+        body [:pre (with-out-str (cljs.pprint/pprint result))]
+        alert {:alert-type alert-type
+               :heading    heading
+               :body       body}]
+    (dispatch [:evt.webui.main/raise-alert alert])))
+
 (defn dispatch-alert
   [result]
   (let [{:keys [status message]} result
@@ -29,9 +39,7 @@
         alert {:alert-type alert-type
                :heading    heading
                :body       body}]
-    (dispatch [:evt.webui.main/raise-alert {:alert-type alert-type
-                                            :heading    heading
-                                            :body       body}])))
+    (dispatch [:evt.webui.main/raise-alert alert])))
 
 (defn dispatch-alert-on-error [data]
   (if (instance? js/Error data)
@@ -42,9 +50,7 @@
           alert {:alert-type alert-type
                  :heading    heading
                  :body       body}]
-      (dispatch [:evt.webui.main/raise-alert {:alert-type alert-type
-                                              :heading    heading
-                                              :body       body}])
+      (dispatch [:evt.webui.main/raise-alert alert])
       true)
     false))
 
@@ -57,15 +63,11 @@
           alert {:alert-type alert-type
                  :heading    heading
                  :body       body}]
-      (dispatch [:evt.webui.main/raise-alert {:alert-type alert-type
-                                              :heading    heading
-                                              :body       body}]))
+      (dispatch [:evt.webui.main/raise-alert alert]))
     (let [alert-type :info
           heading "Success"
           body [:p (with-out-str (pprint response))]
           alert {:alert-type alert-type
                  :heading    heading
                  :body       body}]
-      (dispatch [:evt.webui.main/raise-alert {:alert-type alert-type
-                                              :heading    heading
-                                              :body       body}]))))
+      (dispatch [:evt.webui.main/raise-alert alert]))))

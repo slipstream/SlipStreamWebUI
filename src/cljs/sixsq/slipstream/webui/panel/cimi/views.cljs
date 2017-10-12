@@ -16,16 +16,9 @@
     [sixsq.slipstream.webui.widget.history.utils :as history]
     [sixsq.slipstream.webui.doc-render-utils :as doc-utils]
     [sixsq.slipstream.webui.utils-forms :as form-utils]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.components.editor :as editor]))
 
-(defn format-operations
-  [ops]
-  [h-box
-   :gap "1ex"
-   :children
-   (doall (map (fn [{:keys [rel href]}] [hyperlink
-                                         :label rel
-                                         :on-click #(js/alert (str "Operation: " rel " on URL " href))]) ops))])
 
 (defn id-selector-formatter [entry]
   (let [v (:id entry)]
@@ -221,6 +214,7 @@
                                                                  (reset! show? false)
                                                                  (dispatch [:set-selected-fields @selections]))]]]]]])]])))
 
+
 (defn cloud-entry-point
   []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -237,6 +231,7 @@
                                 (dispatch [:evt.webui.cimi/clear-cache])
                                 (history/navigate (str "cimi/" (name id))))]]])))
 
+
 (defn template-resource-key
   "Returns the collection keyword for the template resource associated with
    the given collection. If there is no template resource, then nil is
@@ -245,12 +240,15 @@
   (when-let [href->key (:collection-key cloud-entry-point)]
     (href->key (str collection-href "-template"))))
 
+
 (defn resource-add-form
   []
-  (let [show? (subscribe [:webui.cimi/show-modal?])
+  (let [tr (subscribe [:webui.i18n/tr])
+        show? (subscribe [:webui.cimi/show-modal?])
         collection-name (subscribe [:webui.cimi/collection-name])
         cloud-entry-point (subscribe [:webui.main/cloud-entry-point])
-        descriptions-vector-atom (subscribe [:webui.cimi/descriptions-vector])]
+        descriptions-vector-atom (subscribe [:webui.cimi/descriptions-vector])
+        text (reagent/atom "")]
     (fn []
       (let [resource-key (get (:collection-key @cloud-entry-point) @collection-name)
             tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
@@ -274,7 +272,34 @@
                     [throbber]
 
                     :else
-                    [label :label "Not implemented yet."])])))))
+                    (do
+                      (reset! text (.stringify js/JSON (clj->js {:key "value"}) nil 2))
+                      [scroller
+                       :min-width "80ex"
+                       :min-height "10em"
+                       :child [v-box
+                               :gap "1ex"
+                               :width "80ex"
+                               :children [[editor/json-editor
+                                           :text text
+                                           :on-change #(reset! text %)]
+                                          [h-box
+                                           :justify :between
+                                           :children [[button
+                                                       :label (@tr [:cancel])
+                                                       :on-click (fn []
+                                                                   (dispatch [:evt.webui.cimi/hide-modal]))]
+                                                      [button
+                                                       :label (@tr [:create])
+                                                       :class "btn-primary"
+                                                       :on-click (fn []
+                                                                   (try
+                                                                     (let [data (js->clj (.parse js/JSON @text))]
+                                                                       (dispatch [:evt.webui.cimi/create-resource-no-tpl resource-key data]))
+                                                                     (catch js/Error e
+                                                                       (dispatch [:evt.main/raise-alert (str e)]))
+                                                                     (finally
+                                                                       (dispatch [:evt.webui.cimi/hide-modal]))))]]]]]]))])))))
 
 (defn can-add?
   [ops]
