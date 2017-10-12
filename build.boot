@@ -107,6 +107,16 @@
                                                                    'goog.DEBUG                                   false}}})
          identity)
 
+(deftask optimized-development []
+         (task-options! cljs {:optimizations    :advanced
+                              :source-map       true
+                              :compiler-options {:language-in     :ecmascript5
+                                                 :parallel-build  true
+                                                 :closure-defines {'sixsq.slipstream.webui.defines/HOST_URL      "https://nuv.la"
+                                                                   'goog.DEBUG                                   false}}}
+                        reload {:on-jsload 'sixsq.slipstream.webui/init})
+         identity)
+
 (deftask development []
          (task-options! cljs {:optimizations    :none
                               :source-map       true
@@ -158,6 +168,7 @@
          "Simple alias to run application in development mode"
          []
          (comp (development)
+               #_(optimized-development)
                (run)))
 
 (deftask testing []
