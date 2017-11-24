@@ -4,4 +4,4 @@
 .nrepl*
 out
 target
-project.clj
+*.DS_Store
