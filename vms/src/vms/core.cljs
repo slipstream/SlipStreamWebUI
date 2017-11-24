@@ -10,10 +10,19 @@
             [vms.deployments :as dep]
             [clojure.string :as str]))
 
+; TODO filter via cloud gauge
+; Export component utils
+; Done not refresh if windows not visible
+; Done not refresh when other tab open
+; Paging
+; manage table content and size and enable scroll
+; test integration with existing dashboard (left 2 issue, modal not centered and height body)
+; color
+; create helper components
+
 (enable-console-print!)
 
 (defonce webPageVisible (atom true))
-
 (defonce activeTab (atom 0))
 (defonce number-record-display 10)
 (defonce activeVmPage (atom 1))
@@ -178,6 +187,12 @@
                                          [sa/TabPane {:as :div :style {:margin "10px"}} [vms-table]]
                                          [:br]]))}
                     ]}]))
+
+(defn ^:export setCloudFilter [cloud]
+  (print "reset offset limit plz")
+  (print "All Clouds")
+  (print "for all tab")
+  (print cloud))
 
 (reagent/render-component [app]
                           (. js/document (getElementById "app")))
