@@ -12,7 +12,8 @@
     [sixsq.slipstream.webui.panel.deployment.events]
     [sixsq.slipstream.webui.panel.deployment.subs]
     [sixsq.slipstream.webui.widget.i18n.subs]
-    [sixsq.slipstream.webui.resource :as resource]))
+    [sixsq.slipstream.webui.resource :as resource]
+    [taoensso.timbre :as log]))
 
 (defn runs-control []
   (let [tr (subscribe [:webui.i18n/tr])
@@ -143,20 +144,21 @@
   [entries]
   (let [tr (subscribe [:webui.i18n/tr])]
     (fn [entries]
-      [scroller
-       :scroll :auto
-       :child [h-box
-               :class "webui-column-table"
-               :children [(doall
-                            (for [column-kw column-kws]
-                              ^{:key (name column-kw)} [column
-                                                        :model entries
-                                                        :key-fn :uuid
-                                                        :value-fn (partial value-fn column-kw)
-                                                        :header (@tr [column-kw])
-                                                        :class "webui-column"
-                                                        :header-class "webui-column-header"
-                                                        :value-class "webui-column-value"]))]]])))
+      (let [entries (if (map? entries) [entries] entries)]  ;; wrap a single value in a list
+        [scroller
+         :scroll :auto
+         :child [h-box
+                 :class "webui-column-table"
+                 :children [(doall
+                              (for [column-kw column-kws]
+                                ^{:key (name column-kw)} [column
+                                                          :model entries
+                                                          :key-fn :uuid
+                                                          :value-fn (partial value-fn column-kw)
+                                                          :header (@tr [column-kw])
+                                                          :class "webui-column"
+                                                          :header-class "webui-column-header"
+                                                          :value-class "webui-column-value"]))]]]))))
 
 (defn runs-display
   []

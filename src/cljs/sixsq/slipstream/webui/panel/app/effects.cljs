@@ -16,7 +16,7 @@
       (let [module (if (nil? url) {} (<! (modules/get-module client url)))
             module-meta (select-keys (first (vals module)) module-fields)
             module-kids (if (nil? url)
-                          (<! (modules/get-module-children client url))
+                          (doall (map :name (<! (modules/get-module-children client url))))
                           (->> module
                                vals
                                first
