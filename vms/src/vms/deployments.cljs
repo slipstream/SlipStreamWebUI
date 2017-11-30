@@ -7,6 +7,7 @@
             [soda-ash.core :as sa]
             [vms.visibility :as vs]
             [vms.client-utils :as req]
+            [vms.tables-utils :as t]
             [clojure.string :as str]))
 
 (enable-console-print!)
@@ -19,6 +20,10 @@
                       :loading      true
                       :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time"
                                      "Clouds" "Tags" "User" ""]
+                      :message      {:hidden  true
+                                     :error   true
+                                     :header  ""
+                                     :content ""}
                       }))
 
 (defn state-set-loading [v]
@@ -54,6 +59,9 @@
 (defn request-opts-offset []
   (get-in @app-state [:request-opts :offset]))
 
+(defn state-set-message [k v]
+  (swap! app-state assoc-in [:message k] v))
+
 (defn set-page [page]
   (state-set-offset (* (dec page) (request-opts-limit))))
 
@@ -69,17 +77,19 @@
 (defn current-page [] (inc (/ (request-opts-offset) (request-opts-limit))))
 
 (defn inc-page []
-  (when (< (current-page) (page-count))
-    (state-set-offset (+ (request-opts-offset) (request-opts-limit)))))
+  (let [current-page (current-page)]
+    (when (< current-page (page-count))
+      (set-page (inc current-page)))))
 
 (defn dec-page []
-  (when (> (current-page) 1)
-    (state-set-offset (- (request-opts-offset) (request-opts-limit)))))
+  (let [current-page (current-page)]
+    (when (> current-page 1)
+      (set-page (dec current-page)))))
 
 (defn extract-deployments-data [deployment-resp]
   (let [deployments (get-in deployment-resp [:runs :item] [])]
     (map (fn [{:keys [uuid moduleResourceUri serviceUrl status startTime cloudServiceNames username abort type tags]}]
-           {:deployment-href (str "run/" uuid)
+           {:deployment-uuid uuid
             :module-uri      moduleResourceUri
             :service-url     serviceUrl
             :state           status
@@ -104,13 +114,52 @@
 (defn is-final-state? [state]
   (#{"Done" "Cancelled"} state))
 
-(defn terminate-confirm [deployment]
+(defn terminate-confirm [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url]
+                          :as   deployment}]
   (let [show-modal (atom false)]
     (fn []
       [:div [sa/Icon {:name "remove" :color "red" :link true :onClick #(reset! show-modal true)}]
        [sa/Confirm {:open      @show-modal
-                    :onCancel  #(do (js/console.log "cancel modal" deployment) (reset! show-modal false))
-                    :onConfirm #(do (js/console.log "confirm modal" deployment) (reset! show-modal false))
+                    :basic     true
+                    :inverted  true
+                    :content   (reagent/as-element
+                                 [:div
+                                  [:h3 (str "Are you sure to terminate following deployment?")]
+                                  [sa/Table {:unstackable true
+                                             :celled      false
+                                             :single-line true
+                                             :size        "small"
+                                             :padded      false}
+                                   [sa/TableBody
+                                    [sa/TableRow
+                                     [sa/TableCell "ID:"]
+                                     [sa/TableCell [:a {:href (str "run/" deployment-uuid)} deployment-uuid]]]
+                                    [sa/TableRow
+                                     [sa/TableCell "Module URI:"]
+                                     [sa/TableCell [:a {:href module-uri} module-uri]]]
+                                    [sa/TableRow [sa/TableCell "Start time:"] [sa/TableCell start-time]]
+                                    [sa/TableRow [sa/TableCell "State:"] [sa/TableCell state]]
+                                    [sa/TableRow
+                                     [sa/TableCell "Service URL:"]
+                                     [sa/TableCell [:a {:href service-url :target "_blank"} service-url]]]
+                                    [sa/TableRow [sa/TableCell "State:"] [sa/TableCell state]]
+                                    [sa/TableRow [sa/TableCell "Clouds:"] [sa/TableCell clouds]]
+                                    [sa/TableRow [sa/TableCell "Abort:"] [sa/TableCell abort]]
+                                    [sa/TableRow [sa/TableCell "Tags:"] [sa/TableCell tags]]]
+                                   ]])
+                    :onCancel  #(reset! show-modal false)
+                    :onConfirm #(do
+                                  (go (let [result (<! (runs/terminate-run req/client deployment-uuid))
+                                            ; error (not (get-in result [:data :success]))
+                                            ]
+                                        (js/console.log (js->clj result :keywordize-keys true))
+                                        ;(state-set-message :header (str (get-in result [:data :body "error" "reason"] "")))
+                                        ;(state-set-message :content (str (get-in result [:data :body "error" "detail"] "")))
+                                        ;(state-set-message :error error)
+                                        ;(state-set-message :hidden error)
+                                        ))
+                                  (fetch-deployments)
+                                  (reset! show-modal false))
                     }]]
       )
     )
@@ -127,7 +176,7 @@
 
 
 (defn table-deployment-cells
-  [{:keys [deployment-href module-uri service-url state active-vm start-time clouds user-href state tags abort type] :as deployment}]
+  [{:keys [deployment-uuid module-uri service-url state active-vm start-time clouds user-href state tags abort type] :as deployment}]
   (let [global-prop (if (is-final-state? state) {:disabled true} {})]
     [[sa/TableCell (merge {:collapsing true} global-prop)
       [sa/Icon (cond
@@ -143,10 +192,9 @@
                         ""
                         )}]]
      [sa/TableCell {:collapsing true}
-      [:a {:href deployment-href} (-> deployment-href
-                                      (str/replace #"^run/" "")
-                                      (str/split #"-")
-                                      (first))]]
+      [:a {:href (str "run/" deployment-uuid)} (-> deployment-uuid
+                                                   (str/split #"-")
+                                                   (first))]]
      [sa/TableCell {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}}
       (let [module-uri-vec (-> module-uri (str/split #"/"))
             module-uri-version (str (nth module-uri-vec (- (count module-uri-vec) 2)) " " (last module-uri-vec))]
@@ -194,86 +242,63 @@
                  :size     "mini" :header "ss:abort" :content abort :position "top center"}]
       row)))
 
+(defn deployments-table [cloud-filter]
+  [sa/Segment {:basic true :loading (get @app-state :loading)}
+   [:p (str (dissoc @app-state :deployments))]
+   ;<Message
+   ;icon='inbox'
+   ;header='Have you heard about our mailing list?'
+   ;content='Get the best news in your e-mail every day.'
+   ;/>
+   [sa/Message (cond-> {:header    "abc" :content "def" :hidden (get-in @app-state [:message :hidden])
+                        :onDismiss #(state-set-message :hidden true)}
+                       (get-in @app-state [:message :error]) (merge {:icon "exclamation circle" :error true}))]
+   [sa/Checkbox {:slider   true :fitted true :label "Include inactive runs"
+                 :onChange #(do
+                              (state-set-active-only (if (:checked (js->clj %2 :keywordize-keys true)) 0 1))
+                              (fetch-deployments))}]
+   [sa/Table
+    {:compact     "very"
+     :size        "small"
+     :selectable  true
+     :unstackable true
+     :celled      false
+     :single-line true
+     :padded      false}
 
-(defn deployments-table []
-  (let [first-button (atom 1)
-        number-button-nav 5]
-    (fn []
-      [sa/Segment {:basic true :loading (get @app-state :loading)}
-       [sa/Checkbox {:slider   true :fitted true :label "Include inactive runs"
-                     :onChange #(do
-                                  (state-set-active-only (if (:checked (js->clj %2 :keywordize-keys true)) 0 1))
-                                  (fetch-deployments))}]
-       [sa/Table
-        {:compact     "very"
-         :size        "small"
-         :selectable  true
-         :unstackable true
-         :celled      false
-         :single-line true
-         :padded      false}
+    [sa/TableHeader
+     (vec (concat [sa/TableRow]
+                  (vec (map (fn [i label] ^{:key (str i "_" label)}
+                  [sa/TableHeaderCell label]) (range) (get @app-state :headers)))))]
+    (vec (concat [sa/TableBody]
+                 (vec (map table-row-format
+                           (extract-deployments-data (get @app-state :deployments))))))
+    [t/table-navigator-footer
+     deployments-count
+     page-count
+     current-page
+     #(count (get @app-state :headers))
+     #(do (inc-page)
+          (state-enable-loading)
+          (fetch-deployments))
+     #(do
+        (dec-page)
+        (state-enable-loading)
+        (fetch-deployments))
+     #(do (set-page 1)
+          (state-enable-loading)
+          (fetch-deployments))
+     #(do (set-page (page-count))
+          (state-enable-loading)
+          (fetch-deployments))
+     #(do (set-page (.-children %2))
+          (state-enable-loading)
+          (fetch-deployments))]
+    ]])
 
-        [sa/TableHeader
-         (vec (concat [sa/TableRow]
-                      (vec (map (fn [i label] ^{:key (str i "_" label)}
-                      [sa/TableHeaderCell label]) (range) (get @app-state :headers)))))]
-        (vec (concat [sa/TableBody]
-                     (vec (map table-row-format
-                               (extract-deployments-data (get @app-state :deployments))))))
-
-        (let [deployments-count (deployments-count)
-              button-range (take number-button-nav (range @first-button (+ (page-count) 2)))]
-          [sa/TableFooter
-           [sa/TableRow
-            [sa/TableHeaderCell {:col-span (str (count (get @app-state :headers)))}
-             [sa/Label "Deployments found" [sa/LabelDetail deployments-count]]
-             [sa/Menu {:floated "right" :size "mini"}
-              [sa/MenuItem {:link    true :disabled (= (current-page) 1)
-                            :onClick (fn [e d]
-                                       (set-page 1)
-                                       (reset! first-button 1)
-                                       (state-enable-loading)
-                                       (fetch-deployments))}
-               [sa/Icon {:name "angle double left"}]]
-              [sa/MenuItem {:link    true :disabled (= (current-page) 1)
-                            :onClick (fn [_ _]
-                                       (when (> (current-page) 1)
-                                         (dec-page)
-                                         (swap! first-button dec)
-                                         (state-enable-loading)
-                                         (fetch-deployments)
-                                         ))}
-               [sa/Icon {:name "angle left"}]]
-              (doall
-                (for [i button-range]
-                  ^{:key i} [sa/MenuItem {:link    true
-                                          :active  (= (current-page) i)
-                                          :onClick (fn [_ d]
-                                                     (set-page (.-children d))
-                                                     (state-enable-loading)
-                                                     (fetch-deployments)
-                                                     )} i])
-                )
-              [sa/MenuItem {:link    true :disabled (>= (current-page) (page-count))
-                            :onClick (fn [e d] (when (< (current-page) (page-count))
-                                                 (inc-page)
-                                                 (swap! first-button inc)
-                                                 (state-enable-loading)
-                                                 (fetch-deployments)
-                                                 ))}
-               [sa/Icon {:name "angle right"}]]
-              [sa/MenuItem {:link    true :disabled (>= (current-page) (page-count))
-                            :onClick (fn [_ _]
-                                       (set-page (page-count))
-                                       (state-enable-loading)
-                                       (reset! first-button
-                                               (let [first-should-be (- (page-count) (dec number-button-nav))]
-                                                 (if (neg-int? first-should-be)
-                                                   1 first-should-be)))
-                                       (fetch-deployments))}
-               [sa/Icon {:name "angle double right"}]]
-              ]]]
-           ])
-        ]]
-      )))
-
+(defn ^:export setCloudFilter [cloud]
+  (if (= cloud "All Clouds")
+    (state-set-cloud "")
+    (state-set-cloud cloud))
+  (state-enable-loading)
+  (fetch-deployments))
