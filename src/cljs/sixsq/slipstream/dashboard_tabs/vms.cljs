@@ -133,6 +133,7 @@
               :unstackable true
               :celled      false
               :single-line true
+              :collapsing  false
               :padded      false}
 
              [sa/TableHeader

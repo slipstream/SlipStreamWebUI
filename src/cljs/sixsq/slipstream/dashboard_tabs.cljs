@@ -54,7 +54,8 @@
       [sa/Tab
        {:onTabChange (fn [e, d]
                          (state-set-active-tab (:activeIndex (js->clj d :keywordize-keys true)))
-                         (fetch-records))
+                         (fetch-records)
+                         (log/info @app-state))
         :panes       [{:menuItem "Deployments"
                        :render   (fn [] (reagent/as-element
                                           [:div {:style {:width "auto" :overflow-x "auto"}}

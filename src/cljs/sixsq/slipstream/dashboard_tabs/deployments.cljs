@@ -119,8 +119,7 @@
       (go
         (let [response (<! (runs/search-runs client/client (get @app-state :request-opts)))
               item (get-in response [:runs :item] [])
-              deployments-list item                         ;(if (= (type item) cljs.core/PersistentVector) item [item])        ;TODO uncomment
-              ]
+              deployments-list (if (= (type item) cljs.core/PersistentVector) item [item])]
              ; workaround gson issue, when one element in item it give element instead of a vector of element
 
              (if (empty? deployments-list)
@@ -272,6 +271,7 @@
          :unstackable true
          :celled      false
          :single-line true
+         :collapsing  false
          :padded      false}
 
         [sa/TableHeader
