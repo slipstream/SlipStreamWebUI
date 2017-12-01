@@ -1,8 +1,6 @@
-(ns vms.tables-utils
+(ns sixsq.slipstream.dashboard-tabs.utils.tables
   (:require [reagent.core :as reagent :refer [atom]]
             [soda-ash.core :as sa]))
-
-(enable-console-print!)
 
 (defn table-navigator-footer [records-count-fn page-count-fn current-page-fn headers-count-fn
                               next-page-fn back-page-fn first-page-fn last-page-fn select-page-fn]

@@ -1,7 +1,7 @@
 (ns
     ^{:copyright "Copyright 2017, Charles A. Loomis, Jr."
           :license   "http://www.apache.org/licenses/LICENSE-2.0"}
-    vms.semantic-ui
+    sixsq.slipstream.dashboard-tabs.utils.semantic-ui
     "Mapping of names of Semantic UI components to the Soda Ash wrappers. This
        namespace has no real functionality; it just keeps Cursive from complaining
        about undefined symbols."
