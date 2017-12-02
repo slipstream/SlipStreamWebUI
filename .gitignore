@@ -4,4 +4,5 @@
 .nrepl*
 out
 target
-project.clj
+*.DS_Store
+*/.cljs_rhino_repl/*

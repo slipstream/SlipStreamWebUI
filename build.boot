@@ -40,6 +40,9 @@
 
                     [secretary]
 
+                    [soda-ash "0.76.0"]
+                    [funcool/promesa "1.9.0"]
+
                     ;; boot task and development deps
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]
