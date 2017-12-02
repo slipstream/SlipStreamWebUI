@@ -141,9 +141,12 @@
 
 (defn terminate-confirm [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url]
                           :as   deployment}]
-      (let [show-modal (atom false)]
+      (let [show-modal (atom false)
+            deleting (atom false)]
            (fn []
-               [:div [sa/Icon {:name "remove" :color "red" :link true :onClick #(reset! show-modal true)}]
+               [:div [sa/Icon (if @deleting
+                                {:name "trash outline" :color "black"}
+                                {:name "remove" :color "red" :link true :onClick #(reset! show-modal true)})]
                 [sa/Confirm {:open      @show-modal
                              :basic     true
                              :content   (reagent/as-element
@@ -174,6 +177,7 @@
                                             ]])
                              :onCancel  #(reset! show-modal false)
                              :onConfirm #(do
+                                           (reset! deleting true)
                                            (go
                                              (let [result (<! (runs/terminate-run client/client deployment-uuid))
                                                    error (when (instance? js/Error result)
