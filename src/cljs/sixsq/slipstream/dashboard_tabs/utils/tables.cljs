@@ -14,8 +14,9 @@
             button-range (take number-button-nav (range @first-button (inc page-count)))]
         [sa/TableFooter
          [sa/TableRow
-          [sa/TableHeaderCell {:col-span (str headers-count)}
-           [sa/Label "Found" [sa/LabelDetail records-count]]
+          [sa/TableHeaderCell {:col-span (str 3)}
+           [sa/Label "Found" [sa/LabelDetail records-count]]]
+          [sa/TableHeaderCell {:col-span (str (- headers-count 3))}
            [sa/Menu {:floated "right" :size "mini"}
             [sa/MenuItem {:link    true :disabled (= current-page 1)
                           :onClick (fn [e d]

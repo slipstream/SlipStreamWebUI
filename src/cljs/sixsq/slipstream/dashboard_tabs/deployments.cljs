@@ -19,7 +19,7 @@
                                      :cloud      ""
                                      :activeOnly 1}
                       :loading      true
-                      :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time"
+                      :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time [UTC]"
                                      "Clouds" "Tags" "User" ""]
                       :message      {:hidden  true
                                      :error   true
@@ -223,12 +223,12 @@
              (let [module-uri-vec (-> module-uri (str/split #"/"))
                    module-uri-version (str (nth module-uri-vec (- (count module-uri-vec) 2)) " " (last module-uri-vec))]
                   [:a {:href module-uri} module-uri-version])]
-            [sa/TableCell {:collapsing true :style {:max-width "250px" :overflow "hidden" :text-overflow "ellipsis"}}
+            [sa/TableCell {:collapsing true :style {:max-width "200px" :overflow "hidden" :text-overflow "ellipsis"}}
              [:a {:href service-url :target "_blank"}
               (when-not (empty? service-url) [sa/Icon {:name "external"}]) service-url]]
             [sa/TableCell (merge {:collapsing true} global-prop) state]
             [sa/TableCell (merge {:collapsing true :textAlign "center"} global-prop) active-vm]
-            [sa/TableCell (merge {:collapsing true} global-prop) start-time]
+            [sa/TableCell (merge {:collapsing true} global-prop) (first (str/split start-time #"\."))]
             [sa/TableCell (merge {:collapsing true} global-prop) clouds]
             [sa/TableCell (merge {:collapsing true :style
                                               {:max-width "100px" :overflow "hidden" :text-overflow "ellipsis"}}
