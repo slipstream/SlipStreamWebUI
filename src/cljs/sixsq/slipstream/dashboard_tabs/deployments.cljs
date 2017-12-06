@@ -136,8 +136,8 @@
                                (state-disable-loading))))
                ))))
 
-(defn is-final-state? [state]
-      (#{"Done" "Cancelled"} state))
+(defn is-terminated-state? [state]
+      (#{"Finalizing" "Done" "Aborted" "Cancelled"} state))
 
 (defn terminate-confirm [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url]
                           :as   deployment}]
@@ -201,12 +201,12 @@
 (defn table-deployment-cells
       [{:keys [deployment-uuid module-uri service-url state start-time clouds user-href state tags abort type active-vm]
         :as   deployment}]
-      (let [global-prop (if (is-final-state? state) {:disabled true} {})]
+      (let [global-prop (if (is-terminated-state? state) {:disabled true} {})]
            [[sa/TableCell (merge {:collapsing true} global-prop)
              [sa/Icon (cond
                         (and (= state "Ready") (empty? abort)) {:name "checkmark"}
                         (not-empty abort) {:name "exclamation circle"}
-                        (is-final-state? state) {:name "power"}
+                        (is-terminated-state? state) {:name "power"}
                         :else {:loading true :name "spinner"}
                         )]
              [sa/Icon {:name (case type
@@ -235,7 +235,7 @@
                                  global-prop) tags]
             [sa/TableCell {:style {:max-width "100px" :overflow "hidden" :text-overflow "ellipsis"}}
              [:a {:href user-href} user-href]]
-            (if (is-final-state? state)
+            (if (is-terminated-state? state)
               [sa/TableCell {:collapsing true}]
               [sa/TableCell {:collapsing true} [terminate-confirm deployment]])
             ]))
