@@ -10,8 +10,8 @@
             [promesa.async-cljs :refer-macros [async]]
             [sixsq.slipstream.client.api.runs :as runs]
             [sixsq.slipstream.client.api.cimi :as cimi]
-            [sixsq.slipstream.dashboard-tabs.utils.client :as client]
-            [sixsq.slipstream.dashboard-tabs.utils.tables :as t]))
+            [sixsq.slipstream.legacy-components.utils.client :as client]
+            [sixsq.slipstream.legacy-components.utils.tables :as t]))
 
 (def app-state (atom {:deployments  {}
                       :request-opts {:offset     0

@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.dashboard-tabs.utils.visibility)
+(ns sixsq.slipstream.legacy-components.utils.visibility)
 
 (defn VisibleWebPage [& {:keys [onWebPageVisible onWebPageHidden] :as options}]
       (. js/document

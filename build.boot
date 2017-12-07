@@ -43,6 +43,9 @@
                     [soda-ash "0.76.0"]
                     [funcool/promesa "1.9.0"]
 
+                    [cljsjs/moment "2.17.1-1"]
+                    [cljsjs/react-date-range "0.2.4-0" :exclusions [cljsjs/react]]
+
                     ;; boot task and development deps
                     [adzerk/boot-cljs]
                     [adzerk/boot-cljs-repl]

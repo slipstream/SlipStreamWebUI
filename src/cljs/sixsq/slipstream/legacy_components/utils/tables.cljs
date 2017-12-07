@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.dashboard-tabs.utils.tables
+(ns sixsq.slipstream.legacy-components.utils.tables
   (:require [reagent.core :as reagent :refer [atom]]
             [soda-ash.core :as sa]))
 

@@ -6,8 +6,8 @@
             [sixsq.slipstream.client.api.cimi :as cimi]
             [soda-ash.core :as sa]
             [taoensso.timbre :as log]
-            [sixsq.slipstream.dashboard-tabs.utils.tables :as t]
-            [sixsq.slipstream.dashboard-tabs.utils.client :as client]
+            [sixsq.slipstream.legacy-components.utils.tables :as t]
+            [sixsq.slipstream.legacy-components.utils.client :as client]
             [clojure.string :as str]))
 
 (def app-state (atom {:vms              {}

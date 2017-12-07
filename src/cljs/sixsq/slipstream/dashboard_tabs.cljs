@@ -6,8 +6,8 @@
             [soda-ash.core :as sa]
             [clojure.string :as str]
             [taoensso.timbre :as log]
-            [sixsq.slipstream.dashboard-tabs.utils.visibility :as vs]
-            [sixsq.slipstream.dashboard-tabs.utils.client :as client]
+            [sixsq.slipstream.legacy-components.utils.visibility :as vs]
+            [sixsq.slipstream.legacy-components.utils.client :as client]
             [sixsq.slipstream.dashboard-tabs.deployments :as dep]
             [sixsq.slipstream.dashboard-tabs.vms :as vms]))
 
