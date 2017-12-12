@@ -177,10 +177,7 @@
                        :multiple    true
                        :search      true
                        :selection   true
-                       :onChange    #(state-set-connectors-selected
-                                       (conj
-                                         (-> (js->clj %2 :keywordize-keys true) :value)
-                                         all-clouds))
+                       :onChange    #(state-set-connectors-selected (-> (js->clj %2 :keywordize-keys true) :value))
                        :options     (map
                                       #(let [connector-href %
                                              connector-name (str/replace connector-href #"^connector/" "")]
