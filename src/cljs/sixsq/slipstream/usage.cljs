@@ -41,11 +41,10 @@
 
 (def app-state (atom {:web-page-visible true
                       :refresh          true
-                      :connectors       {:list         []
-                                         :selected     []
-                                         :loading      true
-                                         :request-opts {"$last"        0
-                                                        "$aggregation" "terms:connector/href"}}
+                      :is-admin         false
+                      :connectors       {:list     []
+                                         :selected []
+                                         :loading  true}
                       :request          {:created-after-utc  nil
                                          :created-before-utc nil}
                       :results          {:loading  true
@@ -58,6 +57,9 @@
 
 (defn state-set-refresh [v]
       (swap! app-state assoc :refresh v))
+
+(defn state-set-is-admin [v]
+      (swap! app-state assoc :is-admin v))
 
 (defn state-set-connectors-list [v]
       (swap! app-state assoc-in [:connectors :list] v))
@@ -85,6 +87,13 @@
 
 (vs/VisibleWebPage :onWebPageVisible #(state-set-web-page-visible true)
                    :onWebPageHidden #(state-set-web-page-visible false))
+
+(defn set-is-admin []
+      (go
+        (let [response (<! (cimi/search client/client "sessions"))
+              role (or (-> response :sessions first :roles (str/split #"\s+") first) "")]
+             (when (= role "ADMIN")
+                   (state-set-is-admin true)))))
 
 (defn fetch-metering [resolve connector]
       (go
@@ -122,7 +131,8 @@
 (defn fetch-connectors-list []
       (when (and (get @app-state :web-page-visible) (get @app-state :refresh))
             (go
-              (let [request-opts (get-in @app-state [:connectors :request-opts])
+              (let [request-opts {"$last"        0
+                                  "$aggregation" "terms:connector/href"}
                     response (<! (cimi/search client/client "meterings" request-opts))
                     connectors (->> (get-in response [:aggregations :terms:connector/href :buckets] [])
                                     (map #(:key %)))]
@@ -262,4 +272,5 @@
 (defn ^:export init []
       (when-let [container-element (.getElementById js/document "usage-container")]
                 (reagent/render-component [app] container-element)
+                (set-is-admin)
                 (fetch-connectors-list)))
