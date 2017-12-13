@@ -1,3 +1,0 @@
-{:require          [sixsq.slipstream.usage]
- :init-fns         [sixsq.slipstream.usage/init]
- :compiler-options {:asset-path "/usage/js/usage.out"}}

@@ -1,26 +1,14 @@
-(ns sixsq.slipstream.dashboard_tabs
+(ns sixsq.slipstream.legacy.components.dashboard_tabs
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [soda-ash.core :as sa]
             [clojure.string :as str]
-            [taoensso.timbre :as log]
-            [sixsq.slipstream.legacy-components.utils.visibility :as vs]
-            [sixsq.slipstream.legacy-components.utils.client :as client]
-            [sixsq.slipstream.dashboard-tabs.deployments :as dep]
-            [sixsq.slipstream.dashboard-tabs.vms :as vms]))
-
-;;
-;; This option is not compatible with other platforms, notably nodejs.
-;; Use instead the logging calls to provide console output.
-;;
-(enable-console-print!)
-
-;;
-;; debugging log level
-;;
-(log/set-level! :debug)                                     ; TODO not working call!
+            [sixsq.slipstream.legacy.utils.visibility :as vs]
+            [sixsq.slipstream.legacy.utils.client :as client]
+            [sixsq.slipstream.legacy.components.dashboard-tabs.deployments :as dep]
+            [sixsq.slipstream.legacy.components.dashboard-tabs.vms :as vms]))
 
 (def app-state (r/atom {:web-page-visible true
                         :active-tab       0
@@ -35,9 +23,6 @@
 (defn state-set-active-tab [v]
       (swap! app-state assoc :active-tab v))
 
-(vs/VisibleWebPage :onWebPageVisible #(state-set-web-page-visible true)
-                   :onWebPageHidden #(state-set-web-page-visible false))
-
 (defn fetch-records []
       (when (and (get @app-state :web-page-visible) (get @app-state :refresh))
             (case (get @app-state :active-tab)
@@ -45,17 +30,12 @@
                   1 (vms/fetch-vms)
                   nil)))
 
-(go (while true
-           (fetch-records)
-           (<! (timeout 10000))))
-
-
 (defn app []
+      (js/console.log @app-state)
       [sa/Tab
        {:onTabChange (fn [e, d]
                          (state-set-active-tab (:activeIndex (js->clj d :keywordize-keys true)))
-                         (fetch-records)
-                         (log/info @app-state))
+                         (fetch-records))
         :panes       [{:menuItem "Deployments"
                        :render   (fn [] (r/as-element
                                           [:div {:style {:width "auto" :overflow-x "auto"}}
@@ -72,6 +52,10 @@
 ;;
 ;; hook to initialize the web application
 ;;
-(defn ^:export init []
-      (when-let [container-element (.getElementById js/document "dashboard-tabs-container")]
-                (r/render [app] container-element)))
+(defn init [container]
+      (r/render [app] container)
+      (vs/VisibleWebPage :onWebPageVisible #(state-set-web-page-visible true)
+                         :onWebPageHidden #(state-set-web-page-visible false))
+      (go (while true
+                 (fetch-records)
+                 (<! (timeout 10000)))))

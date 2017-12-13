@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.legacy-components.utils.tables
+(ns sixsq.slipstream.legacy.utils.tables
   (:require [reagent.core :as r]
             [soda-ash.core :as sa]))
 

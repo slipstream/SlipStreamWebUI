@@ -1,17 +1,16 @@
-(ns sixsq.slipstream.dashboard-tabs.deployments
+(ns sixsq.slipstream.legacy.components.dashboard-tabs.deployments
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [soda-ash.core :as sa]
-            [taoensso.timbre :as log]
             [clojure.string :as str]
             [promesa.core :as p]
             [promesa.async-cljs :refer-macros [async]]
             [sixsq.slipstream.client.api.runs :as runs]
             [sixsq.slipstream.client.api.cimi :as cimi]
-            [sixsq.slipstream.legacy-components.utils.client :as client]
-            [sixsq.slipstream.legacy-components.utils.tables :as t]))
+            [sixsq.slipstream.legacy.utils.client :as client]
+            [sixsq.slipstream.legacy.utils.tables :as t]))
 
 (def app-state (r/atom {:deployments  {}
                       :request-opts {:offset     0
@@ -254,9 +253,7 @@
              row)))
 
 (defn deployments-table [cloud-filter]
-      (log/info (-> @app-state
-                    (dissoc :deployments)
-                    (dissoc :headers)))
+      (js/console.log @app-state)
       [sa/Segment {:basic true :loading (get @app-state :loading)}
        [sa/Message (cond-> {:header    (r/as-element [:div (get-in @app-state [:message :header])])
                             :content   (r/as-element [:div (get-in @app-state [:message :content])])

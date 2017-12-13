@@ -1,24 +1,23 @@
-(ns sixsq.slipstream.dashboard-tabs.vms
+(ns sixsq.slipstream.legacy.components.dashboard-tabs.vms
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [sixsq.slipstream.client.api.cimi :as cimi]
             [soda-ash.core :as sa]
-            [taoensso.timbre :as log]
-            [sixsq.slipstream.legacy-components.utils.tables :as t]
-            [sixsq.slipstream.legacy-components.utils.client :as client]
+            [sixsq.slipstream.legacy.utils.tables :as t]
+            [sixsq.slipstream.legacy.utils.client :as client]
             [clojure.string :as str]))
 
-(def app-state (atom {:vms              {}
-                      :request-opts     {"$first"   0
-                                         "$last"    10
-                                         "$orderby" "created:desc"}
-                      :record-displayed 10
-                      :loading          true
-                      :headers          ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type"
-                                         "Cloud Instance ID" "Cloud" "Owner"]
-                      }))
+(def app-state (r/atom {:vms              {}
+                        :request-opts     {"$first"   0
+                                           "$last"    10
+                                           "$orderby" "created:desc"}
+                        :record-displayed 10
+                        :loading          true
+                        :headers          ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type"
+                                           "Cloud Instance ID" "Cloud" "Owner"]
+                        }))
 
 (defn state-set-loading [v]
       (swap! app-state assoc :loading v))
@@ -120,11 +119,9 @@
                      :user-href       (get-in deployment [:user :href] "")}) vms)))
 
 (defn vms-table []
+      (js/console.log @app-state)
       (let [vms (get @app-state :vms)
             headers (get @app-state :headers)]
-           (log/info (-> @app-state
-                         (dissoc :vms)
-                         (dissoc :headers)))
            [sa/Segment {:basic true :loading (get @app-state :loading)}
             [sa/Table
              {:compact     "very"

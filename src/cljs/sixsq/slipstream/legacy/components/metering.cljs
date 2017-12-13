@@ -1,7 +1,4 @@
-; TODO terms only return 10 element
-; TODO right? division by 60 to get x hour
-
-(ns sixsq.slipstream.usage
+(ns sixsq.slipstream.legacy.components.metering
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
@@ -9,23 +6,11 @@
             [promesa.core :as p]
             [soda-ash.core :as sa]
             [clojure.string :as str]
-            [taoensso.timbre :as log]
             [cljsjs.react-date-range]
             [cljsjs.moment]
             [cljs.pprint :as pprint]
-            [sixsq.slipstream.legacy-components.utils.client :as client]
+            [sixsq.slipstream.legacy.utils.client :as client]
             [sixsq.slipstream.client.api.cimi :as cimi]))
-
-;;
-;; This option is not compatible with other platforms, notably nodejs.
-;; Use instead the logging calls to provide console output.
-;;
-(enable-console-print!)
-
-;;
-;; debugging log level
-;;
-(log/set-level! :debug)                                     ; TODO not working call!
 
 (def initial-start-date (.add (js/moment) -30 "days"))
 (def initial-end-date (.add (js/moment) -1 "days"))
@@ -310,8 +295,7 @@
 ;; hook to initialize the web application
 ;;
 
-(defn ^:export init []
-      (when-let [container-element (.getElementById js/document "usage-container")]
-                (r/render [app] container-element)
-                (handle-is-admin)
-                (fetch-connectors-list)))
+(defn init [container]
+      (r/render [app] container)
+      (handle-is-admin)
+      (fetch-connectors-list))
