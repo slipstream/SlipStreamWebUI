@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.dashboard-tabs.vms
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [sixsq.slipstream.client.api.cimi :as cimi]
             [soda-ash.core :as sa]
@@ -84,7 +84,7 @@
                               user-href]}]
       [[sa/TableCell {:collapsing true}
         (when (empty? deployment-href)
-              [sa/Popup {:trigger  (reagent/as-element [:div [sa/Icon {:name "exclamation circle"}] "Unkown"])
+              [sa/Popup {:trigger  (r/as-element [:div [sa/Icon {:name "exclamation circle"}] "Unkown"])
                          :inverted true
                          :size     "mini" :content "Deployment UUID unknown" :position "left center"}])
         [:a {:href deployment-href} (or (-> deployment-href

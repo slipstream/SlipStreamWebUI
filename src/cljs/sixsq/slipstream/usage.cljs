@@ -4,7 +4,7 @@
 (ns sixsq.slipstream.usage
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [promesa.core :as p]
             [soda-ash.core :as sa]
@@ -38,19 +38,19 @@
       (-> d js/moment (.add 24 "hours") .utc .format))
 
 
-(def app-state (atom {:is-admin   false
-                      :connectors {:list     []
-                                   :selected []
-                                   :loading  true}
-                      :users      {:list     []
-                                   :selected nil
-                                   :loading  true}
-                      :request    {:created-after-utc  nil
-                                   :created-before-utc nil}
-                      :results    {:loading  true
-                                   :metering {all-clouds  {}
-                                              :connectors []}}
-                      }))
+(def app-state (r/atom {:is-admin   false
+                        :connectors {:list     []
+                                     :selected []
+                                     :loading  true}
+                        :users      {:list     []
+                                     :selected nil
+                                     :loading  true}
+                        :request    {:created-after-utc  nil
+                                     :created-before-utc nil}
+                        :results    {:loading  true
+                                     :metering {all-clouds  {}
+                                                :connectors []}}
+                        }))
 
 (defn state-set-is-admin [v]
       (swap! app-state assoc :is-admin v))
@@ -312,6 +312,6 @@
 
 (defn ^:export init []
       (when-let [container-element (.getElementById js/document "usage-container")]
-                (reagent/render-component [app] container-element)
+                (r/render [app] container-element)
                 (handle-is-admin)
                 (fetch-connectors-list)))

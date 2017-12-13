@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.dashboard-tabs.deployments
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [soda-ash.core :as sa]
             [taoensso.timbre :as log]
@@ -13,7 +13,7 @@
             [sixsq.slipstream.legacy-components.utils.client :as client]
             [sixsq.slipstream.legacy-components.utils.tables :as t]))
 
-(def app-state (atom {:deployments  {}
+(def app-state (r/atom {:deployments  {}
                       :request-opts {:offset     0
                                      :limit      10
                                      :cloud      ""
@@ -149,7 +149,7 @@
                                 {:name "remove" :color "red" :link true :onClick #(reset! show-modal true)})]
                 [sa/Confirm {:open      @show-modal
                              :basic     true
-                             :content   (reagent/as-element
+                             :content   (r/as-element
                                           [:div
                                            [:h3 (str "Are you sure to terminate following deployment?")]
                                            [sa/Table {:unstackable true
@@ -248,7 +248,7 @@
                    :else {})
             row (vec (concat [sa/TableRow opts] (table-deployment-cells deployment)))]
            (if aborted
-             [sa/Popup {:trigger  (reagent/as-element row)
+             [sa/Popup {:trigger  (r/as-element row)
                         :inverted true
                         :size     "mini" :header "ss:abort" :content abort :position "top center"}]
              row)))
@@ -258,8 +258,8 @@
                     (dissoc :deployments)
                     (dissoc :headers)))
       [sa/Segment {:basic true :loading (get @app-state :loading)}
-       [sa/Message (cond-> {:header    (reagent/as-element [:div (get-in @app-state [:message :header])])
-                            :content   (reagent/as-element [:div (get-in @app-state [:message :content])])
+       [sa/Message (cond-> {:header    (r/as-element [:div (get-in @app-state [:message :header])])
+                            :content   (r/as-element [:div (get-in @app-state [:message :content])])
                             :hidden    (get-in @app-state [:message :hidden])
                             :onDismiss #(state-set-message :hidden true)}
                            (get-in @app-state [:message :error]) (merge {:icon "exclamation circle" :error true}))]

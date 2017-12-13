@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.dashboard_tabs
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [soda-ash.core :as sa]
             [clojure.string :as str]
@@ -22,9 +22,9 @@
 ;;
 (log/set-level! :debug)                                     ; TODO not working call!
 
-(def app-state (atom {:web-page-visible true
-                      :active-tab       0
-                      :refresh          true}))
+(def app-state (r/atom {:web-page-visible true
+                        :active-tab       0
+                        :refresh          true}))
 
 (defn state-set-web-page-visible [v]
       (swap! app-state assoc :web-page-visible v))
@@ -57,13 +57,13 @@
                          (fetch-records)
                          (log/info @app-state))
         :panes       [{:menuItem "Deployments"
-                       :render   (fn [] (reagent/as-element
+                       :render   (fn [] (r/as-element
                                           [:div {:style {:width "auto" :overflow-x "auto"}}
                                            [sa/TabPane {:as :div :style {:margin "10px"}}
                                             [dep/deployments-table]]
                                            [:br]]))}
                       {:menuItem "Virtual Machines"
-                       :render   (fn [] (reagent/as-element
+                       :render   (fn [] (r/as-element
                                           [:div {:style {:width "auto" :overflow-x "auto"}}
                                            [sa/TabPane {:as :div :style {:margin "10px"}}
                                             [vms/vms-table]]
@@ -74,4 +74,4 @@
 ;;
 (defn ^:export init []
       (when-let [container-element (.getElementById js/document "dashboard-tabs-container")]
-                (reagent/render-component [app] container-element)))
+                (r/render [app] container-element)))

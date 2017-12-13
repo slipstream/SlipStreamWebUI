@@ -1,5 +1,5 @@
 (ns sixsq.slipstream.legacy-components.utils.tables
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [soda-ash.core :as sa]))
 
 (defn table-navigator-footer [records-count-fn page-count-fn current-page-fn headers-count-fn
