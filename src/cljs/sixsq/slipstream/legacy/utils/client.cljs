@@ -23,7 +23,7 @@
 #_(log/debug "using slipstream server:" @SLIPSTREAM_URL)
 
 (def client (async-client/instance
-              ; (str @SLIPSTREAM_URL "/api/cloud-entry-point")
+              (str @SLIPSTREAM_URL "/api/cloud-entry-point")
               ;"https://localhost/api/cloud-entry-point" {:insecure? true} ;dev
-              nil   ; nuv.la
+              ; nil   ; nuv.la
               ))
