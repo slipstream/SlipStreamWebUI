@@ -5,6 +5,7 @@
             [cljs.core.async :refer [<! >! chan timeout]]
             [soda-ash.core :as sa]
             [clojure.string :as str]
+            [taoensso.timbre :as log]
             [sixsq.slipstream.legacy.utils.visibility :as vs]
             [sixsq.slipstream.legacy.utils.client :as client]
             [sixsq.slipstream.legacy.components.dashboard-tabs.deployments :as dep]
@@ -31,7 +32,7 @@
                   nil)))
 
 (defn app []
-      (js/console.log @app-state)
+      #_(log/debug @app-state)
       [sa/Tab
        {:onTabChange (fn [e, d]
                          (state-set-active-tab (:activeIndex (js->clj d :keywordize-keys true)))

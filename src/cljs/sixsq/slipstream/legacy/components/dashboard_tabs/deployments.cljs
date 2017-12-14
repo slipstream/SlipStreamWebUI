@@ -6,24 +6,29 @@
             [soda-ash.core :as sa]
             [clojure.string :as str]
             [promesa.core :as p]
-            [promesa.async-cljs :refer-macros [async]]
+            [taoensso.timbre :as log]
+            [sixsq.slipstream.legacy.utils.visibility :as vs]
             [sixsq.slipstream.client.api.runs :as runs]
             [sixsq.slipstream.client.api.cimi :as cimi]
             [sixsq.slipstream.legacy.utils.client :as client]
             [sixsq.slipstream.legacy.utils.tables :as t]))
 
-(def app-state (r/atom {:deployments  {}
-                      :request-opts {:offset     0
-                                     :limit      10
-                                     :cloud      ""
-                                     :activeOnly 1}
-                      :loading      true
-                      :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time [UTC]"
-                                     "Clouds" "Tags" "User" ""]
-                      :message      {:hidden  true
-                                     :error   true
-                                     :header  ""
-                                     :content ""}}))
+(def app-state (r/atom {:web-page-visible true
+                        :deployments  {}
+                        :request-opts {:offset     0
+                                       :limit      10
+                                       :cloud      ""
+                                       :activeOnly 1}
+                        :loading      true
+                        :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time [UTC]"
+                                       "Clouds" "Tags" "User" ""]
+                        :message      {:hidden  true
+                                       :error   true
+                                       :header  ""
+                                       :content ""}}))
+
+(defn state-set-web-page-visible [v]
+      (swap! app-state assoc :web-page-visible v))
 
 (defn state-set-loading [v]
       (swap! app-state assoc :loading v))
@@ -253,7 +258,7 @@
              row)))
 
 (defn deployments-table [cloud-filter]
-      (js/console.log @app-state)
+      #_(log/debug @app-state)
       [sa/Segment {:basic true :loading (get @app-state :loading)}
        [sa/Message (cond-> {:header    (r/as-element [:div (get-in @app-state [:message :header])])
                             :content   (r/as-element [:div (get-in @app-state [:message :content])])
@@ -311,3 +316,15 @@
         (state-set-cloud cloud))
       (state-enable-loading)
       (fetch-deployments))
+
+;;
+;; hook to initialize the web application
+;;
+(defn init [container]
+      (r/render [deployments-table] container)
+      (vs/VisibleWebPage :onWebPageVisible #(state-set-web-page-visible true)
+                         :onWebPageHidden #(state-set-web-page-visible false))
+      (go (while true
+                 (when (get @app-state :web-page-visible)
+                       (fetch-deployments))
+                 (<! (timeout 10000)))))

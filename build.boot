@@ -124,7 +124,7 @@
                         reload {:on-jsload 'sixsq.slipstream.webui/init})
          identity)
 
-(deftask development []
+(deftask development [l legacy bool "Legacy components dev"]
          (task-options! cljs {:optimizations    :none
                               :source-map       true
                               :compiler-options {:preloads        '[devtools.preload]
@@ -134,7 +134,9 @@
                                                                    'sixsq.slipstream.webui.defines/HOST_URL      "https://nuv.la"
                                                                    ;'sixsq.slipstream.webui.defines/CONTEXT  ""
                                                                    'goog.DEBUG                                   true}}}
-                        reload {:on-jsload 'sixsq.slipstream.webui/init})
+                        reload (if (:legacy *opts*)
+                                   {:on-jsload 'sixsq.slipstream.legacy.components/init}
+                                   {:on-jsload 'sixsq.slipstream.webui/init}))
          identity)
 
 (deftask build []
@@ -148,7 +150,8 @@
                (production)
                (cljs)
                (sift :include #{#".*webui\.out.*" #"webui\.cljs\.edn"
-                                #".*authn\.out.*" #"authn\.cljs\.edn"}
+                                #".*authn\.out.*" #"authn\.cljs\.edn"
+                                #".*legacy\.out.*" #"legacy\.cljs\.edn"}
                      :invert true)
                (jar)))
 
@@ -173,8 +176,8 @@
 
 (deftask dev
          "Simple alias to run application in development mode"
-         []
-         (comp (development)
+         [l legacy bool "Legacy components dev"]
+         (comp (development (when (:legacy *opts*) "-l"))
                #_(optimized-development)
                (run)))
 

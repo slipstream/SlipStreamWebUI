@@ -5,9 +5,10 @@
             [cljs.core.async :refer [<! >! chan timeout]]
             [sixsq.slipstream.client.api.cimi :as cimi]
             [soda-ash.core :as sa]
+            [taoensso.timbre :as log]
+            [clojure.string :as str]
             [sixsq.slipstream.legacy.utils.tables :as t]
-            [sixsq.slipstream.legacy.utils.client :as client]
-            [clojure.string :as str]))
+            [sixsq.slipstream.legacy.utils.client :as client]))
 
 (def app-state (r/atom {:vms              {}
                         :request-opts     {"$first"   0
@@ -119,7 +120,7 @@
                      :user-href       (get-in deployment [:user :href] "")}) vms)))
 
 (defn vms-table []
-      (js/console.log @app-state)
+      #_(log/debug @app-state)
       (let [vms (get @app-state :vms)
             headers (get @app-state :headers)]
            [sa/Segment {:basic true :loading (get @app-state :loading)}
