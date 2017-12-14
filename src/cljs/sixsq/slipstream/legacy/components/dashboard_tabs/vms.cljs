@@ -1,24 +1,24 @@
-(ns sixsq.slipstream.dashboard-tabs.vms
+(ns sixsq.slipstream.legacy.components.dashboard-tabs.vms
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [sixsq.slipstream.client.api.cimi :as cimi]
             [soda-ash.core :as sa]
             [taoensso.timbre :as log]
-            [sixsq.slipstream.dashboard-tabs.utils.tables :as t]
-            [sixsq.slipstream.dashboard-tabs.utils.client :as client]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [sixsq.slipstream.legacy.utils.tables :as t]
+            [sixsq.slipstream.legacy.utils.client :as client]))
 
-(def app-state (atom {:vms              {}
-                      :request-opts     {"$first"   0
-                                         "$last"    10
-                                         "$orderby" "created:desc"}
-                      :record-displayed 10
-                      :loading          true
-                      :headers          ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type"
-                                         "Cloud Instance ID" "Cloud" "Owner"]
-                      }))
+(def app-state (r/atom {:vms              {}
+                        :request-opts     {"$first"   0
+                                           "$last"    10
+                                           "$orderby" "created:desc"}
+                        :record-displayed 10
+                        :loading          true
+                        :headers          ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type"
+                                           "Cloud Instance ID" "Cloud" "Owner"]
+                        }))
 
 (defn state-set-loading [v]
       (swap! app-state assoc :loading v))
@@ -84,7 +84,7 @@
                               user-href]}]
       [[sa/TableCell {:collapsing true}
         (when (empty? deployment-href)
-              [sa/Popup {:trigger  (reagent/as-element [:div [sa/Icon {:name "exclamation circle"}] "Unkown"])
+              [sa/Popup {:trigger  (r/as-element [:div [sa/Icon {:name "exclamation circle"}] "Unkown"])
                          :inverted true
                          :size     "mini" :content "Deployment UUID unknown" :position "left center"}])
         [:a {:href deployment-href} (or (-> deployment-href
@@ -120,11 +120,9 @@
                      :user-href       (get-in deployment [:user :href] "")}) vms)))
 
 (defn vms-table []
+      #_(log/debug @app-state)
       (let [vms (get @app-state :vms)
             headers (get @app-state :headers)]
-           (log/info (-> @app-state
-                         (dissoc :vms)
-                         (dissoc :headers)))
            [sa/Segment {:basic true :loading (get @app-state :loading)}
             [sa/Table
              {:compact     "very"

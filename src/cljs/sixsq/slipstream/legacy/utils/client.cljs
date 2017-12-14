@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.dashboard-tabs.utils.client
+(ns sixsq.slipstream.legacy.utils.client
   (:require
     [clojure.string :as str]
     [taoensso.timbre :as log]
@@ -20,10 +20,10 @@
 ;;
 (def SLIPSTREAM_URL (delay (host-url)))
 
-(log/info "using slipstream server:" @SLIPSTREAM_URL)
+#_(log/debug "using slipstream server:" @SLIPSTREAM_URL)
 
 (def client (async-client/instance
-              (str @SLIPSTREAM_URL "/api/cloud-entry-point")
+              ; (str @SLIPSTREAM_URL "/api/cloud-entry-point")
               ;"https://localhost/api/cloud-entry-point" {:insecure? true} ;dev
-              ;nil   ; nuv.la
+              nil   ; nuv.la
               ))

@@ -1,30 +1,34 @@
-(ns sixsq.slipstream.dashboard-tabs.deployments
+(ns sixsq.slipstream.legacy.components.dashboard-tabs.deployments
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as r]
             [cljs.core.async :refer [<! >! chan timeout]]
             [soda-ash.core :as sa]
-            [taoensso.timbre :as log]
             [clojure.string :as str]
             [promesa.core :as p]
-            [promesa.async-cljs :refer-macros [async]]
+            [taoensso.timbre :as log]
+            [sixsq.slipstream.legacy.utils.visibility :as vs]
             [sixsq.slipstream.client.api.runs :as runs]
             [sixsq.slipstream.client.api.cimi :as cimi]
-            [sixsq.slipstream.dashboard-tabs.utils.client :as client]
-            [sixsq.slipstream.dashboard-tabs.utils.tables :as t]))
+            [sixsq.slipstream.legacy.utils.client :as client]
+            [sixsq.slipstream.legacy.utils.tables :as t]))
 
-(def app-state (atom {:deployments  {}
-                      :request-opts {:offset     0
-                                     :limit      10
-                                     :cloud      ""
-                                     :activeOnly 1}
-                      :loading      true
-                      :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time [UTC]"
-                                     "Clouds" "Tags" "User" ""]
-                      :message      {:hidden  true
-                                     :error   true
-                                     :header  ""
-                                     :content ""}}))
+(def app-state (r/atom {:web-page-visible true
+                        :deployments  {}
+                        :request-opts {:offset     0
+                                       :limit      10
+                                       :cloud      ""
+                                       :activeOnly 1}
+                        :loading      true
+                        :headers      ["" "ID" "Application / Component" "Service URL" "State" "VMs" "Start Time [UTC]"
+                                       "Clouds" "Tags" "User" ""]
+                        :message      {:hidden  true
+                                       :error   true
+                                       :header  ""
+                                       :content ""}}))
+
+(defn state-set-web-page-visible [v]
+      (swap! app-state assoc :web-page-visible v))
 
 (defn state-set-loading [v]
       (swap! app-state assoc :loading v))
@@ -149,7 +153,7 @@
                                 {:name "remove" :color "red" :link true :onClick #(reset! show-modal true)})]
                 [sa/Confirm {:open      @show-modal
                              :basic     true
-                             :content   (reagent/as-element
+                             :content   (r/as-element
                                           [:div
                                            [:h3 (str "Are you sure to terminate following deployment?")]
                                            [sa/Table {:unstackable true
@@ -248,18 +252,16 @@
                    :else {})
             row (vec (concat [sa/TableRow opts] (table-deployment-cells deployment)))]
            (if aborted
-             [sa/Popup {:trigger  (reagent/as-element row)
+             [sa/Popup {:trigger  (r/as-element row)
                         :inverted true
                         :size     "mini" :header "ss:abort" :content abort :position "top center"}]
              row)))
 
 (defn deployments-table [cloud-filter]
-      (log/info (-> @app-state
-                    (dissoc :deployments)
-                    (dissoc :headers)))
+      #_(log/debug @app-state)
       [sa/Segment {:basic true :loading (get @app-state :loading)}
-       [sa/Message (cond-> {:header    (reagent/as-element [:div (get-in @app-state [:message :header])])
-                            :content   (reagent/as-element [:div (get-in @app-state [:message :content])])
+       [sa/Message (cond-> {:header    (r/as-element [:div (get-in @app-state [:message :header])])
+                            :content   (r/as-element [:div (get-in @app-state [:message :content])])
                             :hidden    (get-in @app-state [:message :hidden])
                             :onDismiss #(state-set-message :hidden true)}
                            (get-in @app-state [:message :error]) (merge {:icon "exclamation circle" :error true}))]
@@ -314,3 +316,15 @@
         (state-set-cloud cloud))
       (state-enable-loading)
       (fetch-deployments))
+
+;;
+;; hook to initialize the web application
+;;
+(defn init [container]
+      (r/render [deployments-table] container)
+      (vs/VisibleWebPage :onWebPageVisible #(state-set-web-page-visible true)
+                         :onWebPageHidden #(state-set-web-page-visible false))
+      (go (while true
+                 (when (get @app-state :web-page-visible)
+                       (fetch-deployments))
+                 (<! (timeout 10000)))))

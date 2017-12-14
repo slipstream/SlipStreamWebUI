@@ -1,3 +1,0 @@
-{:require          [sixsq.slipstream.dashboard-tabs]
- :init-fns         [sixsq.slipstream.dashboard-tabs/init]
- :compiler-options {:asset-path "/dashboard_tabs/js/dashboard_tabs.out"}}
