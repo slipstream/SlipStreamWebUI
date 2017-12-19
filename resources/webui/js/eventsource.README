@@ -1,9 +1,0 @@
-
-EventSource Polyfill
---------------------
-
-The eventsource javascript files are provided by the
-[amvek/EventSource](https://github.com/amvtek/EventSource) GitHub
-project. Version 0.9.7 is the current version.
-
-The code is licensed under the MIT license.
