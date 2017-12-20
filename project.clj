@@ -22,9 +22,9 @@
   :parent-project {:coords  [sixsq.slipstream/parent "3.42-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories]}
 
-  :clean-targets ^{:protect false} ["resources/webui/assets/js"
-                                    "resources/authn/assets/js"
-                                    "resources/legacy/assets/js"
+  :clean-targets ^{:protect false} ["resources/public/webui/assets/js"
+                                    "resources/public/authn/assets/js"
+                                    "resources/public/legacy/assets/js"
                                     "target"]
 
   :prep-tasks []
@@ -33,17 +33,17 @@
 
   :resource {:resource-paths
              [["target/cljsjs/codemirror/cljsjs/codemirror/development/codemirror.css"
-               {:target-path "resources/webui/assets/css/codemirror.css"}]
+               {:target-path "resources/public/webui/assets/css/codemirror.css"}]
               ["target/version.css"
-               {:target-path "resources/webui/assets/css/version.css"}]]}
+               {:target-path "resources/public/webui/assets/css/version.css"}]]}
 
   :cljsbuild
   {:builds [
             {:id           "dev-webui"
              :source-paths ["src/cljs" "src/cljc"]
              :compiler     {:main                 sixsq.slipstream.webui
-                            :output-to            "resources/webui/js/webui.js"
-                            :output-dir           "resources/webui/assets/js/"
+                            :output-to            "resources/public/webui/js/webui.js"
+                            :output-dir           "resources/public/webui/assets/js/"
                             :asset-path           "assets/js"
                             :optimizations        :none
                             :source-map           true
@@ -62,7 +62,7 @@
             {:id           "prod-webui"
              :source-paths ["src/cljs" "src/cljc"]
              :compiler     {:main            sixsq.slipstream.webui
-                            :output-to       "resources/webui/js/webui.js"
+                            :output-to       "resources/public/webui/js/webui.js"
                             :output-dir      "target/webui/assets/js/"
                             :optimizations   :advanced
                             :parallel-build  true
@@ -71,7 +71,7 @@
             {:id           "prod-authn"
              :source-paths ["src/cljs" "src/cljc"]
              :compiler     {:main            sixsq.slipstream.authn
-                            :output-to       "resources/authn/js/authn.js"
+                            :output-to       "resources/public/authn/js/authn.js"
                             :output-dir      "target/authn/assets/js/"
                             :optimizations   :advanced
                             :parallel-build  true
@@ -86,8 +86,8 @@
             {:id           "dev-legacy"
              :source-paths ["src/cljs"]
              :compiler     {:main            sixsq.slipstream.legacy.components
-                            :output-to       "resources/legacy/js/legacy.js"
-                            :output-dir      "resources/legacy/assets/js"
+                            :output-to       "resources/public/legacy/js/legacy.js"
+                            :output-dir      "resources/public/legacy/assets/js"
                             :asset-path      "assets/js"
                             :optimizations   :none
                             :source-map      true
@@ -99,7 +99,7 @@
             {:id           "prod-legacy"
              :source-paths ["src/cljs" "src/cljc"]
              :compiler     {:main            sixsq.slipstream.legacy.components
-                            :output-to       "resources/legacy/js/legacy.js"
+                            :output-to       "resources/public/legacy/js/legacy.js"
                             :output-dir      "target/legacy/assets/js"
                             :optimizations   :advanced
                             :parallel-build  true}}
