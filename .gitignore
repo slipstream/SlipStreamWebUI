@@ -7,9 +7,9 @@ target
 *.DS_Store
 */.cljs_rhino_repl/*
 figwheel_server.log
-resources/webui/assets/css/version.css
-resources/webui/assets/css/codemirror.css
-resources/webui/js/webui.js
-resources/authn/js/authn.js
-resources/legacy/js/legacy.js
+resources/public/webui/assets/css/version.css
+resources/public/webui/assets/css/codemirror.css
+resources/public/webui/js/webui.js
+resources/public/authn/js/authn.js
+resources/public/legacy/js/legacy.js
 
