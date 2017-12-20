@@ -9,3 +9,7 @@ target
 figwheel_server.log
 resources/webui/assets/css/version.css
 resources/webui/assets/css/codemirror.css
+resources/webui/js/webui.js
+resources/authn/js/authn.js
+resources/legacy/js/legacy.js
+
