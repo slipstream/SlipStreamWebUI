@@ -61,15 +61,15 @@
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>boot-test</id>
+                <id>lein-test</id>
                 <phase>test</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>boot</executable>
+                  <executable>lein</executable>
                   <arguments>
-                    <argument>mvn-test</argument>
+                    <argument>test</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -88,18 +88,15 @@
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>boot-build</id>
+            <id>lein-build</id>
             <phase>install</phase>
             <goals>
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
+              <executable>lein</executable>
               <arguments>
-                <argument>mvn-build</argument>
+                <argument>prod</argument>
               </arguments>
             </configuration>
           </execution>

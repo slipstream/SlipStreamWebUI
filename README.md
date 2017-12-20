@@ -7,6 +7,10 @@ ClojureScript and related technologies.  It is an early **prototype**
 but feedback (as GitHub issues) on the UI, source code, and underlying
 technologies is welcome.
 
+It also contains, **reagent components** which are integrated to the
+**SlipStream UI**. The purpose of those components are to migrate to
+re-frame framework in nearly futur.
+
 At the moment, it is not packaged and can only be run from a 
 development environment.  See the instructions below for starting up
 the web UI.
@@ -36,10 +40,10 @@ Widgets:
  * [re-com](https://github.com/Day8/re-com): Pure ClojureScript
    widgets for web applications.  Comes with warning about portability
    between browsers.
- * [React Toolbox](http://react-toolbox.com/): Implementation of
-   Google's Material Design specification.
  * [Material UI](http://www.material-ui.com/): Implementation of
-   Google's Material Design specification.  
+   Google's Material Design specification.
+ * [Semantic UI](https://react.semantic-ui.com/introduction):
+   React integration for Semantic UI.
 
 Helpful Information:
 
@@ -51,14 +55,7 @@ Helpful Information:
 
 ## Development Environment
 
-The organization of the repository comes from the [tenzing application
-template](https://github.com/martinklepsch/tenzing).  It uses
-[boot](https://github.com/boot-clj/boot) to create an interactive
-development environment.  It also provides tasks for running unit
-tests and for creating the final artifacts for deployment.
-
-The essentials for using the development environment are below.  See
-the tenzing project page for more detailed instructions.
+The essentials for using the development environment are below.
 
 ### Browser
 
@@ -71,67 +68,54 @@ $ open /Applications/Google\ Chrome.app \
        --args --disable-web-security --user-data-dir
 ```
 
-### Boot
+#### Development
+The development environment requires [`lein`](https://leiningen.org).
 
-The development environment requires [`boot`](http://boot-clj.com).
-
-Once `boot` is installed, you can setup the interactive environment by
+Once `lein` is installed, you can setup the interactive environment by
 doing the following:
 
- * In a terminal, start development server `boot dev`.
+ * In a terminal, start development server for the webui.
   
      ```
-     $ boot dev
+     $ lein dev-webui
      ```
- * In another terminal, start the REPL:
+ * You will get automatically a REPL, with Fighweel controls:
  
      ```
-     $ boot repl -c
-     boot.user=> (start-repl)
-     ...
-     cljs.user=> 
+     dev-webui:cljs.user=>
      ```
 
- * Point your browser to
-   [http://localhost:3000/](http://localhost:3000). 
+ * A new page in your browser should automatically be open and point to:
+   [http://localhost:3000/webui/index.html](http://localhost:3000/webui/index.html).
 
 You should see the client application running.  Any changes you make
 to the source files (either ClojureScript sources or HTML templates)
 should be reflected immediately in the browser.
 
+* To get a dev environment on SlipStream UI components.
+
+     ```
+     $ lein dev-legacy
+     ```
+
+#### Testing
+
+* In a terminal, start tests for the webui.
+
+     ```
+     $ lein test
+     ```
+* You can also get automatic tests re-execution triggered on your code
+  change with following command :
+
+     ```
+     $ lein test-auto
+     ```
+
 ## Integration with IntelliJ
 
-For IntelliJ, the easiest integration is to generate a `project.clj`
-file from the `build.boot` file.  This can be done by creating a
-function in your boot profile.  There are
-[instructions](https://github.com/boot-clj/boot/wiki/For-Cursive-Users)
-on the boot wiki.
-
-After you've done this you can just run:
-
-```
-$ boot generate
-```
-
-to create the `project.clj` file.  You can then import the repository
-through IntelliJ, using the "leiningen" method in the dialog.
-
-To integrate the boot command line into the interface, configure the
-commands as "external tools".  Use the following:
-
- * Program: boot
- * Parameters: dev
- * Working directory: $ProjectFileDir$
-
-You can create one for the "dev" task and another for "repl -c".  They
-can be started via the "Tools -> External Tools" menu.  When started,
-these will show up in the console section of the interface and behave
-just like a terminal.
-
-You must still use an external browser to connect to the development
-environment.  Chrome is recommended.  Be sure to turn off the security
-settings if you're using a SlipStream service running on a different
-machine.
+You can import the repository through IntelliJ, using the "leiningen"
+method in the dialog.
 
 ### Logging
 
