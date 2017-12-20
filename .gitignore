@@ -6,5 +6,6 @@ out
 target
 *.DS_Store
 */.cljs_rhino_repl/*
-project.clj
 figwheel_server.log
+resources/webui/assets/css/version.css
+resources/webui/assets/css/codemirror.css
