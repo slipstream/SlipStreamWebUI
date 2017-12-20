@@ -4,8 +4,9 @@
 
 (defn table-navigator-footer [records-count-fn page-count-fn current-page-fn headers-count-fn
                               next-page-fn back-page-fn first-page-fn last-page-fn select-page-fn]
-  (let [first-button (atom 1)]
-    (fn []
+  (let [first-button (r/atom 1)]
+    (fn [records-count-fn page-count-fn current-page-fn headers-count-fn
+         next-page-fn back-page-fn first-page-fn last-page-fn select-page-fn]
       (let [number-button-nav 5
             records-count (records-count-fn)
             page-count (page-count-fn)
