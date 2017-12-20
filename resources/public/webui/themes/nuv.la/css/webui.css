@@ -1,0 +1,37 @@
+.webui-logo {
+    background-image: url('../images/nuvla-logo.png');
+}
+
+.webui-header {
+    color: black;
+    background-color: lightgrey;
+}
+
+.webui-footer {
+    color: black;
+    background-color: lightgrey;
+}
+
+/* breadcrumbs */
+
+.webui-breadcrumbs {
+    background-color: #ac0505;
+}
+
+.webui-breadcrumb-element {
+    color: white !important;
+}
+
+.webui-breadcrumbs-separator {
+    color: white !important;
+}
+
+/* navigation links */
+
+.webui-nav-link {
+    color: black;
+}
+
+.webui-nav-link:hover, .webui-nav-link:active, .webui-nav-link:focus {
+    color: black;
+}
