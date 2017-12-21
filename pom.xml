@@ -100,6 +100,19 @@
               </arguments>
             </configuration>
           </execution>
+          <execution>
+            <id>lein-clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>lein</executable>
+              <arguments>
+                <argument>clean</argument>
+              </arguments>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 

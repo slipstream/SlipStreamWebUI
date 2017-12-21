@@ -19,17 +19,26 @@
             [lein-resource "16.9.1"]
             [lein-doo "0.1.8"]]
 
-  :parent-project {:coords  [sixsq.slipstream/parent "3.42-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories]}
 
-  :clean-targets ^{:protect false} ["resources/public/webui/assets/js"
+  :clean-targets ^{:protect false} ["target"
+                                    "resources/public/webui/assets/js"
                                     "resources/public/authn/assets/js"
                                     "resources/public/legacy/assets/js"
-                                    "target"]
+                                    "resources/public/webui/js/webui.js"
+                                    "resources/public/authn/js/authn.js"
+                                    "resources/public/legacy/js/legacy.js"
+                                    "resources/public/webui/assets/css/version.css"
+                                    "resources/public/webui/assets/css/codemirror.css"]
+
+  :auto-clean false
 
   :prep-tasks []
 
   :source-paths ["src/cljs" "src/cljc"]
+
+  :pom-location "target/"
 
   :resource {:resource-paths
              [["target/cljsjs/codemirror/cljsjs/codemirror/development/codemirror.css"
@@ -143,6 +152,6 @@
   :aliases {"prepare"    ["do" ["filegen"] ["unpack-resources"] ["resource"]]
             "dev-webui"  ["do" ["prepare"] ["figwheel" "dev-webui"]]
             "dev-legacy" ["figwheel" "dev-legacy"]
-            "prod"       ["do" ["prepare"] ["cljsbuild" "once" "prod-webui" "prod-authn" "prod-legacy"] ["jar"]]
+            "prod"       ["do" ["prepare"] ["cljsbuild" "once" "prod-webui" "prod-authn" "prod-legacy"] ["install"]]
             "test-auto"  ["doo" "phantom" "test"]
             "test"       ["test-auto" "once"]})
