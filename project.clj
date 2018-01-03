@@ -141,11 +141,11 @@
 
    [cljsjs/codemirror "5.24.0-1"]
 
-   [soda-ash "0.76.0"]
-   [funcool/promesa "1.9.0"]
+   [soda-ash]
+   [funcool/promesa]
 
-   [cljsjs/moment "2.17.1-1"]
-   [cljsjs/react-date-range "0.2.4-0" :exclusions [cljsjs/react]]]
+   [cljsjs/moment]
+   [cljsjs/react-date-range]]
 
   :profiles {:dev {:dependencies [[binaryage/devtools]]}}
 
