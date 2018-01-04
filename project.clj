@@ -20,7 +20,7 @@
             [lein-doo "0.1.8"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories :plugins]}
 
   :clean-targets ^{:protect false} ["target"
                                     "resources/public/webui/assets/js"
