@@ -12,4 +12,5 @@ resources/public/webui/assets/css/codemirror.css
 resources/public/webui/js/webui.js
 resources/public/authn/js/authn.js
 resources/public/legacy/js/legacy.js
+resources/public/legacy/assets
 

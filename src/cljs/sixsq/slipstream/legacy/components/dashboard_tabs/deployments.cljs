@@ -25,7 +25,9 @@
                         :message          {:hidden  true
                                            :error   true
                                            :header  ""
-                                           :content ""}}))
+                                           :content ""}
+                        :show-modal       nil
+                        :deleted          #{}}))
 
 (defn state-set-web-page-visible [v]
   (swap! app-state assoc :web-page-visible v))
@@ -65,6 +67,15 @@
 
 (defn state-set-message [k v]
   (swap! app-state assoc-in [:message k] v))
+
+(defn state-set-show-modal [v]
+  (swap! app-state assoc :show-modal v))
+
+(defn state-append-deleted-deployment [v]
+  (swap! app-state update-in [:deleted] conj v))
+
+(defn state-pop-deleted-deployment [v]
+  (swap! app-state update-in [:deleted] disj v))
 
 (defn set-page [page]
   (state-set-offset (* (dec page) (request-opts-limit))))
@@ -143,60 +154,60 @@
 (defn is-terminated-state? [state]
   (#{"Finalizing" "Done" "Aborted" "Cancelled"} state))
 
-(defn terminate-confirm [deployment]
-  (let [show-modal (r/atom false)
-        deleting (r/atom false)]
-    (fn [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url] :as deployment}]
-      [:div [sa/Icon (if @deleting
-                       {:name "trash outline" :color "black"}
-                       {:name "remove" :color "red" :link true :onClick #(reset! show-modal true)})]
-       [sa/Confirm {:open      @show-modal
-                    :basic     true
-                    :content   (r/as-element
-                                 [sa/Table {:unstackable true
-                                            :celled      false
-                                            :single-line true
-                                            :inverted    true
-                                            :size        "small"
-                                            :padded      false}
-                                  [sa/TableBody
-                                   [sa/TableRow
-                                    [sa/TableCell "ID:"]
-                                    [sa/TableCell [:a {:href (str "run/" deployment-uuid)} deployment-uuid]]]
-                                   [sa/TableRow
-                                    [sa/TableCell "Module URI:"]
-                                    [sa/TableCell [:a {:href module-uri} module-uri]]]
-                                   [sa/TableRow [sa/TableCell "Start time:"] [sa/TableCell start-time]]
-                                   [sa/TableRow [sa/TableCell "State:"] [sa/TableCell state]]
-                                   [sa/TableRow
-                                    [sa/TableCell "Service URL:"]
-                                    [sa/TableCell [:a {:href service-url :target "_blank"} service-url]]]
-                                   [sa/TableRow [sa/TableCell "State:"] [sa/TableCell state]]
-                                   [sa/TableRow [sa/TableCell "Clouds:"] [sa/TableCell clouds]]
-                                   [sa/TableRow [sa/TableCell "Abort:"] [sa/TableCell abort]]
-                                   [sa/TableRow [sa/TableCell "Tags:"] [sa/TableCell tags]]]
-                                  ])
-                    :onCancel  #(reset! show-modal false)
-                    :onConfirm #(do
-                                  (reset! deleting true)
-                                  (go
-                                    (let [result (<! (runs/terminate-run client/client deployment-uuid))
-                                          error (when (instance? js/Error result)
-                                                  (:error (js->clj
-                                                            (->> result ex-data :body (.parse js/JSON))
-                                                            :keywordize-keys true)))]
-                                      (when error
-                                        (state-set-message :header (str (get error :reason "-")
-                                                                        ": "
-                                                                        (get error :code "-")))
-                                        (state-set-message :content (get error :detail "-"))
-                                        (state-set-message :error true)
-                                        (state-set-message :hidden false))
-                                      ))
-                                  (fetch-deployments)
-                                  (reset! show-modal false))
-                    }]]
-      )))
+(defn terminate-confirm [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url]
+                          :as   deployment}]
+  [:div [sa/Icon (if (contains? (get @app-state :deleted) deployment-uuid)
+                   {:name "trash outline" :color "black"}
+                   {:name "remove" :color "red" :link true :onClick #(state-set-show-modal deployment-uuid)})]
+   [sa/Confirm {:open      (= (get @app-state :show-modal) deployment-uuid)
+                :basic     true
+                :content   (r/as-element
+                             [sa/Table {:unstackable true
+                                        :celled      false
+                                        :single-line true
+                                        :inverted    true
+                                        :size        "small"
+                                        :padded      false}
+                              [sa/TableBody
+                               [sa/TableRow
+                                [sa/TableCell "ID:"]
+                                [sa/TableCell [:a {:href (str "run/" deployment-uuid)} deployment-uuid]]]
+                               [sa/TableRow
+                                [sa/TableCell "Module URI:"]
+                                [sa/TableCell [:a {:href module-uri} module-uri]]]
+                               [sa/TableRow [sa/TableCell "Start time:"] [sa/TableCell start-time]]
+                               [sa/TableRow [sa/TableCell "State:"] [sa/TableCell state]]
+                               [sa/TableRow
+                                [sa/TableCell "Service URL:"]
+                                [sa/TableCell [:a {:href service-url :target "_blank"} service-url]]]
+                               [sa/TableRow [sa/TableCell "State:"] [sa/TableCell state]]
+                               [sa/TableRow [sa/TableCell "Clouds:"] [sa/TableCell clouds]]
+                               [sa/TableRow [sa/TableCell "Abort:"] [sa/TableCell abort]]
+                               [sa/TableRow [sa/TableCell "Tags:"] [sa/TableCell tags]]]
+                              ])
+                :onCancel  #(state-set-show-modal nil)
+                :onConfirm #(do
+                              (state-append-deleted-deployment deployment-uuid)
+                              (go
+                                (let [result (<! (runs/terminate-run client/client deployment-uuid))
+                                      error (when (instance? js/Error result)
+                                              (:error (js->clj
+                                                        (->> result ex-data :body (.parse js/JSON))
+                                                        :keywordize-keys true)))]
+                                  (when error
+                                    (state-set-message :header (str (get error :reason "-")
+                                                                    ": "
+                                                                    (get error :code "-")))
+                                    (state-set-message :content (get error :detail "-"))
+                                    (state-set-message :error true)
+                                    (state-set-message :hidden false))
+                                  ))
+                              (go (<! (timeout 30000))
+                                  (state-pop-deleted-deployment deployment-uuid))
+                              (fetch-deployments)
+                              (state-set-show-modal nil))
+                }]]
+  )
 
 
 (defn table-deployment-cells
@@ -238,7 +249,7 @@
       [:a {:href user-href} user-href]]
      (if (is-terminated-state? state)
        [sa/TableCell {:collapsing true}]
-       [sa/TableCell {:collapsing true} [terminate-confirm deployment]])
+       [sa/TableCell {:collapsing true} (terminate-confirm deployment)])
      ]))
 
 (defn table-row-format [{:keys [state abort] :as deployment}]
