@@ -123,7 +123,7 @@
             :state           status
             :start-time      startTime
             :clouds          cloudServiceNames
-            :user-href       username
+            :user            username
             :tags            tags
             :abort           abort
             :type            type
@@ -211,7 +211,7 @@
 
 
 (defn table-deployment-cells
-  [{:keys [deployment-uuid module-uri service-url state start-time clouds user-href state tags abort type active-vm]
+  [{:keys [deployment-uuid module-uri service-url state start-time clouds user state tags abort type active-vm]
     :as   deployment}]
   (let [global-prop (if (is-terminated-state? state) {:disabled true} {})]
     [[sa/TableCell (merge {:collapsing true} global-prop)
@@ -246,7 +246,7 @@
                                        {:max-width "100px" :overflow "hidden" :text-overflow "ellipsis"}}
                           global-prop) tags]
      [sa/TableCell {:style {:max-width "100px" :overflow "hidden" :text-overflow "ellipsis"}}
-      [:a {:href user-href} user-href]]
+      [:a {:href (str "user/" user)} user]]
      (if (is-terminated-state? state)
        [sa/TableCell {:collapsing true}]
        [sa/TableCell {:collapsing true} (terminate-confirm deployment)])
