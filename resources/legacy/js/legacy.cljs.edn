@@ -1,3 +1,0 @@
-{:require          [sixsq.slipstream.legacy.components]
- :init-fns         [sixsq.slipstream.legacy.components/init]
- :compiler-options {:asset-path "/legacy/js/legacy.out"}}

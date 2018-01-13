@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset='utf-8'>
+
+    <!-- ensure EventSource is available -->
+    <script type="text/javascript" src="js/eventsource-loader.js"></script>
+
+    <title>SlipStream WebUI</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="assets/css/re-com.css">
+
+    <link rel="stylesheet" href="themes/default/css/webui.css">
+
+    <link rel="stylesheet" href="assets/css/version.css">
+
+    <link rel="stylesheet" href="assets/css/codemirror.css">
+    <!-- host-based theme stylesheet link will be added here -->
+</head>
+<body>
+<div id="webui-wrapper">
+    <div id="webui-header"></div>
+    <div id="webui-container"></div>
+    <div id="webui-footer"></div>
+    <script type="text/javascript" src="js/webui.js"></script>
+    <script>sixsq.slipstream.webui.init();</script>
+</div>
+</body>
+</html>
