@@ -1,0 +1,138 @@
+
+/*
+  Styles on the webui-wrapper and webui-container allow for a 'sticky' footer
+  that stays at the bottom of the window even if there's insufficient content.
+*/
+
+/*#app {height: 100%;
+      background: #f7f7f7;}*/
+
+#webui-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#webui-container {
+    flex: 1;
+}
+
+/*
+  Inserts a theme-dependent image. Themes would normally override only the
+  URL for the background image itself.
+*/
+.webui-logo {
+    width: 100%;
+    background-image: url('../images/cubic-logo.png') !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: contain !important;
+}
+
+
+/*
+  Allows the container to scroll with overview in the x-direction.  Usually
+  put on a Container to take advantage of the automatic width calculation of
+  the Semantic UI Container.
+*/
+.webui-x-autoscroll {
+    overflow-x: auto;
+}
+
+
+/*
+  Configures a block element (usually a div) to provide the logo.
+*/
+.webui-bkg-image-cover {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    width: "20ex";
+    height: "15ex";
+}
+
+
+/*
+  This wraps the entire page.  There are two columns on the page.
+  The left column is the sidebar; the right column is the main
+  content.
+*/
+.webui-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+
+/*
+  The sidebar sits in the left column. When present, it always
+  displays at its natural width.  The minimum height is the height
+  of the page to ensure that the menu goes to the bottom of the
+  page.
+*/
+.webui-sidebar {
+    display: flex;
+    flex: 0;
+    min-height: 100vh;
+    background-color: maroon !important;
+    margin: 0 0 !important;
+}
+
+
+/*
+  The main content sits in the right column. The minimum height is
+  the page height to force the footer to the bottom of the page.
+  There are three elements in this column: the header, the content,
+  and the footer.  These are arranged vertically.
+*/
+.webui-main {
+    display: flex !important; /* will be block without !important */
+    min-height: 100vh;
+    flex-direction: column;
+    background-color: #f5f5f5 !important;
+}
+
+
+/*
+  Main panel for the content.  This will expand vertically as
+  needed to force the footer to the bottom of the page.
+*/
+.webui-content {
+    display: flex;
+    flex: 1;
+    padding: 1ex;
+}
+
+
+/* Page footer styles. */
+.webui-footer {
+    display: flex;
+    flex-direction: row;
+    color: black;
+    padding: 1ex;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: maroon;
+    margin: 1ex 0 0 0;
+}
+
+.webui-footer-left {
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+}
+
+.webui-footer-center {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+}
+
+.webui-footer-right {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.webui-header {
+    height: 30px;
+}
