@@ -2,63 +2,104 @@
 
 An application that provides a graphical interface to cloud management
 services that use the CIMI interface.  The tortured acronym comes from
-"Cimi resoUrces via a Browser InterfaCe".
+"Cimi resoUrces via a Browser InterfaCe". It is an early **prototype**
+but feedback (as GitHub issues) on the UI, source code, and underlying
+technologies is welcome.
 
 ## Frameworks and Libraries
 
- - [re-frame](https://github.com/Day8/re-frame)
+SlipStream Code:
 
-## Development Mode
+ * [SlipStream Clojure(Script)
+   API](https://github.com/slipstream/SlipStreamClojureAPI): Provides
+   a ClojureScript API for the CIMI and CIMI-like resources within
+   SlipStream.
 
-### Run application:
+Frameworks:
+
+ * [Reagent](https://github.com/reagent-project/reagent): Provides a
+   ClojureScript interface to the
+   [React](https://facebook.github.io/react/) framework.
+ * [re-frame](https://github.com/Day8/re-frame): A framework that
+   relies on React for visualization and provides mechanisms for using
+   "FRP" for data flow and control.
+
+Widgets:
+
+ * [Semantic UI](https://react.semantic-ui.com/introduction):
+   React integration for Semantic UI.
+
+
+## Development Environment
+
+The essentials for using the development environment are below.
+
+### Browser
+
+To test the code on a SlipStream server (e.g. https://nuv.la/) running
+on a different machine, you'll need to start a browser with the XSS
+protections disabled.  For Chrome on macOS, this can be done with:
 
 ```
-lein clean
-lein figwheel dev
+$ open /Applications/Google\ Chrome.app \
+       --args --disable-web-security --user-data-dir
 ```
 
-Figwheel will automatically push cljs changes to the browser.
+### Development
+The development environment requires [`lein`](https://leiningen.org).
 
-Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
+Once `lein` is installed, you can setup the interactive environment by
+doing the following:
 
-### Run tests:
+ * In a terminal, start development server for the webui.
+
+     ```
+     $ lein dev
+     ```
+ * You will get automatically a REPL, with Fighweel controls:
+
+     ```
+     dev:cljs.user=>
+     ```
+
+ * Wait a bit, then browse to
+ [http://localhost:3000/webui.html](http://localhost:3000/webui.html).
+
+
+You should see the client application running.  Any changes you make
+to the source files (either ClojureScript sources or HTML templates)
+should be reflected immediately in the browser.
+
+### Testing
+
+* In a terminal, start tests for the webui.
+
+     ```
+     $ lein test
+     ```
+
+* You can also get automatic tests re-execution triggered on your code
+  change with following command :
+
+     ```
+     $ lein test-auto
+     ```
+
+## Integration with IntelliJ
+
+You can import the repository through IntelliJ, using the "leiningen"
+method in the dialog.
+
+### Logging
+
+You can reset the logging level for kvlt from the REPL when running
+in development mode. From the REPL do:
 
 ```
-lein clean
-lein doo phantom test once
+=> (require '[taoensso.timbre :as timbre])
+=> (timbre/set-level! :info)
 ```
 
-The above command assumes that you have
-[phantomjs](https://www.npmjs.com/package/phantomjs)
-installed. However, please note that
-[doo](https://github.com/bensu/doo) can be configured to run cljs.test
-in many other JS environments (chrome, ie, safari, opera, slimer,
-node, rhino, or nashorn).
-
-## Production Build
-
-To compile clojurescript to javascript:
-
-```
-lein clean
-lein cljsbuild once min
-```
-
-## Legal
-
-Unless otherwise indicated in the source files, all code is subject to
-the following copyright and license.
-
-Copyright 2017 Charles A. Loomis, Jr.
-
-Licensed under the Apache License, Version 2.0 (the "License"); you
-may not use this file except in compliance with the License.  You may
-obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied.  See the License for the specific language governing
-permissions and limitations under the License.
+The default value is `:debug` which will log all of the HTTP requests
+and responses.  This is useful when debugging interactions with
+SlipStream, but annoying otherwise.

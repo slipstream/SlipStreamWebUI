@@ -1,18 +1,16 @@
 (ns sixsq.slipstream.webui.dev_server
   (:require [clojure.java.io :as io]
-            [compojure.core :refer [ANY defroutes]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
+            [compojure.core :refer [GET defroutes]]
+            [compojure.route :as route]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.util.response :as response]))
 
-;https://www.opensourcery.co.za/2016/05/27/smooth-client-side-routing-in-a-figwheel-only-project/
 (defroutes routes
-           (ANY "webui/*" _
-                {:status 200
-                 :headers {"Content-Type" "text/html; charset=utf-8"}
-                 :body (io/input-stream (io/resource "public/webui.html"))})
-           (ANY "/webui/*" _
-                {:status 200
-                 :headers {"Content-Type" "text/html; charset=utf-8"}
-                 :body (io/input-stream (io/resource "public/webui.html"))}))
+           (route/resources "/" {:root "public"})
+           (GET "/" [] (-> (response/resource-response "webui.html" {:root "public"})
+                           (response/content-type "text/html")))
+           (route/not-found (-> (response/resource-response "webui.html" {:root "public"})
+                                (response/content-type "text/html"))))
 
 (def http-handler
   (-> routes

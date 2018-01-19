@@ -71,9 +71,9 @@
      :source-paths ["src/cljs" "test/clj"]
      :figwheel     {:on-jsload "sixsq.slipstream.webui.core/mount-root"}
      :compiler     {:main                 sixsq.slipstream.webui.core
-                    :output-to            "resources/public/js/compiled/webui.js"
-                    :output-dir           "resources/public/js/compiled/out"
-                    :asset-path           "/js/compiled/out"
+                    :output-to            "resources/public/js/webui.js"
+                    :output-dir           "resources/public/js/out"
+                    :asset-path           "/js/out"
                     :source-map-timestamp true
                     :preloads             [devtools.preload
                                            day8.re-frame.trace.preload]
@@ -106,15 +106,14 @@
                    [ring]
                    [ring/ring-defaults]
                    [compojure]]
-    :figwheel     {:server-port  3000
-                   :ring-handler sixsq.slipstream.webui.dev_server/http-handler
-                   :css-dirs     ["resources/public/css"]}
+    :figwheel     {:server-port 3000
+                   :ring-handler sixsq.slipstream.webui.dev_server/http-handler}
     }
    }
 
-  :aliases {"prepare"    ["do" ["filegen"] ["unpack-resources"] ["resource"]]
-            "dev" ["figwheel" "dev"]
-            "prod"  ["do" ["prepare"] ["cljsbuild" "once" "prod"] ["install"]]
-            "test-auto"  ["doo" "phantom" "test"]
-            "test"       ["test-auto" "once"]}
+  :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
+            "dev"       ["do" ["prepare"] ["figwheel" "dev"]]
+            "prod"      ["do" ["prepare"] ["cljsbuild" "once" "prod"] ["install"]]
+            "test-auto" ["doo" "phantom" "test"]
+            "test"      ["test-auto" "once"]}
   )

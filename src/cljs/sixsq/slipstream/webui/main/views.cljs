@@ -74,11 +74,11 @@
     (fn []
       [:footer.webui-footer
        [:div.webui-footer-left
-        [:span#release-version (str "v3.43-SNAPSHOT")]]
+        [:span#release-version (str "SlipStream v")]]
        [:div.webui-footer-center
-        [:span "Copyright © 2017, Charles A. Loomis, Jr."]]
+        [:span " © 2018, SixSq Sàrl"]]
        [:div.webui-footer-right
-        [:span "Apache 2.0"]]])))
+        [:span " Open source under Apache 2.0 License"]]])))
 
 
 (defn contents
