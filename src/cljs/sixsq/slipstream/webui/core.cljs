@@ -42,7 +42,7 @@
     :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
                             (dispatch-sync [::authn-events/redirect-uri "/dashboard"]))))
 
-(defn ^:export open-modal []
+(defn ^:export open-authn-modal []
   (log/debug "dispatch open-modal for authn view")
   (dispatch [::authn-events/open-modal]))
 

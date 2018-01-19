@@ -8,11 +8,11 @@
            (ANY "webui/*" _
                 {:status 200
                  :headers {"Content-Type" "text/html; charset=utf-8"}
-                 :body (io/input-stream (io/resource "public/index.html"))})
+                 :body (io/input-stream (io/resource "public/webui.html"))})
            (ANY "/webui/*" _
                 {:status 200
                  :headers {"Content-Type" "text/html; charset=utf-8"}
-                 :body (io/input-stream (io/resource "public/index.html"))}))
+                 :body (io/input-stream (io/resource "public/webui.html"))}))
 
 (def http-handler
   (-> routes
