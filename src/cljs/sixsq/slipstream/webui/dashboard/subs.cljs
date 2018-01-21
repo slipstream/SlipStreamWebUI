@@ -25,3 +25,17 @@
   (fn [db]
     (::dashboard-spec/virtual-machines db)))
 
+(reg-sub
+  ::records-displayed
+  (fn [db]
+    (::dashboard-spec/records-displayed db)))
+
+(reg-sub
+  ::page
+  (fn [db]
+    (::dashboard-spec/page db)))
+
+(reg-sub
+  ::total-pages
+  (fn [db]
+    (::dashboard-spec/total-pages db)))

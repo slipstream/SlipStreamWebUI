@@ -51,15 +51,20 @@
   :dependencies [[org.clojure/clojure]
                  [org.clojure/clojurescript]
                  [reagent]
+                 ;[reagent :exclusions [cljsjs/react]]
+                 ;[cljsjs/react-with-addons "15.6.1-0"]
+
                  [re-frame]
                  [secretary]
                  [expound]
-                 [soda-ash]
+                 ;[soda-ash]
                  [com.taoensso/timbre "4.10.0"]
                  ;[cljsjs/d3 "4.12.0-0"]
                  [cljsjs/codemirror "5.24.0-1"]
                  [com.sixsq.slipstream/SlipStreamClientAPI-jar]
-                 [com.taoensso/tempura]]
+                 [com.taoensso/tempura]
+                 [cljsjs/semantic-ui-react "0.77.2-0" :exclusions [cljsjs/react]] ;;TODO this is a local version waiting https://github.com/cljsjs/packages/pull/1461
+                 ]
 
   :source-paths ["src/clj"]
 
@@ -112,8 +117,8 @@
    }
 
   :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
-            "dev"       ["do" ["prepare"] ["figwheel" "dev"]]
-            "prod"      ["do" ["prepare"] ["cljsbuild" "once" "prod"] ["install"]]
+            "dev"       ["do" "prepare" ["figwheel" "dev"]]
+            "prod"      ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
             "test-auto" ["doo" "phantom" "test"]
             "test"      ["test-auto" "once"]}
   )

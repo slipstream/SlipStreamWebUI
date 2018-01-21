@@ -2,99 +2,108 @@
   "Mapping of names of Semantic UI components to the Soda Ash wrappers. This
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
-  (:require [soda-ash.core :as sa]))
+  (:require                                                 ;[soda-ash.core :as sa]
+    [reagent.core :as r]
+    cljsjs.semantic-ui-react))
 
-(def Breadcrumb sa/Breadcrumb)
-(def BreadcrumbDivider sa/BreadcrumbDivider)
-(def BreadcrumbSection sa/BreadcrumbSection)
+(defn adapt-component [tag]
+  (r/adapt-react-class (aget js/semanticUIReact tag)))
 
-(def Button sa/Button)
-(def ButtonGroup sa/ButtonGroup)
+(def Breadcrumb (adapt-component "Breadcrumb"))
+(def BreadcrumbDivider (adapt-component "BreadcrumbDivider"))
+(def BreadcrumbSection (adapt-component "BreadcrumbSection"))
 
-(def Card sa/Card)
-(def CardContent sa/CardContent)
-(def CardDescription sa/CardDescription)
-(def CardHeader sa/CardHeader)
+(def Button (adapt-component "Button"))
+(def ButtonGroup (adapt-component "ButtonGroup"))
 
-(def Checkbox sa/Checkbox)
+(def Card (adapt-component "Card"))
+(def CardContent (adapt-component "CardContent"))
+(def CardDescription (adapt-component "CardDescription"))
+(def CardHeader (adapt-component "CardHeader"))
 
-(def Container sa/Container)
+(def Checkbox (adapt-component "Checkbox"))
 
-(def Dimmer sa/Dimmer)
-(def DimmerDimmable sa/DimmerDimmable)
+(def Container (adapt-component "Container"))
 
-(def Divider sa/Divider)
+(def Dimmer (adapt-component "Dimmer"))
+(def DimmerDimmable (adapt-component "DimmerDimmable"))
 
-(def Dropdown sa/Dropdown)
-(def DropdownItem sa/DropdownItem)
-(def DropdownMenu sa/DropdownMenu)
+(def Divider (adapt-component "Divider"))
 
-(def Form sa/Form)
-(def FormButton sa/FormButton)
-(def FormDropdown sa/FormDropdown)
-(def FormField sa/FormField)
-(def FormGroup sa/FormGroup)
-(def FormInput sa/FormInput)
-(def FormSelect sa/FormSelect)
+(def Dropdown (adapt-component "Dropdown"))
+(def DropdownItem (adapt-component "DropdownItem"))
+(def DropdownMenu (adapt-component "DropdownMenu"))
 
-(def Grid sa/Grid)
-(def GridColumn sa/GridColumn)
-(def GridRow sa/GridRow)
+(def Form (adapt-component "Form"))
+(def FormButton (adapt-component "FormButton"))
+(def FormDropdown (adapt-component "FormDropdown"))
+(def FormField (adapt-component "FormField"))
+(def FormGroup (adapt-component "FormGroup"))
+(def FormInput (adapt-component "FormInput"))
+(def FormSelect (adapt-component "FormSelect"))
 
-(def Icon sa/Icon)
+(def Grid (adapt-component "Grid"))
+(def GridColumn (adapt-component "GridColumn"))
+(def GridRow (adapt-component "GridRow"))
 
-(def Image sa/Image)
+(def Icon (adapt-component "Icon"))
 
-(def Input sa/Input)
+(def Image (adapt-component "Image"))
 
-(def Header sa/Header)
+(def Input (adapt-component "Input"))
 
-(def Label sa/Label)
+(def Header (adapt-component "Header"))
 
-(def ListSA sa/ListSA)
-(def ListContent sa/ListContent)
-(def ListHeader sa/ListHeader)
-(def ListItem sa/ListItem)
+(def Label (adapt-component "Label"))
+(def LabelDetail (adapt-component "LabelDetail"))
 
-(def Loader sa/Loader)
+(def ListSA (adapt-component "List"))
+(def ListContent (adapt-component "ListContent"))
+(def ListHeader (adapt-component "ListHeader"))
+(def ListItem (adapt-component "ListItem"))
 
-(def Menu sa/Menu)
-(def MenuItem sa/MenuItem)
-(def MenuMenu sa/MenuMenu)
+(def Loader (adapt-component "Loader"))
 
-(def Message sa/Message)
-(def MessageHeader sa/MessageHeader)
+(def Menu (adapt-component "Menu"))
+(def MenuItem (adapt-component "MenuItem"))
+(def MenuMenu (adapt-component "MenuMenu"))
 
-(def Modal sa/Modal)
-(def ModalActions sa/ModalActions)
-(def ModalContent sa/ModalContent)
-(def ModalHeader sa/ModalHeader)
+(def Message (adapt-component "Message"))
+(def MessageHeader (adapt-component "MessageHeader"))
 
-(def Popup sa/Popup)
-(def Progress sa/Progress)
+(def Modal (adapt-component "Modal"))
+(def ModalActions (adapt-component "ModalActions"))
+(def ModalContent (adapt-component "ModalContent"))
+(def ModalHeader (adapt-component "ModalHeader"))
 
-(def Rail sa/Rail)
+(def Pagination (r/adapt-react-class (aget js/semanticUIReact "Pagination")))
 
-(def Segment sa/Segment)
-(def SegmentGroup sa/SegmentGroup)
+(def Popup (adapt-component "Popup"))
+(def Progress (adapt-component "Progress"))
 
-(def Sidebar sa/Sidebar)
-(def SidebarPushable sa/SidebarPushable)
-(def SidebarPusher sa/SidebarPusher)
+(def Rail (adapt-component "Rail"))
 
-(def Statistic sa/Statistic)
-(def StatisticGroup sa/StatisticGroup)
-(def StatisticLabel sa/StatisticLabel)
-(def StatisticValue sa/StatisticValue)
+(def Segment (adapt-component "Segment"))
+(def SegmentGroup (adapt-component "SegmentGroup"))
 
-(def Tab sa/Tab)
-(def TabPane sa/TabPane)
+(def Sidebar (adapt-component "Sidebar"))
+(def SidebarPushable (adapt-component "SidebarPushable"))
+(def SidebarPusher (adapt-component "SidebarPusher"))
 
-(def Table sa/Table)
-(def TableBody sa/TableBody)
-(def TableCell sa/TableCell)
-(def TableHeader sa/TableHeader)
-(def TableHeaderCell sa/TableHeaderCell)
-(def TableRow sa/TableRow)
+(def Statistic (adapt-component "Statistic"))
+(def StatisticGroup (adapt-component "StatisticGroup"))
+(def StatisticLabel (adapt-component "StatisticLabel"))
+(def StatisticValue (adapt-component "StatisticValue"))
 
-(def Transition sa/Transition)
+(def Tab (adapt-component "Tab"))
+(def TabPane (adapt-component "TabPane"))
+
+(def Table (adapt-component "Table"))
+(def TableBody (adapt-component "TableBody"))
+(def TableCell (adapt-component "TableCell"))
+(def TableFooter (adapt-component "TableFooter"))
+(def TableHeader (adapt-component "TableHeader"))
+(def TableHeaderCell (adapt-component "TableHeaderCell"))
+(def TableRow (adapt-component "TableRow"))
+
+(def Transition (adapt-component "Transition"))

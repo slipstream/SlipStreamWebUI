@@ -56,19 +56,43 @@
   (fn [db [_ cloud]]
     (assoc db ::dashboard-spec/filtered-cloud cloud)))
 
+(defn page-count [record-displayed vms-count]
+  (let [full-page-number (quot vms-count record-displayed)
+        additionnal-page (if (pos? (mod vms-count record-displayed)) 1 0)]
+    (+ full-page-number additionnal-page)))
+
 (reg-event-db
   ::set-virtual-machines
   [debug]
-  (fn [db [_ virtual-machines]]
-    (assoc db ::dashboard-spec/virtual-machines virtual-machines)))
+  (fn [{:keys [::dashboard-spec/records-displayed] :as db} [_ virtual-machines]]
+    (let [total-pages (page-count records-displayed (:count virtual-machines))
+          new-db (-> db
+                     (assoc ::dashboard-spec/virtual-machines virtual-machines)
+                     (assoc ::dashboard-spec/total-pages total-pages))]
+      (cond-> new-db
+              (> (:page db) total-pages) (assoc ::dashboard-spec/page total-pages)))))
+
+(defn fetch-vms-cofx [{:keys [::client-spec/client
+                              ::dashboard-spec/filtered-cloud
+                              ::dashboard-spec/page
+                              ::dashboard-spec/records-displayed] :as db}]
+  (let [last (* page records-displayed)
+        first (+ (- last records-displayed) 1)]
+    {::dashboard-fx/get-virtual-machines [client {:$filter filtered-cloud
+                                                  :$order  "created:desc"
+                                                  :$first  first
+                                                  :$last   last}]}))
 
 (reg-event-fx
   ::get-virtual-machines
-  (fn [{{:keys [::client-spec/client ::dashboard-spec/filtered-cloud] :as db} :db} _]
-    {;:db                             (assoc db ::deployment-spec/loading? true)
-     ::dashboard-fx/get-virtual-machines [client (cond->
-                                                   {:$first   0
-                                                    :$last    10
-                                                    :$orderby "created:desc"}
-                                                   filtered-cloud (assoc :$filter filtered-cloud))]}))
+  (fn [{:keys [db]} _]
+    (fetch-vms-cofx db)))
 
+(reg-event-fx
+  ::set-page
+  (fn [{{:keys [::client-spec/client
+                ::dashboard-spec/filtered-cloud
+                ::dashboard-spec/page
+                ::dashboard-spec/records-displayed] :as db} :db} [_ page]]
+    (let [db (assoc db ::dashboard-spec/page page)]
+      (merge (fetch-vms-cofx db) {:db db}))))

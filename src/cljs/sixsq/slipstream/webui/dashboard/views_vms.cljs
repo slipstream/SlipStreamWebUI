@@ -10,7 +10,8 @@
     [clojure.string :as str]
     #_[sixsq.slipstream.legacy.utils.tables :as t]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.dashboard.subs :as dashbord-subs]))
+    [sixsq.slipstream.webui.dashboard.subs :as dashbord-subs]
+    [sixsq.slipstream.webui.dashboard.events :as dashboard-events]))
 
 (def app-state (r/atom {:vms              {}
                         :request-opts     {"$first"   0
@@ -31,50 +32,23 @@
 (defn state-enable-loading []
   (state-set-loading true))
 
-(defn state-set-request-opts [k v]
-  (swap! app-state assoc-in [:request-opts k] v))
-
-(defn state-set-first [v]
-  (state-set-request-opts "$first" v))
-
-(defn state-set-last [v]
-  (state-set-request-opts "$last" v))
-
-(defn state-set-filter [v]
-  (state-set-request-opts "$filter" v))
-
-(defn state-dissoc-filter []
-  (swap! app-state update :request-opts dissoc "$filter"))
-
-(defn state-set-vms [v]
-  (swap! app-state assoc :vms v))
-
-(defn vms-count [] (get-in @app-state [:vms :count] 0))
-
-(defn page-count []
-  (let [vc (vms-count)
-        record-displayed (get @app-state :record-displayed)
-        full-page-number (quot vc record-displayed)
-        additionnal-page (if (pos? (mod vc record-displayed)) 1 0)]
-    (+ full-page-number additionnal-page)))
-
-(defn current-page [] (/ (get-in @app-state [:request-opts "$last"]) (get @app-state :record-displayed)))
-
-(defn set-page [page]
-  (let [record-displayed (get @app-state :record-displayed)
-        last (* page record-displayed)]
-    (state-set-last last)
-    (state-set-first (- last record-displayed))))
-
-(defn inc-page []
-  (let [cp (current-page)]
-    (when (< cp (page-count))
-      (set-page (inc cp)))))
-
-(defn dec-page []
-  (let [cp (current-page)]
-    (when (> cp 1)
-      (set-page (dec cp)))))
+;(defn current-page [] (/ (get-in @app-state [:request-opts "$last"]) (get @app-state :record-displayed)))
+;
+;(defn set-page [page]
+;  (let [record-displayed (get @app-state :record-displayed)
+;        last (* page record-displayed)]
+;    (state-set-last last)
+;    (state-set-first (- last record-displayed))))
+;
+;(defn inc-page []
+;  (let [cp (current-page)]
+;    (when (< cp (page-count))
+;      (set-page (inc cp)))))
+;
+;(defn dec-page []
+;  (let [cp (current-page)]
+;    (when (> cp 1)
+;      (set-page (dec cp)))))
 
 ;(defn fetch-vms []
 ;  (go
@@ -122,49 +96,65 @@
             :user-href       (get-in deployment [:user :href] "")}) vms)))
 
 (defn vms-table []
-  (let [vms (subscribe [::dashbord-subs/virtual-machines])
-        headers ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type" "Cloud Instance ID" "Cloud" "Owner"]]
+  (let [virtual-machines (subscribe [::dashbord-subs/virtual-machines])
+        headers ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type" "Cloud Instance ID" "Cloud" "Owner"]
+        record-displayed (subscribe [::dashbord-subs/records-displayed])
+        page (subscribe [::dashbord-subs/page])
+        total-pages (subscribe [::dashbord-subs/total-pages])]
     (fn []
-      [ui/Segment {:basic true :loading false #_(get @app-state :loading)}
-       [ui/Table
-        {:compact     "very"
-         :size        "small"
-         :selectable  true
-         :unstackable true
-         :celled      false
-         :single-line true
-         :collapsing  false
-         :padded      false}
+      (let [vms-count (get @virtual-machines :count 0)]
+        [ui/Segment {:basic true :loading false #_(get @app-state :loading)}
+         [ui/Table
+          {:compact     "very"
+           :size        "small"
+           :selectable  true
+           :unstackable true
+           :celled      false
+           :single-line true
+           :collapsing  false
+           :padded      false}
 
-        [ui/TableHeader
-         (vec (concat [ui/TableRow]
-                      (vec (map (fn [label] ^{:key label} [ui/TableHeaderCell label]) headers))))]
-        (vec (concat [ui/TableBody]
-                     (vec (map
-                            (fn [entry]
-                              (vec (concat [ui/TableRow
-                                            {:error (empty? (:deployment-href entry))}] (table-vm-cells entry))))
-                            (extract-vms-data vms)))))
-        #_[t/table-navigator-footer
-           vms-count
-           page-count
-           current-page
-           #(count (get @app-state :headers))
-           #(do (inc-page)
+          [ui/TableHeader
+           (vec (concat [ui/TableRow]
+                        (vec (map (fn [label] ^{:key label} [ui/TableHeaderCell label]) headers))))]
+          (vec (concat [ui/TableBody]
+                       (vec (map
+                              (fn [entry]
+                                (vec (concat [ui/TableRow
+                                              {:error (empty? (:deployment-href entry))}] (table-vm-cells entry))))
+                              (extract-vms-data @virtual-machines)))))
+          [ui/TableFooter
+           [ui/TableRow
+            [ui/TableHeaderCell {:col-span (str 3)}
+             [ui/Label "Found" [ui/LabelDetail vms-count]]]
+            [ui/TableHeaderCell {:textAlign "right" :col-span (str (- (count headers) 3))}
+             [ui/Pagination
+              {:size         "tiny"
+               :totalPages   @total-pages
+               :activePage   @page
+               :onPageChange (fn [e d]
+                               (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))
+               }]]]]
+          #_[t/table-navigator-footer
+             vms-count
+             page-count
+             current-page
+             #(count (get @app-state :headers))
+             #(do (inc-page)
+                  (state-enable-loading)
+                  (fetch-vms))
+             #(do
+                (dec-page)
                 (state-enable-loading)
                 (fetch-vms))
-           #(do
-              (dec-page)
-              (state-enable-loading)
-              (fetch-vms))
-           #(do (set-page 1)
+             #(do (set-page 1)
+                  (state-enable-loading)
+                  (fetch-vms))
+             #(do
+                (set-page (page-count))
                 (state-enable-loading)
                 (fetch-vms))
-           #(do
-              (set-page (page-count))
-              (state-enable-loading)
-              (fetch-vms))
-           #(do (set-page (.-children %2))
-                (state-enable-loading)
-                (fetch-vms))]
-        ]])))
+             #(do (set-page (.-children %2))
+                  (state-enable-loading)
+                  (fetch-vms))]
+          ]]))))
