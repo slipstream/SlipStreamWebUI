@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.utils.defines :as defines]
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
+    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.db.events :as db-events]
@@ -42,12 +43,17 @@
     :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
                             (dispatch-sync [::authn-events/redirect-uri "/dashboard"]))))
 
+(defn visibility-watcher []
+  (let [callback #(dispatch [::main-events/visible (not (.-hidden js/document))])]
+    (. js/document (addEventListener "visibilitychange" callback))))
+
 (defn ^:export open-authn-modal []
   (log/debug "dispatch open-modal for authn view")
   (dispatch [::authn-events/open-modal]))
 
 (defn ^:export init []
   (routes/routes)
+  (visibility-watcher)
   (dispatch-sync [::db-events/initialize-db])
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
   (dispatch-sync [::history-events/initialize @config/path-prefix])

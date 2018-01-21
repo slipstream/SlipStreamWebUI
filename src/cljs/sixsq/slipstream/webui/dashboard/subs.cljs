@@ -15,4 +15,13 @@
   (fn [db]
     (::dashboard-spec/loading? db)))
 
+(reg-sub
+  ::selected-tab
+  (fn [db]
+    (::dashboard-spec/selected-tab db)))
+
+(reg-sub
+  ::virtual-machines
+  (fn [db]
+    (::dashboard-spec/virtual-machines db)))
 

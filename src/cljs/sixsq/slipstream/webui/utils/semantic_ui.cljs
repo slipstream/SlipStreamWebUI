@@ -87,6 +87,9 @@
 (def StatisticLabel sa/StatisticLabel)
 (def StatisticValue sa/StatisticValue)
 
+(def Tab sa/Tab)
+(def TabPane sa/TabPane)
+
 (def Table sa/Table)
 (def TableBody sa/TableBody)
 (def TableCell sa/TableCell)

@@ -1,13 +1,14 @@
 (ns sixsq.slipstream.webui.dashboard.events
   (:require
     [clojure.string :as str]
-    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
+    [re-frame.core :refer [reg-event-db reg-event-fx dispatch debug]]
 
     [sixsq.slipstream.webui.utils.general :as general-utils]
 
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard-spec]
+    [sixsq.slipstream.webui.dashboard.effects :as dashboard-fx]
     [taoensso.timbre :as log]))
 
 
@@ -43,3 +44,31 @@
                              collection-name
                              (general-utils/prepare-params params)
                              #(dispatch [::set-statistics %])]})))
+
+(reg-event-db
+  ::set-selected-tab
+  (fn [db [_ tab-index]]
+    (assoc db ::dashboard-spec/selected-tab tab-index)))
+
+(reg-event-db                                               ; TODO set loading and fetch records
+  ::set-filtered-cloud
+  [debug]
+  (fn [db [_ cloud]]
+    (assoc db ::dashboard-spec/filtered-cloud cloud)))
+
+(reg-event-db
+  ::set-virtual-machines
+  [debug]
+  (fn [db [_ virtual-machines]]
+    (assoc db ::dashboard-spec/virtual-machines virtual-machines)))
+
+(reg-event-fx
+  ::get-virtual-machines
+  (fn [{{:keys [::client-spec/client ::dashboard-spec/filtered-cloud] :as db} :db} _]
+    {;:db                             (assoc db ::deployment-spec/loading? true)
+     ::dashboard-fx/get-virtual-machines [client (cond->
+                                                   {:$first   0
+                                                    :$last    10
+                                                    :$orderby "created:desc"}
+                                                   filtered-cloud (assoc :$filter filtered-cloud))]}))
+

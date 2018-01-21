@@ -93,16 +93,16 @@
   []
   (let [show? (subscribe [::main-subs/sidebar-open?])]
     (fn []
-     [ui/Menu {:className "webui-header" :borderless true}
-      [ui/MenuItem {:link true
-                    :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
-       [ui/Icon {:name (if @show? "chevron left" "bars")}]]
-      [ui/MenuItem [breadcrumbs]]
+      [ui/Menu {:className "webui-header" :borderless true}
+       [ui/MenuItem {:link    true
+                     :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
+        [ui/Icon {:name (if @show? "chevron left" "bars")}]]
+       [ui/MenuItem [breadcrumbs]]
 
-      [ui/MenuMenu {:position "right"}
-       [ui/MenuItem
-        [i18n-views/locale-dropdown]
-        [authn-views/authn-button]]]])))
+       [ui/MenuMenu {:position "right"}
+        [ui/MenuItem
+         [i18n-views/locale-dropdown]
+         [authn-views/authn-button]]]])))
 
 
 (defn app []
@@ -113,39 +113,4 @@
        [ui/Container {:className "webui-main" :fluid true}
         [header]
         [contents]
-        [footer]]
-       ]
-      #_[:div
-
-         [sidebar]
-         #_[ui/Grid {
-                     :style {:height "100vh" :width "100vw"} :celled true :stretched true :columns 2}
-            #_[ui/GridRow
-               [ui/GridColumn [ui/Container [sidebar]]]
-               [ui/GridColumn [ui/Container [contents]]]]
-            [ui/GridRow [ui/Container [footer]]]]]
-
-      #_[ui/Grid {:celled true}
-         [ui/GridColumn]
-         [ui/GridColumn
-          [ui/SegmentGroup {:attached "top"}
-           [ui/Segment [header]]
-           [ui/Segment [contents]]
-           [ui/Segment [footer]]]]])))
-
-
-#_(defn app []
-    (let [session (subscribe [::authn-subs/session])]
-      (fn []
-        [ui/Grid {:style {:height "100vh" :maxWidth "100vw"}}
-         [ui/SidebarPushable {:as (aget js/semanticUIReact "Segment") :style {:height "100vh"}}
-          [sidebar]
-          [ui/SidebarPusher
-           [ui/SegmentGroup
-            [ui/Segment [header]]
-            [ui/Segment [contents]]
-            [ui/Segment [footer]]]
-           ;[header]
-           ;[contents]
-           ;[footer]
-           ]]])))
+        [footer]]])))

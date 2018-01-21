@@ -8,6 +8,11 @@
   (fn [db]
     (:sixsq.slipstream.webui.main.spec/sidebar-open? db)))
 
+(reg-sub
+  ::visible?
+  (fn [db]
+    (:sixsq.slipstream.webui.main.spec/visible? db)))
+
 
 (reg-sub
   ::nav-path

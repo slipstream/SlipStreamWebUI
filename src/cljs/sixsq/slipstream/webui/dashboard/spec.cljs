@@ -7,7 +7,16 @@
 
 (s/def ::statistics any?)
 
+(s/def ::selected-tab int?)
+
+(s/def ::filtered-cloud (s/nilable string?))
+
+(s/def ::virtual-machines any?)
+
 (s/def ::db (s/keys :req [::loading? ::statistics]))
 
 (def defaults {::loading? false
-               ::statistics nil})
+               ::statistics nil
+               ::selected-tab 0
+               ::filtered-cloud nil
+               ::virtual-machines nil})
