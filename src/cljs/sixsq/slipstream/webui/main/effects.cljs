@@ -9,7 +9,7 @@
            (fn handler [[{:keys [action id frequency event] :as opts}]]
              (condp = action
                :clean (doseq [[id _] (map identity @live-intervals)]
-                        (log/info "Cleaning " id)
+                        (log/info "Cleaning intervals: " id)
                         (handler [{:action :end :id id}]))
                :pause (do
                         (log/info "Pausing intervals: " @live-intervals)
@@ -21,12 +21,14 @@
                          (doseq [[id opts] (map identity @live-intervals)]
                            (handler [opts])))
                :start (do
-                        (log/info "Start dispatch timer: " opts)
+                        (log/info "Starting dispatch timer: " opts)
+                        (when (-> @live-intervals id)
+                          (handler [{:action :end :id id}])) ; avoid duplication of same action
                         (dispatch event)
                         (swap! live-intervals assoc id
                                (assoc opts :timer (js/setInterval #(dispatch event) frequency))))
                :end (do
-                      (log/info "Will delete this timer: " (-> @live-intervals id :timer))
+                      (log/info "Deleting timer: " (-> @live-intervals id :timer))
                       (js/clearInterval (-> @live-intervals id :timer))
                         (swap! live-intervals dissoc id))))))
 

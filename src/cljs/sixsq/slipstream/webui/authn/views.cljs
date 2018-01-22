@@ -204,3 +204,7 @@
       (if-not @session
         [login-button]
         [logout-button]))))
+
+(defn ^:export open-authn-modal []
+  (log/debug "dispatch open-modal for authn view")
+  (dispatch [::authn-events/open-modal]))

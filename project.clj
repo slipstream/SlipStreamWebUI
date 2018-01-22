@@ -23,7 +23,7 @@
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.43-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
-  :clean-targets ^{:protect false} ["resources/public/js/compiled"
+  :clean-targets ^{:protect false} ["resources/public/js/"
                                     "target"
                                     "test/js"
                                     "resources/public/css/version.css"

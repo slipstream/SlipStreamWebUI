@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard-spec]
     [sixsq.slipstream.webui.dashboard.effects :as dashboard-fx]
+    [sixsq.slipstream.webui.main.effects :as main-fx]
     [taoensso.timbre :as log]))
 
 
@@ -45,10 +46,19 @@
                              (general-utils/prepare-params params)
                              #(dispatch [::set-statistics %])]})))
 
-(reg-event-db
+(reg-event-fx
   ::set-selected-tab
-  (fn [db [_ tab-index]]
-    (assoc db ::dashboard-spec/selected-tab tab-index)))
+  [debug]
+  (fn [{:keys [db]} [_ tab-index]]
+    {:db                       (-> db
+                                   (assoc ::dashboard-spec/selected-tab tab-index)
+                                   (assoc ::dashboard-spec/page 1))
+     ::main-fx/action-interval [{:action    :start
+                                 :id        :dashboard-tab
+                                 :frequency 10000
+                                 :event     [(case tab-index
+                                               0 ::get-deployments
+                                               1 ::get-virtual-machines)]}]}))
 
 (reg-event-db                                               ; TODO set loading and fetch records
   ::set-filtered-cloud
@@ -56,10 +66,10 @@
   (fn [db [_ cloud]]
     (assoc db ::dashboard-spec/filtered-cloud cloud)))
 
-(defn page-count [record-displayed vms-count]
-  (let [full-page-number (quot vms-count record-displayed)
-        additionnal-page (if (pos? (mod vms-count record-displayed)) 1 0)]
-    (+ full-page-number additionnal-page)))
+(defn page-count [record-displayed element-count]
+  (cond-> element-count
+          true (quot record-displayed)
+          (pos? (mod element-count record-displayed)) inc))
 
 (reg-event-db
   ::set-virtual-machines
@@ -78,10 +88,34 @@
                               ::dashboard-spec/records-displayed] :as db}]
   (let [last (* page records-displayed)
         first (+ (- last records-displayed) 1)]
-    {::dashboard-fx/get-virtual-machines [client {:$filter filtered-cloud
+    {::dashboard-fx/get-virtual-machines [client {:$filter (when filtered-cloud
+                                                             (str "connector/href=\"connector/" filtered-cloud "\""))
                                                   :$order  "created:desc"
                                                   :$first  first
                                                   :$last   last}]}))
+
+(defn fetch-deployments-cofx [{:keys [::client-spec/client
+                                      ::dashboard-spec/filtered-cloud
+                                      ::dashboard-spec/page
+                                      ::dashboard-spec/records-displayed
+                                      ::dashboard-spec/active-deployments-only] :as db}]
+  (let [offset (* (dec page) records-displayed)]
+    {::dashboard-fx/get-deployments [client {:offset     offset
+                                             :limit      records-displayed
+                                             :cloud      (or filtered-cloud "")
+                                             :activeOnly (if active-deployments-only 1 0)}]}))
+
+(reg-event-db
+  ::set-deployments
+  [debug]
+  (fn [{:keys [::dashboard-spec/records-displayed] :as db}  [_ deployments]]
+    (let [deployments-count (get-in deployments [:runs :totalCount] 0)
+          total-pages (page-count records-displayed deployments-count)
+          new-db (-> db
+                     (assoc ::dashboard-spec/deployments deployments)
+                     (assoc ::dashboard-spec/total-pages total-pages))]
+      (cond-> new-db
+              (> (:page db) total-pages) (assoc ::dashboard-spec/page total-pages)))))
 
 (reg-event-fx
   ::get-virtual-machines
@@ -89,10 +123,23 @@
     (fetch-vms-cofx db)))
 
 (reg-event-fx
+  ::get-deployments
+  (fn [{:keys [db]} _]
+    (fetch-deployments-cofx db)))
+
+(reg-event-fx
   ::set-page
-  (fn [{{:keys [::client-spec/client
-                ::dashboard-spec/filtered-cloud
-                ::dashboard-spec/page
-                ::dashboard-spec/records-displayed] :as db} :db} [_ page]]
+  (fn [{{:keys [::dashboard-spec/selected-tab] :as db} :db} [_ page]]
     (let [db (assoc db ::dashboard-spec/page page)]
-      (merge (fetch-vms-cofx db) {:db db}))))
+      (merge ((case selected-tab
+                0 fetch-deployments-cofx
+                1 fetch-vms-cofx) db) {:db db}))))
+
+(reg-event-fx
+  ::active-deployments-only
+  [debug]
+  (fn [{{:keys [::dashboard-spec/selected-tab] :as db} :db} [_ v]]
+    (let [db (assoc db ::dashboard-spec/active-deployments-only v)]
+      (merge ((case selected-tab
+                0 fetch-deployments-cofx
+                1 fetch-vms-cofx) db) {:db db}))))

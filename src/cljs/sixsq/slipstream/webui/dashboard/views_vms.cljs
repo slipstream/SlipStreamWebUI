@@ -127,7 +127,8 @@
            [ui/TableRow
             [ui/TableHeaderCell {:col-span (str 3)}
              [ui/Label "Found" [ui/LabelDetail vms-count]]]
-            [ui/TableHeaderCell {:textAlign "right" :col-span (str (- (count headers) 3))}
+            [ui/TableHeaderCell {:textAlign "right"
+                                 :col-span (str (- (count headers) 3))}
              [ui/Pagination
               {:size         "tiny"
                :totalPages   @total-pages

@@ -26,6 +26,11 @@
     (::dashboard-spec/virtual-machines db)))
 
 (reg-sub
+  ::deployments
+  (fn [db]
+    (::dashboard-spec/deployments db)))
+
+(reg-sub
   ::records-displayed
   (fn [db]
     (::dashboard-spec/records-displayed db)))
@@ -39,3 +44,8 @@
   ::total-pages
   (fn [db]
     (::dashboard-spec/total-pages db)))
+
+(reg-sub
+  ::active-deployments-only
+  (fn [db]
+    (::dashboard-spec/active-deployments-only db)))

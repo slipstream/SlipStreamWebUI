@@ -10,6 +10,7 @@
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
+    [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
     [sixsq.slipstream.webui.db.events :as db-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.views :as main-views]
@@ -41,15 +42,13 @@
   (render-component-when-present
     "modal-login" authn-views/modal-login
     :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
-                            (dispatch-sync [::authn-events/redirect-uri "/dashboard"]))))
+                            (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
+  (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
+  )
 
 (defn visibility-watcher []
   (let [callback #(dispatch [::main-events/visible (not (.-hidden js/document))])]
     (. js/document (addEventListener "visibilitychange" callback))))
-
-(defn ^:export open-authn-modal []
-  (log/debug "dispatch open-modal for authn view")
-  (dispatch [::authn-events/open-modal]))
 
 (defn ^:export init []
   (routes/routes)

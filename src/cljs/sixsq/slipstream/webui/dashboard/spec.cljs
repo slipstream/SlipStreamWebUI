@@ -15,17 +15,23 @@
 
 (s/def ::total-pages int?)
 
+(s/def ::records-displayed int?)
+
 (s/def ::virtual-machines any?)
 
-(s/def ::records-displayed int?)
+(s/def ::deployments any?)
+
+(s/def ::active-deployments-only boolean?)
 
 (s/def ::db (s/keys :req [::loading? ::statistics]))
 
-(def defaults {::loading?          false
-               ::statistics        nil
-               ::selected-tab      0
-               ::filtered-cloud    nil
-               ::virtual-machines  nil
-               ::records-displayed 10
-               ::page              1
-               ::total-pages       0})
+(def defaults {::loading?                false
+               ::statistics              nil
+               ::selected-tab            0
+               ::filtered-cloud          nil
+               ::virtual-machines        nil
+               ::deployments             nil
+               ::active-deployments-only true
+               ::records-displayed       10
+               ::page                    1
+               ::total-pages             0})
