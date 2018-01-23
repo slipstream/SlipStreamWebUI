@@ -1,4 +1,4 @@
-(def +version+ "3.43-SNAPSHOT")
+(def +version+ "3.44-SNAPSHOT")
 
 ;; FIXME: Provide HTTPS access to Nexus.
 (require 'cemerick.pomegranate.aether)
@@ -20,7 +20,7 @@
             [lein-resource "16.9.1"]
             ]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.43-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.44-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :clean-targets ^{:protect false} ["resources/public/js/"
@@ -107,7 +107,7 @@
   :profiles
   {:dev
    {:dependencies [[binaryage/devtools]
-                   [day8.re-frame/trace]
+                   [day8.re-frame/trace "0.1.14"]
                    [ring]
                    [ring/ring-defaults]
                    [compojure]]
