@@ -2,7 +2,7 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
-    [cljs.core.async :refer [<!]]
+    [cljs.core.async :refer [<! timeout]]
     [re-frame.core :refer [reg-fx dispatch]]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.runs :as runs]
@@ -17,29 +17,6 @@
       (let [virtual-machines (<! (cimi/search client "virtualMachines" (general-utils/prepare-params params)))]
         (dispatch [:sixsq.slipstream.webui.dashboard.events/set-virtual-machines virtual-machines])))))
 
-
-;(defn fetch-deployments []
-;  (go
-;    (let [response (<! (runs/search-runs client/client (get @app-state :request-opts)))
-;          item (get-in response [:runs :item] [])
-;          deployments-list (if (= (type item) cljs.core/PersistentVector) item [item])]
-;      ; workaround gson issue, when one element in item it give element instead of a vector of element
-;
-;      (if (empty? deployments-list)
-;        (do (state-set-deployments (assoc-in response [:runs :item] deployments-list))
-;            (state-disable-loading))
-;        (-> (p/promise
-;              (fn [resolve _] (fetch-active-vms resolve deployments-list)))
-;            (p/then (fn [active-vms-per-deployment]
-;                      (->> deployments-list
-;                           (map #(assoc % :active-vm
-;                                          (get active-vms-per-deployment (keyword (str "run/" (:uuid %))) 0)))
-;                           (assoc-in response [:runs :item])
-;                           state-set-deployments)
-;                      (state-disable-loading))))
-;        ))))
-
-
 (reg-fx
   ::get-deployments
   (fn [[client params]]
@@ -49,9 +26,11 @@
             deployments-list (if (= (type item) cljs.core/PersistentVector) item [item])
             deployments-uuid (map #(str "deployment/href=\"run/" (:uuid %) "\"") deployments-list)
             filter-str (str/join " or " deployments-uuid)
-            active-vms (<! (cimi/search client "virtualMachines" {"$last"        0
-                                                                  "$aggregation" "terms:deployment/href"
-                                                                  "$filter"      filter-str}))
+            vm-aggregation-params (-> {"$last"        0
+                                       "$aggregation" "terms:deployment/href"
+                                       "$filter"      filter-str}
+                                      general-utils/prepare-params)
+            active-vms (<! (cimi/search client "virtualMachines" vm-aggregation-params))
             active-vms-per-deployment (->> (get-in active-vms [:aggregations :terms:deployment/href :buckets] [])
                                            (map #(vector (keyword (:key %)) (:doc_count %)))
                                            (into {}))
@@ -61,3 +40,28 @@
                                                           (keyword (str "run/" (:uuid %))) 0)))
                                       (assoc-in response [:runs :item]))]
         (dispatch [:sixsq.slipstream.webui.dashboard.events/set-deployments deployments-with-vms])))))
+
+(reg-fx
+  ::fetch-tab-records
+  (fn [[client params]]
+
+    ))
+
+(reg-fx
+  ::pop-deleted-deployment
+  (fn [[uuid]]
+    (go (<! (timeout 30000))
+        (dispatch [:sixsq.slipstream.webui.dashboard.events/pop-deleted-deployment uuid]))))
+
+(reg-fx
+  ::delete-deployment
+  (fn [[client uuid]]
+    (go
+      (let [result (<! (runs/terminate-run client uuid))
+            error (when (instance? js/Error result)
+                    (:error (js->clj
+                              (->> result ex-data :body (.parse js/JSON))
+                              :keywordize-keys true)))]
+        (if error
+          (dispatch [:sixsq.slipstream.webui.dashboard.events/set-error-message-deployment error])
+          (dispatch [:sixsq.slipstream.webui.dashboard.events/deleted-deployment uuid]))))))

@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.authn.events
   (:require
-    [re-frame.core :refer [dispatch reg-event-db reg-event-fx debug]]
+    [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.authn.effects :as authn-fx]
     [sixsq.slipstream.webui.history.effects :as history-fx]

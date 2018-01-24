@@ -31,16 +31,17 @@
         visible? (subscribe [::main-subs/visible?])]
     (dispatch [::main-events/action-interval {:action    :start
                                               :id        :dashboard-tab
-                                              :frequency 10000
-                                              :event     [(case @selected-tab
-                                                            0 ::dashboard-events/get-deployments
-                                                            1 ::dashboard-events/get-virtual-machines)]}])
+                                              :frequency 15000
+                                              :event     [::dashboard-events/fetch-tab-records]}])
     (fn []
       [ui/Tab
        {:menu        {:attached true :tabular true :size "tiny"}
         :onTabChange (fn [e, d]
-                       (let [activeTabIndex (:activeIndex (js->clj d :keywordize-keys true))]
-                         (dispatch [::dashboard-events/set-selected-tab activeTabIndex])))
+                       (let [activeTabIndex (:activeIndex (js->clj d :keywordize-keys true))
+                             activeTab (case activeTabIndex
+                                         0 "deployments"
+                                         1 "virtual-machines")]
+                         (dispatch [::dashboard-events/set-selected-tab activeTab])))
         :panes       [{:menuItem "Deployments"
                        :render   (fn [] (r/as-element
                                           [:div {:style {:width "auto" :overflow-x "auto"}}
@@ -74,13 +75,11 @@
                           (sort-by :order)
                           (map as-statistic))]
            (vec (concat [:div] stats))))
-       [vms-deployments]
-       ])))
+       [vms-deployments]])))
 
 (defn ^:export set-cloud-filter [cloud]
-  (if (= cloud "All Clouds")
-    (dispatch [::dashboard-subs/set-filtered-cloud nil])
-    (dispatch [::dashboard-subs/set-filtered-cloud cloud])))
+  (log/debug "dispatch open-modal for authn view")
+  (dispatch [::dashboard-events/set-filtered-cloud cloud]))
 
 (defmethod panel/render :dashboard
   [path query-params]

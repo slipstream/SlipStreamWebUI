@@ -4,57 +4,11 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as r]
-    [cljs.core.async :refer [<! >! chan timeout]]
-    [sixsq.slipstream.client.api.cimi :as cimi]
     [taoensso.timbre :as log]
     [clojure.string :as str]
-    #_[sixsq.slipstream.legacy.utils.tables :as t]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.dashboard.subs :as dashbord-subs]
+    [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]))
-
-(def app-state (r/atom {:vms              {}
-                        :request-opts     {"$first"   0
-                                           "$last"    10
-                                           "$orderby" "created:desc"}
-                        :record-displayed 10
-                        :loading          true
-                        :headers          ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type"
-                                           "Cloud Instance ID" "Cloud" "Owner"]
-                        }))
-
-(defn state-set-loading [v]
-  (swap! app-state assoc :loading v))
-
-(defn state-disable-loading []
-  (state-set-loading false))
-
-(defn state-enable-loading []
-  (state-set-loading true))
-
-;(defn current-page [] (/ (get-in @app-state [:request-opts "$last"]) (get @app-state :record-displayed)))
-;
-;(defn set-page [page]
-;  (let [record-displayed (get @app-state :record-displayed)
-;        last (* page record-displayed)]
-;    (state-set-last last)
-;    (state-set-first (- last record-displayed))))
-;
-;(defn inc-page []
-;  (let [cp (current-page)]
-;    (when (< cp (page-count))
-;      (set-page (inc cp)))))
-;
-;(defn dec-page []
-;  (let [cp (current-page)]
-;    (when (> cp 1)
-;      (set-page (dec cp)))))
-
-;(defn fetch-vms []
-;  (go
-;    (let [response (<! (cimi/search client/client "virtualMachines" (get @app-state :request-opts)))]
-;      (state-set-vms response)))
-;  (state-disable-loading))
 
 (defn table-vm-cells [{:keys [deployment-href state ip vcpu ram disk instance-type instance-id connector-href
                               user-href]}]
@@ -96,14 +50,15 @@
             :user-href       (get-in deployment [:user :href] "")}) vms)))
 
 (defn vms-table []
-  (let [virtual-machines (subscribe [::dashbord-subs/virtual-machines])
+  (let [virtual-machines (subscribe [::dashboard-subs/virtual-machines])
         headers ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type" "Cloud Instance ID" "Cloud" "Owner"]
-        record-displayed (subscribe [::dashbord-subs/records-displayed])
-        page (subscribe [::dashbord-subs/page])
-        total-pages (subscribe [::dashbord-subs/total-pages])]
+        record-displayed (subscribe [::dashboard-subs/records-displayed])
+        page (subscribe [::dashboard-subs/page])
+        total-pages (subscribe [::dashboard-subs/total-pages])
+        loading? (subscribe [::dashboard-subs/loading-tab?])]
     (fn []
       (let [vms-count (get @virtual-machines :count 0)]
-        [ui/Segment {:basic true :loading false #_(get @app-state :loading)}
+        [ui/Segment {:basic true :loading @loading?}
          [ui/Table
           {:compact     "very"
            :size        "small"
@@ -128,34 +83,11 @@
             [ui/TableHeaderCell {:col-span (str 3)}
              [ui/Label "Found" [ui/LabelDetail vms-count]]]
             [ui/TableHeaderCell {:textAlign "right"
-                                 :col-span (str (- (count headers) 3))}
+                                 :col-span  (str (- (count headers) 3))}
              [ui/Pagination
               {:size         "tiny"
                :totalPages   @total-pages
                :activePage   @page
                :onPageChange (fn [e d]
                                (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))
-               }]]]]
-          #_[t/table-navigator-footer
-             vms-count
-             page-count
-             current-page
-             #(count (get @app-state :headers))
-             #(do (inc-page)
-                  (state-enable-loading)
-                  (fetch-vms))
-             #(do
-                (dec-page)
-                (state-enable-loading)
-                (fetch-vms))
-             #(do (set-page 1)
-                  (state-enable-loading)
-                  (fetch-vms))
-             #(do
-                (set-page (page-count))
-                (state-enable-loading)
-                (fetch-vms))
-             #(do (set-page (.-children %2))
-                  (state-enable-loading)
-                  (fetch-vms))]
-          ]]))))
+               }]]]]]]))))

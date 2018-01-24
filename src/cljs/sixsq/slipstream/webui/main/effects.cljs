@@ -38,4 +38,3 @@
 (reg-fx
   ::action-interval
   interval-handler)
-

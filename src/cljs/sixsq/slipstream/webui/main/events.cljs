@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.main.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx debug]]
+    [re-frame.core :refer [reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.main.spec :as main-spec]
     [sixsq.slipstream.webui.main.effects :as main-fx]
     [taoensso.timbre :as log]

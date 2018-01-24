@@ -23,6 +23,8 @@
 
 (def Checkbox (adapt-component "Checkbox"))
 
+(def Confirm (adapt-component "Confirm"))
+
 (def Container (adapt-component "Container"))
 
 (def Dimmer (adapt-component "Dimmer"))

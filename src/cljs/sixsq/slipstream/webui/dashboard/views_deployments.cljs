@@ -8,76 +8,9 @@
     [sixsq.slipstream.client.api.cimi :as cimi]
     [taoensso.timbre :as log]
     [clojure.string :as str]
-    #_[sixsq.slipstream.legacy.utils.tables :as t]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.dashboard.subs :as dashbord-subs]
+    [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]))
-
-(def app-state (r/atom {:web-page-visible true
-                        :deployments      {}
-                        :request-opts     {:offset     0
-                                           :limit      10
-                                           :cloud      ""
-                                           :activeOnly 1}
-                        :loading          true
-                        :headers          ["" "ID" "Application / Component" "Service URL" "State" "VMs"
-                                           "Start Time [UTC]" "Clouds" "Tags" "User" ""]
-                        :message          {:hidden  true
-                                           :error   true
-                                           :header  ""
-                                           :content ""}
-                        :show-modal       nil
-                        :deleted          #{}}))
-
-(defn state-set-web-page-visible [v]
-  (swap! app-state assoc :web-page-visible v))
-
-(defn state-set-loading [v]
-  (swap! app-state assoc :loading v))
-
-(defn state-disable-loading []
-  (state-set-loading false))
-
-(defn state-enable-loading []
-  (state-set-loading true))
-
-(defn state-set-request-opts [k v]
-  (swap! app-state assoc-in [:request-opts k] v))
-
-(defn state-set-offset [v]
-  (state-set-request-opts :offset v))
-
-(defn state-set-limit [v]
-  (state-set-request-opts :limit v))
-
-(defn state-set-cloud [v]
-  (state-set-request-opts :cloud v))
-
-(defn state-set-active-only [v]
-  (state-set-request-opts :activeOnly v))
-
-(defn state-set-deployments [v]
-  (swap! app-state assoc :deployments v))
-
-(defn request-opts-limit []
-  (get-in @app-state [:request-opts :limit]))
-
-(defn request-opts-offset []
-  (get-in @app-state [:request-opts :offset]))
-
-(defn state-set-message [k v]
-  (swap! app-state assoc-in [:message k] v))
-
-(defn state-set-show-modal [v]
-  (swap! app-state assoc :show-modal v))
-
-(defn state-append-deleted-deployment [v]
-  (swap! app-state update-in [:deleted] conj v))
-
-(defn state-pop-deleted-deployment [v]
-  (swap! app-state update-in [:deleted] disj v))
-
-(defn current-page [] (inc (/ (request-opts-offset) (request-opts-limit))))
 
 (defn extract-deployments-data [deployment-resp]
   (let [deployments (get-in deployment-resp [:runs :item] [])]
@@ -99,65 +32,44 @@
 (defn is-terminated-state? [state]
   (#{"Finalizing" "Done" "Aborted" "Cancelled"} state))
 
-#_(defn terminate-confirm [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url]
-                            :as   deployment}]
-    [:div [ui/Icon (if (contains? (get @app-state :deleted) deployment-uuid)
-                     {:name "trash outline" :color "black"}
-                     {:name "remove" :color "red" :link true :onClick #(state-set-show-modal deployment-uuid)})]
-     [ui/Confirm {:open      (= (get @app-state :show-modal) deployment-uuid)
-                  :basic     true
-                  :content   (r/as-element
-                               [ui/Table {:unstackable true
-                                          :celled      false
-                                          :single-line true
-                                          :inverted    true
-                                          :size        "small"
-                                          :padded      false}
-                                [ui/TableBody
-                                 [ui/TableRow
-                                  [ui/TableCell "ID:"]
-                                  [ui/TableCell [:a {:href (str "run/" deployment-uuid)} deployment-uuid]]]
-                                 [ui/TableRow
-                                  [ui/TableCell "Module URI:"]
-                                  [ui/TableCell [:a {:href module-uri} module-uri]]]
-                                 [ui/TableRow [ui/TableCell "Start time:"] [ui/TableCell start-time]]
-                                 [ui/TableRow [ui/TableCell "State:"] [ui/TableCell state]]
-                                 [ui/TableRow
-                                  [ui/TableCell "Service URL:"]
-                                  [ui/TableCell [:a {:href service-url :target "_blank"} service-url]]]
-                                 [ui/TableRow [ui/TableCell "State:"] [ui/TableCell state]]
-                                 [ui/TableRow [ui/TableCell "Clouds:"] [ui/TableCell clouds]]
-                                 [ui/TableRow [ui/TableCell "Abort:"] [ui/TableCell abort]]
-                                 [ui/TableRow [ui/TableCell "Tags:"] [ui/TableCell tags]]]
-                                ])
-                  :onCancel  #(state-set-show-modal nil)
-                  :onConfirm #(do
-                                (state-append-deleted-deployment deployment-uuid)
-                                (go
-                                  (let [result (<! (runs/terminate-run client/client deployment-uuid))
-                                        error (when (instance? js/Error result)
-                                                (:error (js->clj
-                                                          (->> result ex-data :body (.parse js/JSON))
-                                                          :keywordize-keys true)))]
-                                    (when error
-                                      (state-set-message :header (str (get error :reason "-")
-                                                                      ": "
-                                                                      (get error :code "-")))
-                                      (state-set-message :content (get error :detail "-"))
-                                      (state-set-message :error true)
-                                      (state-set-message :hidden false))
-                                    ))
-                                (go (<! (timeout 30000))
-                                    (state-pop-deleted-deployment deployment-uuid))
-                                (fetch-deployments)
-                                (state-set-show-modal nil))
-                  }]]
-    )
+(defn terminate-confirm []
+  (let [deployment (subscribe [::dashboard-subs/delete-deployment-modal])]
+    (fn []
+      (let [{:keys [deployment-uuid module-uri state clouds start-time abort tags service-url]} @deployment]
+        [ui/Confirm
+         {:open      (boolean deployment-uuid)
+          :basic     true
+          :content   (r/as-element
+                       [ui/Table {:unstackable true
+                                  :celled      false
+                                  :single-line true
+                                  :inverted    true
+                                  :size        "small"
+                                  :padded      false}
+                        [ui/TableBody
+                         [ui/TableRow
+                          [ui/TableCell "ID:"]
+                          [ui/TableCell [:a {:href (str "run/" deployment-uuid)} deployment-uuid]]]
+                         [ui/TableRow
+                          [ui/TableCell "Module URI:"]
+                          [ui/TableCell [:a {:href module-uri} module-uri]]]
+                         [ui/TableRow [ui/TableCell "Start time:"] [ui/TableCell start-time]]
+                         [ui/TableRow [ui/TableCell "State:"] [ui/TableCell state]]
+                         [ui/TableRow
+                          [ui/TableCell "Service URL:"]
+                          [ui/TableCell [:a {:href service-url :target "_blank"} service-url]]]
+                         [ui/TableRow [ui/TableCell "State:"] [ui/TableCell state]]
+                         [ui/TableRow [ui/TableCell "Clouds:"] [ui/TableCell clouds]]
+                         [ui/TableRow [ui/TableCell "Abort:"] [ui/TableCell abort]]
+                         [ui/TableRow [ui/TableCell "Tags:"] [ui/TableCell tags]]]])
+          :onCancel  #(dispatch [::dashboard-events/delete-deployment-modal nil])
+          :onConfirm #(dispatch [::dashboard-events/delete-deployment deployment-uuid])
+          }]))))
 
 
 (defn table-deployment-cells
-  [{:keys [deployment-uuid module-uri service-url state start-time clouds user state tags abort type activeVm]
-    :as   deployment}]
+  [deleted {:keys [deployment-uuid module-uri service-url state start-time clouds user state tags abort type activeVm]
+            :as   deployment}]
   (let [global-prop (if (is-terminated-state? state) {:disabled true} {})]
     [[ui/TableCell (merge {:collapsing true} global-prop)
       [ui/Icon (cond
@@ -194,16 +106,23 @@
       [:a {:href (str "user/" user)} user]]
      (if (is-terminated-state? state)
        [ui/TableCell {:collapsing true}]
-       [ui/TableCell {:collapsing true} #_(terminate-confirm deployment)])
+       [ui/TableCell {:collapsing true}
+        [ui/Icon
+         (if (contains? deleted deployment-uuid)
+           {:name "trash outline" :color "black"}
+           {:name    "remove" :color "red" :link true
+            :onClick #(dispatch [::dashboard-events/delete-deployment-modal deployment])})]
+
+        ])
      ]))
 
-(defn table-row-format [{:keys [state abort] :as deployment}]
+(defn table-row-format [deleted {:keys [state abort] :as deployment}]
   (let [aborted (not-empty abort)
         opts (cond
                (and (= state "Ready") (not aborted)) {:positive true}
                aborted {:error true}
                :else {})
-        row (vec (concat [ui/TableRow opts] (table-deployment-cells deployment)))]
+        row (vec (concat [ui/TableRow opts] ((partial table-deployment-cells deleted) deployment)))]
     (if aborted
       [ui/Popup {:trigger  (r/as-element row)
                  :inverted true
@@ -211,24 +130,26 @@
       row)))
 
 (defn deployments-table [cloud-filter]
-  #_(log/debug @app-state)
-  (let [deployments (subscribe [::dashbord-subs/deployments])
+  (let [deployments (subscribe [::dashboard-subs/deployments])
         headers ["" "ID" "Application / Component" "Service URL" "State" "VMs"
                  "Start Time [UTC]" "Clouds" "Tags" "User" ""]
-        record-displayed (subscribe [::dashbord-subs/records-displayed])
-        page (subscribe [::dashbord-subs/page])
-        total-pages (subscribe [::dashbord-subs/total-pages])
-        active-only (subscribe [::dashbord-subs/active-deployments-only])]
+        record-displayed (subscribe [::dashboard-subs/records-displayed])
+        page (subscribe [::dashboard-subs/page])
+        total-pages (subscribe [::dashboard-subs/total-pages])
+        active-only (subscribe [::dashboard-subs/active-deployments-only])
+        deleted (subscribe [::dashboard-subs/deleted-deployments])
+        error-message (subscribe [::dashboard-subs/error-message-deployment])
+        loading? (subscribe [::dashboard-subs/loading-tab?])]
     (fn []
       (let [deployments-count (get-in @deployments [:runs :totalCount] 0)]
         [ui/Segment {:basic true
-                     ;:loading (get @app-state :loading)
-                     }
-         #_[ui/Message (cond-> {:header    (r/as-element [:div (get-in @app-state [:message :header])])
-                                :content   (r/as-element [:div (get-in @app-state [:message :content])])
-                                :hidden    (get-in @app-state [:message :hidden])
-                                :onDismiss #(state-set-message :hidden true)}
-                               (get-in @app-state [:message :error]) (merge {:icon "exclamation circle" :error true}))]
+                     :loading @loading?}
+         (when-let [{:keys [reason code detail]} @error-message]
+           [ui/Message {:header    (r/as-element [:div (str reason ": " code)])
+                        :content   (r/as-element [:div detail])
+                        :icon "exclamation circle"
+                        :error true
+                        :onDismiss #(dispatch [::dashboard-events/clear-error-message-deployment])}])
          [ui/Checkbox {:slider   true :fitted true :label "Include inactive runs"
                        :onChange #(dispatch [::dashboard-events/active-deployments-only
                                              (not (:checked (js->clj %2 :keywordize-keys true)))])}]
@@ -247,7 +168,7 @@
                         (vec (map (fn [i label] ^{:key (str i "_" label)}
                         [ui/TableHeaderCell label]) (range) headers))))]
           (vec (concat [ui/TableBody]
-                       (vec (map table-row-format
+                       (vec (map (partial table-row-format @deleted)
                                  (extract-deployments-data @deployments)))))
           [ui/TableFooter
            [ui/TableRow
@@ -261,29 +182,9 @@
                :activePage   @page
                :onPageChange (fn [e d]
                                (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))
-               }]]]]
-          #_[t/table-navigator-footer
-             deployments-count
-             page-count
-             current-page
-             #(count (get @app-state :headers))
-             #(do (inc-page)
-                  (state-enable-loading)
-                  (fetch-deployments))
-             #(do
-                (dec-page)
-                (state-enable-loading)
-                (fetch-deployments))
-             #(do (set-page 1)
-                  (state-enable-loading)
-                  (fetch-deployments))
-             #(do (set-page (page-count))
-                  (state-enable-loading)
-                  (fetch-deployments))
-             #(do (set-page (.-children %2))
-                  (state-enable-loading)
-                  (fetch-deployments))]
-          ]]
+               }]]]]]
+         [terminate-confirm]
+         ]
         )
       )
     )

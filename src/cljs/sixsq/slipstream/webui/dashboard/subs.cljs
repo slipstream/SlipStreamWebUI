@@ -49,3 +49,23 @@
   ::active-deployments-only
   (fn [db]
     (::dashboard-spec/active-deployments-only db)))
+
+(reg-sub
+  ::deleted-deployments
+  (fn [db]
+    (::dashboard-spec/deleted-deployments db)))
+
+(reg-sub
+  ::delete-deployment-modal
+  (fn [db]
+    (::dashboard-spec/delete-deployment-modal db)))
+
+(reg-sub
+  ::error-message-deployment
+  (fn [db]
+    (::dashboard-spec/error-message-deployment db)))
+
+(reg-sub
+  ::loading-tab?
+  (fn [db]
+    (::dashboard-spec/loading-tab? db)))
