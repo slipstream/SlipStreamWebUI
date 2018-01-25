@@ -13,6 +13,8 @@
     [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
 
+    [sixsq.slipstream.webui.cimi.events :as cimi-events]
+
     [taoensso.timbre :as log]))
 
 
@@ -23,7 +25,8 @@
     {:on-click on-cancel}
     cancel-label]
    [ui/Button
-    {:on-click on-confirm}
+    {:primary  true
+     :on-click on-confirm}
     confirm-label]])
 
 
@@ -115,9 +118,9 @@
 
 (defn operation-button [data [label href operation-uri]]
   (case label
-    "edit" [edit-button data #(dispatch [:evt.webui.cimi/edit (:id data) %])]
-    "delete" [delete-button data #(dispatch [:evt.webui.cimi/delete (:id data)])]
-    [other-button label data #(dispatch [:evt.webui.cimi/operation (:id data) operation-uri])]))
+    "edit" [edit-button data #(dispatch [:evt.webui.cimi/edit (:id data) %])] ;;FIXME
+    "delete" [delete-button data #(dispatch [::cimi-events/delete (:id data)])]
+    [other-button label data #(dispatch [:evt.webui.cimi/operation (:id data) operation-uri])])) ;;FIXME
 
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI]

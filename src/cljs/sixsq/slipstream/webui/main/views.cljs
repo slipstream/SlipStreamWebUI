@@ -27,8 +27,7 @@
 (defn sidebar []
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::main-subs/sidebar-open?])
-        nav-path (subscribe [::main-subs/nav-path])
-        activeItem (r/atom (first @nav-path))]
+        nav-path (subscribe [::main-subs/nav-path])]
     (fn []
       (when @show?
         (vec (concat
@@ -46,10 +45,9 @@
                                           [:profile "profile" "user circle"]
                                           [:cimi "cimi" "code"]
                                           [:settings "settings" "settings"]]]
-                 [ui/MenuItem {:active  (= @activeItem url)
+                 [ui/MenuItem {:active  (= (first @nav-path) url)
                                :onClick (fn []
                                           (log/info "navigate event" url)
-                                          (reset! activeItem url)
                                           (dispatch [::history-events/navigate url]))}
                   [ui/Icon {:name icon}] (@tr [label-kw])]))))
       )))
@@ -91,18 +89,31 @@
 
 (defn header
   []
-  (let [show? (subscribe [::main-subs/sidebar-open?])]
+  (let [show? (subscribe [::main-subs/sidebar-open?])
+        message (subscribe [::main-subs/message])]
     (fn []
-      [ui/Menu {:className "webui-header" :borderless true}
-       [ui/MenuItem {:link    true
-                     :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
-        [ui/Icon {:name (if @show? "chevron left" "bars")}]]
-       [ui/MenuItem [breadcrumbs]]
+      [:div
+       [ui/Menu {:className "webui-header" :borderless true}
+        [ui/MenuItem {:link    true
+                      :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
+         [ui/Icon {:name (if @show? "chevron left" "bars")}]]
+        [ui/MenuItem [breadcrumbs]]
 
-       [ui/MenuMenu {:position "right"}
-        [ui/MenuItem
-         [i18n-views/locale-dropdown]
-         [authn-views/authn-button]]]])))
+        [ui/MenuMenu {:position "right"}
+         [ui/MenuItem
+          [i18n-views/locale-dropdown]
+          [authn-views/authn-button]]]]
+
+       (when @message
+         [ui/Container
+          [ui/Message {:icon            (case (:type @message)
+                                          :error "exclamation"
+                                          "info")
+                       (:type @message) true
+                       :onDismiss       #(dispatch [::main-events/clear-message])
+                       :header          (:header @message)
+                       :content         (:content @message)}]])
+       ])))
 
 
 (defn app []

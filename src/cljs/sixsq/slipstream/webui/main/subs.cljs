@@ -24,3 +24,8 @@
   ::nav-query-params
   (fn [db]
     (:sixsq.slipstream.webui.main.spec/nav-query-params db)))
+
+(reg-sub
+  ::message
+  (fn [db]
+    (:sixsq.slipstream.webui.main.spec/message db)))

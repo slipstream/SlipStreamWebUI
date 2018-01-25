@@ -35,7 +35,6 @@
     {::main-fx/action-interval [opts]}
     ))
 
-
 (reg-event-db
   ::push-breadcrumb
   (fn [db [_ path-element]]
@@ -47,4 +46,12 @@
   (fn [db [_ index]]
     (update db ::main-spec/nav-path (partial take (inc index)))))
 
+(reg-event-db
+  ::set-message
+  (fn [db [_ message]]
+    (assoc db ::main-spec/message message)))
 
+(reg-event-db
+  ::clear-message
+  (fn [db [_ message]]
+    (assoc db ::main-spec/message nil)))

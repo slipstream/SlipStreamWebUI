@@ -5,7 +5,7 @@
     [sixsq.slipstream.client.async :as async-client]
 
     [sixsq.slipstream.webui.application.spec :as spec]
-    [sixsq.slipstream.webui.application.effects :as fx]
+    [sixsq.slipstream.webui.application.effects :as application-fx]
 
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.main.spec :as main-spec]))
@@ -24,7 +24,7 @@
   (fn [{{:keys [::client-spec/client ::main-spec/nav-path] :as db} :db} _]
     (when client
       (let [path (some->> nav-path rest seq (str/join "/"))]
-        {:db             (assoc db ::spec/completed? false
-                                   ::spec/module-id nil
-                                   ::spec/module nil)
-         ::fx/get-module [client path]}))))
+        {:db                         (assoc db ::spec/completed? false
+                                               ::spec/module-id nil
+                                               ::spec/module nil)
+         ::application-fx/get-module [client path]}))))

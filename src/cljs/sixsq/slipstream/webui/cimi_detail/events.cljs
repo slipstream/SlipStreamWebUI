@@ -10,7 +10,6 @@
 (reg-event-fx
   ::get
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id]]
-    (log/error "DEBUG " client resource-id)
     (when client
       {:db               (assoc db ::cimi-detail-spec/loading? true
                                    ::cimi-detail-spec/resource-id resource-id)

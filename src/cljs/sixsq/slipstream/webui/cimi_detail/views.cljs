@@ -40,6 +40,6 @@
     (fn []
       (let [resource-id (path->resource-id @path)
             correct-resource? (= resource-id @cached-resource-id)]
-        (when (and (not @loading?) (not= resource-id @cached-resource-id))
+        (when (not= resource-id @cached-resource-id)
           (dispatch [::cimi-detail-events/get resource-id]))
         [details/resource-detail [refresh-button] resource-id (when correct-resource? @resource) (:baseURI @cep)]))))

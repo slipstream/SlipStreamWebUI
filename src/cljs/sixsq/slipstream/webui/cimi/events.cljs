@@ -3,10 +3,13 @@
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
+    [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.i18n.utils :as utils]
     [sixsq.slipstream.webui.utils.general :as general-utils]
+    [sixsq.slipstream.webui.utils.component :as comp]
     [taoensso.timbre :as log]))
 
 
@@ -101,6 +104,24 @@
                              #(dispatch [::set-results resource-type %])]})))
 
 
+(reg-event-fx
+  ::create-resource-no-tpl
+  (fn [{{:keys [::cimi-spec/collection-name
+                ::cimi-spec/cloud-entry-point
+                ::client-spec/client] :as db} :db} [_ data]]
+    (let [resource-type (-> cloud-entry-point
+                            :collection-key
+                            (get collection-name))]
+      {::cimi-api-fx/add [client resource-type data
+                          #(if (instance? js/Error %)
+                             (let [error (->> % ex-data)]
+                               (dispatch [::main-events/set-message {:header  "Failure"
+                                                                     :content (:body error)
+                                                                     :type    :error}]))
+                             (dispatch [::main-events/set-message {:header  "Success"
+                                                                   :content (:message %)
+                                                                   :type    :success}]))]})))
+
 (reg-event-db
   ::set-results
   (fn [db [_ resource-type listing]]
@@ -130,3 +151,22 @@
       {::cimi-api-fx/cloud-entry-point
        [client (fn [cep]
                  (dispatch [::set-cloud-entry-point cep]))]})))
+
+(reg-event-fx
+  ::delete
+  (fn [{{:keys [::client-spec/client
+                ::cimi-spec/collection-name
+                ] :as db} :db} [_ resource-id]]
+    (when client
+      {::cimi-api-fx/delete [client resource-id
+                             #(if (instance? js/Error %)
+                                (let [error (->> % ex-data)]
+                                  (dispatch [::main-events/set-message {:header  "Failure"
+                                                                        :content (:body error)
+                                                                        :type    :error}]))
+                                (do
+                                  (dispatch [::main-events/set-message {:header  "Success"
+                                                                        :content (:message %)
+                                                                        :type    :success}])
+                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]
+       })))

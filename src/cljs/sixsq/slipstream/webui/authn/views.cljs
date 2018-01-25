@@ -146,7 +146,7 @@
             [ui/GridColumn {:stretched true}
              [ui/Segment {:textAlign "left"}
               (vec (concat [:span {:style {:position "absolute"}}]
-                           (map #(identity [ui/Icon {:name % :size "big"}]) ["github" "twitter" "facebook" "twitch"])))
+                           (map #(identity [ui/Icon {:name % :size "big"}]) ["world" "github"])))
               [ui/Label {:color "teal" :ribbon "right"} "External methods"] ; TODO translate
               [:div
                (vec (concat [:div]
@@ -166,9 +166,7 @@
         :on-close #(dispatch [::authn-events/close-modal])}
        [ui/ModalHeader (@tr [:login])]
        [ui/ModalContent {:scrolling true}
-        [login-form-container]]
-       #_[ui/ModalActions
-          #_[forms-chooser/login-button]]])))               ;; FIXME
+        [login-form-container]]])))
 
 (defn login-button
   "This panel shows the login button and modal (if open)."

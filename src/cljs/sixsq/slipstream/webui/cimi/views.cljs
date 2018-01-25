@@ -16,6 +16,7 @@
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]
+    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
@@ -27,7 +28,7 @@
   (let [v (:id entry)
         label (second (str/split v #"/"))
         on-click #(dispatch [::history-events/navigate (str "cimi/" v)])]
-    [:a {:on-click on-click} label]))
+    [:a {:style {:cursor "pointer"} :on-click on-click} label]))
 
 
 (defn field-selector
@@ -53,6 +54,7 @@
 (defn results-table-row [row-fn entry]
   (when entry
     (let [data (row-fn entry)]
+      (log/info data)
       (vec (concat [ui/TableRow]
                    (vec (map (fn [v] [ui/TableCell v]) data)))))))
 
@@ -65,10 +67,11 @@
 (defn results-table [selected-fields entries]
   (when (pos? (count entries))
     (let [row-fn (results-table-row-fn selected-fields)]
-      [ui/Container {:class-name "webui-x-autoscroll"}
+      [:div {:class-name "webui-x-autoscroll"}
        [ui/Table
         {:collapsing  true
          :compact     true
+         :unstackable true
          :single-line true
          :padded      false}
         (results-table-header selected-fields)
@@ -246,7 +249,8 @@
           {:on-click #(reset! show? false)}
           (@tr [:cancel])]
          [ui/Button
-          {:on-click (fn []
+          {:primary true
+           :on-click (fn []
                        (reset! show? false)
                        (dispatch [::cimi-events/set-selected-fields @selections]))}
           (@tr [:update])]]]])))
@@ -304,13 +308,13 @@
         (when @show?
           (cond
             (and tpl-resource-key (seq @descriptions-vector-atom))
-            [form-utils/credential-form-container-modal
-               :show? show?
-               :descriptions descriptions-vector-atom
-               :on-cancel #(dispatch [::cimi-events/hide-add-modal])
-               :on-submit (fn [data]
-                            (dispatch [:evt.sixsq.slipstream.webui.cimi/create-resource resource-key data]) ;; FIXME
-                            (dispatch [::cimi-events/hide-add-modal]))]
+            [form-utils/credential-form-container-modal     ;; FIXME
+             :show? show?
+             :descriptions descriptions-vector-atom
+             :on-cancel #(dispatch [::cimi-events/hide-add-modal])
+             :on-submit (fn [data]
+                          (dispatch [:evt.sixsq.slipstream.webui.cimi/create-resource resource-key data]) ;; FIXME
+                          (dispatch [::cimi-events/hide-add-modal]))]
 
 
             (and @show? tpl-resource-key (empty? @descriptions-vector-atom))
@@ -330,25 +334,28 @@
             (do
               (reset! text (.stringify js/JSON (clj->js {:key "value"}) nil 2))
               [ui/Modal
-               {:size       "tiny"
+               {:size       "large"
                 :scrollable true
                 :open       @show?}
                [ui/ModalContent
                 [editor/json-editor
-                   :text text
-                   :on-change #(reset! text %)]]
+                 :text text
+                 :on-change #(reset! text %)]]
                [ui/ModalActions
                 [ui/Button
                  {:on-click (fn []
                               (dispatch [::cimi-events/hide-add-modal]))}
                  (@tr [:cancel])]
                 [ui/Button
-                 {:on-click (fn []
+                 {:primary true
+                  :on-click (fn []
                               (try
                                 (let [data (js->clj (.parse js/JSON @text))]
-                                  (dispatch [:evt.sixsq.slipstream.webui.cimi/create-resource-no-tpl resource-key data])) ;; FIXME
+                                  (dispatch [::cimi-events/create-resource-no-tpl data]))
                                 (catch js/Error e
-                                  (dispatch [:evt.main/raise-alert (str e)])) ;; FIXME
+                                  (dispatch [::main-events/set-message {:header  "Error"
+                                                                        :message (str "Unable to parse your json. " e)
+                                                                        :error   true}]))
                                 (finally
                                   (dispatch [::cimi-events/hide-add-modal]))))}
                  (@tr [:create])]]])))))))
@@ -369,7 +376,7 @@
       [ui/Button
        {:circular true
         :primary  true
-        :icon     "refresh"
+        :icon     "search"
         :loading  @loading?
         :on-click #(dispatch [::cimi-events/get-results])}])))
 

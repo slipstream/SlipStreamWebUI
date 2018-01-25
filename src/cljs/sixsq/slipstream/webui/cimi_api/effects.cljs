@@ -22,7 +22,6 @@
 (reg-fx
   ::get
   (fn [[client resource-id callback]]
-    (log/error "DEBUG: getting " resource-id)
     (go
       (callback (<! (cimi/get client resource-id))))))
 
@@ -47,6 +46,12 @@
   (fn [[client resource-id data callback]]
     (go
       (callback (<! (cimi/edit client resource-id data))))))
+
+(reg-fx
+  ::add
+  (fn [[client resource-type data callback]]
+    (go
+      (callback (<! (cimi/add client resource-type data))))))
 
 
 (reg-fx
