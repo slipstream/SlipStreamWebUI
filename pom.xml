@@ -88,7 +88,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>lein-build</id>
+            <id>lein-install</id>
             <phase>install</phase>
             <goals>
               <goal>exec</goal>
@@ -97,6 +97,19 @@
               <executable>lein</executable>
               <arguments>
                 <argument>prod</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>lein-deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>lein</executable>
+              <arguments>
+                <argument>deploy</argument>
               </arguments>
             </configuration>
           </execution>
