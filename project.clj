@@ -128,7 +128,7 @@
    [org.clojure/core.async]
 
    [com.andrewmcveigh/cljs-time]
-   [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
    [com.taoensso/tempura]
 
    [expound]
