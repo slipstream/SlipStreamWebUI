@@ -115,19 +115,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>lein-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>lein</executable>
-              <arguments>
-                <argument>deploy</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
             <id>lein-clean</id>
             <phase>clean</phase>
             <goals>
