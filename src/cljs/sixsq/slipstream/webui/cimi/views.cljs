@@ -54,7 +54,6 @@
 (defn results-table-row [row-fn entry]
   (when entry
     (let [data (row-fn entry)]
-      (log/info data)
       (vec (concat [ui/TableRow]
                    (vec (map (fn [v] [ui/TableCell v]) data)))))))
 

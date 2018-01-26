@@ -7,7 +7,7 @@
 
 (defproject
   sixsq.slipstream/webui
-  "3.43-SNAPSHOT"
+  "3.44-SNAPSHOT"
   :license
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
@@ -17,8 +17,7 @@
             [lein-doo "0.1.8"]
             [lein-unpack-resources "0.1.1"]
             [pdok/lein-filegen "0.1.0"]
-            [lein-resource "16.9.1"]
-            ]
+            [lein-resource "16.9.1"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.44-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
@@ -51,19 +50,18 @@
   :dependencies [[org.clojure/clojure]
                  [org.clojure/clojurescript]
                  [reagent]
-                 ;[reagent :exclusions [cljsjs/react]]
-                 ;[cljsjs/react-with-addons "15.6.1-0"]
 
                  [re-frame]
                  [secretary]
                  [expound]
-                 ;[soda-ash]
                  [com.taoensso/timbre "4.10.0"]
-                 ;[cljsjs/d3 "4.12.0-0"]
                  [cljsjs/codemirror "5.24.0-1"]
                  [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                  [com.taoensso/tempura]
                  [cljsjs/semantic-ui-react "0.77.2-0" :exclusions [cljsjs/react]] ;;TODO this is a local version waiting https://github.com/cljsjs/packages/pull/1461
+                 [cljsjs/moment]
+                 [cljsjs/react-date-range]
+                 [funcool/promesa]
                  ]
 
   :source-paths ["src/clj"]

@@ -13,7 +13,7 @@
     [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
 
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
+    [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
 
     [taoensso.timbre :as log]))
 
@@ -118,8 +118,8 @@
 
 (defn operation-button [data [label href operation-uri]]
   (case label
-    "edit" [edit-button data #(dispatch [:evt.webui.cimi/edit (:id data) %])] ;;FIXME
-    "delete" [delete-button data #(dispatch [::cimi-events/delete (:id data)])]
+    "edit" [edit-button data #(dispatch [::cimi-detail-events/edit (:id data) %])]
+    "delete" [delete-button data #(dispatch [::cimi-detail-events/delete (:id data)])]
     [other-button label data #(dispatch [:evt.webui.cimi/operation (:id data) operation-uri])])) ;;FIXME
 
 

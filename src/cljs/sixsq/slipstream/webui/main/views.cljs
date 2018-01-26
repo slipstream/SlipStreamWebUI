@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.settings.views]
+    [sixsq.slipstream.webui.usage.views]
 
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.history.events :as history-events]
@@ -44,6 +45,7 @@
                                           [:dashboard "dashboard" "dashboard"]
                                           [:profile "profile" "user circle"]
                                           [:cimi "cimi" "code"]
+                                          [:usage "usage" "history"]
                                           [:settings "settings" "settings"]]]
                  [ui/MenuItem {:active  (= (first @nav-path) url)
                                :onClick (fn []

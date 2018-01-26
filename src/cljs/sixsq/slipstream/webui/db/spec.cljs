@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail]
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
+    [sixsq.slipstream.webui.usage.spec :as usage]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
     [sixsq.slipstream.webui.main.spec :as main]))
 
@@ -27,4 +28,5 @@
          client/defaults
          dashboard/defaults
          i18n/defaults
-         main/defaults))
+         main/defaults
+         usage/defaults))

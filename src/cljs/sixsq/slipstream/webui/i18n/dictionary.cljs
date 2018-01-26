@@ -46,6 +46,7 @@
         :tags                "tags"
         :unauthorized        "unauthorized"
         :update              "update"
+        :usage               "usage"
         :url                 "URL"
         :username            "username"
         :vms                 "VMs"
@@ -96,6 +97,7 @@
         :unauthorized        "non autorisé"
         :update              "mettre à jour"
         :url                 "URL"
+        :usage               "usage"
         :username            "nom d'utilisateur"
         :vms                 "VMs"
         }})

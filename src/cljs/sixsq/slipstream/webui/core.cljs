@@ -11,6 +11,7 @@
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
+    [sixsq.slipstream.webui.usage.views :as usage-views]
     [sixsq.slipstream.webui.db.events :as db-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.views :as main-views]
@@ -44,6 +45,7 @@
     :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
                             (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
   (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
+  (render-component-when-present "usage" usage-views/usage)
   )
 
 (defn visibility-watcher []

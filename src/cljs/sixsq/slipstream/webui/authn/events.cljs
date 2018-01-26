@@ -7,7 +7,6 @@
     [sixsq.slipstream.webui.authn.spec :as authn-spec]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.i18n.utils :as utils]
-    [sixsq.slipstream.webui.authn.utils :as au]
     [taoensso.timbre :as log]))
 
 (reg-event-db
