@@ -1,13 +1,8 @@
-(def +version+ "3.44-SNAPSHOT")
-
-;; FIXME: Provide HTTPS access to Nexus.
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+(def +version+ "3.45-SNAPSHOT")
 
 (defproject
   sixsq.slipstream/webui
-  "3.44-SNAPSHOT"
+  "3.45-SNAPSHOT"
   :license
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
@@ -19,7 +14,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.44-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :clean-targets ^{:protect false} ["resources/public/js/"
@@ -54,11 +49,11 @@
                  [re-frame]
                  [secretary]
                  [expound]
-                 [com.taoensso/timbre "4.10.0"]
+                 [com.taoensso/timbre]
                  [cljsjs/codemirror "5.24.0-1"]
                  [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                  [com.taoensso/tempura]
-                 [cljsjs/semantic-ui-react "0.77.2-0" :exclusions [cljsjs/react]] ;;TODO this is a local version waiting https://github.com/cljsjs/packages/pull/1461
+                 [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
                  [funcool/promesa]
@@ -105,7 +100,7 @@
   :profiles
   {:dev
    {:dependencies [[binaryage/devtools]
-                   [day8.re-frame/trace "0.1.14"]
+                   [day8.re-frame/trace]
                    [ring]
                    [ring/ring-defaults]
                    [compojure]]
