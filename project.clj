@@ -51,7 +51,7 @@
                  [expound]
                  [com.taoensso/timbre]
                  [cljsjs/codemirror "5.24.0-1"]
-                 [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                 [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
                  [com.taoensso/tempura]
                  [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
@@ -93,7 +93,7 @@
      :source-paths ["src/cljs" "test/cljs"]
      :compiler     {:main          sixsq.slipstream.webui.runner
                     :output-to     "target/test/webui/webui-test.js"
-                    :output-dir    "target/test.webui/"
+                    :output-dir    "target/test/webui/out"
                     :optimizations :none}}
     ]}
 
