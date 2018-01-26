@@ -41,7 +41,6 @@
               ["target/version.css"
                {:target-path "resources/public/css/version.css"}]]}
 
-
   :dependencies [[org.clojure/clojure]
                  [org.clojure/clojurescript]
                  [reagent]
