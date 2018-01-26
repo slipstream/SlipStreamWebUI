@@ -9,107 +9,25 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-figwheel "0.5.14"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
+            [lein-doo "0.1.8"]
             [lein-unpack-resources "0.1.1"]
             [pdok/lein-filegen "0.1.0"]
-            [lein-resource "16.9.1"]
-            [lein-doo "0.1.8"]]
+            [lein-resource "16.9.1"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
-  :clean-targets ^{:protect false} ["target"
-                                    "resources/public/webui/assets/js"
-                                    "resources/public/authn/assets/js"
-                                    "resources/public/legacy/assets/js"
-                                    "resources/public/webui/js/webui.js"
-                                    "resources/public/authn/js/authn.js"
-                                    "resources/public/legacy/js/legacy.js"
-                                    "resources/public/webui/assets/css/version.css"
-                                    "resources/public/webui/assets/css/codemirror.css"]
+  :clean-targets ^{:protect false} ["resources/public/js/"
+                                    "target"
+                                    "test/js"
+                                    "resources/public/css/version.css"
+                                    "resources/public/css/codemirror.css"]
 
   :auto-clean false
 
   :prep-tasks []
 
-  :source-paths ["src/cljs" "src/cljc"]
-
   :pom-location "target/"
-
-  :resource {:resource-paths
-             [["target/cljsjs/codemirror/cljsjs/codemirror/development/codemirror.css"
-               {:target-path "resources/public/webui/assets/css/codemirror.css"}]
-              ["target/version.css"
-               {:target-path "resources/public/webui/assets/css/version.css"}]]}
-
-  :cljsbuild
-  {:builds [
-            {:id           "dev-webui"
-             :source-paths ["src/cljs" "src/cljc"]
-             :compiler     {:main                 sixsq.slipstream.webui
-                            :output-to            "resources/public/webui/js/webui.js"
-                            :output-dir           "resources/public/webui/assets/js/"
-                            :asset-path           "assets/js"
-                            :optimizations        :none
-                            :source-map           true
-                            :source-map-timestamp true
-                            :preloads             [devtools.preload]
-                            :parallel-build       true
-                            :closure-defines      {sixsq.slipstream.webui.defines/LOGGING_LEVEL "info"
-                                                   sixsq.slipstream.webui.defines/HOST_URL      "https://nuv.la"
-                                                   ;'sixsq.slipstream.webui.defines/CONTEXT     ""
-                                                   goog.DEBUG                                   true}
-                            :external-config      {:devtools/config {:features-to-install :all}}
-                            }
-             :figwheel     {:on-jsload "sixsq.slipstream.webui/init"
-                            :open-urls ["http://localhost:3000/webui/index.html"]}}
-
-            {:id           "prod-webui"
-             :source-paths ["src/cljs" "src/cljc"]
-             :compiler     {:main            sixsq.slipstream.webui
-                            :output-to       "resources/public/webui/js/webui.js"
-                            :output-dir      "target/webui/assets/js/"
-                            :optimizations   :advanced
-                            :parallel-build  true
-                            :closure-defines {sixsq.slipstream.webui.defines/LOGGING_LEVEL "warn"
-                                              goog.DEBUG                                   false}}}
-            {:id           "prod-authn"
-             :source-paths ["src/cljs" "src/cljc"]
-             :compiler     {:main            sixsq.slipstream.authn
-                            :output-to       "resources/public/authn/js/authn.js"
-                            :output-dir      "target/authn/assets/js/"
-                            :optimizations   :advanced
-                            :parallel-build  true
-                            :closure-defines {sixsq.slipstream.webui.defines/LOGGING_LEVEL "warn"
-                                              goog.DEBUG                                   false}}}
-            {:id           "test"
-             :source-paths ["src/cljs" "src/cljc" "test/cljs"]
-             :compiler     {:main          sixsq.slipstream.webui.runner
-                            :output-to     "target/test/webui/webui-test.js"
-                            :output-dir    "target/test/webui/"
-                            :optimizations :none}}
-            {:id           "dev-legacy"
-             :source-paths ["src/cljs"]
-             :compiler     {:main            sixsq.slipstream.legacy.components
-                            :output-to       "resources/public/legacy/js/legacy.js"
-                            :output-dir      "resources/public/legacy/assets/js"
-                            :asset-path      "assets/js"
-                            :optimizations   :none
-                            :source-map      true
-                            :preloads        [devtools.preload]
-                            :parallel-build  true
-                            :external-config {:devtools/config {:features-to-install :all}}}
-             :figwheel     {:on-jsload "sixsq.slipstream.legacy.components/init"
-                            :open-urls ["http://localhost:3000/legacy/index.html"]}}
-            {:id           "prod-legacy"
-             :source-paths ["src/cljs" "src/cljc"]
-             :compiler     {:main            sixsq.slipstream.legacy.components
-                            :output-to       "resources/public/legacy/js/legacy.js"
-                            :output-dir      "target/legacy/assets/js"
-                            :optimizations   :advanced
-                            :parallel-build  true}}
-            ]}
-
-  :figwheel {:server-port 3000}
 
   :unpack-resources {:resource [cljsjs/codemirror "5.24.0-1"] :extract-path "target/cljsjs/codemirror"}
 
@@ -117,36 +35,82 @@
              :template-fn #(apply str %)
              :target      "target/version.css"}]
 
-  :dependencies
-  [[org.clojure/clojure]
-   [org.clojure/clojurescript]
-   [org.clojure/core.async]
+  :resource {:resource-paths
+             [["target/cljsjs/codemirror/cljsjs/codemirror/development/codemirror.css"
+               {:target-path "resources/public/css/codemirror.css"}]
+              ["target/version.css"
+               {:target-path "resources/public/css/version.css"}]]}
 
-   [com.andrewmcveigh/cljs-time]
-   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
-   [com.taoensso/tempura]
+  :dependencies [[org.clojure/clojure]
+                 [org.clojure/clojurescript]
+                 [reagent]
 
-   [expound]
+                 [re-frame]
+                 [secretary]
+                 [expound]
+                 [com.taoensso/timbre]
+                 [cljsjs/codemirror "5.24.0-1"]
+                 [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
+                 [com.taoensso/tempura]
+                 [cljsjs/semantic-ui-react]
+                 [cljsjs/moment]
+                 [cljsjs/react-date-range]
+                 [funcool/promesa]
+                 ]
 
-   [reagent]
-   [re-frame]
-   [re-com]
+  :source-paths ["src/clj"]
 
-   [secretary]
+  :test-paths ["test/cljs"]
 
-   [cljsjs/codemirror "5.24.0-1"]
+  :cljsbuild
+  {:builds
+   [{:id           "dev"
+     :source-paths ["src/cljs" "test/clj"]
+     :figwheel     {:on-jsload "sixsq.slipstream.webui.core/mount-root"}
+     :compiler     {:main                 sixsq.slipstream.webui.core
+                    :output-to            "resources/public/js/webui.js"
+                    :output-dir           "resources/public/js/out"
+                    :asset-path           "/js/out"
+                    :source-map-timestamp true
+                    :preloads             [devtools.preload
+                                           day8.re-frame.trace.preload]
+                    :closure-defines      {"re_frame.trace.trace_enabled_QMARK_"         true
+                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
+                                           ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
+                                           goog.DEBUG                                    true}
+                    :external-config      {:devtools/config {:features-to-install :all}}
+                    }}
+    {:id           "prod"
+     :source-paths ["src/cljs"]
+     :compiler     {:main            sixsq.slipstream.webui.core
+                    :output-to       "resources/public/js/webui.js"
+                    :optimizations   :advanced
+                    :closure-defines {goog.DEBUG false}
+                    :pretty-print    false}}
 
-   [soda-ash]
-   [funcool/promesa]
+    {:id           "test"
+     :source-paths ["src/cljs" "test/cljs"]
+     :compiler     {:main          sixsq.slipstream.webui.runner
+                    :output-to     "target/test/webui/webui-test.js"
+                    :output-dir    "target/test/webui/out"
+                    :optimizations :none}}
+    ]}
 
-   [cljsjs/moment]
-   [cljsjs/react-date-range]]
+  :profiles
+  {:dev
+   {:dependencies [[binaryage/devtools]
+                   [day8.re-frame/trace]
+                   [ring]
+                   [ring/ring-defaults]
+                   [compojure]]
+    :figwheel     {:server-port 3000
+                   :ring-handler sixsq.slipstream.webui.dev_server/http-handler}
+    }
+   }
 
-  :profiles {:dev {:dependencies [[binaryage/devtools]]}}
-
-  :aliases {"prepare"    ["do" ["filegen"] ["unpack-resources"] ["resource"]]
-            "dev-webui"  ["do" ["prepare"] ["figwheel" "dev-webui"]]
-            "dev-legacy" ["figwheel" "dev-legacy"]
-            "prod"       ["do" ["prepare"] ["cljsbuild" "once" "prod-webui" "prod-authn" "prod-legacy"] ["install"]]
-            "test-auto"  ["doo" "phantom" "test"]
-            "test"       ["test-auto" "once"]})
+  :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
+            "dev"       ["do" "prepare" ["figwheel" "dev"]]
+            "prod"      ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
+            "test-auto" ["doo" "phantom" "test"]
+            "test"      ["test-auto" "once"]}
+  )

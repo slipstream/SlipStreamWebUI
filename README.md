@@ -1,28 +1,19 @@
-# Web UI
+# SlipStream Web UI
 
-## Purpose
-
-This repository contains a simple web browser UI for SlipStream, using
-ClojureScript and related technologies.  It is an early **prototype**
+An application that provides a graphical interface to cloud management
+services that use the CIMI interface.  The tortured acronym comes from
+"Cimi resoUrces via a Browser InterfaCe". It is an early **prototype**
 but feedback (as GitHub issues) on the UI, source code, and underlying
 technologies is welcome.
 
-It also contains, **reagent components** which are integrated to the
-**SlipStream UI**. The purpose of those components are to migrate to
-re-frame framework in nearly futur.
-
-At the moment, it is not packaged and can only be run from a 
-development environment.  See the instructions below for starting up
-the web UI.
-
-## Useful Tools (and Commentary)
+## Frameworks and Libraries
 
 SlipStream Code:
 
  * [SlipStream Clojure(Script)
    API](https://github.com/slipstream/SlipStreamClojureAPI): Provides
    a ClojureScript API for the CIMI and CIMI-like resources within
-   SlipStream. 
+   SlipStream.
 
 Frameworks:
 
@@ -35,23 +26,9 @@ Frameworks:
 
 Widgets:
 
- * [React-Bootstrap](https://react-bootstrap.github.io): React
-   bindings for Bootstrap widgets. 
- * [re-com](https://github.com/Day8/re-com): Pure ClojureScript
-   widgets for web applications.  Comes with warning about portability
-   between browsers.
- * [Material UI](http://www.material-ui.com/): Implementation of
-   Google's Material Design specification.
  * [Semantic UI](https://react.semantic-ui.com/introduction):
    React integration for Semantic UI.
 
-Helpful Information:
-
- * [Modern
-   ClojureScript](https://github.com/magomimmo/modern-cljs/tree/master/doc/second-edition)
- * [Reagent Introduction](https://reagent-project.github.io)
- * [Bootstrap with
-   Reagent](http://nicolovaligi.com/boostrap-components-reagent-clojurescript.html) 
 
 ## Development Environment
 
@@ -68,43 +45,39 @@ $ open /Applications/Google\ Chrome.app \
        --args --disable-web-security --user-data-dir
 ```
 
-#### Development
+### Development
 The development environment requires [`lein`](https://leiningen.org).
 
 Once `lein` is installed, you can setup the interactive environment by
 doing the following:
 
  * In a terminal, start development server for the webui.
-  
+
      ```
-     $ lein dev-webui
+     $ lein dev
      ```
  * You will get automatically a REPL, with Fighweel controls:
- 
+
      ```
-     dev-webui:cljs.user=>
+     dev:cljs.user=>
      ```
 
- * A new page in your browser should automatically be open and point to:
-   [http://localhost:3000/webui/index.html](http://localhost:3000/webui/index.html).
+ * Wait a bit, then browse to
+ [http://localhost:3000/webui.html](http://localhost:3000/webui.html).
+
 
 You should see the client application running.  Any changes you make
 to the source files (either ClojureScript sources or HTML templates)
 should be reflected immediately in the browser.
 
-* To get a dev environment on SlipStream UI components.
-
-     ```
-     $ lein dev-legacy
-     ```
-
-#### Testing
+### Testing
 
 * In a terminal, start tests for the webui.
 
      ```
      $ lein test
      ```
+
 * You can also get automatic tests re-execution triggered on your code
   change with following command :
 
@@ -128,5 +101,5 @@ in development mode. From the REPL do:
 ```
 
 The default value is `:debug` which will log all of the HTTP requests
-and responses.  This is useful when debugging interactions with 
-SlipStream, but annoying otherwise.  
+and responses.  This is useful when debugging interactions with
+SlipStream, but annoying otherwise.
