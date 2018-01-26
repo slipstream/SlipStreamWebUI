@@ -1,10 +1,5 @@
 (def +version+ "3.45-SNAPSHOT")
 
-;; FIXME: Provide HTTPS access to Nexus.
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
-
 (defproject
   sixsq.slipstream/webui
   "3.45-SNAPSHOT"
