@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.utils.component :as cutil]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
 
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
@@ -248,7 +249,7 @@
           {:on-click #(reset! show? false)}
           (@tr [:cancel])]
          [ui/Button
-          {:primary true
+          {:primary  true
            :on-click (fn []
                        (reset! show? false)
                        (dispatch [::cimi-events/set-selected-fields @selections]))}
@@ -302,32 +303,17 @@
             tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
         (when (and tpl-resource-key (empty? @descriptions-vector-atom))
           (log/info "retrieving templates for" tpl-resource-key)
-          (dispatch [:evt.sixsq.slipstream.webui.cimi/get-templates tpl-resource-key])) ;; FIXME
-
+          (dispatch [::cimi-events/get-templates tpl-resource-key]))
         (when @show?
           (cond
             (and tpl-resource-key (seq @descriptions-vector-atom))
-            [form-utils/credential-form-container-modal     ;; FIXME
+            [form-utils/form-container-modal
              :show? show?
              :descriptions descriptions-vector-atom
              :on-cancel #(dispatch [::cimi-events/hide-add-modal])
              :on-submit (fn [data]
-                          (dispatch [:evt.sixsq.slipstream.webui.cimi/create-resource resource-key data]) ;; FIXME
+                          (dispatch [::cimi-events/create-resource (cimi-api-utils/create-template @collection-name data)])
                           (dispatch [::cimi-events/hide-add-modal]))]
-
-
-            (and @show? tpl-resource-key (empty? @descriptions-vector-atom))
-            [ui/Modal
-             {:size       "tiny"
-              :scrollable true
-              :open       (and @show? tpl-resource-key (empty? @descriptions-vector-atom))}
-             [ui/ModalContent
-              [:p "loading..."]]
-             [ui/ModalActions
-              [ui/Button
-               {:on-click (fn []
-                            (dispatch [::cimi-events/hide-add-modal]))}
-               (@tr [:cancel])]]]
 
             :else
             (do
@@ -346,11 +332,11 @@
                               (dispatch [::cimi-events/hide-add-modal]))}
                  (@tr [:cancel])]
                 [ui/Button
-                 {:primary true
+                 {:primary  true
                   :on-click (fn []
                               (try
                                 (let [data (js->clj (.parse js/JSON @text))]
-                                  (dispatch [::cimi-events/create-resource-no-tpl data]))
+                                  (dispatch [::cimi-events/create-resource data]))
                                 (catch js/Error e
                                   (dispatch [::main-events/set-message {:header  "Error"
                                                                         :message (str "Unable to parse your json. " e)

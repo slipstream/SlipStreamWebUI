@@ -1,4 +1,4 @@
-(ns  sixsq.slipstream.webui.authn.views
+(ns sixsq.slipstream.webui.authn.views
   (:require
     [re-frame.core :refer [subscribe dispatch]]
 
@@ -54,6 +54,9 @@
        seq
        (sort-by (fn [[_ {:keys [order]}]] order))))
 
+(defn keep-param-mandatory-not-readonly? [[k {:keys [mandatory readOnly]}]]
+  (and mandatory (not readOnly)))
+
 (defn select-method-by-id
   [id methods]
   (->> methods
@@ -64,11 +67,21 @@
   "Provides a single element of a form. This should provide a reasonable
    control for each defined type, but this initial implementation just provides
    either a text or password field."
-  [[param-name {:keys [data type displayName] :as param}]]
+  [[param-name {:keys [data type displayName mandatory] :as param}]]
   (case type
     "hidden" [ui/FormField [:input {:name param-name :type "hidden" :value (or data "")}]]
-    "password" [ui/FormInput {:name param-name :type type :placeholder displayName :icon "lock" :iconPosition "left"}]
-    [ui/FormInput {:name param-name :type type :placeholder displayName :icon "user" :iconPosition "left"}]))
+    "password" [ui/FormInput {:name         param-name
+                              :type         type
+                              :placeholder  displayName
+                              :icon         "lock"
+                              :iconPosition "left"
+                              :required mandatory}]
+    [ui/FormInput {:name         param-name
+                   :type         type
+                   :placeholder  displayName
+                   :icon         "user"
+                   :iconPosition "left"
+                   :required mandatory}]))
 
 (defn method-form
   "Renders the form for a particular login method. The fields are taken from
@@ -82,10 +95,9 @@
             {:keys [baseURI collection-href]} @cep
             id (or id method-type)
             post-uri (str baseURI (:sessions collection-href)) ;; FIXME: Should be part of CIMI API.
-            inputs-method (conj (ordered-params method)
+            inputs-method (conj (->> method ordered-params (filter keep-param-mandatory-not-readonly?))
                                 ["href" {:displayName "href" :data id :type "hidden"}]
-                                ["redirectURI" {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])
-            ]
+                                ["redirectURI" {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])]
         (log/info "creating login form for method" id)
         (vec (concat [ui/Form {:id     (str "login_" id)
                                :action post-uri

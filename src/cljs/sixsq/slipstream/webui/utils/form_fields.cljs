@@ -27,7 +27,6 @@
 
 (defmethod form-field :default
   [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description] :as param}]]
-  (log/error (with-out-str (cljs.pprint/pprint param)))
   ^{:key displayName}
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]

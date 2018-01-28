@@ -66,4 +66,4 @@
                ::selected-fields     ["id"]
                ::available-fields    ["id"]
                ::show-add-modal?     false
-               ::descriptions-vector nil})
+               ::descriptions-vector []})

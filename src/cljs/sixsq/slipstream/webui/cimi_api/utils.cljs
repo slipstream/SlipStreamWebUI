@@ -7,7 +7,8 @@
     [sixsq.slipstream.client.impl.utils.http-async :as http]
     [sixsq.slipstream.client.impl.utils.json :as json]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [clojure.walk :as walk]))
+    [clojure.walk :as walk]
+    [taoensso.timbre :as log]))
 
 
 (def ^:const common-attrs #{:created :updated :resourceURI :properties :acl :operations})
@@ -49,13 +50,12 @@
   (str baseURI relative-url))
 
 
-(defn keep-param-desc? [[k {:keys [mandatory readOnly]}]]
-  (and mandatory (not readOnly)))
+(defn keep-param-desc? [[k {:keys [type readOnly]}]]
+  (and (not readOnly) (not= "map" type) (not= "list" type)))
 
 
 (defn filter-params-desc [desc]
   (into {} (filter keep-param-desc? desc)))
-
 
 (defn complete-parameter-description
   [{:keys [describe-url] :as tpl}]
@@ -64,9 +64,8 @@
       (let [params-desc (<! (http/get describe-url {:chan (chan 1 (json/body-as-json) identity)}))]
         (when-not (instance? js/Error params-desc)
           (-> tpl
-              (assoc :params-desc (filter-params-desc params-desc))
+              (assoc :params-desc (filter-params-desc (dissoc params-desc :acl)))
               (dissoc :describe-url)))))))
-
 
 (defn prepare-session-template
   [baseURI {:keys [id name group method description operations] :as tpl}]
@@ -100,3 +99,27 @@
 (defn clear-form-data [m]
   (let [f (fn [[k v]] (if (string? v) [k ""] [k v]))]
     (walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
+
+(defn get-templates
+  [client collection-keyword]
+  (go
+    (let [baseURI (:baseURI (<! (cimi/cloud-entry-point client)))
+          collection-response (<! (cimi/search client collection-keyword))]
+      (when-not (instance? js/Error collection-response)
+        (->> (get collection-response collection-keyword)
+             (map (partial prepare-session-template baseURI)))))))
+
+(defn split-form-data
+  [form-data]
+  (let [common-attrs #{:name :description :properties}
+        common-map (select-keys form-data common-attrs)
+        template-map (into {} (remove #(common-attrs (first %)) form-data))]
+    [common-map template-map]))
+
+(defn create-template
+  [resource-type form-data]
+  (log/info "resource-type: " resource-type)
+  (let [[common-map template-map] (split-form-data form-data)
+        template-keyword (keyword (str resource-type "Template"))]
+    (assoc common-map template-keyword template-map)))

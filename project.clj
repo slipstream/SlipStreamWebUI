@@ -29,7 +29,7 @@
 
   :pom-location "target/"
 
-  :unpack-resources {:resource [cljsjs/codemirror "5.24.0-1"] :extract-path "target/cljsjs/codemirror"}
+  :unpack-resources {:resource [cljsjs/codemirror "5.31.0-0"] :extract-path "target/cljsjs/codemirror"}
 
   :filegen [{:data        ["#release-version:after {content: '" ~+version+ "';}\n"]
              :template-fn #(apply str %)
@@ -49,13 +49,14 @@
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
-                 [cljsjs/codemirror "5.24.0-1"]
+                 [cljsjs/codemirror "5.31.0-0"]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
                  [com.taoensso/tempura]
                  [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
                  [funcool/promesa]
+                 [com.taoensso/encore] ;fix conflict, needed indirectly
                  ]
 
   :source-paths ["src/clj"]

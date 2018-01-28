@@ -5,7 +5,8 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.component :as ui-utils]))
+    [sixsq.slipstream.webui.utils.component :as ui-utils]
+    [taoensso.timbre :as log]))
 
 
 (defn hidden?
@@ -35,7 +36,7 @@
       (reset! form-data-atom data))))
 
 
-(defn credential-template-form
+(defn template-form
   [form-data-atom {:keys [id] :as description}]
   (let [[hidden-params visible-params] (ordered-params description)
         update-data-fn (partial update-data form-data-atom)
@@ -47,7 +48,7 @@
   (vec (map (fn [{:keys [id label]}] {:value id, :text label}) descriptions)))
 
 
-(defn credential-template-selector
+(defn template-selector
   [update-form-data-fn selected-id-atom descriptions]
   [ui/FormField
    [ui/FormSelect
@@ -61,14 +62,15 @@
                                      (update-form-data-fn value nil nil)))}]])
 
 
-(defn credential-form-container-inner-modal
+(defn form-container-inner-modal
   [show? descriptions-atom on-submit on-cancel]
   (let [tr (subscribe [::i18n-subs/tr])
         selected-id (reagent/atom nil)
         form-data (reagent/atom nil)]
     (fn []
       (when (nil? @selected-id)
-        (reset! selected-id (:id (first (sort-by :id @descriptions-atom)))))
+        (reset! selected-id (:id (first (sort-by :id @descriptions-atom))))
+        (update-data form-data @selected-id nil nil))
       (let [descriptions (sort-by :id @descriptions-atom)
             selected-description (first (filter #(= @selected-id (:id %)) descriptions))]
         [ui/Modal
@@ -77,11 +79,11 @@
          [ui/ModalContent
           {:scrolling true}
           (vec (concat [ui/Form]
-                       [[credential-template-selector
+                       [[template-selector
                          (partial update-data form-data)
                          selected-id
                          descriptions]]
-                       (credential-template-form form-data selected-description)))]
+                       (template-form form-data selected-description)))]
          [ui/ModalActions
           [ui/Button
            {:on-click on-cancel}
@@ -95,9 +97,9 @@
 ;; public component
 ;;
 
-(defn credential-form-container-modal
+(defn form-container-modal
   [& {:keys [show? descriptions on-submit on-cancel]
       :or   {on-submit #()
              on-cancel #()}
       :as   args}]
-  [credential-form-container-inner-modal show? descriptions on-submit on-cancel])
+  [form-container-inner-modal show? descriptions on-submit on-cancel])

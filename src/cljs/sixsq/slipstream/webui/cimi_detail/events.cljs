@@ -48,16 +48,26 @@
 
 (reg-event-fx
   ::edit
-  (fn [{{:keys [::client-spec/client
-                ::cimi-spec/collection-name
-                ] :as db} :db} [_ resource-id data]]
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id data]]
     (when client
-      {::cimi-api-fx/edit [client resource-id data
-                           #(if (instance? js/Error %)
-                              (let [error (->> % ex-data)]
-                                (dispatch [::main-events/set-message {:header  "Failure"
-                                                                      :content (:body error)
-                                                                      :type    :error}]))
-                              (dispatch [::set-resource (:body %)]))]
+      {::cimi-api-fx/edit [client resource-id data #(if (instance? js/Error %)
+                                                      (let [error (->> % ex-data)]
+                                                        (dispatch [::main-events/set-message {:header  "Failure"
+                                                                                              :content (:body error)
+                                                                                              :type    :error}]))
+                                                      (dispatch [::set-resource (:body %)]))]
        })))
 
+(reg-event-fx
+  ::operation
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id operation]]
+    {::cimi-api-fx/operation [client resource-id operation #(if (instance? js/Error %)
+                                                              (let [error (->> % ex-data)]
+                                                                (dispatch [::main-events/set-message
+                                                                           {:header  "Failure"
+                                                                            :content (:body error)
+                                                                            :type    :error}]))
+                                                              (dispatch [::main-events/set-message
+                                                                         {:header  "Success"
+                                                                          :content (with-out-str (cljs.pprint/pprint %))
+                                                                          :type    :success}]))]}))

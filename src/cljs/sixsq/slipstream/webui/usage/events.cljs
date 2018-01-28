@@ -56,11 +56,6 @@
           (assoc ::usage-spec/loading-users-list? false)))))
 
 (reg-event-db
-  ::set-selected-connectors
-  (fn [db [_ connectors]]
-    (assoc db ::usage-spec/selected-connectors connectors)))
-
-(reg-event-db
   ::set-user
   (fn [db [_ user]]
     (assoc db ::usage-spec/selected-user user)))
@@ -69,7 +64,6 @@
   ::clear-user
   (fn [db [_ user]]
     (assoc db ::usage-spec/selected-user nil)))
-
 
 (reg-event-db
   ::set-date-after-before

@@ -120,7 +120,7 @@
   (case label
     "edit" [edit-button data #(dispatch [::cimi-detail-events/edit (:id data) %])]
     "delete" [delete-button data #(dispatch [::cimi-detail-events/delete (:id data)])]
-    [other-button label data #(dispatch [:evt.webui.cimi/operation (:id data) operation-uri])])) ;;FIXME
+    [other-button label data #(dispatch [::cimi-detail-events/operation (:id data) operation-uri])]))
 
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI]

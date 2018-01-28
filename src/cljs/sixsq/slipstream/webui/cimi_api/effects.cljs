@@ -82,3 +82,18 @@
   (fn [[client callback]]
     (go
       (callback (<! (cimi-api-utils/get-current-session client))))))
+
+
+(reg-fx
+  ::get-templates
+  (fn [[client resource-type callback]]
+    (go
+      (when-let [results (<! (cimi-api-utils/get-templates client resource-type))]
+        (callback results)))))
+
+(reg-fx
+  ::get-description
+  (fn [[template callback]]
+    (go
+      (when-let [description (<! (cimi-api-utils/complete-parameter-description template))]
+        (callback description)))))

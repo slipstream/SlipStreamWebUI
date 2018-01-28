@@ -69,19 +69,15 @@
 (reg-event-db
   ::set-collection-name
   (fn [db [_ collection-name]]
-    (assoc db ::cimi-spec/collection-name collection-name)))
+    (-> db
+        (assoc ::cimi-spec/collection-name collection-name)
+        (assoc ::cimi-spec/descriptions-vector []))))
 
 
 (reg-event-db
   ::set-selected-fields
   (fn [db [_ fields]]
     (assoc db ::cimi-spec/selected-fields (sort (vec fields)))))
-
-
-;(reg-event-fx
-;  ::get-results
-;  (fn [db [_ collection-name]]
-;    {::cimi-api-fx/search #(dispatch [::set-results %])}))
 
 
 (reg-event-fx
@@ -103,7 +99,7 @@
 
 
 (reg-event-fx
-  ::create-resource-no-tpl
+  ::create-resource
   (fn [{{:keys [::cimi-spec/collection-name
                 ::cimi-spec/cloud-entry-point
                 ::client-spec/client] :as db} :db} [_ data]]
@@ -117,7 +113,7 @@
                                                                      :content (:body error)
                                                                      :type    :error}]))
                              (dispatch [::main-events/set-message {:header  "Success"
-                                                                   :content (:message %)
+                                                                   :content (with-out-str (cljs.pprint/pprint %))
                                                                    :type    :success}]))]})))
 
 (reg-event-db
@@ -150,3 +146,21 @@
        [client (fn [cep]
                  (dispatch [::set-cloud-entry-point cep]))]})))
 
+(reg-event-fx
+  ::get-description
+  (fn [cofx [_ template]]
+    {::cimi-api-fx/get-description [template #(dispatch [::set-description %])]}))
+
+(reg-event-fx
+  ::get-templates
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-type]]
+    (when client
+      {::cimi-api-fx/get-templates [client resource-type
+                                    #(doseq [result %]
+                                       (dispatch [::get-description result]))]})))
+
+(reg-event-db
+  ::set-description
+  (fn [db [_ description]]
+    (let [description-map {(:id description) description}]
+      (update db ::cimi-spec/descriptions-vector merge description))))
