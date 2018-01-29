@@ -1,7 +1,7 @@
 (def +version+ "3.45-SNAPSHOT")
 
 (defproject
-  sixsq.slipstream/webui
+  com.sixsq.slipstream/SlipStreamWebUI
   "3.45-SNAPSHOT"
   :license
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
