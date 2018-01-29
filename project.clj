@@ -56,7 +56,7 @@
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
                  [funcool/promesa]
-                 [com.taoensso/encore] ;fix conflict, needed indirectly
+                 [com.taoensso/encore]                      ;fix conflict, needed indirectly
                  ]
 
   :source-paths ["src/clj"]
@@ -104,14 +104,14 @@
                    [ring]
                    [ring/ring-defaults]
                    [compojure]]
-    :figwheel     {:server-port 3000
+    :figwheel     {:server-port  3000
                    :ring-handler sixsq.slipstream.webui.dev_server/http-handler}
     }
    }
 
   :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
             "dev"       ["do" "prepare" ["figwheel" "dev"]]
-            "prod"      ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
+            "install"   ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
             "test-auto" ["doo" "phantom" "test"]
             "test"      ["test-auto" "once"]}
   )
