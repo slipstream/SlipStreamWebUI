@@ -3,9 +3,12 @@
 (defproject com.sixsq.slipstream/SlipStreamWebUI "3.45-SNAPSHOT"
 
   :description "Web Browser User Interface"
+
   :url "https://github.com/slipstream/SlipStreamWebUI"
 
-  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+  :license {:name "Apache 2.0"
+            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
             [lein-figwheel "0.5.14"]
