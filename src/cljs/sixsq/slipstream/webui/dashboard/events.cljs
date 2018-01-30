@@ -98,7 +98,7 @@
   ::set-filtered-cloud
   (fn [{:keys [db]} [_ cloud]]
     {:db (-> db
-             (assoc ::dashboard-spec/filtered-cloud (if (= cloud "All Clouds") "" cloud))
+             (assoc ::dashboard-spec/filtered-cloud (if (= cloud "All Clouds") nil cloud))
              (assoc ::dashboard-spec/loading-tab? true))}))
 
 (defn page-count [record-displayed element-count]
