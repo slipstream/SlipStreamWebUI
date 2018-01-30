@@ -1,10 +1,11 @@
 (def +version+ "3.45-SNAPSHOT")
 
-(defproject
-  com.sixsq.slipstream/SlipStreamWebUI
-  "3.45-SNAPSHOT"
-  :license
-  {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.45-SNAPSHOT"
+
+  :description "Web Browser User Interface"
+  :url "https://github.com/slipstream/SlipStreamWebUI"
+
+  :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :plugins [[lein-parent "0.3.2"]
             [lein-figwheel "0.5.14"]
@@ -15,7 +16,10 @@
             [lein-resource "16.9.1"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+                   :inherit [:min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
 
   :clean-targets ^{:protect false} ["resources/public/js/"
                                     "target"
