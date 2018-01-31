@@ -173,6 +173,7 @@
                                           (assoc ::dashboard-spec/delete-deployment-modal nil)
                                           (update ::dashboard-spec/deleted-deployments conj uuid))
      ::dashboard-fx/delete-deployment [client uuid]}))
+
 (reg-event-db
   ::pop-deleted-deployment
   (fn [db [_ uuid]]

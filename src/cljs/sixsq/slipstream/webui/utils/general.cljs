@@ -87,16 +87,6 @@
       (.-nodeValue node)                                    ;; text node
       (merge (attribute-map node) (child-map node)))))
 
-(defn host-url
-  "Extracts the host URL from the javascript window.location object."
-  []
-  (if-let [location (.-location js/window)]
-    (let [protocol (.-protocol location)
-          host (.-hostname location)
-          port (.-port location)
-          port-field (when-not (str/blank? port) (str ":" port))]
-      (str protocol "//" host port-field))))
-
 (defn parse-resource-path
   "Utility to split a resource path into a vector of terms. Returns an empty
    vector for a nil argument. Removes blank or empty terms from the result."

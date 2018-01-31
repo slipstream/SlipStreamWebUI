@@ -10,4 +10,6 @@
   ::initialize
   (fn [db [_ slipstream-url]]
     (let [client (async-client/instance (str slipstream-url "/api/cloud-entry-point"))]
-      (assoc db ::client-spec/client client))))
+      (-> db
+          (assoc ::client-spec/slipstream-url slipstream-url)
+          (assoc ::client-spec/client client)))))

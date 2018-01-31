@@ -16,7 +16,7 @@
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.views :as main-views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
-    [sixsq.slipstream.webui.utils.general :as utils]
+    [sixsq.slipstream.webui.history.utils :as utils]
     [taoensso.timbre :as log]
     [clojure.string :as str]))
 

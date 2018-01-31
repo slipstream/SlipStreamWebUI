@@ -5,6 +5,10 @@
 
 (s/def ::client any?)
 
-(s/def ::db (s/keys :req [::client]))
+(s/def ::slipstream-url string?)
 
-(def defaults {::client nil})
+(s/def ::db (s/keys :req [::client
+                          ::slipstream-url]))
+
+(def defaults {::client nil
+               ::slipstream-url ""})

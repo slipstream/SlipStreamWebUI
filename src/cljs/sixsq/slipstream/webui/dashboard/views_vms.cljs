@@ -8,32 +8,35 @@
     [clojure.string :as str]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
+    [sixsq.slipstream.webui.client.subs :as client-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]))
 
-(defn table-vm-cells [{:keys [deployment-href state ip vcpu ram disk instance-type instance-id connector-href
-                              user-href]}]
-  [[ui/TableCell {:collapsing true}
-    (when (empty? deployment-href)
-      [ui/Popup {:trigger  (r/as-element [:div [ui/Icon {:name "exclamation circle"}] "Unkown"])
-                 :inverted true
-                 :size     "mini" :content "Deployment UUID unknown" :position "left center"}])
-    [:a {:href deployment-href} (or (-> deployment-href
-                                        (str/replace #"^run/" "")
-                                        (str/split #"-")
-                                        (first)) "")]]
-   [ui/TableCell {:collapsing true} state]
-   [ui/TableCell {:collapsing true} ip]
-   [ui/TableCell {:collapsing true :textAlign "center"} vcpu]
-   [ui/TableCell {:collapsing true :textAlign "center"} ram]
-   [ui/TableCell {:collapsing true :textAlign "center"} disk]
-   [ui/TableCell
-    {:collapsing true :style {:max-width "50px" :overflow "hidden" :text-overflow "ellipsis"}} instance-type]
-   [ui/TableCell
-    {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}} instance-id]
-   [ui/TableCell {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}}
-    (or (-> connector-href (str/replace #"^connector/" "")) "")]
-   [ui/TableCell {:style {:max-width "250px" :overflow "hidden" :text-overflow "ellipsis"}}
-    [:a {:href user-href} (str/replace user-href #"^user/" "")]]])
+(defn table-vm-row [vm]
+  (let [slipstream-url (subscribe [::client-subs/slipstream-url])]
+    (fn [{:keys [deployment-href state ip vcpu ram disk instance-type instance-id connector-href user-href] :as vm}]
+      [ui/TableRow {:error (empty? deployment-href)}
+       [ui/TableCell {:collapsing true}
+        (when (empty? deployment-href)
+          [ui/Popup {:trigger  (r/as-element [:div [ui/Icon {:name "exclamation circle"}] "Unkown"])
+                     :inverted true
+                     :size     "mini" :content "Deployment UUID unknown" :position "left center"}])
+        [:a {:href (str @slipstream-url "/" deployment-href)} (or (-> deployment-href
+                                                                      (str/replace #"^run/" "")
+                                                                      (str/split #"-")
+                                                                      (first)) "")]]
+       [ui/TableCell {:collapsing true} state]
+       [ui/TableCell {:collapsing true} ip]
+       [ui/TableCell {:collapsing true :textAlign "center"} vcpu]
+       [ui/TableCell {:collapsing true :textAlign "center"} ram]
+       [ui/TableCell {:collapsing true :textAlign "center"} disk]
+       [ui/TableCell
+        {:collapsing true :style {:max-width "50px" :overflow "hidden" :text-overflow "ellipsis"}} instance-type]
+       [ui/TableCell
+        {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}} instance-id]
+       [ui/TableCell {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}}
+        (or (-> connector-href (str/replace #"^connector/" "")) "")]
+       [ui/TableCell {:style {:max-width "250px" :overflow "hidden" :text-overflow "ellipsis"}}
+        [:a {:href (str @slipstream-url "/" user-href)} (str/replace user-href #"^user/" "")]]])))
 
 (defn extract-vms-data [vms-response]
   (let [vms (:virtualMachines vms-response)]
@@ -57,7 +60,8 @@
         total-pages (subscribe [::dashboard-subs/total-pages])
         loading? (subscribe [::dashboard-subs/loading-tab?])]
     (fn []
-      (let [vms-count (get @virtual-machines :count 0)]
+      (let [vms-count (get @virtual-machines :count 0)
+            vms-data (extract-vms-data @virtual-machines)]
         [ui/Segment {:basic true :loading @loading?}
          [ui/Table
           {:compact     "very"
@@ -72,12 +76,13 @@
           [ui/TableHeader
            (vec (concat [ui/TableRow]
                         (vec (map (fn [label] ^{:key label} [ui/TableHeaderCell label]) headers))))]
+
+
           (vec (concat [ui/TableBody]
-                       (vec (map
-                              (fn [entry]
-                                (vec (concat [ui/TableRow
-                                              {:error (empty? (:deployment-href entry))}] (table-vm-cells entry))))
-                              (extract-vms-data @virtual-machines)))))
+                       (vec (map (fn [{:keys [instance-id connector-href] :as vm}]
+                                   ^{:key (str connector-href "/" instance-id)}
+                                   [table-vm-row vm]) vms-data))))
+
           [ui/TableFooter
            [ui/TableRow
             [ui/TableHeaderCell {:col-span (str 3)}
