@@ -30,7 +30,8 @@
                                        "$aggregation" "terms:deployment/href"
                                        "$filter"      filter-str}
                                       general-utils/prepare-params)
-            active-vms (<! (cimi/search client "virtualMachines" vm-aggregation-params))
+            active-vms (if (not-empty deployments-list)
+                         (<! (cimi/search client "virtualMachines" vm-aggregation-params)) {})
             active-vms-per-deployment (->> (get-in active-vms [:aggregations :terms:deployment/href :buckets] [])
                                            (map #(vector (keyword (:key %)) (:doc_count %)))
                                            (into {}))
@@ -40,12 +41,6 @@
                                                           (keyword (str "run/" (:uuid %))) 0)))
                                       (assoc-in response [:runs :item]))]
         (dispatch [:sixsq.slipstream.webui.dashboard.events/set-deployments deployments-with-vms])))))
-
-(reg-fx
-  ::fetch-tab-records
-  (fn [[client params]]
-
-    ))
 
 (reg-fx
   ::pop-deleted-deployment
