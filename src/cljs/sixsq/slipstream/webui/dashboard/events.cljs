@@ -169,9 +169,10 @@
 (reg-event-fx
   ::delete-deployment
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ uuid]]
-    {:db                              (assoc db ::dashboard-spec/delete-deployment-modal nil)
+    {:db                              (-> db
+                                          (assoc ::dashboard-spec/delete-deployment-modal nil)
+                                          (update ::dashboard-spec/deleted-deployments conj uuid))
      ::dashboard-fx/delete-deployment [client uuid]}))
-
 (reg-event-db
   ::pop-deleted-deployment
   (fn [db [_ uuid]]
