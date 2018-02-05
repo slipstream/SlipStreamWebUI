@@ -19,3 +19,11 @@
     (into {} (->> cep
                   collection-href-map
                   (map (juxt second first))))))
+
+(defn template-resource-key
+  "Returns the collection keyword for the template resource associated with
+   the given collection. If there is no template resource, then nil is
+   returned."
+  [cloud-entry-point collection-href]
+  (when-let [href->key (:collection-key cloud-entry-point)]
+    (href->key (str collection-href "-template"))))

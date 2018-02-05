@@ -8,7 +8,9 @@
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.client.impl.utils.json :as json]
     [sixsq.slipstream.webui.history.events :as history-events]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [clojure.string :as str]))
 
 
 (reg-event-fx
@@ -20,12 +22,42 @@
        ::cimi-api-fx/get [client resource-id #(dispatch [::set-resource %])]})))
 
 
-(reg-event-db
+
+(defn operation-name [op-uri]
+  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
+
+(reg-event-fx
   ::set-resource
-  (fn [db [_ resource]]
-    (assoc db ::cimi-detail-spec/loading? false
-              ::cimi-detail-spec/resource-id (:id resource)
-              ::cimi-detail-spec/resource resource)))
+  (fn [{{:keys [::client-spec/client
+                ::cimi-spec/collection-name
+                ::cimi-spec/cloud-entry-point] :as db} :db} [_ {:keys [operations] :as resource}]]
+    (let [tpl-resources-key (-> cloud-entry-point
+                                (get :collection-key "")
+                                (get (str collection-name "-template") ""))
+          tpl-resource-key (->> tpl-resources-key
+                                name
+                                drop-last
+                                (str/join "")
+                                keyword)
+          tpl-id (-> resource
+                     (get tpl-resource-key)
+                     :href)
+          describe-operation (->> operations
+                                  (filter #(= (-> % :rel operation-name) "describe"))
+                                  first
+                                  :rel)]
+      (cond-> {:db (assoc db ::cimi-detail-spec/loading? false
+                             ::cimi-detail-spec/resource-id (:id resource)
+                             ::cimi-detail-spec/resource resource
+                             ::cimi-detail-spec/description nil)}
+              (and tpl-id describe-operation) (assoc ::cimi-api-fx/operation
+                                                     [client tpl-id describe-operation
+                                                      #(dispatch [::set-description %])])))))
+
+(reg-event-db
+  ::set-description
+  (fn [db [_ description]]
+    (assoc db ::cimi-detail-spec/description description)))
 
 (reg-event-fx
   ::delete

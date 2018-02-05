@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.utils.resource-details
   (:require
     [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as reagent]
+    [reagent.core :as r]
 
     [cljs.pprint :refer [pprint]]
 
@@ -14,6 +14,9 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
 
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
+
+    [sixsq.slipstream.webui.utils.form-fields :as ff]
+    [sixsq.slipstream.webui.utils.component :as comp]
 
     [taoensso.timbre :as log]))
 
@@ -32,7 +35,7 @@
 
 (defn action-button
   [label title-text body on-confirm on-cancel & [scrolling?]]
-  (let [show? (reagent/atom false)]
+  (let [show? (r/atom false)]
     (fn [label title-text body on-confirm on-cancel & [scrolling?]]
       (let [action-fn (fn []
                         (reset! show? false)
@@ -41,40 +44,48 @@
                         (reset! show? false)
                         (on-cancel))]
 
-        [ui/Button
-         {:circular false
-          :primary  true
-          :on-click #(reset! show? true)}
-         label
-         [ui/Modal
-          (cond-> {:open     (boolean @show?)
-                   :on-close #(reset! show? false)}
-                  scrolling? (assoc :scrolling true))
-          [ui/ModalHeader title-text]
-          [ui/ModalContent
-           [:p body]]
-          [ui/ModalActions
-           [action-buttons
-            label
-            "cancel"
-            action-fn
-            cancel-fn]]]]))))
+        [ui/Modal
+         (cond-> {:open     (boolean @show?)
+                  :on-close #(reset! show? false)
+                  :trigger  (r/as-element [ui/Button
+                                           {:primary  true
+                                            :on-click #(reset! show? true)}
+                                           label])}
+                 scrolling? (assoc :scrolling true))
+         [ui/ModalHeader title-text]
+         [ui/ModalContent body]
+         [ui/ModalActions
+          [action-buttons
+           label
+           "cancel"
+           action-fn
+           cancel-fn]]]))))
 
 
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
    modified resource when saved."
-  [data action-fn]
+  [data description action-fn]
   (let [tr (subscribe [::i18n-subs/tr])
-        text (reagent/atom "")]
-    (fn [data action-fn]
+        text (r/atom "")
+        editor-mode? (r/atom false)]
+    (fn [data description action-fn]
       (reset! text (.stringify js/JSON (clj->js data) nil 2))
       [action-button
        (@tr [:update])
        (str (@tr [:editing]) " " (:id data))
-       [editor/json-editor
-        :text text
-        :on-change #(reset! text %)]
+       (if description
+         [:div
+          [ui/Menu {:attached "top"}
+           [ui/MenuItem {:icon    (if @editor-mode? "code" "list layout")
+                         :active  @editor-mode?
+                         :onClick (comp/callback :active #(reset! editor-mode? (not %)))}]]
+          [ui/Segment {:attached "bottom"}
+           (if @editor-mode?
+             [editor/json-editor text]
+             [ui/Segment "other"]
+             )]]
+         [editor/json-editor text])
        (fn []
          (try
            (let [data (js->clj (.parse js/JSON @text))]
@@ -116,16 +127,16 @@
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 
-(defn operation-button [data [label href operation-uri]]
+(defn operation-button [data description [label href operation-uri]]
   (case label
-    "edit" [edit-button data #(dispatch [::cimi-detail-events/edit (:id data) %])]
+    "edit" [edit-button data description #(dispatch [::cimi-detail-events/edit (:id data) %])]
     "delete" [delete-button data #(dispatch [::cimi-detail-events/delete (:id data)])]
     [other-button label data #(dispatch [::cimi-detail-events/operation (:id data) operation-uri])]))
 
 
-(defn format-operations [refresh-button {:keys [operations] :as data} baseURI]
+(defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
   (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
-    (vec (concat [:div refresh-button] (map (partial operation-button data) ops)))))
+    (vec (concat [:div refresh-button] (map (partial operation-button data description) ops)))))
 
 
 (defn attr-ns
@@ -148,16 +159,16 @@
   (last (re-matches #"(?:([^:]*):)?(.*)" (name k))))
 
 
-(defn tuple-to-row [[v1 v2]]
+(defn tuple-to-row [[key value display-name helper]]
   [ui/TableRow
-   [ui/TableCell {:collapsing true} (str v1)]
+   [ui/TableCell {:collapsing true} (or display-name (str key)) ff/nbsp [ff/help-popup helper]]
    [ui/TableCell {:style {:max-width     "80ex"             ;; FIXME: need to get this from parent container
                           :text-overflow "ellipsis"
-                          :overflow      "hidden"}} (str v2)]])
+                          :overflow      "hidden"}} (str value)]])
 
 
 (defn group-table-sui
-  [group-data]
+  [group-data description]
   (let [data (sort-by first group-data)]
     [ui/Table {:compact     true
                :definition  true
@@ -165,16 +176,21 @@
                :padded      false
                :style       {:max-width "100%"}}
      (vec (concat [ui/TableBody]
-                  (map tuple-to-row (map (juxt (comp strip-attr-ns first) second) data))))]))
+                  (map tuple-to-row
+                       (map (juxt
+                              (comp strip-attr-ns first)
+                              second
+                              #(get-in description [(keyword (first %)) :displayName])
+                              #(get-in description [(keyword (first %)) :description])) data))))]))
 
 
-(defn format-group [[group data]]
+(defn format-group [description [group data]]
   ^{:key group}
   [ui/Card {:fluid true}
    [ui/CardContent
     [ui/CardHeader (str group)]
     [ui/CardDescription
-     [group-table-sui data]]]])
+     [group-table-sui data description]]]])
 
 
 (defn reformat-acl [{{:keys [owner rules] :as acl} :acl :as data}]
@@ -198,20 +214,20 @@
       x-index (< x-index o-index))))
 
 
-(defn format-resource-data [data]
+(defn format-resource-data [data description]
   (let [groups (into (sorted-map-by group-comparator)
                      (group-by attr-ns (-> data
                                            reformat-acl
                                            (dissoc :operations))))]
-    (doall (map format-group groups))))
+    (doall (map (partial format-group description) groups))))
 
 
 (defn resource-detail
   "Provides a generic visualization of a CIMI resource document."
-  [refresh-button title {:keys [name id operations] :as data} baseURI]
+  [refresh-button title {:keys [name id operations] :as data} baseURI description]
   [:div
    [:h1 (or name id title)]
-   (format-operations refresh-button data baseURI)
+   (format-operations refresh-button data baseURI description)
    (if-not (instance? js/Error data)
-     (format-resource-data data)
+     (format-resource-data data description)
      [:pre (with-out-str (pprint (ex-data data)))])])

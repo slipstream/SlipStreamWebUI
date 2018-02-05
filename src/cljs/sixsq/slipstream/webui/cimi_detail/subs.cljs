@@ -20,3 +20,9 @@
   ::resource
   (fn [db _]
     (::cimi-detail-spec/resource db)))
+
+
+(reg-sub
+  ::description
+  (fn [db _]
+    (::cimi-detail-spec/description db)))

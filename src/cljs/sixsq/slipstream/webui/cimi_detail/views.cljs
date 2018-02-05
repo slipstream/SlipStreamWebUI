@@ -36,10 +36,12 @@
         path (subscribe [::main-subs/nav-path])
         loading? (subscribe [::cimi-detail-subs/loading?])
         cached-resource-id (subscribe [::cimi-detail-subs/resource-id])
-        resource (subscribe [::cimi-detail-subs/resource])]
+        resource (subscribe [::cimi-detail-subs/resource])
+        description (subscribe [::cimi-detail-subs/description])]
     (fn []
       (let [resource-id (path->resource-id @path)
             correct-resource? (= resource-id @cached-resource-id)]
         (when (not= resource-id @cached-resource-id)
           (dispatch [::cimi-detail-events/get resource-id]))
-        [details/resource-detail [refresh-button] resource-id (when correct-resource? @resource) (:baseURI @cep)]))))
+        [details/resource-detail [refresh-button] resource-id
+         (when correct-resource? @resource) (:baseURI @cep) @description]))))

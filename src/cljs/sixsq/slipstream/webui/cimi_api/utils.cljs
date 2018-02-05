@@ -67,7 +67,7 @@
               (assoc :params-desc (filter-params-desc (dissoc params-desc :acl)))
               (dissoc :describe-url)))))))
 
-(defn prepare-session-template
+(defn prepare-session-template ; FIXME Is used also for other things than session
   [baseURI {:keys [id name group method description operations] :as tpl}]
   (when-let [describe-url (->> operations
                                extract-describe-url

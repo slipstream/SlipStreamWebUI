@@ -84,6 +84,7 @@
 (def Progress (adapt-component "Progress"))
 
 (def Rail (adapt-component "Rail"))
+(def Ref (adapt-component "Ref"))
 
 (def Segment (adapt-component "Segment"))
 (def SegmentGroup (adapt-component "SegmentGroup"))
@@ -107,5 +108,7 @@
 (def TableHeader (adapt-component "TableHeader"))
 (def TableHeaderCell (adapt-component "TableHeaderCell"))
 (def TableRow (adapt-component "TableRow"))
+
+(def TextArea (adapt-component "TextArea"))
 
 (def Transition (adapt-component "Transition"))

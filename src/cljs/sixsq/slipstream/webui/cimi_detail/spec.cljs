@@ -8,8 +8,11 @@
 
 (s/def ::resource any?)
 
-(s/def ::db (s/keys :req [::loading? ::resource-id ::resource]))
+(s/def ::description any?)
+
+(s/def ::db (s/keys :req [::loading? ::resource-id ::resource ::description]))
 
 (def defaults {::loading?    true
                ::resource-id nil
-               ::resource    nil})
+               ::resource    nil
+               ::description nil})

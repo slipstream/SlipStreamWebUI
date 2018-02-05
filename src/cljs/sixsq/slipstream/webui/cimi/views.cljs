@@ -13,6 +13,7 @@
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
 
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
@@ -281,15 +282,6 @@
              :on-change   (cutil/callback :value callback)}]]]]))))
 
 
-(defn template-resource-key
-  "Returns the collection keyword for the template resource associated with
-   the given collection. If there is no template resource, then nil is
-   returned."
-  [cloud-entry-point collection-href]
-  (when-let [href->key (:collection-key cloud-entry-point)]
-    (href->key (str collection-href "-template"))))
-
-
 (defn resource-add-form
   []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -300,7 +292,7 @@
         text (reagent/atom "")]
     (fn []
       (let [resource-key (get (:collection-key @cloud-entry-point) @collection-name)
-            tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
+            tpl-resource-key (cimi-utils/template-resource-key @cloud-entry-point @collection-name)]
         (when (and tpl-resource-key (empty? @descriptions-vector-atom))
           (log/info "retrieving templates for" tpl-resource-key)
           (dispatch [::cimi-events/get-templates tpl-resource-key]))
@@ -323,9 +315,7 @@
                 :scrollable true
                 :open       @show?}
                [ui/ModalContent
-                [editor/json-editor
-                 :text text
-                 :on-change #(reset! text %)]]
+                [editor/json-editor text]]
                [ui/ModalActions
                 [ui/Button
                  {:on-click (fn []
