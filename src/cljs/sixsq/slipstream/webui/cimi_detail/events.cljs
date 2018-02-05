@@ -13,11 +13,18 @@
 
 (reg-event-fx
   ::get
-  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id]]
+  (fn [{{:keys [::client-spec/client
+                ::cimi-spec/collection-name] :as db} :db} [_ resource-id]]
     (when client
       {:db               (assoc db ::cimi-detail-spec/loading? true
-                                   ::cimi-detail-spec/resource-id resource-id)
-       ::cimi-api-fx/get [client resource-id #(dispatch [::set-resource %])]})))
+                                ::cimi-detail-spec/resource-id resource-id)
+       ::cimi-api-fx/get [client resource-id #(if (instance? js/Error %)
+                                                (do 
+                                                  (dispatch [::main-events/set-message {:header  "Failure"
+                                                                                        :content (->> % ex-data :body)
+                                                                                        :type    :error}])
+                                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)]))
+                                                (dispatch [::set-resource %]))]})))
 
 
 (reg-event-db
