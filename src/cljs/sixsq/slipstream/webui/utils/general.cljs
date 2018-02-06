@@ -100,3 +100,9 @@
   (if (> (count s) max-size)
     (str (str/join "" (take max-size s)) suffix)
     s))
+
+(defn edn->json [edn & {:keys [spaces] :or {spaces 2}}]
+  (.stringify js/JSON (clj->js edn) nil spaces))
+
+(defn json->edn [json & {:keys [keywordize-keys] :or {keywordize-keys true}}]
+  (js->clj (.parse js/JSON json) :keywordize-keys keywordize-keys))

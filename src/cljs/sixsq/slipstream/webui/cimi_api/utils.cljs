@@ -7,6 +7,7 @@
     [sixsq.slipstream.client.impl.utils.http-async :as http]
     [sixsq.slipstream.client.impl.utils.json :as json]
     [sixsq.slipstream.client.api.cimi :as cimi]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [clojure.walk :as walk]
     [taoensso.timbre :as log]))
 
@@ -58,14 +59,18 @@
   (into {} (filter keep-param-desc? desc)))
 
 (defn complete-parameter-description
-  [{:keys [describe-url] :as tpl}]
+  [{:keys [describe-url default-values] :as tpl}]
   (go
     (if describe-url
       (let [params-desc (<! (http/get describe-url {:chan (chan 1 (json/body-as-json) identity)}))]
         (when-not (instance? js/Error params-desc)
-          (-> tpl
-              (assoc :params-desc (filter-params-desc (dissoc params-desc :acl)))
-              (dissoc :describe-url)))))))
+          (let [description-filtered (filter-params-desc (dissoc params-desc :acl))
+                default-values-map (->> default-values (map (fn [[k v]] [k {:data v}])) (into {}))
+                description-filtered-defaults (merge-with merge description-filtered default-values-map)]
+            (-> tpl
+                (assoc :params-desc description-filtered-defaults)
+                (dissoc :default-values)
+                (dissoc :describe-url))))))))
 
 (defn prepare-session-template ; FIXME Is used also for other things than session
   [baseURI {:keys [id name group method description operations] :as tpl}]
@@ -76,6 +81,10 @@
      :label        name
      :group        group
      :authn-method method
+     :default-values (-> tpl
+                         (cimi-utils/strip-common-attrs)
+                         (cimi-utils/strip-service-attrs)
+                         (dissoc :acl))
      :description  description
      :describe-url describe-url}))
 

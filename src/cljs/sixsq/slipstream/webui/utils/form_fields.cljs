@@ -91,11 +91,12 @@
 
 
 (defmethod form-field :enum
-  [update-fn form-id [param-name {:keys [enum displayName mandatory description]}]]
+  [update-fn form-id [param-name {:keys [enum data displayName mandatory description]}]]
   ^{:key displayName}
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]
    [ui/FormSelect
     {:options   (vec (map (fn [v] {:value v, :text v}) enum))
+     :value data
      :on-change (ui-utils/callback :value
                                    #(update-fn form-id param-name %))}]])

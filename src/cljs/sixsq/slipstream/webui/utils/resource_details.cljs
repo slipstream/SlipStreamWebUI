@@ -20,6 +20,7 @@
 
     [taoensso.timbre :as log]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [sixsq.slipstream.webui.utils.general :as general]
     [clojure.string :as str]))
 
 
@@ -64,21 +65,23 @@
            cancel-fn]]]))))
 
 
-(defn update-data [form-data-atom form-id param value]
-  (let [data (cond-> @form-data-atom
-                     param (merge {param value}))]
-    (swap! form-data-atom merge data)))
+(defn update-data [text form-id param value]
+  (let [edn-text (general/json->edn @text)
+        data (cond-> edn-text
+                     param (merge {param value}))
+        result (merge edn-text data)]
+    (reset! text (general/edn->json result))))
 
 (defn template-form
-  [form-data-atom {:keys [template-resource-key params-desc] :as description}]
-  (let [default-data (->> @form-data-atom (map (fn [[k v]] [k {:data v}])) (into {}))
+  [text {:keys [template-resource-key params-desc] :as description}]
+  (let [default-data (->> (general/json->edn @text) (map (fn [[k v]] [k {:data v}])) (into {}))
         params-desc-with-data (-> (merge-with merge params-desc default-data)
                                   (dissoc :acl)
                                   (dissoc :operations)
                                   (dissoc template-resource-key))
         description-with-data (assoc description :params-desc params-desc-with-data)
         [hidden-params visible-params] (form-utils/ordered-params description-with-data)
-        update-data-fn (partial update-data form-data-atom)
+        update-data-fn (partial update-data text)
         form-component-fn (partial ff/form-field update-data-fn nil)]
     (vec (map form-component-fn (concat hidden-params visible-params)))))
 
@@ -87,31 +90,39 @@
    modified resource when saved."
   [data description action-fn]
   (let [tr (subscribe [::i18n-subs/tr])
-        text (r/atom "")
-        local-data (r/atom data)
-        editor-mode? (r/atom false)]
+        text (r/atom (general/edn->json data))
+        editor-mode? (r/atom false)
+        json-error? (r/atom false)]
     (fn [data description action-fn]
-      (reset! text (.stringify js/JSON (clj->js @local-data) nil 2))
       [action-button
        (@tr [:update])
        (str (@tr [:editing]) " " (:id data))
        (if description
          [:div
           [ui/Menu {:attached "top"}
-           [ui/MenuItem {:icon    (if @editor-mode? "code" "list layout")
-                         :active  @editor-mode?
-                         :onClick (comp/callback :active #(reset! editor-mode? (not %)))}]]
+           [ui/MenuItem {:icon     (if @editor-mode? "list layout" "code")
+                         :active   @editor-mode?
+                         :onClick  (comp/callback :active (fn [active-v]
+                                                            (reset! json-error? false)
+                                                            (try
+                                                              (general/json->edn @text)
+                                                              (reset! json-error? false)
+                                                              (reset! editor-mode? (not active-v))
+                                                              (catch js/Object e
+                                                                (reset! json-error? true)
+                                                                (reset! editor-mode? true)))
+                                                            ))}]
+           (when @json-error?
+             [ui/MenuItem [ui/Label {:color "red"} "Invalid JSON!!!"]])]
           [ui/Segment {:attached "bottom"}
            (if @editor-mode?
              [editor/json-editor text]
              (vec (concat [ui/Form]
-                          (template-form local-data description)))
-             )]]
+                          (template-form text description))))]]
          [editor/json-editor text])
        (fn []
          (try
-           (let [data (js->clj (.parse js/JSON @text))]
-             (action-fn data))
+           (action-fn (general/json->edn @text))
            (catch js/Error e
              (action-fn e))))
        (constantly nil)

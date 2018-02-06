@@ -22,6 +22,7 @@
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.utils.general :as general]
 
     [taoensso.timbre :as log]))
 
@@ -309,7 +310,7 @@
 
             :else
             (do
-              (reset! text (.stringify js/JSON (clj->js {:key "value"}) nil 2))
+              (reset! text (general/edn->json {:key "value"}))
               [ui/Modal
                {:size       "large"
                 :scrollable true
@@ -325,7 +326,7 @@
                  {:primary  true
                   :on-click (fn []
                               (try
-                                (let [data (js->clj (.parse js/JSON @text))]
+                                (let [data (general/json->edn @text)]
                                   (dispatch [::cimi-events/create-resource data]))
                                 (catch js/Error e
                                   (dispatch [::main-events/set-message {:header  "Error"

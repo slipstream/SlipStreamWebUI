@@ -45,7 +45,7 @@
 
 
 (defn descriptions->options [descriptions]
-  (vec (map (fn [{:keys [id label]}] {:value id, :text label}) descriptions)))
+  (vec (map (fn [{:keys [id label]}] {:value id, :text (or label id)}) descriptions)))
 
 
 (defn template-selector
