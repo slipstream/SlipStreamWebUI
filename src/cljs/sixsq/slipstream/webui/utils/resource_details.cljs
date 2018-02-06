@@ -18,7 +18,9 @@
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.component :as comp]
 
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [clojure.string :as str]))
 
 
 (defn action-buttons
@@ -62,15 +64,34 @@
            cancel-fn]]]))))
 
 
+(defn update-data [form-data-atom form-id param value]
+  (let [data (cond-> @form-data-atom
+                     param (merge {param value}))]
+    (swap! form-data-atom merge data)))
+
+(defn template-form
+  [form-data-atom {:keys [template-resource-key params-desc] :as description}]
+  (let [default-data (->> @form-data-atom (map (fn [[k v]] [k {:data v}])) (into {}))
+        params-desc-with-data (-> (merge-with merge params-desc default-data)
+                                  (dissoc :acl)
+                                  (dissoc :operations)
+                                  (dissoc template-resource-key))
+        description-with-data (assoc description :params-desc params-desc-with-data)
+        [hidden-params visible-params] (form-utils/ordered-params description-with-data)
+        update-data-fn (partial update-data form-data-atom)
+        form-component-fn (partial ff/form-field update-data-fn nil)]
+    (vec (map form-component-fn (concat hidden-params visible-params)))))
+
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
    modified resource when saved."
   [data description action-fn]
   (let [tr (subscribe [::i18n-subs/tr])
         text (r/atom "")
+        local-data (r/atom data)
         editor-mode? (r/atom false)]
     (fn [data description action-fn]
-      (reset! text (.stringify js/JSON (clj->js data) nil 2))
+      (reset! text (.stringify js/JSON (clj->js @local-data) nil 2))
       [action-button
        (@tr [:update])
        (str (@tr [:editing]) " " (:id data))
@@ -83,7 +104,8 @@
           [ui/Segment {:attached "bottom"}
            (if @editor-mode?
              [editor/json-editor text]
-             [ui/Segment "other"]
+             (vec (concat [ui/Form]
+                          (template-form local-data description)))
              )]]
          [editor/json-editor text])
        (fn []
@@ -168,7 +190,7 @@
 
 
 (defn group-table-sui
-  [group-data description]
+  [group-data {:keys [params-desc] :as description}]
   (let [data (sort-by first group-data)]
     [ui/Table {:compact     true
                :definition  true
@@ -180,8 +202,8 @@
                        (map (juxt
                               (comp strip-attr-ns first)
                               second
-                              #(get-in description [(keyword (first %)) :displayName])
-                              #(get-in description [(keyword (first %)) :description])) data))))]))
+                              #(get-in params-desc [(keyword (first %)) :displayName])
+                              #(get-in params-desc [(keyword (first %)) :description])) data))))]))
 
 
 (defn format-group [description [group data]]

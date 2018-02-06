@@ -52,7 +52,9 @@
                              ::cimi-detail-spec/description nil)}
               (and tpl-id describe-operation) (assoc ::cimi-api-fx/operation
                                                      [client tpl-id describe-operation
-                                                      #(dispatch [::set-description %])])))))
+                                                      #(dispatch [::set-description {:href tpl-id
+                                                                                     :template-resource-key tpl-resource-key
+                                                                                     :params-desc %}])])))))
 
 (reg-event-db
   ::set-description
