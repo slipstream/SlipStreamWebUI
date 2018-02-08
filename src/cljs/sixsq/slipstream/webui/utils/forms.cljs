@@ -74,8 +74,10 @@
       (let [descriptions (sort-by :id @descriptions-atom)
             selected-description (first (filter #(= @selected-id (:id %)) descriptions))]
         [ui/Modal
-         {:size "tiny"
-          :open @show?}
+         {:open @show?
+          :onClose on-cancel
+          :closeIcon true}
+         [ui/ModalHeader (@tr [:create])]
          [ui/ModalContent
           {:scrolling true}
           (vec (concat [ui/Form]

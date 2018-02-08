@@ -16,5 +16,5 @@
 
 
 (defmethod panel/render :settings
-  [path query-params]
+  [path]
   [settings-info])

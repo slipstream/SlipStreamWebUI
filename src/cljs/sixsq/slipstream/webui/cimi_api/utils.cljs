@@ -64,11 +64,11 @@
     (if describe-url
       (let [params-desc (<! (http/get describe-url {:chan (chan 1 (json/body-as-json) identity)}))]
         (when-not (instance? js/Error params-desc)
-          (let [description-filtered (filter-params-desc (dissoc params-desc :acl))
-                default-values-map (->> default-values (map (fn [[k v]] [k {:data v}])) (into {}))
-                description-filtered-defaults (merge-with merge description-filtered default-values-map)]
+          (let [default-values-map (->> default-values (map (fn [[k v]] [k {:data v}])) (into {}))
+                description-with-defaults (merge-with merge params-desc default-values-map)
+                description-filtered (filter-params-desc (dissoc description-with-defaults :acl))]
             (-> tpl
-                (assoc :params-desc description-filtered-defaults)
+                (assoc :params-desc description-filtered)
                 (dissoc :default-values)
                 (dissoc :describe-url))))))))
 

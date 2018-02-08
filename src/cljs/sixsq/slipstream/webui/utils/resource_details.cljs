@@ -49,6 +49,7 @@
 
         [ui/Modal
          (cond-> {:open     (boolean @show?)
+                  :closeIcon true
                   :on-close #(reset! show? false)
                   :trigger  (r/as-element [ui/Button
                                            {:primary  true
@@ -113,7 +114,7 @@
                                                                 (reset! editor-mode? true)))
                                                             ))}]
            (when @json-error?
-             [ui/MenuItem [ui/Label {:color "red"} "Invalid JSON!!!"]])]
+             [ui/MenuItem [ui/Label "Invalid JSON!!!"]])]
           [ui/Segment {:attached "bottom"}
            (if @editor-mode?
              [editor/json-editor text]
@@ -261,6 +262,4 @@
   [:div
    [:h1 (or name id title)]
    (format-operations refresh-button data baseURI description)
-   (if-not (instance? js/Error data)
-     (format-resource-data data description)
-     [:pre (with-out-str (pprint (ex-data data)))])])
+   (format-resource-data data description)])

@@ -19,9 +19,9 @@
                 ::cimi-spec/collection-name] :as db} :db} [_ resource-id]]
     (when client
       {:db               (assoc db ::cimi-detail-spec/loading? true
-                                ::cimi-detail-spec/resource-id resource-id)
+                                   ::cimi-detail-spec/resource-id resource-id)
        ::cimi-api-fx/get [client resource-id #(if (instance? js/Error %)
-                                                (do 
+                                                (do
                                                   (dispatch [::main-events/set-message {:header  "Failure"
                                                                                         :content (->> % ex-data :body)
                                                                                         :type    :error}])
@@ -53,15 +53,17 @@
                                   (filter #(= (-> % :rel operation-name) "describe"))
                                   first
                                   :rel)]
+      (log/info (:id resource))
       (cond-> {:db (assoc db ::cimi-detail-spec/loading? false
                              ::cimi-detail-spec/resource-id (:id resource)
                              ::cimi-detail-spec/resource resource
                              ::cimi-detail-spec/description nil)}
               (and tpl-id describe-operation) (assoc ::cimi-api-fx/operation
                                                      [client tpl-id describe-operation
-                                                      #(dispatch [::set-description {:href tpl-id
-                                                                                     :template-resource-key tpl-resource-key
-                                                                                     :params-desc %}])])))))
+                                                      #(dispatch [::set-description
+                                                                  {:href                  tpl-id
+                                                                   :template-resource-key tpl-resource-key
+                                                                   :params-desc           %}])])))))
 
 (reg-event-db
   ::set-description
@@ -71,8 +73,7 @@
 (reg-event-fx
   ::delete
   (fn [{{:keys [::client-spec/client
-                ::cimi-spec/collection-name
-                ] :as db} :db} [_ resource-id]]
+                ::cimi-spec/collection-name] :as db} :db} [_ resource-id]]
     (when client
       {::cimi-api-fx/delete [client resource-id
                              #(if (instance? js/Error %)
@@ -96,7 +97,7 @@
                                                         (dispatch [::main-events/set-message {:header  "Failure"
                                                                                               :content (:body error)
                                                                                               :type    :error}]))
-                                                      (dispatch [::set-resource (:body %)]))]
+                                                      (dispatch [::set-resource %]))]
        })))
 
 (reg-event-fx

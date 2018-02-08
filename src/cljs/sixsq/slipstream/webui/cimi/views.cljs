@@ -238,7 +238,7 @@
          :icon     "columns"
          :on-click #(reset! show? true)}]
        [ui/Modal
-        {:size     "tiny"
+        {:closeIcon true
          :open     @show?
          :on-close #(reset! show? false)
          :on-open  #(reset! selections (set @selected-fields))}
@@ -305,7 +305,8 @@
              :descriptions descriptions-vector-atom
              :on-cancel #(dispatch [::cimi-events/hide-add-modal])
              :on-submit (fn [data]
-                          (dispatch [::cimi-events/create-resource (cimi-api-utils/create-template @collection-name data)])
+                          (dispatch [::cimi-events/create-resource
+                                     (cimi-api-utils/create-template @collection-name data)])
                           (dispatch [::cimi-events/hide-add-modal]))]
 
             :else
@@ -314,6 +315,7 @@
               [ui/Modal
                {:size       "large"
                 :scrollable true
+                :closeIcon true
                 :open       @show?}
                [ui/ModalContent
                 [editor/json-editor text]]
@@ -426,5 +428,5 @@
 
 
 (defmethod panel/render :cimi
-  [path query-params]
+  [path]
   [cimi-resource])

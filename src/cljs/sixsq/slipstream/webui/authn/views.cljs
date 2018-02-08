@@ -106,7 +106,7 @@
                      [(if @selected-method-group
                         [ui/FormButton {:primary true :fluid true} label]
                         [ui/FormField
-                         [ui/ButtonGroup {:color "blue" :fluid true}
+                         [ui/ButtonGroup {:primary true :fluid true}
                           [ui/Dropdown
                            {:options     (map #(identity {:key   (:id %)
                                                           :text  (:label %)
@@ -150,16 +150,12 @@
 
           [ui/GridColumn {:stretched true}
            [ui/Segment {:basic externals? :textAlign "left"}
-            (when-not externals? [ui/Label {:color "red" :ribbon true} "Internal methods"]) ; TODO translate
             (vec (concat [:div]
                          (map (fn [[k v]] [method-form k v]) internals)))]]
 
           (when-not externals?
             [ui/GridColumn {:stretched true}
              [ui/Segment {:textAlign "left"}
-              (vec (concat [:span {:style {:position "absolute"}}]
-                           (map #(identity [ui/Icon {:name % :size "big"}]) ["world" "github"])))
-              [ui/Label {:color "teal" :ribbon "right"} "External methods"] ; TODO translate
               [:div
                (vec (concat [:div]
                             (map (fn [[k v]] [method-form k v]) externals)))]]])
@@ -171,10 +167,9 @@
         modal-open? (subscribe [::authn-subs/modal-open?])]
     (fn []
       [ui/Modal
-       {:size     "small"
-        :id       "modal-login-id"
+       {:id       "modal-login-id"
         :open     @modal-open?
-        :dimmer   "blurring"
+        :closeIcon true
         :on-close #(dispatch [::authn-events/close-modal])}
        [ui/ModalHeader (@tr [:login])]
        [ui/ModalContent {:scrolling true}
@@ -202,7 +197,7 @@
                    #_(history/navigate "welcome"))]         ;; FIXME
     (fn []
       [:div
-       [ui/Button {:size "tiny" :on-click on-click :color "red"} (@tr [:logout])]])))
+       [ui/Button {:size "tiny" :on-click on-click :negative true} (@tr [:logout])]])))
 
 
 (defn authn-button

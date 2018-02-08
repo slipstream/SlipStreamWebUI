@@ -45,6 +45,6 @@
 
 
 (defmethod panel/render :profile
-  [path query-params]
+  [path]
   [session-info])
 

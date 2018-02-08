@@ -82,5 +82,5 @@
   (dispatch [::dashboard-events/set-filtered-cloud cloud]))
 
 (defmethod panel/render :dashboard
-  [path query-params]
+  [path]
   [dashboard-resource])

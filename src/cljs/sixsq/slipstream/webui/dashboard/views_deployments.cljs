@@ -143,8 +143,8 @@
                    [ui/TableCell {:collapsing true}
                     [ui/Icon
                      (if (contains? @deleted deployment-uuid)
-                       {:name "trash outline" :color "black"}
-                       {:name    "remove" :color "red" :link true
+                       {:name "trash outline"}
+                       {:name    "remove" :negative true :link true
                         :onClick #(dispatch
                                     [::dashboard-events/delete-deployment-modal deployment])})]
 
