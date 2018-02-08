@@ -3,6 +3,7 @@
     [re-frame.core :refer [reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.main.spec :as main-spec]
     [sixsq.slipstream.webui.main.effects :as main-fx]
+    [sixsq.slipstream.webui.history.effects :as history-fx]
     [taoensso.timbre :as log]
     [clojure.string :as str]))
 
@@ -32,19 +33,17 @@
 (reg-event-fx
   ::action-interval
   (fn [_ [_ opts]]
-    {::main-fx/action-interval [opts]}
-    ))
+    {::main-fx/action-interval [opts]}))
 
-(reg-event-db
+(reg-event-fx
   ::push-breadcrumb
-  (fn [db [_ path-element]]
-    (update db ::main-spec/nav-path conj path-element)))
+  (fn [{{:keys [::main-spec/nav-path] :as db} :db} [_ path-element]]
+    {::history-fx/navigate [(str/join "/" (conj nav-path path-element))]}))
 
-
-(reg-event-db
+(reg-event-fx
   ::trim-breadcrumb
-  (fn [db [_ index]]
-    (update db ::main-spec/nav-path (partial take (inc index)))))
+  (fn [{{:keys [::main-spec/nav-path] :as db} :db} [_ index]]
+    {::history-fx/navigate [(str/join "/" (take (inc index) nav-path))]}))
 
 (reg-event-db
   ::set-message

@@ -19,3 +19,23 @@
     (into {} (->> cep
                   collection-href-map
                   (map (juxt second first))))))
+
+(defn template-resource-key
+  "Returns the collection keyword for the template resource associated with
+   the given collection. If there is no template resource, then nil is
+   returned."
+  [cloud-entry-point collection-href]
+  (when-let [href->key (:collection-key cloud-entry-point)]
+    (href->key (str collection-href "-template"))))
+
+(defn strip-common-attrs
+  "Strips all common resource attributes from the map."
+  [m]
+  (dissoc m :id :name :description :created :updated :properties))
+
+(defn strip-service-attrs
+  "Strips common attributes from the map whose values are controlled
+   entirely by the service.  These include :id, :created, :updated,
+   :resourceURI, and :operations."
+  [m]
+  (dissoc m :id :created :updated :resourceURI :operations))

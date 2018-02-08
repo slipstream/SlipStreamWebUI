@@ -95,6 +95,6 @@
 
 
 (defmethod panel/render :application
-  [path query-params]
+  [path]
   (dispatch [::application-events/get-module])
   [module-resource])

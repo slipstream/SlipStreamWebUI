@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.utils.resource-details
   (:require
     [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as reagent]
+    [reagent.core :as r]
 
     [cljs.pprint :refer [pprint]]
 
@@ -15,7 +15,13 @@
 
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
 
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.form-fields :as ff]
+    [sixsq.slipstream.webui.utils.component :as comp]
+
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [sixsq.slipstream.webui.utils.general :as general]
+    [clojure.string :as str]))
 
 
 (defn action-buttons
@@ -32,7 +38,7 @@
 
 (defn action-button
   [label title-text body on-confirm on-cancel & [scrolling?]]
-  (let [show? (reagent/atom false)]
+  (let [show? (r/atom false)]
     (fn [label title-text body on-confirm on-cancel & [scrolling?]]
       (let [action-fn (fn []
                         (reset! show? false)
@@ -41,44 +47,83 @@
                         (reset! show? false)
                         (on-cancel))]
 
-        [ui/Button
-         {:circular false
-          :primary  true
-          :on-click #(reset! show? true)}
-         label
-         [ui/Modal
-          (cond-> {:open     (boolean @show?)
-                   :on-close #(reset! show? false)}
-                  scrolling? (assoc :scrolling true))
-          [ui/ModalHeader title-text]
-          [ui/ModalContent
-           [:p body]]
-          [ui/ModalActions
-           [action-buttons
-            label
-            "cancel"
-            action-fn
-            cancel-fn]]]]))))
+        [ui/Modal
+         (cond-> {:open     (boolean @show?)
+                  :closeIcon true
+                  :on-close #(reset! show? false)
+                  :trigger  (r/as-element [ui/Button
+                                           {:primary  true
+                                            :on-click #(reset! show? true)}
+                                           label])}
+                 scrolling? (assoc :scrolling true))
+         [ui/ModalHeader title-text]
+         [ui/ModalContent body]
+         [ui/ModalActions
+          [action-buttons
+           label
+           "cancel"
+           action-fn
+           cancel-fn]]]))))
 
+
+(defn update-data [text form-id param value]
+  (let [edn-text (general/json->edn @text)
+        data (cond-> edn-text
+                     param (merge {param value}))
+        result (merge edn-text data)]
+    (reset! text (general/edn->json result))))
+
+(defn template-form
+  [text {:keys [template-resource-key params-desc] :as description}]
+  (let [default-data (->> (general/json->edn @text) (map (fn [[k v]] [k {:data v}])) (into {}))
+        params-desc-with-data (-> (merge-with merge params-desc default-data)
+                                  (dissoc :acl)
+                                  (dissoc :operations)
+                                  (dissoc template-resource-key))
+        description-with-data (assoc description :params-desc params-desc-with-data)
+        [hidden-params visible-params] (form-utils/ordered-params description-with-data)
+        update-data-fn (partial update-data text)
+        form-component-fn (partial ff/form-field update-data-fn nil)]
+    (vec (map form-component-fn (concat hidden-params visible-params)))))
 
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
    modified resource when saved."
-  [data action-fn]
+  [data description action-fn]
   (let [tr (subscribe [::i18n-subs/tr])
-        text (reagent/atom "")]
-    (fn [data action-fn]
-      (reset! text (.stringify js/JSON (clj->js data) nil 2))
+        text (r/atom (general/edn->json data))
+        editor-mode? (r/atom false)
+        json-error? (r/atom false)]
+    (fn [data description action-fn]
       [action-button
        (@tr [:update])
        (str (@tr [:editing]) " " (:id data))
-       [editor/json-editor
-        :text text
-        :on-change #(reset! text %)]
+       (if description
+         [:div
+          [ui/Menu {:attached "top"}
+           [ui/MenuItem {:icon     (if @editor-mode? "list layout" "code")
+                         :active   @editor-mode?
+                         :onClick  (comp/callback :active (fn [active-v]
+                                                            (reset! json-error? false)
+                                                            (try
+                                                              (general/json->edn @text)
+                                                              (reset! json-error? false)
+                                                              (reset! editor-mode? (not active-v))
+                                                              (catch js/Object e
+                                                                (reset! json-error? true)
+                                                                (reset! editor-mode? true)))
+                                                            ))}]
+           (when @json-error?
+             [ui/MenuItem [ui/Label "Invalid JSON!!!"]])]
+          [ui/Segment {:attached "bottom"}
+           (if @editor-mode?
+             [editor/json-editor text]
+             (vec (concat [ui/Form]
+                          (template-form text description))))]]
+         [editor/json-editor text])
        (fn []
          (try
-           (let [data (js->clj (.parse js/JSON @text))]
-             (action-fn data))
+           (action-fn (general/json->edn @text))
            (catch js/Error e
              (action-fn e))))
        (constantly nil)
@@ -116,16 +161,16 @@
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 
-(defn operation-button [data [label href operation-uri]]
+(defn operation-button [data description [label href operation-uri]]
   (case label
-    "edit" [edit-button data #(dispatch [::cimi-detail-events/edit (:id data) %])]
+    "edit" [edit-button data description #(dispatch [::cimi-detail-events/edit (:id data) %])]
     "delete" [delete-button data #(dispatch [::cimi-detail-events/delete (:id data)])]
     [other-button label data #(dispatch [::cimi-detail-events/operation (:id data) operation-uri])]))
 
 
-(defn format-operations [refresh-button {:keys [operations] :as data} baseURI]
+(defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
   (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
-    (vec (concat [:div refresh-button] (map (partial operation-button data) ops)))))
+    (vec (concat [:div refresh-button] (map (partial operation-button data description) ops)))))
 
 
 (defn attr-ns
@@ -148,16 +193,16 @@
   (last (re-matches #"(?:([^:]*):)?(.*)" (name k))))
 
 
-(defn tuple-to-row [[v1 v2]]
+(defn tuple-to-row [[key value display-name helper]]
   [ui/TableRow
-   [ui/TableCell {:collapsing true} (str v1)]
+   [ui/TableCell {:collapsing true} (or display-name (str key)) ff/nbsp [ff/help-popup helper]]
    [ui/TableCell {:style {:max-width     "80ex"             ;; FIXME: need to get this from parent container
                           :text-overflow "ellipsis"
-                          :overflow      "hidden"}} (str v2)]])
+                          :overflow      "hidden"}} (str value)]])
 
 
 (defn group-table-sui
-  [group-data]
+  [group-data {:keys [params-desc] :as description}]
   (let [data (sort-by first group-data)]
     [ui/Table {:compact     true
                :definition  true
@@ -165,16 +210,21 @@
                :padded      false
                :style       {:max-width "100%"}}
      (vec (concat [ui/TableBody]
-                  (map tuple-to-row (map (juxt (comp strip-attr-ns first) second) data))))]))
+                  (map tuple-to-row
+                       (map (juxt
+                              (comp strip-attr-ns first)
+                              second
+                              #(get-in params-desc [(keyword (first %)) :displayName])
+                              #(get-in params-desc [(keyword (first %)) :description])) data))))]))
 
 
-(defn format-group [[group data]]
+(defn format-group [description [group data]]
   ^{:key group}
   [ui/Card {:fluid true}
    [ui/CardContent
     [ui/CardHeader (str group)]
     [ui/CardDescription
-     [group-table-sui data]]]])
+     [group-table-sui data description]]]])
 
 
 (defn reformat-acl [{{:keys [owner rules] :as acl} :acl :as data}]
@@ -198,20 +248,18 @@
       x-index (< x-index o-index))))
 
 
-(defn format-resource-data [data]
+(defn format-resource-data [data description]
   (let [groups (into (sorted-map-by group-comparator)
                      (group-by attr-ns (-> data
                                            reformat-acl
                                            (dissoc :operations))))]
-    (doall (map format-group groups))))
+    (doall (map (partial format-group description) groups))))
 
 
 (defn resource-detail
   "Provides a generic visualization of a CIMI resource document."
-  [refresh-button title {:keys [name id operations] :as data} baseURI]
+  [refresh-button title {:keys [name id operations] :as data} baseURI description]
   [:div
    [:h1 (or name id title)]
-   (format-operations refresh-button data baseURI)
-   (if-not (instance? js/Error data)
-     (format-resource-data data)
-     [:pre (with-out-str (pprint (ex-data data)))])])
+   (format-operations refresh-button data baseURI description)
+   (format-resource-data data description)])

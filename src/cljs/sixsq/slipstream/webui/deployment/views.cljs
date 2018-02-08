@@ -208,5 +208,5 @@
 
 
 (defmethod panel/render :deployment
-  [path query-params]
+  [path]
   [deployment-resource])

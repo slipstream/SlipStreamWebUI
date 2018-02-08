@@ -73,7 +73,6 @@
     display: flex;
     flex: 0;
     min-height: 100vh;
-    background-color: maroon !important;
     margin: 0 0 !important;
 }
 
@@ -111,7 +110,7 @@
     padding: 1ex;
     border-top-style: solid;
     border-top-width: 1px;
-    border-top-color: maroon;
+    border-top-color: black;
     margin: 1ex 0 0 0;
 }
 

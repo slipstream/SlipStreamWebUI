@@ -8,7 +8,9 @@
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.client.impl.utils.json :as json]
     [sixsq.slipstream.webui.history.events :as history-events]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [clojure.string :as str]))
 
 
 (reg-event-fx
@@ -17,9 +19,9 @@
                 ::cimi-spec/collection-name] :as db} :db} [_ resource-id]]
     (when client
       {:db               (assoc db ::cimi-detail-spec/loading? true
-                                ::cimi-detail-spec/resource-id resource-id)
+                                   ::cimi-detail-spec/resource-id resource-id)
        ::cimi-api-fx/get [client resource-id #(if (instance? js/Error %)
-                                                (do 
+                                                (do
                                                   (dispatch [::main-events/set-message {:header  "Failure"
                                                                                         :content (->> % ex-data :body)
                                                                                         :type    :error}])
@@ -27,18 +29,51 @@
                                                 (dispatch [::set-resource %]))]})))
 
 
-(reg-event-db
+
+(defn operation-name [op-uri]
+  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
+
+(reg-event-fx
   ::set-resource
-  (fn [db [_ resource]]
-    (assoc db ::cimi-detail-spec/loading? false
-              ::cimi-detail-spec/resource-id (:id resource)
-              ::cimi-detail-spec/resource resource)))
+  (fn [{{:keys [::client-spec/client
+                ::cimi-spec/collection-name
+                ::cimi-spec/cloud-entry-point] :as db} :db} [_ {:keys [operations] :as resource}]]
+    (let [tpl-resources-key (-> cloud-entry-point
+                                (get :collection-key "")
+                                (get (str collection-name "-template") ""))
+          tpl-resource-key (->> tpl-resources-key
+                                name
+                                drop-last
+                                (str/join "")
+                                keyword)
+          tpl-id (-> resource
+                     (get tpl-resource-key)
+                     :href)
+          describe-operation (->> operations
+                                  (filter #(= (-> % :rel operation-name) "describe"))
+                                  first
+                                  :rel)]
+      (log/info (:id resource))
+      (cond-> {:db (assoc db ::cimi-detail-spec/loading? false
+                             ::cimi-detail-spec/resource-id (:id resource)
+                             ::cimi-detail-spec/resource resource
+                             ::cimi-detail-spec/description nil)}
+              (and tpl-id describe-operation) (assoc ::cimi-api-fx/operation
+                                                     [client tpl-id describe-operation
+                                                      #(dispatch [::set-description
+                                                                  {:href                  tpl-id
+                                                                   :template-resource-key tpl-resource-key
+                                                                   :params-desc           %}])])))))
+
+(reg-event-db
+  ::set-description
+  (fn [db [_ description]]
+    (assoc db ::cimi-detail-spec/description description)))
 
 (reg-event-fx
   ::delete
   (fn [{{:keys [::client-spec/client
-                ::cimi-spec/collection-name
-                ] :as db} :db} [_ resource-id]]
+                ::cimi-spec/collection-name] :as db} :db} [_ resource-id]]
     (when client
       {::cimi-api-fx/delete [client resource-id
                              #(if (instance? js/Error %)
@@ -62,7 +97,7 @@
                                                         (dispatch [::main-events/set-message {:header  "Failure"
                                                                                               :content (:body error)
                                                                                               :type    :error}]))
-                                                      (dispatch [::set-resource (:body %)]))]
+                                                      (dispatch [::set-resource %]))]
        })))
 
 (reg-event-fx

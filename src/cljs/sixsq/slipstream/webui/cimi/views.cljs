@@ -13,6 +13,7 @@
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
 
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
@@ -21,6 +22,7 @@
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.utils.general :as general]
 
     [taoensso.timbre :as log]))
 
@@ -236,7 +238,7 @@
          :icon     "columns"
          :on-click #(reset! show? true)}]
        [ui/Modal
-        {:size     "tiny"
+        {:closeIcon true
          :open     @show?
          :on-close #(reset! show? false)
          :on-open  #(reset! selections (set @selected-fields))}
@@ -281,15 +283,6 @@
              :on-change   (cutil/callback :value callback)}]]]]))))
 
 
-(defn template-resource-key
-  "Returns the collection keyword for the template resource associated with
-   the given collection. If there is no template resource, then nil is
-   returned."
-  [cloud-entry-point collection-href]
-  (when-let [href->key (:collection-key cloud-entry-point)]
-    (href->key (str collection-href "-template"))))
-
-
 (defn resource-add-form
   []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -300,7 +293,7 @@
         text (reagent/atom "")]
     (fn []
       (let [resource-key (get (:collection-key @cloud-entry-point) @collection-name)
-            tpl-resource-key (template-resource-key @cloud-entry-point @collection-name)]
+            tpl-resource-key (cimi-utils/template-resource-key @cloud-entry-point @collection-name)]
         (when (and tpl-resource-key (empty? @descriptions-vector-atom))
           (log/info "retrieving templates for" tpl-resource-key)
           (dispatch [::cimi-events/get-templates tpl-resource-key]))
@@ -312,20 +305,20 @@
              :descriptions descriptions-vector-atom
              :on-cancel #(dispatch [::cimi-events/hide-add-modal])
              :on-submit (fn [data]
-                          (dispatch [::cimi-events/create-resource (cimi-api-utils/create-template @collection-name data)])
+                          (dispatch [::cimi-events/create-resource
+                                     (cimi-api-utils/create-template @collection-name data)])
                           (dispatch [::cimi-events/hide-add-modal]))]
 
             :else
             (do
-              (reset! text (.stringify js/JSON (clj->js {:key "value"}) nil 2))
+              (reset! text (general/edn->json {:key "value"}))
               [ui/Modal
                {:size       "large"
                 :scrollable true
+                :closeIcon true
                 :open       @show?}
                [ui/ModalContent
-                [editor/json-editor
-                 :text text
-                 :on-change #(reset! text %)]]
+                [editor/json-editor text]]
                [ui/ModalActions
                 [ui/Button
                  {:on-click (fn []
@@ -335,7 +328,7 @@
                  {:primary  true
                   :on-click (fn []
                               (try
-                                (let [data (js->clj (.parse js/JSON @text))]
+                                (let [data (general/json->edn @text)]
                                   (dispatch [::cimi-events/create-resource data]))
                                 (catch js/Error e
                                   (dispatch [::main-events/set-message {:header  "Error"
@@ -435,5 +428,5 @@
 
 
 (defmethod panel/render :cimi
-  [path query-params]
+  [path]
   [cimi-resource])

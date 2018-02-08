@@ -4,6 +4,7 @@
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.i18n.utils :as utils]
@@ -119,11 +120,16 @@
 (reg-event-db
   ::set-results
   (fn [db [_ resource-type listing]]
-    (let [entries (get listing (keyword resource-type) [])
-          aggregations (:aggregations listing)
+    (let [error? (instance? js/Error listing)
+          entries (get listing (keyword resource-type) [])
+          aggregations (get listing :aggregations nil)
           fields (general-utils/merge-keys (conj entries {:id "id"}))]
+      (when error?
+        (dispatch [::main-events/set-message {:header  "Failure"
+                                              :content (:body (->> listing ex-data))
+                                              :type    :error}]))
       (assoc db ::cimi-spec/aggregations aggregations
-                ::cimi-spec/collection listing
+                ::cimi-spec/collection (when-not error? listing)
                 ::cimi-spec/loading? false
                 ::cimi-spec/available-fields fields))))
 

@@ -117,7 +117,7 @@
                  (dispatch [::usage-events/get-users-list]))
                [search-users-dropdown])
              [:div
-              [ui/Button {:icon    "search" :color "blue" :circular true :floated "right"
+              [ui/Button {:icon    "search" :primary true :circular true :floated "right"
                           :onClick #(dispatch [::usage-events/fetch-meterings])}]]
              ]]]]
          ]))))
@@ -205,5 +205,5 @@
      [search-result]]))
 
 (defmethod panel/render :usage
-  [path query-params]
+  [path]
   [usage])

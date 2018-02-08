@@ -4,7 +4,7 @@
 (defmulti render
           "Dispatches the rendering of a panel based on the first element of
            the path."
-          (fn [path query-parameters]
+          (fn [path]
             (keyword (first path))))
 
 

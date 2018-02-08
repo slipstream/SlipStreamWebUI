@@ -58,7 +58,7 @@
 (defn crumb
   [index segment]
   (let [nav-fn (fn [& _] (dispatch [::main-events/trim-breadcrumb index]))]
-    ^{:key segment} [ui/BreadcrumbSection [:a {:on-click nav-fn} (str segment)]]))
+    ^{:key segment} [ui/BreadcrumbSection [:a {:on-click nav-fn :style {:cursor "pointer"}} (str segment)]]))
 
 
 (defn breadcrumbs []
@@ -83,11 +83,10 @@
 
 (defn contents
   []
-  (let [resource-path (subscribe [::main-subs/nav-path])
-        resource-query-params (subscribe [::main-subs/nav-query-params])]
+  (let [resource-path (subscribe [::main-subs/nav-path])]
     (fn []
       [ui/Container {:class-name "webui-content", :fluid true}
-       (panel/render @resource-path @resource-query-params)])))
+       (panel/render @resource-path)])))
 
 (defn header
   []
