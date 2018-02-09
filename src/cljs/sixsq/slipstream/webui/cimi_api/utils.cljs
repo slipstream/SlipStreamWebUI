@@ -9,6 +9,7 @@
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [clojure.walk :as walk]
+    [camel-snake-kebab.core :as csk]
     [taoensso.timbre :as log]))
 
 
@@ -130,5 +131,5 @@
   [resource-type form-data]
   (log/info "resource-type: " resource-type)
   (let [[common-map template-map] (split-form-data form-data)
-        template-keyword (keyword (str resource-type "Template"))]
+        template-keyword (-> resource-type (str "Template") csk/->camelCase keyword)]
     (assoc common-map template-keyword template-map)))

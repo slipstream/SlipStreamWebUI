@@ -64,6 +64,7 @@
                  [cljsjs/react-date-range]
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;fix conflict, needed indirectly
+                 [camel-snake-kebab]
                  ]
 
   :source-paths ["src/clj"]
