@@ -18,10 +18,9 @@
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.component :as comp]
 
-    [taoensso.timbre :as log]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.general :as general]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.utils.values :as values]))
 
 
 (defn action-buttons
@@ -48,13 +47,13 @@
                         (on-cancel))]
 
         [ui/Modal
-         (cond-> {:open     (boolean @show?)
+         (cond-> {:open      (boolean @show?)
                   :closeIcon true
-                  :on-close #(reset! show? false)
-                  :trigger  (r/as-element [ui/Button
-                                           {:primary  true
-                                            :on-click #(reset! show? true)}
-                                           label])}
+                  :on-close  #(reset! show? false)
+                  :trigger   (r/as-element [ui/Button
+                                            {:primary  true
+                                             :on-click #(reset! show? true)}
+                                            label])}
                  scrolling? (assoc :scrolling true))
          [ui/ModalHeader title-text]
          [ui/ModalContent body]
@@ -73,6 +72,7 @@
         result (merge edn-text data)]
     (reset! text (general/edn->json result))))
 
+
 (defn template-form
   [text {:keys [template-resource-key params-desc] :as description}]
   (let [default-data (->> (general/json->edn @text) (map (fn [[k v]] [k {:data v}])) (into {}))
@@ -85,6 +85,7 @@
         update-data-fn (partial update-data text)
         form-component-fn (partial ff/form-field update-data-fn nil)]
     (vec (map form-component-fn (concat hidden-params visible-params)))))
+
 
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
@@ -101,18 +102,18 @@
        (if description
          [:div
           [ui/Menu {:attached "top"}
-           [ui/MenuItem {:icon     (if @editor-mode? "list layout" "code")
-                         :active   @editor-mode?
-                         :onClick  (comp/callback :active (fn [active-v]
-                                                            (reset! json-error? false)
-                                                            (try
-                                                              (general/json->edn @text)
-                                                              (reset! json-error? false)
-                                                              (reset! editor-mode? (not active-v))
-                                                              (catch js/Object e
-                                                                (reset! json-error? true)
-                                                                (reset! editor-mode? true)))
-                                                            ))}]
+           [ui/MenuItem {:icon    (if @editor-mode? "list layout" "code")
+                         :active  @editor-mode?
+                         :onClick (comp/callback :active (fn [active-v]
+                                                           (reset! json-error? false)
+                                                           (try
+                                                             (general/json->edn @text)
+                                                             (reset! json-error? false)
+                                                             (reset! editor-mode? (not active-v))
+                                                             (catch js/Object e
+                                                               (reset! json-error? true)
+                                                               (reset! editor-mode? true)))
+                                                           ))}]
            (when @json-error?
              [ui/MenuItem [ui/Label "Invalid JSON!!!"]])]
           [ui/Segment {:attached "bottom"}
@@ -193,12 +194,22 @@
   (last (re-matches #"(?:([^:]*):)?(.*)" (name k))))
 
 
-(defn tuple-to-row [[key value display-name helper]]
+(defn tuple-to-row
+  [[key value display-name helper]]
   [ui/TableRow
    [ui/TableCell {:collapsing true} (or display-name (str key)) ff/nbsp [ff/help-popup helper]]
    [ui/TableCell {:style {:max-width     "80ex"             ;; FIXME: need to get this from parent container
                           :text-overflow "ellipsis"
-                          :overflow      "hidden"}} (str value)]])
+                          :overflow      "hidden"}} (values/format-value value)]])
+
+
+(defn data-to-tuple-fn
+  [params-desc]
+  (juxt
+    (comp strip-attr-ns first)
+    second
+    #(get-in params-desc [(keyword (first %)) :displayName])
+    #(get-in params-desc [(keyword (first %)) :description])))
 
 
 (defn group-table-sui
@@ -210,12 +221,9 @@
                :padded      false
                :style       {:max-width "100%"}}
      (vec (concat [ui/TableBody]
-                  (map tuple-to-row
-                       (map (juxt
-                              (comp strip-attr-ns first)
-                              second
-                              #(get-in params-desc [(keyword (first %)) :displayName])
-                              #(get-in params-desc [(keyword (first %)) :description])) data))))]))
+                  (->> data
+                       (map (data-to-tuple-fn params-desc))
+                       (map tuple-to-row))))]))
 
 
 (defn format-group [description [group data]]
