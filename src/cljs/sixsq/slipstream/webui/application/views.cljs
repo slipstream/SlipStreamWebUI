@@ -8,8 +8,7 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.events :as application-events]
-    [sixsq.slipstream.webui.main.events :as main-events]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.main.events :as main-events]))
 
 
 (defn format-module [{:keys [category name version description] :as module}]
