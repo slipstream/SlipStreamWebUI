@@ -8,13 +8,18 @@
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
 
+    [sixsq.slipstream.webui.utils.values :as values]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn tuple-to-row [[v1 v2]]
   [ui/TableRow
    [ui/TableCell {:collapsing true} (str v1)]
-   [ui/TableCell (str v2)]])
+   [ui/TableCell v2]])
+
+
+(def data-to-tuple
+  (juxt (comp name first) (comp values/format-value second)))
 
 
 (defn group-table-sui
@@ -26,7 +31,9 @@
                :padded      false
                :style       {:max-width "100%"}}
      (vec (concat [ui/TableBody]
-                  (map tuple-to-row (map (juxt (comp name first) (comp str second)) data))))]))
+                  (->> data
+                       (map data-to-tuple)
+                       (map tuple-to-row))))]))
 
 
 (defn session-info

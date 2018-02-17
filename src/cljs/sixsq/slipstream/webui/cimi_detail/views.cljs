@@ -38,9 +38,14 @@
         cached-resource-id (subscribe [::cimi-detail-subs/resource-id])
         resource (subscribe [::cimi-detail-subs/resource])
         description (subscribe [::cimi-detail-subs/description])]
-    (dispatch [::cimi-detail-events/get (path->resource-id @path)])
     (fn []
       (let [resource-id (path->resource-id @path)
             correct-resource? (= resource-id @cached-resource-id)]
+
+        ;; forces a refresh when the correct resource isn't cached
+        (when-not correct-resource?
+          (dispatch [::cimi-detail-events/get (path->resource-id @path)]))
+
+        ;; render the (possibly empty) detail
         [details/resource-detail [refresh-button] resource-id
          (when correct-resource? @resource) (:baseURI @cep) @description]))))
