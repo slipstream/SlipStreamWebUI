@@ -61,7 +61,9 @@
 
 (def ListSA (adapt-component "List"))
 (def ListContent (adapt-component "ListContent"))
+(def ListDescription (adapt-component "ListDescription"))
 (def ListHeader (adapt-component "ListHeader"))
+(def ListIcon (adapt-component "ListIcon"))
 (def ListItem (adapt-component "ListItem"))
 
 (def Loader (adapt-component "Loader"))
