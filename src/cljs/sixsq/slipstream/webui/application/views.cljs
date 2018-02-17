@@ -8,14 +8,25 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.events :as application-events]
-    [sixsq.slipstream.webui.main.events :as main-events]))
+    [sixsq.slipstream.webui.main.events :as main-events]
+    [taoensso.timbre :as log]))
 
 
-(defn format-module [module]
+(defn format-module [{:keys [category name version description] :as module}]
   (when module
-    (let [on-click #(dispatch [::main-events/push-breadcrumb module])]
-      [ui/TableRow
-       [ui/TableCell [:a {:on-click on-click} module]]])))
+    (let [on-click #(dispatch [::main-events/push-breadcrumb name])
+          icon-name (case category
+                      "Project" "folder"
+                      "Deployment" "sitemap"
+                      "Image" "microchip"
+                      "refresh")]
+      [ui/ListItem
+       [ui/ListIcon {:name           icon-name
+                     :size           "large"
+                     :vertical-align "middle"}]
+       [ui/ListContent
+        [ui/ListHeader [:a {:on-click on-click} (str name " (" version ")")]]
+        [ui/ListDescription [:span description]]]])))
 
 
 (defn tuple-to-row [[v1 v2]]
@@ -62,8 +73,8 @@
     (fn [error]
       (let [reason-text (error-text tr error)]
         [ui/Container
-         [ui/Header {:as       "h3"
-                     :icon     true}
+         [ui/Header {:as   "h3"
+                     :icon true}
           [ui/Icon {:name "warning sign"}]
           reason-text]]))))
 
@@ -81,9 +92,9 @@
             [ui/Container
              [format-meta module-meta]
              (when (pos? (count module-children))
-               [ui/Table
-                (vec (concat [ui/TableBody]
-                             (map format-module module-children)))])]))
+               (vec (concat [ui/ListSA {:divided true
+                                        :relaxed true}]
+                            (map format-module module-children))))]))
         [ui/Container
          [ui/Dimmer {:active true}
           [ui/Header {:as       "h3"

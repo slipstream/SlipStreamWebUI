@@ -10,6 +10,17 @@
 (def ^:const metadata-fields #{:shortName :description :category :creation :version :logoLink})
 
 
+(def ^:const item-keys #{:name :description :category :version})
+
+
+(defn get-module-items
+  [module]
+  (let [items (->> module vals first :children :item)]
+    (if (map? items)
+      [(select-keys items item-keys)]                       ;; single item
+      (mapv #(select-keys % item-keys) items))))            ;; multiple items
+
+
 (reg-fx
   ::get-module
   (fn [[client module-id]]
@@ -18,11 +29,6 @@
             module-meta (-> module vals first (select-keys metadata-fields))
             children (if (nil? module-id)
                        (<! (modules/get-module-children client nil))
-                       (->> module
-                            vals
-                            first
-                            :children
-                            :item
-                            (map :name)))
+                       (get-module-items module))
             module-data (assoc module-meta :children children)]
         (dispatch [:sixsq.slipstream.webui.application.events/set-module module-id module-data])))))
