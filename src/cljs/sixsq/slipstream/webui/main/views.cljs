@@ -6,6 +6,7 @@
     [sixsq.slipstream.webui.application.views]
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.dashboard.views]
+    [sixsq.slipstream.webui.metrics.views]
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.settings.views]
@@ -25,6 +26,7 @@
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [reagent.core :as r]))
 
+
 (defn sidebar []
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::main-subs/sidebar-open?])
@@ -38,21 +40,20 @@
                          :borderless true
                          :inverted   true}]
                [^{:key "logo"} [ui/MenuItem
-                                [ui/Image {:src "/images/cubic-logo.png"}]
-                                ]]
+                                [ui/Image {:src "/images/cubic-logo.png"}]]]
                (for [[label-kw url icon] [[:application "application" "sitemap"]
                                           [:deployment "deployment" "cloud"]
                                           [:dashboard "dashboard" "dashboard"]
                                           [:profile "profile" "user circle"]
                                           [:cimi "cimi" "code"]
                                           [:usage "usage" "history"]
-                                          [:settings "settings" "settings"]]]
+                                          [:settings "settings" "settings"]
+                                          [:metrics "metrics" "bar chart"]]]
                  [ui/MenuItem {:active  (= (first @nav-path) url)
                                :onClick (fn []
                                           (log/info "navigate event" url)
                                           (dispatch [::history-events/navigate url]))}
-                  [ui/Icon {:name icon}] (@tr [label-kw])]))))
-      )))
+                  [ui/Icon {:name icon}] (@tr [label-kw])])))))))
 
 
 (defn crumb

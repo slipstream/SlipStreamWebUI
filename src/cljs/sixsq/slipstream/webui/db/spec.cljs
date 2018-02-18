@@ -7,9 +7,10 @@
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail]
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
-    [sixsq.slipstream.webui.usage.spec :as usage]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
-    [sixsq.slipstream.webui.main.spec :as main]))
+    [sixsq.slipstream.webui.main.spec :as main]
+    [sixsq.slipstream.webui.metrics.spec :as metrics]
+    [sixsq.slipstream.webui.usage.spec :as usage]))
 
 
 (s/def ::db (s/merge ::authn/db
@@ -18,7 +19,9 @@
                      ::client/db
                      ::dashboard/db
                      ::i18n/db
-                     ::main/db))
+                     ::main/db
+                     ::metrics/db
+                     ::usage/db))
 
 
 (def default-db
@@ -29,4 +32,5 @@
          dashboard/defaults
          i18n/defaults
          main/defaults
+         metrics/defaults
          usage/defaults))

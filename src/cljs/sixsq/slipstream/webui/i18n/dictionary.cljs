@@ -33,6 +33,7 @@
         :login               "login"
         :login-failed        "login failed"
         :logout              "logout"
+        :metrics             "metrics"
         :module              "module"
         :offset              "offset"
         :order               "order"
@@ -49,8 +50,7 @@
         :usage               "usage"
         :url                 "URL"
         :username            "username"
-        :vms                 "VMs"
-        }
+        :vms                 "VMs"}
 
    :fr {:lang                "français"
 
@@ -83,6 +83,7 @@
         :login               "se connecter"
         :login-failed        "la connexion a échoué"
         :logout              "déconnexion"
+        :metrics             "métriques"
         :module              "module"
         :offset              "décalage"
         :order               "ordonner"
@@ -99,5 +100,4 @@
         :url                 "URL"
         :usage               "usage"
         :username            "nom d'utilisateur"
-        :vms                 "VMs"
-        }})
+        :vms                 "VMs"}})
