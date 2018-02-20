@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.authn :as authn]
+    [sixsq.slipstream.client.api.metrics :as metrics]
     [taoensso.timbre :as log]))
 
 
@@ -97,3 +98,11 @@
     (go
       (when-let [description (<! (cimi-api-utils/complete-parameter-description template))]
         (callback description)))))
+
+(reg-fx
+  ::metrics
+  (fn [[client callback]]
+    (go
+      (callback (<! (metrics/get-metrics client {}))))))
+
+

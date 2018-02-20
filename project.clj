@@ -6,8 +6,8 @@
 
   :url "https://github.com/slipstream/SlipStreamWebUI"
 
-  :license {:name "Apache 2.0"
-            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  :license {:name         "Apache 2.0"
+            :url          "http://www.apache.org/licenses/LICENSE-2.0.txt"
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
@@ -65,6 +65,7 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;fix conflict, needed indirectly
                  [camel-snake-kebab]
+                 [cljsjs/vega-embed "3.0.0-rc7-0"]
                  ]
 
   :source-paths ["src/clj"]

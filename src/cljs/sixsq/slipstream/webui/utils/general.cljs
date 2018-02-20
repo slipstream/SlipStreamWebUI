@@ -106,3 +106,11 @@
 
 (defn json->edn [json & {:keys [keywordize-keys] :or {keywordize-keys true}}]
   (js->clj (.parse js/JSON json) :keywordize-keys keywordize-keys))
+
+
+(defn random-id
+  "Random six character string that can be used to generate unique
+   identifiers."
+  []
+  (let [rand-alphanum #(rand-nth (vec "abcdefghijklmnopqrstuvwxyz0123456789"))]
+    (str/join "" (take 6 (repeatedly rand-alphanum)))))
