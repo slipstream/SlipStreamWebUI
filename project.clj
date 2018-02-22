@@ -83,7 +83,7 @@
                     :asset-path           "/js/out"
                     :source-map-timestamp true
                     :preloads             [devtools.preload
-                                           day8.re-frame.trace.preload]
+                                           day8.re-frame-10x.preload]
                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_"         true
                                            sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
@@ -109,7 +109,7 @@
   :profiles
   {:dev
    {:dependencies [[binaryage/devtools]
-                   [day8.re-frame/trace]
+                   [day8.re-frame/re-frame-10x]
                    [ring]
                    [ring/ring-defaults]
                    [compojure]]
