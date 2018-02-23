@@ -26,26 +26,30 @@
 
 (defn report-item
   [{:keys [id component created state] :as report}]
-  ^{:key id} [ui/ListItem
-              (when (= state "ready")
-                {:as      :a
-                 :onClick #(dispatch [::deployment-detail-events/download-report id])})
-              (str/join " " [component created])])
+  ^{:key id} [:li
+              (let [label (str/join " " [component created])]
+                (if (= state "ready")
+                 [:a {:onClick #(dispatch [::deployment-detail-events/download-report id])} label]
+                 label))])
 
 (defn reports-section
   []
   (let [runUUID (subscribe [::deployment-detail-subs/runUUID])
         reports (subscribe [::deployment-detail-subs/reports])
         on-click #(dispatch [::deployment-detail-events/fetch-reports])]
+    (dispatch [::deployment-detail-events/fetch-reports])
     (dispatch [::main-events/action-interval
                {:action    :start
                 :id        :deployment-detail-reports
                 :frequency 30000
                 :event     [::deployment-detail-events/fetch-reports]}])
     (fn []
-      (vec
-        (concat [ui/ListSA {:bulleted true}]
-                (vec (map report-item (:externalObjects @reports))))))))
+      [:div
+       (vec
+         (concat [:ul]
+                 (vec (map report-item (:externalObjects @reports)))))
+       [:p "Reports will be displayed as soon as available. No need to refresh."]
+       ])))
 
 (defn deployment-detail
   []
