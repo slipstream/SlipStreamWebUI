@@ -9,6 +9,10 @@
 (defn adapt-component [tag]
   (r/adapt-react-class (aget js/semanticUIReact tag)))
 
+(def Accordion (adapt-component "Accordion"))
+(def AccordionTitle (adapt-component "AccordionTitle"))
+(def AccordionContent (adapt-component "AccordionContent"))
+
 (def Breadcrumb (adapt-component "Breadcrumb"))
 (def BreadcrumbDivider (adapt-component "BreadcrumbDivider"))
 (def BreadcrumbSection (adapt-component "BreadcrumbSection"))

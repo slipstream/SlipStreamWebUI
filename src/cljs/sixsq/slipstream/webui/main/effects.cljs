@@ -38,3 +38,8 @@
 (reg-fx
   ::action-interval
   interval-handler)
+
+(reg-fx
+  ::open-new-window
+  (fn [[url]]
+    (.open js/window url "_blank")))
