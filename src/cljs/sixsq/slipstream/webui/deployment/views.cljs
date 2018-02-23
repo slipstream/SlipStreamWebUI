@@ -12,7 +12,14 @@
 
     [sixsq.slipstream.webui.utils.component :as ui-utils]
 
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.history.events :as history-events]
+
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+
+    [sixsq.slipstream.webui.main.subs :as main-subs]
+
+    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
+    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]))
 
 
 (defn bool->int [bool]
@@ -104,11 +111,9 @@
 
 (defn format-uuid
   [uuid]
-  (let [showing? (reagent/atom false)
-        tag (.substring uuid 0 8)]
-    (fn []
-      [:span tag])))
-
+  (let [tag (.substring uuid 0 8)
+        on-click #(dispatch [::history-events/navigate (str "deployment/" uuid)])]
+    [:a {:style {:cursor "pointer"} :on-click on-click} tag]))
 
 #_(defn abort-popup [message]
     (fn []
@@ -141,15 +146,15 @@
   [ui/TableRow
    ;[label :label [deployment-icon (:type entry)]]
    ;[abort-popup (:abort entry)]
-   [ui/TableCell [service-url (:serviceUrl entry) (:status entry)]]
    [ui/TableCell [format-uuid (:uuid entry)]]
-   [ui/TableCell [format-module (:moduleResourceUri entry)]]
-   [ui/TableCell (:activeVm entry)]
    [ui/TableCell (:status entry)]
-   [ui/TableCell (:username entry)]
+   [ui/TableCell (:activeVm entry)]
+   [ui/TableCell [service-url (:serviceUrl entry) (:status entry)]]
+   [ui/TableCell [format-module (:moduleResourceUri entry)]]
    [ui/TableCell (:startTime entry)]
    [ui/TableCell (:cloudServiceNames entry)]
-   [ui/TableCell (:tags entry)]])
+   [ui/TableCell (:tags entry)]
+   [ui/TableCell (:username entry)]])
 
 
 (defn vertical-data-table
@@ -201,10 +206,18 @@
 
 (defn deployment-resource
   []
-  (fn []
-    [:div
-     [runs-control]
-     [runs-display]]))
+  (let [path (subscribe [::main-subs/nav-path])]
+    (fn []
+      (let [[_ resource-id] @path]
+        (dispatch [::deployment-detail-events/set-runUUID resource-id]))
+      (let [n (count @path)
+            children (case n
+                       1 [[runs-control]
+                          [runs-display]]
+                       2 [[deployment-detail-views/deployment-detail]]
+                       [[runs-control]
+                        [runs-display]])]
+        (vec (concat [:div] children))))))
 
 
 (defmethod panel/render :deployment

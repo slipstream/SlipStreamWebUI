@@ -27,8 +27,7 @@
    [ui/StatisticLabel label]])
 
 (defn vms-deployments []
-  (let [selected-tab (subscribe [::dashboard-subs/selected-tab])
-        visible? (subscribe [::main-subs/visible?])]
+  (let [selected-tab (subscribe [::dashboard-subs/selected-tab])]
     (dispatch [::main-events/action-interval {:action    :start
                                               :id        :dashboard-tab
                                               :frequency 15000
