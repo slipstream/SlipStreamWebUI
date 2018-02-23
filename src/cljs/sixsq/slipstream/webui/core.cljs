@@ -16,6 +16,7 @@
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.views :as main-views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
+    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.history.utils :as utils]
     [taoensso.timbre :as log]
     [clojure.string :as str]))
@@ -46,6 +47,7 @@
                             (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
   (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
   (render-component-when-present "usage" usage-views/usage)
+  (render-component-when-present "deployment-detail-reports" deployment-detail-views/reports-section)
   )
 
 (defn visibility-watcher []

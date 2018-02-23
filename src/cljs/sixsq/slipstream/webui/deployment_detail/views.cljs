@@ -40,7 +40,7 @@
     (dispatch [::main-events/action-interval
                {:action    :start
                 :id        :deployment-detail-reports
-                :frequency 15000
+                :frequency 30000
                 :event     [::deployment-detail-events/fetch-reports]}])
     (fn []
       (vec
