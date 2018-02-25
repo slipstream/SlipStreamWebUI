@@ -9,11 +9,15 @@
 
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.history.events :as history-events]
-    [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
     [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.plot.plot :as plot]
+    [cljs-time.core :as time]
+    [cljs-time.format :as time-fmt]
+    [cljs-time.coerce :as time-coerce]))
 
 
 (defn ^:export set-runUUID [uuid]
@@ -54,12 +58,19 @@
       key-as-string)))
 
 
+(defn format-module-link
+  [module]
+  (let [f #(dispatch [::history-events/navigate (str "application/" module)])]
+    [:a {:on-click f} module]))
+
+
 (defn format-parameter-value
   [k v]
   (let [value (str v)]
-    (if (re-matches #"^.*:url.*$" (name k))
-      [:a {:href value} value]
-      value)))
+    (cond
+      (re-matches #"^.*:url.*$" (name k)) [:a {:href value} value]
+      (= :module k) (format-module-link value)
+      :else value)))
 
 
 (defn tuple-to-row
@@ -208,6 +219,17 @@
                          (map event-map-to-row))))])))
 
 
+(defn gantt
+  []
+  (let [events-collection (subscribe [::deployment-detail-subs/events])]
+    (fn []
+      (let [data (-> @events-collection
+                     :events
+                     events-table-info
+                     gantt/events-to-gantt)]
+        [gantt/gantt-plot data]))))
+
+
 (defn events-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -221,7 +243,9 @@
     (fn []
       (let [events (-> @events-collection :events events-table-info)]
         [section (@tr [:events])
-         [events-table events]]))))
+         [:div
+          [events-table events]
+          [gantt]]]))))
 
 
 (defn reports-section
@@ -267,7 +291,8 @@
         :icon           true
         :label-position :left
         :on-click       #(log/error "TERMINATE:" @runUUID)
-                        #_#(dispatch [::dashboard-events/delete-deployment-modal @deployment])}
+        ;#(dispatch [::dashboard-events/delete-deployment-modal @deployment])
+        }
        [ui/Icon {:name "close"}]
        (@tr [:terminate])])))
 
