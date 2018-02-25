@@ -171,7 +171,9 @@
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
   (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
-    (vec (concat [:div refresh-button] (map (partial operation-button data description) ops)))))
+    [ui/Card {:fluid true}
+     [ui/CardContent
+      (vec (concat [ui/CardDescription refresh-button] (map (partial operation-button data description) ops)))]]))
 
 
 (defn attr-ns

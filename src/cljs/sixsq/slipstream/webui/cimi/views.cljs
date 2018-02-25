@@ -239,9 +239,9 @@
          :on-click #(reset! show? true)}]
        [ui/Modal
         {:closeIcon true
-         :open     @show?
-         :on-close #(reset! show? false)
-         :on-open  #(reset! selections (set @selected-fields))}
+         :open      @show?
+         :on-close  #(reset! show? false)
+         :on-open   #(reset! selections (set @selected-fields))}
         [ui/ModalHeader (@tr [:fields])]
         [ui/ModalContent
          {:scrolling true}
@@ -315,7 +315,7 @@
               [ui/Modal
                {:size       "large"
                 :scrollable true
-                :closeIcon true
+                :closeIcon  true
                 :open       @show?}
                [ui/ModalContent
                 [editor/json-editor text]]
@@ -381,9 +381,11 @@
 
 
 (defn control-bar []
-  [:div
-   [select-controls]
-   [search-header]])
+  [ui/Card {:fluid true}
+   [ui/CardContent
+    [ui/CardDescription
+     [select-controls]
+     [search-header]]]])
 
 
 (defn results-bar []
@@ -394,20 +396,23 @@
     (fn []
       (let [collection-name @collection-name
             resources @resources]
-        (if (instance? js/Error resources)
-          [:div (@tr [:error])]
-          [ui/Menu {:secondary true}
-           [ui/MenuItem [search-button]]
-           [ui/MenuItem [select-fields]]
-           [ui/MenuItem [create-button]]
-           (when resources
-             (let [collection-key (get (:collection-key @cep) collection-name)
-                   total (:count resources)
-                   n (count (get resources collection-key []))]
-               [ui/MenuItem
-                [ui/Statistic {:size "tiny"}
-                 [ui/StatisticValue (str n " / " total)]
-                 [ui/StatisticLabel (@tr [:results])]]]))])))))
+        [ui/Card {:fluid true}
+         [ui/CardContent
+          [ui/CardDescription
+           (if (instance? js/Error resources)
+             [:div (@tr [:error])]
+             [ui/Menu {:secondary true}
+              [ui/MenuItem [search-button]]
+              [ui/MenuItem [select-fields]]
+              [ui/MenuItem [create-button]]
+              (when resources
+                (let [collection-key (get (:collection-key @cep) collection-name)
+                      total (:count resources)
+                      n (count (get resources collection-key []))]
+                  [ui/MenuItem
+                   [ui/Statistic {:size "tiny"}
+                    [ui/StatisticValue (str n " / " total)]
+                    [ui/StatisticLabel (@tr [:results])]]]))])]]]))))
 
 
 (defn cimi-resource

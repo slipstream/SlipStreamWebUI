@@ -6,9 +6,27 @@
 
 (s/def ::reports any?)
 
-(s/def ::db (s/keys :req [::loading?
-                          ::runUUID
-                          ::reports]))
+(s/def ::loading? boolean?)
 
-(def defaults {::runUUID  nil
-               ::reports nil})
+(s/def ::cached-resource-id (s/nilable string?))
+
+(s/def ::resource any?)
+
+(s/def ::events any?)
+
+
+
+(s/def ::db (s/keys :req [::runUUID
+                          ::reports
+                          ::loading?
+                          ::cached-resource-id
+                          ::resource
+                          ::events]))
+
+
+(def defaults {::runUUID            nil
+               ::reports            nil
+               ::loading?           false
+               ::cached-resource-id nil
+               ::resource           nil
+               ::events             nil})
