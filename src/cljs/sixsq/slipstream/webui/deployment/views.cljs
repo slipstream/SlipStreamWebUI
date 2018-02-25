@@ -189,8 +189,7 @@
     (fn []
       [ui/Container {:class-name "webui-x-autoscroll"}
        [ui/Menu
-        {:secondary  true}
-        [ui/MenuItem [search-button]]
+        {:secondary true}
         (when-not @loading?
           (when-let [{:keys [runs]} @deployments]
             (let [{:keys [count totalCount]} runs]
@@ -204,6 +203,22 @@
              [vertical-data-table item])))])))
 
 
+(defn deployments
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    [:div
+     [ui/Card {:fluid true}
+      [ui/CardContent
+       [ui/CardDescription
+        [runs-control]]]
+      [ui/CardContent {:extra true}
+       [search-button]]]
+     [ui/Card {:fluid true}
+      [ui/CardContent
+       [ui/CardDescription
+        [runs-display]]]]]))
+
+
 (defn deployment-resource
   []
   (let [path (subscribe [::main-subs/nav-path])]
@@ -212,11 +227,9 @@
         (dispatch [::deployment-detail-events/set-runUUID resource-id]))
       (let [n (count @path)
             children (case n
-                       1 [[runs-control]
-                          [runs-display]]
+                       1 [[deployments]]
                        2 [[deployment-detail-views/deployment-detail]]
-                       [[runs-control]
-                        [runs-display]])]
+                       [[deployments]])]
         (vec (concat [:div] children))))))
 
 

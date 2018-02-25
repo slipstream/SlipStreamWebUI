@@ -145,6 +145,7 @@
                  (assoc ::dashboard-spec/loading-tab? true))]
       (merge (fetch-tab-records-cofx db) {:db db}))))
 
+;; FIXME: Generalize this so that it can be used elsewhere.
 (reg-event-db
   ::delete-deployment-modal
   (fn [db [_ deployment]]

@@ -59,6 +59,7 @@
                  [cljsjs/codemirror "5.31.0-0"]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
                  [com.taoensso/tempura]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
                  [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
