@@ -1,6 +1,6 @@
-(def +version+ "3.46-SNAPSHOT")
+(def +version+ "3.46")
 
-(defproject com.sixsq.slipstream/SlipStreamWebUI "3.46-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.46"
 
   :description "Web Browser User Interface"
 
@@ -18,7 +18,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
