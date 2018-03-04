@@ -162,11 +162,15 @@
   (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 
-(defn operation-button [data description [label href operation-uri]]
+;; Explicit keys have been added to the operation buttons to avoid react
+;; errors for duplicate keys, which may happen when the data contains :key.
+;; It is probably a bad idea to have a first argument that can be a map
+;; as this will be confused with reagent options.
+(defn operation-button [{:keys [id] :as data} description [label href operation-uri]]
   (case label
-    "edit" [edit-button data description #(dispatch [::cimi-detail-events/edit (:id data) %])]
-    "delete" [delete-button data #(dispatch [::cimi-detail-events/delete (:id data)])]
-    [other-button label data #(dispatch [::cimi-detail-events/operation (:id data) operation-uri])]))
+    "edit" ^{:key "edit"} [edit-button data description #(dispatch [::cimi-detail-events/edit id %])]
+    "delete" ^{:key "delete"} [delete-button data #(dispatch [::cimi-detail-events/delete id])]
+    ^{:key other-button} [other-button label data #(dispatch [::cimi-detail-events/operation id operation-uri])]))
 
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
