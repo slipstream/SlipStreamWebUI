@@ -48,4 +48,4 @@
 
         ;; render the (possibly empty) detail
         [details/resource-detail [refresh-button] resource-id
-         (when correct-resource? @resource) (:baseURI @cep) @description]))))
+         (when (and (not @loading?) correct-resource?) @resource) (:baseURI @cep) @description]))))
