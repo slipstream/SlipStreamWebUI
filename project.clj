@@ -91,6 +91,7 @@
                                            goog.DEBUG                                    true}
                     :external-config      {:devtools/config {:features-to-install :all}}
                     }}
+
     {:id           "prod"
      :source-paths ["src/cljs"]
      :compiler     {:main            sixsq.slipstream.webui.core
@@ -104,8 +105,7 @@
      :compiler     {:main          sixsq.slipstream.webui.runner
                     :output-to     "target/test/webui/webui-test.js"
                     :output-dir    "target/test/webui/out"
-                    :optimizations :none}}
-    ]}
+                    :optimizations :whitespace}}]}
 
   :profiles
   {:dev
@@ -115,13 +115,10 @@
                    [ring/ring-defaults]
                    [compojure]]
     :figwheel     {:server-port  3000
-                   :ring-handler sixsq.slipstream.webui.dev_server/http-handler}
-    }
-   }
+                   :ring-handler sixsq.slipstream.webui.dev_server/http-handler}}}
 
   :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
             "dev"       ["do" "prepare" ["figwheel" "dev"]]
             "install"   ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
-            "test-auto" ["doo" "phantom" "test"]
-            "test"      ["test-auto" "once"]}
-  )
+            "test-auto" ["doo" "nashorn" "test"]
+            "test"      ["test-auto" "once"]})
