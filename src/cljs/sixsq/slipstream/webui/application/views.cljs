@@ -8,7 +8,8 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.events :as application-events]
-    [sixsq.slipstream.webui.main.events :as main-events]))
+    [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
 (defn format-module [{:keys [category name version description] :as module}]
@@ -78,33 +79,60 @@
           reason-text]]))))
 
 
+(defn title-card
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [cc/title-card (@tr [:application])])))
+
+
+(defn dimmer
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        data (subscribe [::application-subs/module])]
+    (fn []
+      (let [loading? (not @data)]
+        [ui/Dimmer {:active   loading?
+                    :page     false
+                    :inverted true}
+         [ui/Header {:as       "h3"
+                     :icon     true
+                     :inverted false}
+          [ui/Icon {:name    "refresh"
+                    :loading true}]
+          (@tr [:loading])]]))))
+
+
+(defn format-module-children
+  [module-children]
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      (when (pos? (count module-children))
+        [cc/collapsible-card
+         (@tr [:modules])
+         (vec (concat [ui/ListSA {:divided true
+                                  :relaxed true}]
+                      (map format-module module-children)))]))))
+
+
 (defn module-resource []
   (let [tr (subscribe [::i18n-subs/tr])
         data (subscribe [::application-subs/module])]
     (fn []
-      (if @data
-        (if (instance? js/Error @data)
-          [ui/Container
-           [format-error @data]]
-          (let [module-meta (dissoc @data :children)
-                module-children (:children @data)]
-            [ui/Container
-             [format-meta module-meta]
-             (when (pos? (count module-children))
-               (vec (concat [ui/ListSA {:divided true
-                                        :relaxed true}]
-                            (map format-module module-children))))]))
-        [ui/Container
-         [ui/Dimmer {:active true}
-          [ui/Header {:as       "h3"
-                      :icon     true
-                      :inverted true}
-           [ui/Icon {:name    "refresh"
-                     :loading true}]
-           (@tr [:loading])]]]))))
+      (let [loading? (not @data)]
+        [ui/DimmerDimmable
+         (vec (concat [ui/Container [title-card] [dimmer]]
+                      (when-not loading?
+                        (if (instance? js/Error @data)
+                          [[format-error @data]]
+                          (let [module-meta (dissoc @data :children)
+                                module-children (:children @data)]
+                            [[format-meta module-meta]
+                             [format-module-children module-children]])))))]))))
 
 
 (defmethod panel/render :application
   [path]
   (dispatch [::application-events/get-module])
+  [title-card]
   [module-resource])

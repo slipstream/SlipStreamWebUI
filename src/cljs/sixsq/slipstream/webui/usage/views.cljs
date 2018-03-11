@@ -6,9 +6,11 @@
     [cljsjs.react-date-range]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.usage.subs :as usage-subs]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.usage.events :as usage-events]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
 
     [clojure.string :as str]
     [cljs.pprint :as pprint]
@@ -199,10 +201,12 @@
 
 (defn usage
   []
-  (fn []
-    [:div
-     [search-header]
-     [search-result]]))
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [ui/Container {:fluid true}
+       [cc/title-card (@tr [:usage])]
+       [search-header]
+       [search-result]])))
 
 (defmethod panel/render :usage
   [path]

@@ -18,10 +18,12 @@
     [sixsq.slipstream.webui.dashboard.views-vms :as vms]
     [sixsq.slipstream.webui.dashboard.views-deployments :as dep]
     [sixsq.slipstream.webui.main.events :as main-events]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
 (defn as-statistic [{:keys [label value]}]
+  ^{:key label}
   [ui/Statistic
    [ui/StatisticValue value]
    [ui/StatisticLabel label]])
@@ -61,19 +63,20 @@
         statistics (subscribe [::dashboard-subs/statistics])
         loading? (subscribe [::dashboard-subs/loading?])]
     (fn []
-      [:div
-       [:h1 (@tr [:dashboard])]
-       [ui/Button
-        {:circular true
-         :primary  true
-         :icon     "refresh"
-         :loading  @loading?
-         :on-click #(dispatch [::dashboard-events/get-statistics])}]
+      [ui/Container {:fluid true}
+       [cc/title-card
+        (@tr [:dashboard])
+        [ui/Button
+         {:circular true
+          :primary  true
+          :icon     "refresh"
+          :loading  @loading?
+          :on-click #(dispatch [::dashboard-events/get-statistics])}]]
        (when-not @loading?
          (let [stats (->> @statistics
                           (sort-by :order)
                           (map as-statistic))]
-           (vec (concat [:div] stats))))
+           [cc/collapsible-card (@tr [:statistics]) [ui/StatisticGroup {:size :tiny} stats]]))
        [vms-deployments]])))
 
 (defn ^:export set-cloud-filter [cloud]

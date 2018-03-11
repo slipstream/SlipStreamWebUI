@@ -9,7 +9,6 @@
     [sixsq.slipstream.webui.metrics.views]
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.cimi.views]
-    [sixsq.slipstream.webui.settings.views]
     [sixsq.slipstream.webui.usage.views]
 
     [sixsq.slipstream.webui.authn.views :as authn-views]
@@ -47,7 +46,6 @@
                                           [:profile "profile" "user circle"]
                                           [:cimi "cimi" "code"]
                                           [:usage "usage" "history"]
-                                          [:settings "settings" "settings"]
                                           [:metrics "metrics" "bar chart"]]]
                  [ui/MenuItem {:active  (= (first @nav-path) url)
                                :onClick (fn []

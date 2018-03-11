@@ -7,12 +7,15 @@
     [sixsq.slipstream.webui.metrics.subs :as metrics-subs]
     [sixsq.slipstream.webui.metrics.events :as metrics-events]
 
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
 
-    [sixsq.slipstream.webui.plot.plot :as plot]))
+    [sixsq.slipstream.webui.plot.plot :as plot]
+    [reagent.core :as reagent]
+    [taoensso.timbre :as log]))
 
 
-(defn refresh-button
+(defn controls
   []
   (let [loading? (subscribe [::metrics-subs/loading?])]
     (fn []
@@ -21,6 +24,7 @@
         :primary  true
         :icon     "refresh"
         :loading  @loading?
+        :floated  :left
         :on-click #(dispatch [::metrics-events/fetch-metrics])}])))
 
 
@@ -92,19 +96,37 @@
   []
   (let [rates (subscribe [::metrics-subs/ring-response-rates])]
     (fn []
-      [plot/plot responses-vega-spec {:values @rates}])))
+      [plot/plot responses-vega-spec {:values @rates} :style {:float :right}])))
+
+
+(defn request-statistics
+  []
+  [cc/collapsible-card
+   "request statistics"
+   [ring-request-rates]
+   [ring-response-rates]])
+
+
+(defn server-statistics
+  []
+  [cc/collapsible-card
+   "server statistics"
+   [thread-plot]
+   [memory-plot]])
 
 
 (defn metrics-info
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Container
-     [ui/Header {:as "h1"} (@tr [:metrics])]
-     [refresh-button]
-     [thread-plot]
-     [memory-plot]
-     [ring-request-rates]
-     [ring-response-rates]]))
+  (let [tr (subscribe [::i18n-subs/tr])
+        jvm-threads (subscribe [::metrics-subs/jvm-threads])
+        rates (subscribe [::metrics-subs/ring-response-rates])]
+    (fn []
+      (when (or (nil? @rates) (nil? @jvm-threads))
+        (dispatch [::metrics-events/fetch-metrics]))
+      [ui/Container {:fluid true}
+       [cc/title-card (@tr [:metrics]) [controls]]
+       [request-statistics]
+       [server-statistics]])))
 
 
 (defmethod panel/render :metrics

@@ -60,7 +60,7 @@
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
-                 [cljsjs/semantic-ui-react]
+                 [cljsjs/semantic-ui-react "0.78.2-0"]
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
                  [funcool/promesa]

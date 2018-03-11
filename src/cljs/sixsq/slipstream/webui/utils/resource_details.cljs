@@ -20,7 +20,8 @@
 
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.general :as general]
-    [sixsq.slipstream.webui.utils.values :as values]))
+    [sixsq.slipstream.webui.utils.values :as values]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
 (defn action-buttons
@@ -175,9 +176,7 @@
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
   (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
-    [ui/Card {:fluid true}
-     [ui/CardContent
-      (vec (concat [ui/CardDescription refresh-button] (map (partial operation-button data description) ops)))]]))
+    (vec (concat [refresh-button] (map (partial operation-button data description) ops)))))
 
 
 (defn attr-ns
@@ -234,11 +233,9 @@
 
 (defn format-group [description [group data]]
   ^{:key group}
-  [ui/Card {:fluid true}
-   [ui/CardContent
-    [ui/CardHeader (str group)]
-    [ui/CardDescription
-     [group-table-sui data description]]]])
+  [cc/collapsible-card
+   (str group)
+   [group-table-sui data description]])
 
 
 (defn reformat-acl [{{:keys [owner rules] :as acl} :acl :as data}]
@@ -274,6 +271,11 @@
   "Provides a generic visualization of a CIMI resource document."
   [refresh-button title {:keys [name id operations] :as data} baseURI description]
   [:div
-   [:h1 (or name id title)]
-   (format-operations refresh-button data baseURI description)
+   (vec (concat [ui/Card {:fluid true}
+                 [ui/CardContent
+                  [ui/CardHeader
+                   [:h1 (or name id title)]]]
+                 [ui/CardContent {:extra true}
+                  (vec (concat [ui/CardDescription]
+                               (format-operations refresh-button data baseURI description)))]]))
    (format-resource-data data description)])
