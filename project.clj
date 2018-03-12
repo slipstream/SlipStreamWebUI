@@ -36,7 +36,9 @@
 
   :pom-location "target/"
 
-  :unpack-resources {:resource [cljsjs/codemirror "5.31.0-0"] :extract-path "target/cljsjs/codemirror"}
+  ;; NOTE: this version must be kept in sync with the parent project.clj file.
+  :unpack-resources {:resource [cljsjs/codemirror "5.31.0-0"]
+                     :extract-path "target/cljsjs/codemirror"}
 
   :filegen [{:data        ["#release-version:after {content: '" ~+version+ "';}\n"]
              :template-fn #(apply str %)
@@ -56,17 +58,17 @@
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
-                 [cljsjs/codemirror "5.31.0-0"]
+                 [cljsjs/codemirror]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
-                 [com.andrewmcveigh/cljs-time "0.5.2"]
-                 [cljsjs/semantic-ui-react "0.78.2-0"]
+                 [com.andrewmcveigh/cljs-time]
+                 [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/vega-embed "3.0.0-rc7-0"]
+                 [cljsjs/vega-embed]
                  ]
 
   :source-paths ["src/clj"]
