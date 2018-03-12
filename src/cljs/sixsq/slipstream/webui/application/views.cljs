@@ -116,8 +116,7 @@
 
 
 (defn module-resource []
-  (let [tr (subscribe [::i18n-subs/tr])
-        data (subscribe [::application-subs/module])]
+  (let [data (subscribe [::application-subs/module])]
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable

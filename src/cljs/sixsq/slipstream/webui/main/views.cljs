@@ -63,10 +63,10 @@
 (defn breadcrumbs []
   (let [path (subscribe [::main-subs/nav-path])]
     (fn []
-      (vec (concat [ui/Breadcrumb]
+      (vec (concat [ui/Breadcrumb {:size :massive}]
                    (vec (->> @path
                              (map crumb (range))
-                             (interpose [ui/BreadcrumbDivider "/"]))))))))
+                             (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))))
 
 (defn footer []
   (let [tr (subscribe [::i18n-subs/tr])]
@@ -96,7 +96,7 @@
        [ui/Menu {:className "webui-header" :borderless true}
         [ui/MenuItem {:link    true
                       :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
-         [ui/Icon {:name (if @show? "chevron left" "bars")}]]
+         [ui/Icon {:name (if @show? "caret left" "bars")}]]
         [ui/MenuItem [breadcrumbs]]
 
         [ui/MenuMenu {:position "right"}
