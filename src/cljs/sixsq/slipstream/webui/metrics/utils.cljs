@@ -11,15 +11,16 @@
     {waiting :value}       :jvm.thread.waiting.count
     {blocked :value}       :jvm.thread.blocked.count
     :as                    metrics}]
-  [{:state "terminated", :threads terminated}
-   {:state "runnable", :threads runnable}
-   {:state "total", :threads total}
-   {:state "deadlocked", :threads deadlocked}
-   {:state "new", :threads new}
-   {:state "daemon", :threads daemon}
-   {:state "timed-waiting", :threads timed-waiting}
-   {:state "waiting", :threads waiting}
-   {:state "blocked", :threads blocked}])
+  (when metrics
+    [{:state "terminated", :threads terminated}
+     {:state "runnable", :threads runnable}
+     {:state "total", :threads total}
+     {:state "deadlocked", :threads deadlocked}
+     {:state "new", :threads new}
+     {:state "daemon", :threads daemon}
+     {:state "timed-waiting", :threads timed-waiting}
+     {:state "waiting", :threads waiting}
+     {:state "blocked", :threads blocked}]))
 
 
 (defn extract-memory-metrics
@@ -38,29 +39,33 @@
     {total-init :value}         :jvm.memory.total.init
     {total-max :value}          :jvm.memory.total.max
     :as                         metrics}]
-  [{:type "non-heap committed", :memory non-heap-committed}
-   {:type "non-heap init", :memory non-heap-init}
-   {:type "non-heap used", :memory non-heap-used}
-   {:type "non-heap max", :memory non-heap-max}
+  (when metrics
+    (->> [{:type "non-heap committed", :memory non-heap-committed}
+          {:type "non-heap init", :memory non-heap-init}
+          {:type "non-heap used", :memory non-heap-used}
+          {:type "non-heap max", :memory non-heap-max}
 
-   {:type "heap committed", :memory heap-committed}
-   {:type "heap init", :memory heap-init}
-   {:type "heap used", :memory heap-used}
-   {:type "heap max", :memory heap-max}
+          {:type "heap committed", :memory heap-committed}
+          {:type "heap init", :memory heap-init}
+          {:type "heap used", :memory heap-used}
+          {:type "heap max", :memory heap-max}
 
-   {:type "total committed", :memory total-committed}
-   {:type "total init", :memory total-init}
-   {:type "total used", :memory total-used}
-   {:type "total max", :memory total-max}])
+          {:type "total committed", :memory total-committed}
+          {:type "total init", :memory total-init}
+          {:type "total used", :memory total-used}
+          {:type "total max", :memory total-max}]
+
+         (filter #(not (neg? (:memory %)))))))
 
 
 (defn get-rate
   "extracts the 1-minute average rate for the method"
   [metrics type k]
-  (let [section-kw (keyword (str "ring." type ".rate." k))
-        path [section-kw :rates :1]
-        rate (get-in metrics path)]
-    {(keyword type) (keyword k), :rate rate}))
+  (when metrics
+    (let [section-kw (keyword (str "ring." type ".rate." k))
+          path [section-kw :rates :1]
+          rate (get-in metrics path)]
+      {(keyword type) (keyword k), :rate rate})))
 
 
 (defn extract-ring-requests-rates

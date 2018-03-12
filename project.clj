@@ -18,7 +18,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.0.2"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.3"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -60,7 +60,7 @@
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
-                 [cljsjs/semantic-ui-react]
+                 [cljsjs/semantic-ui-react "0.78.2-0"]
                  [cljsjs/moment]
                  [cljsjs/react-date-range]
                  [funcool/promesa]

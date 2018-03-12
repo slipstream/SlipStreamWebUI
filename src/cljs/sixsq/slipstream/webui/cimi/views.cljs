@@ -24,7 +24,8 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.general :as general]
 
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
 (defn id-selector-formatter [entry]
@@ -81,32 +82,50 @@
 
 
 (defn statistic
-  [[value label]]
-  ^{:key label}
-  [ui/Statistic
-   [ui/StatisticValue value]
-   [ui/StatisticLabel label]])
+  [[value label :as data]]
+  (when data
+    ^{:key label}
+    [ui/Statistic {:size "tiny"}
+     [ui/StatisticValue value]
+     [ui/StatisticLabel label]]))
 
+
+(defn results-statistic
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        collection-name (subscribe [::cimi-subs/collection-name])
+        resources (subscribe [::cimi-subs/collection])
+        cep (subscribe [::cimi-subs/cloud-entry-point])]
+    (fn []
+      (let [collection-name @collection-name
+            resources @resources]
+        (when resources
+          (let [collection-key (get (:collection-key @cep) collection-name)
+                total (:count resources)
+                n (count (get resources collection-key []))]
+            [ui/Statistic
+             [ui/StatisticValue (str n " / " total)]
+             [ui/StatisticLabel (@tr [:results])]]))))))
+
+
+(def tuple-fn (juxt (comp :value second)
+                    (comp name first)))
 
 (defn aggregations-table
   []
-  (let [aggregations (subscribe [::cimi-subs/aggregations])
-        tr (subscribe [::i18n-subs/tr])]
+  (let [aggregations (subscribe [::cimi-subs/aggregations])]
     (fn []
-      (when-let [data @aggregations]
-        (let [tuple-fn (juxt (comp :value second)
-                             (comp name first))
-
-              stats (->> data
-                         (map tuple-fn)
-                         (sort second)
-                         (map #(statistic %))
-                         vec)]
-          (vec (concat [ui/StatisticGroup] stats)))))))
+      (let [stats (->> @aggregations
+                       (map tuple-fn)
+                       (sort second)
+                       (map #(statistic %))
+                       vec)]
+        (vec (concat [ui/StatisticGroup {:size :mini}] [[results-statistic]] stats))))))
 
 
 (defn results-display []
-  (let [collection (subscribe [::cimi-subs/collection])
+  (let [tr (subscribe [::i18n-subs/tr])
+        collection (subscribe [::cimi-subs/collection])
         collection-name (subscribe [::cimi-subs/collection-name])
         selected-fields (subscribe [::cimi-subs/selected-fields])
         cep (subscribe [::cimi-subs/cloud-entry-point])]
@@ -114,12 +133,13 @@
       (let [{:keys [collection-key]} @cep
             resource-collection-key (get collection-key @collection-name)
             results @collection]
-        (if (instance? js/Error results)
-          [:pre (with-out-str (pprint (ex-data results)))]
-          (let [entries (get results resource-collection-key [])]
-            [:div
-             [aggregations-table]
-             [results-table @selected-fields entries]]))))))
+        [cc/collapsible-card (@tr [:results])
+         (if (instance? js/Error results)
+           [:pre (with-out-str (pprint (ex-data results)))]
+           (let [entries (get results resource-collection-key [])]
+             [:div
+              [aggregations-table]
+              [results-table @selected-fields entries]]))]))))
 
 
 (defn search-header []
@@ -258,7 +278,7 @@
           (@tr [:update])]]]])))
 
 
-(defn cloud-entry-point
+(defn cloud-entry-point-title
   []
   (let [tr (subscribe [::i18n-subs/tr])
         cep (subscribe [::cimi-subs/cloud-entry-point])
@@ -271,16 +291,13 @@
                          (map (fn [k] {:value k :text k}))
                          vec)
             callback #(dispatch [::history-events/navigate (str "cimi/" %)])]
-        [ui/Form
-         [ui/FormGroup {:widths "equal"
-                        ;:fluid  true
-                        }
-          [ui/FormField
-           [ui/FormSelect
-            {:value       @selected-id
-             :placeholder (@tr [:resource-type])
-             :options     options
-             :on-change   (cutil/callback :value callback)}]]]]))))
+        [ui/Dropdown
+         {:as          :h1
+          :value       @selected-id
+          :placeholder (@tr [:resource-type])
+          :inline      true
+          :options     options
+          :on-change   (cutil/callback :value callback)}]))))
 
 
 (defn resource-add-form
@@ -371,48 +388,28 @@
           :on-click #(dispatch [::cimi-events/show-add-modal])}]))))
 
 
-(defn select-controls
+(defn results-bar []
+  (let [tr (subscribe [::i18n-subs/tr])
+        resources (subscribe [::cimi-subs/collection])]
+    (fn []
+      (let [resources @resources]
+        (if (instance? js/Error resources)
+          [:div (@tr [:error])]
+          [:div
+           [search-button]
+           [select-fields]
+           [create-button]])))))
+
+
+(defn control-bar
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
-      [:div
-       [cloud-entry-point]
-       [resource-add-form]])))
-
-
-(defn control-bar []
-  [ui/Card {:fluid true}
-   [ui/CardContent
-    [ui/CardDescription
-     [select-controls]
-     [search-header]]]])
-
-
-(defn results-bar []
-  (let [tr (subscribe [::i18n-subs/tr])
-        collection-name (subscribe [::cimi-subs/collection-name])
-        resources (subscribe [::cimi-subs/collection])
-        cep (subscribe [::cimi-subs/cloud-entry-point])]
-    (fn []
-      (let [collection-name @collection-name
-            resources @resources]
-        [ui/Card {:fluid true}
-         [ui/CardContent
-          [ui/CardDescription
-           (if (instance? js/Error resources)
-             [:div (@tr [:error])]
-             [ui/Menu {:secondary true}
-              [ui/MenuItem [search-button]]
-              [ui/MenuItem [select-fields]]
-              [ui/MenuItem [create-button]]
-              (when resources
-                (let [collection-key (get (:collection-key @cep) collection-name)
-                      total (:count resources)
-                      n (count (get resources collection-key []))]
-                  [ui/MenuItem
-                   [ui/Statistic {:size "tiny"}
-                    [ui/StatisticValue (str n " / " total)]
-                    [ui/StatisticLabel (@tr [:results])]]]))])]]]))))
+      [cc/collapsible-card-extra
+       [cloud-entry-point-title]
+       [resource-add-form]
+       [search-header]
+       [results-bar]])))
 
 
 (defn cimi-resource
@@ -425,7 +422,6 @@
             children (case n
                        1 [[control-bar]]
                        2 [[control-bar]
-                          [results-bar]
                           [results-display]]
                        3 [[cimi-detail-views/cimi-detail]]
                        [[control-bar]])]

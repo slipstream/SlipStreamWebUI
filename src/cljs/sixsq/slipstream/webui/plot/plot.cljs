@@ -8,8 +8,8 @@
 
 
 (def default-vega-opts
-  {:actions false
-   :renderer :canvas})
+  {:actions  false
+   :renderer :svg})
 
 
 (defn plot-inner
@@ -27,8 +27,9 @@
                      (fn [plot-spec data {:keys [options] :as args}]
                        (let [options (merge default-vega-opts options)]
                          (dispatch [::plot-evts/render-plot plot-id plot-spec data options]))
-                       [ui/Container
-                        [:div {:id plot-id}]])})))
+                       [ui/Image {:as     :span
+                                  :id     plot-id
+                                  :inline true}])})))
 
 
 (defn plot

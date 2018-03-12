@@ -17,7 +17,8 @@
     [sixsq.slipstream.webui.plot.plot :as plot]
     [cljs-time.core :as time]
     [cljs-time.format :as time-fmt]
-    [cljs-time.coerce :as time-coerce]))
+    [cljs-time.coerce :as time-coerce]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
 (defn ^:export set-runUUID [uuid]
@@ -26,11 +27,7 @@
 
 (defn section
   [title contents]
-  [ui/Card {:fluid true}
-   [ui/CardContent
-    [ui/CardHeader (str title)]
-    [ui/CardDescription
-     contents]]])
+  [cc/collapsible-card (str title) contents])
 
 
 (def summary-keys #{:creation
@@ -100,7 +97,7 @@
                       (vec (concat [ui/TableBody]
                                    (->> summary-info
                                         (map tuple-to-row))))]]
-        [section (@tr [:summary]) contents]))))
+        [cc/collapsible-card (@tr [:summary]) contents]))))
 
 
 (def node-parameter-pattern #"([^:]+?)(\.\d+)?:(.+)")
@@ -158,7 +155,7 @@
             parameter-group (get parameters-kv (or @selected-section "ss"))
             parameter-table (node-parameter-table parameter-group)
             contents (vec (concat [:div] [[parameters-dropdown selected-section]] [parameter-table]))]
-        [section (@tr [:parameters]) contents]))))
+        [cc/collapsible-card (@tr [:parameters]) contents]))))
 
 
 (defn report-item
@@ -202,21 +199,22 @@
   [events]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [events]
-      [ui/Table {:compact     true
-                 :definition  false
-                 :single-line true
-                 :padded      false
-                 :style       {:max-width "100%"}}
-       [ui/TableHeader
-        [ui/TableRow
-         [ui/TableHeaderCell [:span (@tr [:event])]]
-         [ui/TableHeaderCell [:span (@tr [:timestamp])]]
-         [ui/TableHeaderCell [:span (@tr [:delta-min])]]
-         [ui/TableHeaderCell [:span (@tr [:type])]]
-         [ui/TableHeaderCell [:span (@tr [:state])]]]]
-       (vec (concat [ui/TableBody]
-                    (->> events
-                         (map event-map-to-row))))])))
+      [ui/Container {:class-name "webui-x-autoscroll"}
+       [ui/Table {:compact     true
+                  :definition  false
+                  :single-line true
+                  :padded      false
+                  :style       {:max-width "100%"}}
+        [ui/TableHeader
+         [ui/TableRow
+          [ui/TableHeaderCell [:span (@tr [:event])]]
+          [ui/TableHeaderCell [:span (@tr [:timestamp])]]
+          [ui/TableHeaderCell [:span (@tr [:delta-min])]]
+          [ui/TableHeaderCell [:span (@tr [:type])]]
+          [ui/TableHeaderCell [:span (@tr [:state])]]]]
+        (vec (concat [ui/TableBody]
+                     (->> events
+                          (map event-map-to-row))))]])))
 
 
 (defn gantt
@@ -242,10 +240,10 @@
                 :event     [::deployment-detail-events/fetch-events]}])
     (fn []
       (let [events (-> @events-collection :events events-table-info)]
-        [section (@tr [:events])
-         [:div
-          [events-table events]
-          [gantt]]]))))
+        [cc/collapsible-card
+         (@tr [:events])
+         [events-table events]
+         [gantt]]))))
 
 
 (defn reports-section
@@ -259,12 +257,12 @@
                 :frequency 30000
                 :event     [::deployment-detail-events/fetch-reports]}])
     (fn []
-      [section (@tr [:reports])
-       [:div
-        (vec
-          (concat [:ul]
-                  (vec (map report-item (:externalObjects @reports)))))
-        [:p "Reports will be displayed as soon as available. No need to refresh."]]])))
+      [cc/collapsible-card
+       (@tr [:reports])
+       (vec
+         (concat [:ul]
+                 (vec (map report-item (:externalObjects @reports)))))
+       [:p "Reports will be displayed as soon as available. No need to refresh."]])))
 
 
 (defn refresh-button
@@ -326,10 +324,12 @@
             short-name (second (re-matches #"^.*/(.*)$" (str (or module "TITLE"))))
             state (-> @resource :run :state)
             title (str short-name " (" state ")")]
-        [section title [:div
-                        [refresh-button]
-                        [service-link-button]
-                        [terminate-button]]]))))
+        [cc/title-card
+         title
+         [:div
+          [refresh-button]
+          [service-link-button]
+          [terminate-button]]]))))
 
 
 (defn deployment-detail
@@ -344,11 +344,10 @@
 
       (vec
         (concat
-          [:div]
+          [ui/Container {:fluid false}]
           [[controls]]
           (when (and @runUUID @resource #_correct-resource?) ;; FIXME: Don't show information for a different resource.
-            [[ui/Container {:fluid true}
-              [summary-section]
-              [parameters-section]
-              [events-section]
-              [reports-section]]]))))))
+            [[summary-section]
+             [parameters-section]
+             [events-section]
+             [reports-section]]))))))

@@ -19,7 +19,8 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
 
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
-    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]))
+    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
 (defn bool->int [bool]
@@ -144,8 +145,6 @@
 
 (defn row-fn [entry]
   [ui/TableRow
-   ;[label :label [deployment-icon (:type entry)]]
-   ;[abort-popup (:abort entry)]
    [ui/TableCell [format-uuid (:uuid entry)]]
    [ui/TableCell (:status entry)]
    [ui/TableCell (:activeVm entry)]
@@ -168,15 +167,15 @@
         :padded      false}
        [ui/TableHeader
         [ui/TableRow
-         [ui/TableHeaderCell (@tr [:url])]
          [ui/TableHeaderCell (@tr [:id])]
-         [ui/TableHeaderCell (@tr [:module])]
-         [ui/TableHeaderCell (@tr [:vms])]
          [ui/TableHeaderCell (@tr [:status])]
-         [ui/TableHeaderCell (@tr [:username])]
+         [ui/TableHeaderCell (@tr [:vms])]
+         [ui/TableHeaderCell (@tr [:url])]
+         [ui/TableHeaderCell (@tr [:module])]
          [ui/TableHeaderCell (@tr [:start])]
          [ui/TableHeaderCell (@tr [:cloud])]
-         [ui/TableHeaderCell (@tr [:tags])]]]
+         [ui/TableHeaderCell (@tr [:tags])]
+         [ui/TableHeaderCell (@tr [:username])]]]
        (vec (concat [ui/TableBody]
                     (map row-fn entries)))])))
 
@@ -194,7 +193,7 @@
           (when-let [{:keys [runs]} @deployments]
             (let [{:keys [count totalCount]} runs]
               [ui/MenuItem
-               [ui/Statistic {:size "tiny"}
+               [ui/Statistic {:size :mini}
                 [ui/StatisticValue (str count "/" totalCount)]
                 [ui/StatisticLabel (@tr [:results])]]])))]
        (when-not @loading?
@@ -206,17 +205,14 @@
 (defn deployments
   []
   (let [tr (subscribe [::i18n-subs/tr])]
-    [:div
-     [ui/Card {:fluid true}
-      [ui/CardContent
-       [ui/CardDescription
-        [runs-control]]]
-      [ui/CardContent {:extra true}
-       [search-button]]]
-     [ui/Card {:fluid true}
-      [ui/CardContent
-       [ui/CardDescription
-        [runs-display]]]]]))
+    [ui/Container {:fluid true}
+     [cc/collapsible-card-extra
+      (@tr [:deployment])
+      [runs-control]
+      [search-button]]
+     [cc/collapsible-card
+      (@tr [:results])
+      [runs-display]]]))
 
 
 (defn deployment-resource
