@@ -17,15 +17,15 @@
 
 (defn controls
   []
-  (let [loading? (subscribe [::metrics-subs/loading?])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        loading? (subscribe [::metrics-subs/loading?])]
     (fn []
-      [ui/Button
-       {:circular true
-        :primary  true
-        :icon     "refresh"
-        :loading  @loading?
-        :floated  :left
-        :on-click #(dispatch [::metrics-events/fetch-metrics])}])))
+      [ui/Menu
+       [ui/MenuItem {:name     "refresh"
+                     :on-click #(dispatch [::metrics-events/fetch-metrics])}
+        [ui/Icon {:name    "refresh"
+                  :loading @loading?}]
+        (@tr [:refresh])]])))
 
 
 (def thread-vega-spec
@@ -124,7 +124,7 @@
       (when (or (nil? @rates) (nil? @jvm-threads))
         (dispatch [::metrics-events/fetch-metrics]))
       [ui/Container {:fluid true}
-       [cc/title-card (@tr [:metrics]) [controls]]
+       [controls]
        [request-statistics]
        [server-statistics]])))
 

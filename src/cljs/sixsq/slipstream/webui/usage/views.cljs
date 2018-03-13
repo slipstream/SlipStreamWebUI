@@ -204,7 +204,6 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [ui/Container {:fluid true}
-       [cc/title-card (@tr [:usage])]
        [search-header]
        [search-result]])))
 

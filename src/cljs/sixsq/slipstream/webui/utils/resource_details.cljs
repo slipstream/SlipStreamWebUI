@@ -271,11 +271,6 @@
   "Provides a generic visualization of a CIMI resource document."
   [refresh-button title {:keys [name id operations] :as data} baseURI description]
   [:div
-   (vec (concat [ui/Card {:fluid true}
-                 [ui/CardContent
-                  [ui/CardHeader
-                   [:h1 (or name id title)]]]
-                 [ui/CardContent {:extra true}
-                  (vec (concat [ui/CardDescription]
-                               (format-operations refresh-button data baseURI description)))]]))
+   (vec (concat [ui/Menu]
+                (format-operations refresh-button data baseURI description)))
    (format-resource-data data description)])

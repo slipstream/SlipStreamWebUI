@@ -6,6 +6,7 @@
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
     [sixsq.slipstream.webui.cimi-detail.subs :as cimi-detail-subs]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.resource-details :as details]
@@ -14,15 +15,15 @@
 
 (defn refresh-button
   []
-  (let [loading? (subscribe [::cimi-detail-subs/loading?])
+  (let [tr (subscribe [::i18n-subs/tr])
+        loading? (subscribe [::cimi-detail-subs/loading?])
         resource-id (subscribe [::cimi-detail-subs/resource-id])]
     (fn []
-      [ui/Button
-       {:circular true
-        :primary  true
-        :icon     "refresh"
-        :loading  @loading?
-        :on-click #(dispatch [::cimi-detail-events/get @resource-id])}])))
+      [ui/MenuItem {:name "refresh"
+                    :on-click #(dispatch [::cimi-detail-events/get @resource-id])}
+       [ui/Icon {:name "refresh"
+                 :loading @loading?}]
+       (@tr [:refresh])])))
 
 
 (defn path->resource-id
