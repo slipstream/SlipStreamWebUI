@@ -36,10 +36,10 @@
     confirm-label]])
 
 
-(defn action-button
-  [label title-text body on-confirm on-cancel & [scrolling?]]
+(defn action-button-icon
+  [label icon title-text body on-confirm on-cancel & [scrolling?]]
   (let [show? (r/atom false)]
-    (fn [label title-text body on-confirm on-cancel & [scrolling?]]
+    (fn [label icon title-text body on-confirm on-cancel & [scrolling?]]
       (let [action-fn (fn []
                         (reset! show? false)
                         (on-confirm))
@@ -51,10 +51,16 @@
          (cond-> {:open      (boolean @show?)
                   :closeIcon true
                   :on-close  #(reset! show? false)
-                  :trigger   (r/as-element [ui/Button
-                                            {:primary  true
+                  :trigger   (r/as-element
+                               [ui/MenuItem {:name     label
                                              :on-click #(reset! show? true)}
-                                            label])}
+                                (when icon
+                                  [ui/Icon {:name icon}])
+                                label]
+                               #_[ui/Button
+                                  {:primary  true
+                                   :on-click #(reset! show? true)}
+                                  label])}
                  scrolling? (assoc :scrolling true))
          [ui/ModalHeader title-text]
          [ui/ModalContent body]
@@ -64,6 +70,11 @@
            "cancel"
            action-fn
            cancel-fn]]]))))
+
+
+(defn action-button
+  [label title-text body on-confirm on-cancel & [scrolling?]]
+  [action-button-icon label nil title-text body on-confirm on-cancel scrolling?])
 
 
 (defn update-data [text form-id param value]
@@ -97,8 +108,9 @@
         editor-mode? (r/atom false)
         json-error? (r/atom false)]
     (fn [data description action-fn]
-      [action-button
+      [action-button-icon
        (@tr [:update])
+       "pencil"
        (str (@tr [:editing]) " " (:id data))
        (if description
          [:div
@@ -138,8 +150,9 @@
   [data action-fn]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [data action-fn]
-      [action-button
+      [action-button-icon
        (@tr [:delete])
+       "trash"
        (@tr [:delete-resource])
        [:p (@tr [:delete-resource-msg] [(:id data)])]
        action-fn
@@ -151,8 +164,12 @@
   [label data action-fn]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [label data action-fn]
-      [action-button
+      [action-button-icon
        label
+       (case label
+         "download" "cloud download"
+         "upload" "cloud upload"
+         nil)
        (@tr [:execute-action] [label])
        [:p (@tr [:execute-action-msg] [label (:id data)])]
        action-fn

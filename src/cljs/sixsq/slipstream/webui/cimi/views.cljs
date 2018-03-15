@@ -294,6 +294,7 @@
           :value       @selected-id
           :placeholder (@tr [:resource-type])
           :inline      true
+          :scrolling   true
           :options     options
           :on-change   (cutil/callback :value callback)}]))))
 
