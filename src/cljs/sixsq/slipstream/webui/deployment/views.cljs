@@ -83,14 +83,15 @@
 
 (defn search-button
   []
-  (let [loading? (subscribe [::deployment-subs/loading?])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        loading? (subscribe [::deployment-subs/loading?])]
     (fn []
-      [ui/Button
-       {:circular true
-        :primary  true
-        :icon     "refresh"
-        :loading  @loading?
-        :on-click #(dispatch [::deployment-events/get-deployments])}])))
+      [ui/Menu
+       [ui/MenuItem {:name "refresh"
+                     :on-click #(dispatch [::deployment-events/get-deployments])}
+        [ui/Icon {:name "refresh"
+                  :loading @loading?}]
+        (@tr [:refresh])]])))
 
 (defn service-url
   [url status]
@@ -206,10 +207,10 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Container {:fluid true}
-     [cc/collapsible-card-extra
-      (@tr [:deployment])
-      [runs-control]
-      [search-button]]
+     [search-button]
+     [cc/collapsible-card
+      " "
+      [runs-control]]
      [cc/collapsible-card
       (@tr [:results])
       [runs-display]]]))

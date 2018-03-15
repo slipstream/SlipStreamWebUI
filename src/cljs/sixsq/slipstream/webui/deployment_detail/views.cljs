@@ -9,15 +9,12 @@
 
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
     [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
     [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.plot.plot :as plot]
-    [cljs-time.core :as time]
-    [cljs-time.format :as time-fmt]
-    [cljs-time.coerce :as time-coerce]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
@@ -40,6 +37,13 @@
                     :type
                     :user
                     :cloudServiceNames})
+
+
+(def terminate-summary-keys #{:resourceUri
+                              :startTime
+                              :state
+                              :user
+                              :cloudServiceNames})
 
 
 (defn module-name
@@ -95,9 +99,24 @@
                                 :padded      false
                                 :style       {:max-width "100%"}}
                       (vec (concat [ui/TableBody]
-                                   (->> summary-info
-                                        (map tuple-to-row))))]]
+                                   (map tuple-to-row summary-info)))]]
         [cc/collapsible-card (@tr [:summary]) contents]))))
+
+
+(defn terminate-summary
+  []
+  (let [resource (subscribe [::deployment-detail-subs/resource])]
+    (fn []
+      (let [module (module-name @resource)
+            summary-info (-> (select-keys (:run @resource) terminate-summary-keys)
+                             (assoc :module module))]
+        [ui/Table {:compact     true
+                   :definition  true
+                   :single-line true
+                   :padded      false
+                   :style       {:max-width "100%"}}
+         (vec (concat [ui/TableBody]
+                      (map tuple-to-row summary-info)))]))))
 
 
 (def node-parameter-pattern #"([^:]+?)(\.\d+)?:(.+)")
@@ -267,32 +286,39 @@
 
 (defn refresh-button
   []
-  (let [loading? (subscribe [::deployment-detail-subs/loading?])
+  (let [tr (subscribe [::i18n-subs/tr])
+        loading? (subscribe [::deployment-detail-subs/loading?])
         runUUID (subscribe [::deployment-detail-subs/runUUID])]
     (fn []
-      [ui/Button
-       {:circular true
-        :primary  true
-        :icon     "refresh"
-        :loading  @loading?
-        :on-click #(dispatch [::deployment-detail-events/get-deployment @runUUID])}])))
+      [ui/MenuItem {:name     "refresh"
+                    :on-click #(dispatch [::deployment-detail-events/get-deployment @runUUID])}
+       [ui/Icon {:name    "refresh"
+                 :loading @loading?}]
+       (@tr [:refresh])])))
+
+
+;; FIXME: Remove duplicated function.
+(defn is-terminated-state? [state]
+  (#{"Finalizing" "Done" "Aborted" "Cancelled"} state))
 
 
 (defn terminate-button
+  "Creates a button that will bring up a delete dialog and will execute the
+   delete when confirmed."
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        runUUID (subscribe [::deployment-detail-subs/runUUID])
-        deployment (subscribe [::deployment-detail-resource])]
+        cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
+        resource (subscribe [::deployment-detail-subs/resource])]
     (fn []
-      [ui/Button
-       {:negative       true
-        :icon           true
-        :label-position :left
-        :on-click       #(log/error "TERMINATE:" @runUUID)
-        ;#(dispatch [::dashboard-events/delete-deployment-modal @deployment])
-        }
-       [ui/Icon {:name "close"}]
-       (@tr [:terminate])])))
+      (when-let [state (-> @resource :run :state)]
+        (when-not (is-terminated-state? state)
+          [resource-details/action-button-icon
+           (@tr [:terminate])
+           "close"
+           (@tr [:terminate])
+           [terminate-summary]
+           #(dispatch [::deployment-detail-events/terminate-deployment @cached-resource-id])
+           (constantly nil)])))))
 
 
 (defn service-link-button
@@ -303,34 +329,30 @@
             global-params (get parameters-kv "ss")
             state (second (first (filter #(= "ss:state" (first %)) global-params)))
             link (second (first (filter #(= "ss:url.service" (first %)) global-params)))]
-        (log/error "Global params" global-params)
-        (log/error state)
-        (log/error link)
         (when (and link (= "Ready" state))
-          [ui/Button
-           {:primary        true
-            :icon           true
-            :label-position :left
-            :on-click       #(set! js/window.location.href link)}
+          [ui/MenuItem
+           {:name     "open"
+            :on-click #(dispatch [::deployment-detail-events/open-link link])}
            [ui/Icon {:name "external"}]
            link])))))
 
 
-(defn controls
+(defn title
   []
   (let [resource (subscribe [::deployment-detail-subs/resource])]
     (fn []
       (let [module (module-name @resource)
             short-name (second (re-matches #"^.*/(.*)$" (str (or module "TITLE"))))
-            state (-> @resource :run :state)
-            title (str short-name " (" state ")")]
-        [cc/title-card
-         title
-         [:div
-          [refresh-button]
-          [service-link-button]
-          [terminate-button]]]))))
+            state (-> @resource :run :state)]
+        [:h1 (str short-name " (" state ")")]))))
 
+
+(defn menu
+  []
+  [ui/Menu
+   [refresh-button]
+   [service-link-button]
+   [terminate-button]])
 
 (defn deployment-detail
   []
@@ -344,8 +366,9 @@
 
       (vec
         (concat
-          [ui/Container {:fluid false}]
-          [[controls]]
+          [ui/Container {:fluid true}]
+          [[menu]
+           [title]]
           (when (and @runUUID @resource #_correct-resource?) ;; FIXME: Don't show information for a different resource.
             [[summary-section]
              [parameters-section]

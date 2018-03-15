@@ -74,6 +74,15 @@
                                   (dispatch [::set-deployment resource-id %]))]})))
 
 
+;; FIXME: Keep in sync with dashboard
+(reg-event-fx
+  ::terminate-deployment
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ uuid]]
+    {:db                                         db
+     ::deployment-detail-fx/terminate-deployment [client uuid]}))
+
+
+
 (reg-event-db
   ::set-events
   (fn [db [_ events]]
@@ -94,3 +103,9 @@
                              "events"
                              (general-utils/prepare-params query-params)
                              #(dispatch [::set-events %])]})))
+
+
+(reg-event-fx
+  ::open-link
+  (fn [_ [_ uri]]
+    {::main-fx/open-new-window [uri]}))

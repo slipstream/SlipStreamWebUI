@@ -26,9 +26,28 @@
   (fn [[client module-id]]
     (go
       (let [module (if (nil? module-id) {} (<! (modules/get-module client module-id)))
-            module-meta (-> module vals first (select-keys metadata-fields))
+
+            metadata (-> module vals first (select-keys metadata-fields))
+
+            targets (->> (-> module vals first :targets :target)
+                         (map (juxt #(-> % :name keyword) :content))
+                         (filter second)
+                         (into {}))
+
+            output-parameters (->> (-> module vals first :parameters :entry)
+                                   (map :parameter)
+                                   (filter #(= "Output" (:category %))))
+
+            input-parameters (->> (-> module vals first :parameters :entry)
+                                  (map :parameter)
+                                  (filter #(= "Input" (:category %))))
+
             children (if (nil? module-id)
                        (<! (modules/get-module-children client nil))
                        (get-module-items module))
-            module-data (assoc module-meta :children children)]
+
+            module-data {:metadata         metadata
+                         :targets          targets
+                         :parameters       (concat input-parameters output-parameters)
+                         :children         children}]
         (dispatch [:sixsq.slipstream.webui.application.events/set-module module-id module-data])))))

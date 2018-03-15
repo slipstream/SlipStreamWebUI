@@ -64,14 +64,12 @@
         loading? (subscribe [::dashboard-subs/loading?])]
     (fn []
       [ui/Container {:fluid true}
-       [cc/title-card
-        (@tr [:dashboard])
-        [ui/Button
-         {:circular true
-          :primary  true
-          :icon     "refresh"
-          :loading  @loading?
-          :on-click #(dispatch [::dashboard-events/get-statistics])}]]
+       [ui/Menu
+        [ui/MenuItem {:name "refresh"
+                      :on-click #(dispatch [::dashboard-events/get-statistics])}
+         [ui/Icon {:name "refresh"
+                   :loading @loading?}]
+         (@tr [:refresh])]]
        (when-not @loading?
          (let [stats (->> @statistics
                           (sort-by :order)

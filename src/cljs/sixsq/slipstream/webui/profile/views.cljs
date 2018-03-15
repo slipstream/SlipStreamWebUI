@@ -112,15 +112,8 @@
        [:p (@tr [:no-session])])]))
 
 
-(defn panel-title
-  []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    [cc/title-card (@tr [:profile])]))
-
-
 (defmethod panel/render :profile
   [path]
   [ui/Container {:fluid true}
-   [panel-title]
    [session-info]])
 

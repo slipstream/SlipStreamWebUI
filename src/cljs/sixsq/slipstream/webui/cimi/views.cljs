@@ -251,12 +251,10 @@
         selections (reagent/atom (set @selected-fields))
         show? (reagent/atom false)]
     (fn []
-      [:span
-       [ui/Button
-        {:circular true
-         :primary  true
-         :icon     "columns"
-         :on-click #(reset! show? true)}]
+      [ui/MenuItem {:name     "select-fields"
+                    :on-click #(reset! show? true)}
+       [ui/Icon {:name "columns"}]
+       (@tr [:columns])
        [ui/Modal
         {:closeIcon true
          :open      @show?
@@ -296,6 +294,7 @@
           :value       @selected-id
           :placeholder (@tr [:resource-type])
           :inline      true
+          :scrolling   true
           :options     options
           :on-change   (cutil/callback :value callback)}]))))
 
@@ -366,50 +365,51 @@
 
 (defn search-button
   []
-  (let [loading? (subscribe [::cimi-subs/loading?])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        loading? (subscribe [::cimi-subs/loading?])]
     (fn []
-      [ui/Button
-       {:circular true
-        :primary  true
-        :icon     "search"
-        :loading  @loading?
-        :on-click #(dispatch [::cimi-events/get-results])}])))
+      [ui/MenuItem {:name     "search"
+                    :on-click #(dispatch [::cimi-events/get-results])}
+       (if @loading?
+         [ui/Icon {:name    "refresh"
+                   :loading @loading?}]
+         [ui/Icon {:name "search"}])
+       (@tr [:search])])))
 
 
 (defn create-button
   []
-  (let [search-results (subscribe [::cimi-subs/collection])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        search-results (subscribe [::cimi-subs/collection])]
     (fn []
       (when (can-add? (-> @search-results :operations))
-        [ui/Button
-         {:circular true
-          :primary  true
-          :icon     "add"
-          :on-click #(dispatch [::cimi-events/show-add-modal])}]))))
+        [ui/MenuItem {:name     "add"
+                      :on-click #(dispatch [::cimi-events/show-add-modal])}
+         [ui/Icon {:name "add"}]
+         (@tr [:add])]))))
 
 
 (defn results-bar []
   (let [tr (subscribe [::i18n-subs/tr])
         resources (subscribe [::cimi-subs/collection])]
     (fn []
-      (let [resources @resources]
-        (if (instance? js/Error resources)
-          [:div (@tr [:error])]
-          [:div
-           [search-button]
-           [select-fields]
-           [create-button]])))))
+      (when (instance? js/Error @resources)
+        (dispatch [::main-events/set-message {:header  (@tr [:error])
+                                              :message (str @resources)
+                                              :error   true}]))
+      [ui/Menu
+       [search-button]
+       [select-fields]
+       (when (can-add? (-> @resources :operations))
+         [create-button])])))
 
 
 (defn control-bar
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    (fn []
-      [cc/collapsible-card-extra
-       [cloud-entry-point-title]
-       [resource-add-form]
-       [search-header]
-       [results-bar]])))
+  [cc/collapsible-card
+   [cloud-entry-point-title]
+   [resource-add-form]
+   [search-header]])
 
 
 (defn cimi-resource
@@ -420,11 +420,14 @@
         (dispatch [::cimi-events/set-collection-name resource-type]))
       (let [n (count @path)
             children (case n
-                       1 [[control-bar]]
-                       2 [[control-bar]
+                       1 [[results-bar]
+                          [control-bar]]
+                       2 [[results-bar]
+                          [control-bar]
                           [results-display]]
                        3 [[cimi-detail-views/cimi-detail]]
-                       [[control-bar]])]
+                       [[results-bar]
+                        [control-bar]])]
         (vec (concat [:div] children))))))
 
 

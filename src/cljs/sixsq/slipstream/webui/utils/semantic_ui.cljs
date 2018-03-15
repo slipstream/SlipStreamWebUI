@@ -24,6 +24,7 @@
 (def CardContent (adapt-component "CardContent"))
 (def CardDescription (adapt-component "CardDescription"))
 (def CardHeader (adapt-component "CardHeader"))
+(def CardMeta (adapt-component "CardMeta"))
 
 (def Checkbox (adapt-component "Checkbox"))
 

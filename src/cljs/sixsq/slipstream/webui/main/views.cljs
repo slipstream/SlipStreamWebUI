@@ -63,7 +63,7 @@
 (defn breadcrumbs []
   (let [path (subscribe [::main-subs/nav-path])]
     (fn []
-      (vec (concat [ui/Breadcrumb {:size :massive}]
+      (vec (concat [ui/Breadcrumb {:size :large}]
                    (vec (->> @path
                              (map crumb (range))
                              (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))))
