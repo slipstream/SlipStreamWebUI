@@ -420,14 +420,14 @@
         (dispatch [::cimi-events/set-collection-name resource-type]))
       (let [n (count @path)
             children (case n
-                       1 [[results-bar]
-                          [control-bar]]
-                       2 [[results-bar]
-                          [control-bar]
+                       1 [[control-bar]
+                          [results-bar]]
+                       2 [[control-bar]
+                          [results-bar]
                           [results-display]]
                        3 [[cimi-detail-views/cimi-detail]]
-                       [[results-bar]
-                        [control-bar]])]
+                       [[control-bar]
+                        [results-bar]])]
         (vec (concat [:div] children))))))
 
 

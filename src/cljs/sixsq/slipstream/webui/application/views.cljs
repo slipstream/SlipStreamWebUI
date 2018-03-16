@@ -186,7 +186,7 @@
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable
-         (vec (concat [ui/Container [dimmer]]
+         (vec (concat [:div [dimmer]]
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]

@@ -21,11 +21,12 @@
     (fn [title & children]
       [ui/Card {:fluid true}
        [ui/CardContent
-        [ui/CardHeader
-         title
-         [ui/Button {:floated  :right
-                     :icon     (if @visible? "chevron down" "chevron up")
-                     :on-click #(reset! visible? (not @visible?))}]]
+        [ui/Label {:as       :a
+                   :corner   "right"
+                   :size     "mini"
+                   :icon     (if @visible? "chevron down" "chevron up")
+                   :on-click #(reset! visible? (not @visible?))}]
+        [ui/CardHeader title]
         (when @visible?
           (vec (concat [ui/CardDescription] children)))]])))
 

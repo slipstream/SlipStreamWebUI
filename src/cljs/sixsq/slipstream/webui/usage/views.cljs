@@ -102,27 +102,29 @@
        ])))
 
 (defn search-header []
-  (let [session (subscribe [::authn-subs/session])
+  (let [is-admin? (subscribe [::authn-subs/is-admin?])
         loading? (subscribe [::usage-subs/loading-users-list?])]
     (fn []
-      (let [role (or (-> @session :roles (str/split #"\s+") first) "")
-            is-admin? (= role "ADMIN")]
-        [:div
-         [ui/Segment {:size "mini"}
-          [ui/Grid {:stackable true :columns 2}
-           [ui/GridColumn {:width 10} [search-calendar]]
-           [ui/GridColumn {:width 6 :stretched true}
-            [ui/Segment {:basic true}
-             [search-all-clouds-dropdown]
-             (when is-admin?
-               (when @loading?
-                 (dispatch [::usage-events/get-users-list]))
-               [search-users-dropdown])
-             [:div
-              [ui/Button {:icon    "search" :primary true :circular true :floated "right"
-                          :onClick #(dispatch [::usage-events/fetch-meterings])}]]
-             ]]]]
-         ]))))
+      [:div
+       [ui/Segment {:size "mini"}
+        [ui/Grid {:stackable true :columns 2}
+         [ui/GridColumn {:width 10} [search-calendar]]
+         [ui/GridColumn {:width 6 :stretched true}
+          [ui/Segment {:basic true}
+           [search-all-clouds-dropdown]
+           (when @is-admin?
+             (when @loading?
+               (dispatch [::usage-events/get-users-list]))
+             [search-users-dropdown])]]]]
+       ])))
+
+(defn control-bar []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    [ui/Menu
+     [ui/MenuItem {:name     "search"
+                   :on-click #(dispatch [::usage-events/fetch-meterings])}
+      [ui/Icon {:name "search"}]
+      (@tr [:search])]]))
 
 (defn format [fmt-str & v]
   (apply pprint/cl-format nil fmt-str v))
@@ -205,6 +207,7 @@
     (fn []
       [ui/Container {:fluid true}
        [search-header]
+       [control-bar]
        [search-result]])))
 
 (defmethod panel/render :usage

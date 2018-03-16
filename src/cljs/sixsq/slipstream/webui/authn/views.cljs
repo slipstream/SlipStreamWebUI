@@ -75,13 +75,13 @@
                               :placeholder  displayName
                               :icon         "lock"
                               :iconPosition "left"
-                              :required mandatory}]
+                              :required     mandatory}]
     [ui/FormInput {:name         param-name
                    :type         type
                    :placeholder  displayName
                    :icon         "user"
                    :iconPosition "left"
-                   :required mandatory}]))
+                   :required     mandatory}]))
 
 (defn method-form
   "Renders the form for a particular login method. The fields are taken from
@@ -167,10 +167,10 @@
         modal-open? (subscribe [::authn-subs/modal-open?])]
     (fn []
       [ui/Modal
-       {:id       "modal-login-id"
-        :open     @modal-open?
+       {:id        "modal-login-id"
+        :open      @modal-open?
         :closeIcon true
-        :on-close #(dispatch [::authn-events/close-modal])}
+        :on-close  #(dispatch [::authn-events/close-modal])}
        [ui/ModalHeader (@tr [:login])]
        [ui/ModalContent {:scrolling true}
         [login-form-container]]])))
@@ -186,29 +186,28 @@
         (@tr [:login])]
        [modal-login]])))
 
-
-(defn logout-button
-  "Button to close the user's session. Triggers a logout from the server and
-   navigates to the welcome page."
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        on-click (fn []
-                   (dispatch [::authn-events/logout])
-                   #_(history/navigate "welcome"))]         ;; FIXME
-    (fn []
-      [:div
-       [ui/Button {:size "tiny" :on-click on-click :negative true} (@tr [:logout])]])))
-
-
-(defn authn-button
-  "Provides either a login or logout button depending on whether the user has
+(defn authn-menu
+  "Provides either a login or user dropdown depending on whether the user has
    an active session. The login button will bring up a modal dialog."
   []
-  (let [session (subscribe [::authn-subs/session])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        user (subscribe [::authn-subs/user])
+        on-click (fn []
+                   (dispatch [::authn-events/logout])
+                   #_(history/navigate "welcome"))]         ;; FIXME]
     (fn []
-      (if-not @session
+      (if-not @user
         [login-button]
-        [logout-button]))))
+        [ui/Dropdown {:item    true
+                      :simple  true
+                      :icon    nil
+                      :trigger (r/as-element [:span [ui/Icon {:name "user"}] @user])}
+         [ui/DropdownMenu
+          [ui/DropdownItem
+           {:key     "sign-out"
+            :text    (@tr [:logout])
+            :icon    "sign out"
+            :onClick on-click}]]]))))
 
 (defn ^:export open-authn-modal []
   (log/debug "dispatch open-modal for authn view")

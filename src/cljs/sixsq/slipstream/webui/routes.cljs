@@ -16,8 +16,10 @@
             (when-let [error (:error query-params)]
               (dispatch [::authn-events/set-error-message error])
               (dispatch [::authn-events/open-modal]))
-            (dispatch [::main-events/set-navigation-info path query-params]))
+            (when (not-empty path)
+              (dispatch [::main-events/set-navigation-info path query-params])))
 
   (defroute "*" {path :*}
             (log/debug "routing * path")
-            (dispatch [::main-events/set-navigation-info path nil])))
+            (when (not-empty path)
+              (dispatch [::main-events/set-navigation-info path nil]))))

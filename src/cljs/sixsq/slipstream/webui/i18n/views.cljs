@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.i18n.views
   (:require
     [re-frame.core :refer [subscribe dispatch]]
+    [reagent.core :as r]
 
     [sixsq.slipstream.webui.i18n.events :as i18n-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -18,9 +19,10 @@
   []
   (let [locale (subscribe [::i18n-subs/locale])]
     (fn []
-      [ui/Dropdown {:class-name      "item"
-                    :icon            "globe"
-                    :pointing        "top right"
-                    :close-on-change true}
+      [ui/Dropdown {:close-on-change true
+                    :item            true
+                    :simple          true
+                    :icon            nil
+                    :trigger         (r/as-element [:span [ui/Icon {:name "globe"}] @locale])}
        (vec (concat [ui/DropdownMenu]
                     (map locale-dropdown-item (utils/locale-choices))))])))

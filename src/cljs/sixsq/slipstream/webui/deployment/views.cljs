@@ -87,9 +87,9 @@
         loading? (subscribe [::deployment-subs/loading?])]
     (fn []
       [ui/Menu
-       [ui/MenuItem {:name "refresh"
+       [ui/MenuItem {:name     "refresh"
                      :on-click #(dispatch [::deployment-events/get-deployments])}
-        [ui/Icon {:name "refresh"
+        [ui/Icon {:name    "refresh"
                   :loading @loading?}]
         (@tr [:refresh])]])))
 
@@ -162,8 +162,7 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [entries]
       [ui/Table
-       {:collapsing  true
-        :compact     true
+       {:compact     true
         :single-line true
         :padded      false}
        [ui/TableHeader
@@ -187,16 +186,14 @@
         loading? (subscribe [::deployment-subs/loading?])
         deployments (subscribe [::deployment-subs/deployments])]
     (fn []
-      [ui/Container {:class-name "webui-x-autoscroll"}
-       [ui/Menu
-        {:secondary true}
-        (when-not @loading?
-          (when-let [{:keys [runs]} @deployments]
-            (let [{:keys [count totalCount]} runs]
-              [ui/MenuItem
-               [ui/Statistic {:size :mini}
-                [ui/StatisticValue (str count "/" totalCount)]
-                [ui/StatisticLabel (@tr [:results])]]])))]
+      [:div {:class-name "webui-x-autoscroll"}
+       (when-not @loading?
+         (when-let [{:keys [runs]} @deployments]
+           (let [{:keys [count totalCount]} runs]
+             [ui/MenuItem
+              [ui/Statistic {:size :mini}
+               [ui/StatisticValue (str count "/" totalCount)]
+               [ui/StatisticLabel (@tr [:results])]]])))
        (when-not @loading?
          (when-let [{:keys [runs]} @deployments]
            (let [{:keys [item]} runs]
@@ -207,10 +204,10 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Container {:fluid true}
-     [search-button]
      [cc/collapsible-card
       " "
       [runs-control]]
+     [search-button]
      [cc/collapsible-card
       (@tr [:results])
       [runs-display]]]))

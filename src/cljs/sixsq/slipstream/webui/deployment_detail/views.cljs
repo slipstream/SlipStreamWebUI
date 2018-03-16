@@ -218,7 +218,7 @@
   [events]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [events]
-      [ui/Container {:class-name "webui-x-autoscroll"}
+      [:div {:class-name "webui-x-autoscroll"}
        [ui/Table {:compact     true
                   :definition  false
                   :single-line true

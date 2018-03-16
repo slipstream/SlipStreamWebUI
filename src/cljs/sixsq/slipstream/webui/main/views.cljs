@@ -29,7 +29,9 @@
 (defn sidebar []
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::main-subs/sidebar-open?])
-        nav-path (subscribe [::main-subs/nav-path])]
+        nav-path (subscribe [::main-subs/nav-path])
+        is-admin? (subscribe [::authn-subs/is-admin?])
+        is-user? (subscribe [::authn-subs/is-user?])]
     (fn []
       (when @show?
         (vec (concat
@@ -40,18 +42,24 @@
                          :inverted   true}]
                [^{:key "logo"} [ui/MenuItem
                                 [ui/Image {:src "/images/cubic-logo.png"}]]]
-               (for [[label-kw url icon] [[:application "application" "sitemap"]
+               (for [[label-kw url icon]
+                     (vec
+                       (concat
+                         (when @is-user? [[:dashboard "dashboard" "dashboard"]
+                                          [:application "application" "sitemap"]
                                           [:deployment "deployment" "cloud"]
-                                          [:dashboard "dashboard" "dashboard"]
                                           [:profile "profile" "user circle"]
-                                          [:cimi "cimi" "code"]
-                                          [:usage "usage" "history"]
-                                          [:metrics "metrics" "bar chart"]]]
+                                          [:usage "usage" "history"]])
+                         (when @is-admin?
+                           [[:metrics "metrics" "bar chart"]])
+                         [[:cimi "cimi" "code"]]))
+                     :when (some? label-kw)]
                  [ui/MenuItem {:active  (= (first @nav-path) url)
                                :onClick (fn []
                                           (log/info "navigate event" url)
                                           (dispatch [::history-events/navigate url]))}
-                  [ui/Icon {:name icon}] (@tr [label-kw])])))))))
+                  [ui/Icon {:name icon}] (@tr [label-kw])]
+                 )))))))
 
 
 (defn crumb
@@ -93,7 +101,8 @@
         message (subscribe [::main-subs/message])]
     (fn []
       [:div
-       [ui/Menu {:className "webui-header" :borderless true}
+       [ui/Menu {:className "webui-header"
+                 :borderless true}
         [ui/MenuItem {:link    true
                       :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
          [ui/Icon {:name (if @show? "caret left" "bars")}]]
@@ -102,7 +111,7 @@
         [ui/MenuMenu {:position "right"}
          [ui/MenuItem
           [i18n-views/locale-dropdown]
-          [authn-views/authn-button]]]]
+          [authn-views/authn-menu]]]]
 
        (when @message
          [ui/Container
