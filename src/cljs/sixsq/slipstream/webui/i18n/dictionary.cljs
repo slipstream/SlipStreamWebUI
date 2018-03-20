@@ -140,4 +140,4 @@
         :usage               "usage"
         :username            "nom d'utilisateur"
         :vms                 "VMs"
-        :welcome             "bienvenu"}})
+        :welcome             "bienvenue"}})
