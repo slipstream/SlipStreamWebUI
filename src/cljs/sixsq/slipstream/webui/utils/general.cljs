@@ -13,10 +13,9 @@
     (edn/read-string s)))
 
 (defn prepare-params [params]
-  (let [filter-value (:$filter params)]
-    (if (or (nil? filter-value) (str/blank? filter-value))
-      (dissoc params :$filter)
-      params)))
+  (->> params
+       (filter (fn [[k v]] (not (or (nil? v) (str/blank? v)))))
+       (into {})))
 
 (defn keys-in [m]
   (if (map? m)

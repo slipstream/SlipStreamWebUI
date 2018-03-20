@@ -48,6 +48,10 @@
   (fn [db [_ select-value]]
     (update db ::cimi-spec/query-params merge {:$select select-value})))
 
+(reg-event-db
+  ::set-query-params
+  (fn [db [_ params]]
+    (update db ::cimi-spec/query-params merge params)))
 
 (reg-event-db
   ::show-add-modal

@@ -161,68 +161,65 @@
         (reset! select-value (str (or $select "")))
         (reset! aggregation-value (str (or $aggregation ""))))
       [ui/Form
-       [ui/FormGroup {:widths "equal"
-                      ;:fluid  true
-                      }
+       [ui/FormGroup {:widths "equal"}
         [ui/FormField
-         [ui/Input {:type          "number"
-                    :min           0
-                    :label         (@tr [:first])
-                    :default-value @first-value
-                    :on-change     (cutil/callback :value
-                                                   (fn [v]
-                                                     (reset! first-value v)
-                                                     (dispatch [::cimi-events/set-first v])))}]]
+         [ui/Input {:type      "number"
+                    :min       0
+                    :label     (@tr [:first])
+                    :value     @first-value
+                    :on-change (cutil/callback :value
+                                               (fn [v]
+                                                 (reset! first-value v)
+                                                 (dispatch [::cimi-events/set-first v])))}]]
 
         [ui/FormField
-         [ui/Input {:type          "number"
-                    :min           0
-                    :label         (@tr [:last])
-                    :default-value @last-value
-                    :on-change     (cutil/callback :value
-                                                   (fn [v]
-                                                     (reset! last-value v)
-                                                     (dispatch [::cimi-events/set-last v])))}]]
+         [ui/Input {:type      "number"
+                    :min       0
+                    :label     (@tr [:last])
+                    :value     @last-value
+                    :on-change (cutil/callback :value
+                                               (fn [v]
+                                                 (reset! last-value v)
+                                                 (dispatch [::cimi-events/set-last v])))}]]
 
         [ui/FormField
-         [ui/Input {:type          "text"
-                    :label         (@tr [:select])
-                    :default-value @select-value
-                    :on-change     (cutil/callback :value
-                                                   (fn [v]
-                                                     (reset! select-value v)
-                                                     (dispatch [::cimi-events/set-select v])))}]]]
+         [ui/Input {:type      "text"
+                    :label     (@tr [:select])
+                    :value     @select-value
+                    :on-change (cutil/callback :value
+                                               (fn [v]
+                                                 (reset! select-value v)
+                                                 (dispatch [::cimi-events/set-select v])))}]]]
 
        [ui/FormGroup {:widths "equal"}
         [ui/FormField
-         [ui/Input {:type          "text"
-                    :label         (@tr [:order])
-                    :default-value @orderby-value
-                    :on-change     (cutil/callback :value
-                                                   (fn [v]
-                                                     (reset! orderby-value v)
-                                                     (dispatch [::cimi-events/set-orderby v])))}]]
+         [ui/Input {:type      "text"
+                    :label     (@tr [:order])
+                    :value     @orderby-value
+                    :on-change (cutil/callback :value
+                                               (fn [v]
+                                                 (reset! orderby-value v)
+                                                 (dispatch [::cimi-events/set-orderby v])))}]]
 
 
         [ui/FormField
-         [ui/Input {:type          "text"
-                    :label         (@tr [:aggregation])
-                    :default-value @aggregation-value
-                    :on-change     (cutil/callback :value
-                                                   (fn [v]
-                                                     (reset! aggregation-value v)
-                                                     (dispatch [::cimi-events/set-aggregation v])))}]]]
+         [ui/Input {:type      "text"
+                    :label     (@tr [:aggregation])
+                    :value     @aggregation-value
+                    :on-change (cutil/callback :value
+                                               (fn [v]
+                                                 (reset! aggregation-value v)
+                                                 (dispatch [::cimi-events/set-aggregation v])))}]]]
 
-       [ui/FormGroup {;:fluid  true
-                      :widths "equal"}
+       [ui/FormGroup {:widths "equal"}
         [ui/FormField
-         [ui/Input {:type          "text"
-                    :label         (@tr [:filter])
-                    :default-value @filter-value
-                    :on-change     (cutil/callback :value
-                                                   (fn [v]
-                                                     (reset! filter-value v)
-                                                     (dispatch [::cimi-events/set-filter v])))}]]]])))
+         [ui/Input {:type      "text"
+                    :label     (@tr [:filter])
+                    :value     @filter-value
+                    :on-change (cutil/callback :value
+                                               (fn [v]
+                                                 (reset! filter-value v)
+                                                 (dispatch [::cimi-events/set-filter v])))}]]]])))
 
 
 (defn format-field-item [selections-atom item]
@@ -414,10 +411,13 @@
 
 (defn cimi-resource
   []
-  (let [path (subscribe [::main-subs/nav-path])]
+  (let [path (subscribe [::main-subs/nav-path])
+        query-params (subscribe [::main-subs/nav-query-params])]
     (fn []
       (let [[_ resource-type resource-id] @path]
-        (dispatch [::cimi-events/set-collection-name resource-type]))
+        (dispatch [::cimi-events/set-collection-name resource-type])
+        (when @query-params
+          (dispatch [::cimi-events/set-query-params @query-params])))
       (let [n (count @path)
             children (case n
                        1 [[control-bar]

@@ -18,8 +18,8 @@
 (s/def ::db (s/keys :req [::loading? ::query-params ::deployments]))
 
 (def defaults {::loading?     false
-               ::query-params [:offset ""
-                               :limit ""
-                               :cloud ""
-                               :activeOnly int?]
+               ::query-params {:offset     ""
+                               :limit      ""
+                               :cloud      ""
+                               :activeOnly 1}
                ::deployments  nil})

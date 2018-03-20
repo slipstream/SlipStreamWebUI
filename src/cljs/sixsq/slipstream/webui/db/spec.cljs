@@ -4,6 +4,7 @@
     [clojure.spec.alpha :as s]
     [sixsq.slipstream.webui.authn.spec :as authn]
     [sixsq.slipstream.webui.cimi.spec :as cimi]
+    [sixsq.slipstream.webui.deployment.spec :as deployment]
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail]
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
@@ -28,6 +29,7 @@
   (merge authn/defaults
          cimi/defaults
          cimi-detail/defaults
+         deployment/defaults
          client/defaults
          dashboard/defaults
          i18n/defaults

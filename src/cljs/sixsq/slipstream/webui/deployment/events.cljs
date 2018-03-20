@@ -22,7 +22,7 @@
   ::get-deployments
   (fn [{{:keys [::client-spec/client ::deployment-spec/query-params] :as db} :db} _]
     {:db                             (assoc db ::deployment-spec/loading? true)
-     ::deployment-fx/get-deployments [client query-params]}))
+     ::deployment-fx/get-deployments [client (general-utils/prepare-params query-params)]}))
 
 
 (reg-event-db
