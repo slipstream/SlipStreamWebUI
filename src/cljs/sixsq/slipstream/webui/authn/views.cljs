@@ -4,14 +4,14 @@
 
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
+    [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
 
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [taoensso.timbre :as log]
-    [reagent.core :as r]
-    [clojure.string :as str]))
+    [reagent.core :as r]))
 
 (defn method-comparator
   "Compares two login method types. The value 'internal' will always compare
@@ -194,20 +194,27 @@
         user (subscribe [::authn-subs/user])
         on-click (fn []
                    (dispatch [::authn-events/logout])
-                   #_(history/navigate "welcome"))]         ;; FIXME]
+                   (dispatch [::history-events/navigate "welcome"]))]
     (fn []
       (if-not @user
         [login-button]
-        [ui/Dropdown {:item    true
-                      :simple  true
-                      :icon    nil
-                      :trigger (r/as-element [:span [ui/Icon {:name "user"}] @user])}
+        [ui/Dropdown {:item            true
+                      :simple          false
+                      :icon            nil
+                      :close-on-change true
+                      :trigger         (r/as-element [:span [ui/Icon {:name "user"}] @user])}
          [ui/DropdownMenu
           [ui/DropdownItem
-           {:key     "sign-out"
-            :text    (@tr [:logout])
-            :icon    "sign out"
-            :onClick on-click}]]]))))
+           {:key      "profile"
+            :text     (@tr [:profile])
+            :icon     "user circle"
+            :on-click #(history-utils/navigate "profile")}]
+          [ui/DropdownItem
+           {:key      "sign-out"
+            :text     (@tr [:logout])
+            :icon     "sign out"
+            :on-click on-click}]]]))))
+
 
 (defn ^:export open-authn-modal []
   (log/debug "dispatch open-modal for authn view")

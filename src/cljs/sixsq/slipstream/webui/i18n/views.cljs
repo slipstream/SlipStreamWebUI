@@ -20,9 +20,9 @@
   (let [locale (subscribe [::i18n-subs/locale])]
     (fn []
       [ui/Dropdown {:close-on-change true
+                    :upward          true
                     :item            true
-                    :simple          true
-                    :icon            nil
+                    ;:button          true
                     :trigger         (r/as-element [:span [ui/Icon {:name "globe"}] @locale])}
        (vec (concat [ui/DropdownMenu]
                     (map locale-dropdown-item (utils/locale-choices))))])))
