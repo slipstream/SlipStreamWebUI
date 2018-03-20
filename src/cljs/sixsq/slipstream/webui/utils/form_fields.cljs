@@ -89,6 +89,20 @@
      :on-change     (ui-utils/callback :checked
                                        #(update-fn form-id param-name %))}]])
 
+(defmethod form-field :href
+  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description] :as param}]]
+  ^{:key displayName}
+  [ui/FormField {:required mandatory}
+   [:label displayName nbsp (help-popup description)]
+   [ui/Input
+    {:type          "text"
+     :name          param-name
+     :default-value (or (:href data) "")
+     :read-only     readOnly
+     :fluid         true
+     :on-change     (ui-utils/callback :value
+                                       #(update-fn form-id param-name {:href %}))}]])
+
 
 (defmethod form-field :enum
   [update-fn form-id [param-name {:keys [enum data displayName mandatory description]}]]
