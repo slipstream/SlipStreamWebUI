@@ -2,10 +2,6 @@
   (:require
     [re-frame.core :refer [subscribe]]
 
-    [cljs-time.core :as time]
-    [cljs-time.format :as time-format]
-    [cljs-time.coerce :as time-coerce]
-
     [sixsq.slipstream.webui.panel :as panel]
 
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
@@ -14,7 +10,7 @@
 
     [sixsq.slipstream.webui.utils.values :as values]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [clojure.string :as str]
+    [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
 
 
@@ -57,24 +53,6 @@
                      (map tuple-to-row))))])
 
 
-(def rfc822 (time-format/formatters :rfc822))
-
-
-;;
-;; FIXME: Should be replaced with use of moment.js.
-;;
-(defn minutes-remaining
-  [expiry]
-  (if expiry
-    (let [fixed-tz (str/replace expiry #"UTC" "Z")
-          date-time (time-format/parse rfc822 fixed-tz)
-          expiry-ms (time-coerce/to-long date-time)
-          now-ms (time-coerce/to-long (time/now))
-          remaining-mins (int (/ (max (- expiry-ms now-ms) 0) 60000.))]
-      (str remaining-mins " minutes"))
-    "unknown"))
-
-
 (def session-keys #{:id :username :roles :clientIP})
 
 
@@ -90,13 +68,14 @@
 
 (defn process-session-data
   [data]
-  (let [expiry (second (first (filter #(= :expiry (first %)) data)))]
-    (->> data
-         (filter #(session-keys (first %)))
-         (cons [:time-remaining (minutes-remaining expiry)])
-         (map add-index)
-         (sort-by first)
-         (map rest))))
+  (let [locale (subscribe [::i18n-subs/locale])]
+    (let [expiry (second (first (filter #(= :expiry (first %)) data)))]
+      (->> data
+           (filter #(session-keys (first %)))
+           (cons [:time-remaining (time/remaining expiry @locale)])
+           (map add-index)
+           (sort-by first)
+           (map rest)))))
 
 
 (defn session-info

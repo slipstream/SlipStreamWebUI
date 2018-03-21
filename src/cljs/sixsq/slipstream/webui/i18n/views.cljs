@@ -22,6 +22,7 @@
       [ui/Dropdown {:close-on-change true
                     :upward          true
                     :item            true
+                    :icon            nil
                     ;:button          true
                     :trigger         (r/as-element [:span [ui/Icon {:name "globe"}] @locale])}
        (vec (concat [ui/DropdownMenu]

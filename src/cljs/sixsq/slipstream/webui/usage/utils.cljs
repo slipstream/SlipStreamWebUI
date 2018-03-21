@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.webui.usage.utils
   (:require-macros
     [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [<! >! chan timeout]]
-            [cljsjs.moment]
-            [promesa.core :as p]
-            [clojure.string :as str]
-            [sixsq.slipstream.client.api.cimi :as cimi]))
+  (:require
+    [cljs.core.async :refer [<! >! chan timeout]]
+    [promesa.core :as p]
+    [clojure.string :as str]
+    [sixsq.slipstream.client.api.cimi :as cimi]))
 
 (defn fetch-metering [resolve client date-after date-before user connector]
   (go

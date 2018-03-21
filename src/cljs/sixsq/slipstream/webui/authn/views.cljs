@@ -202,12 +202,12 @@
                       :simple          false
                       :icon            nil
                       :close-on-change true
-                      :trigger         (r/as-element [:span [ui/Icon {:name "user"}] @user])}
+                      :trigger         (r/as-element [:span [ui/Icon {:name "user circle"}] @user])}
          [ui/DropdownMenu
           [ui/DropdownItem
            {:key      "profile"
             :text     (@tr [:profile])
-            :icon     "user circle"
+            :icon     "user"
             :on-click #(history-utils/navigate "profile")}]
           [ui/DropdownItem
            {:key      "sign-out"
