@@ -87,7 +87,7 @@
                      :labeled     true
                      :button      true
                      :value       @selected-user
-                     :className   "icon"
+                     :className   "icon multiple"
                      :selection   true
                      :loading     @loading?
                      :onChange    #(dispatch [::usage-events/set-user (-> (js->clj %2 :keywordize-keys true) :value)])
