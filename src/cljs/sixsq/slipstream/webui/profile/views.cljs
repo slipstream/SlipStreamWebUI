@@ -68,13 +68,14 @@
 
 (defn process-session-data
   [data]
-  (let [expiry (second (first (filter #(= :expiry (first %)) data)))]
-    (->> data
-         (filter #(session-keys (first %)))
-         (cons [:time-remaining (time/remaining expiry)])
-         (map add-index)
-         (sort-by first)
-         (map rest))))
+  (let [locale (subscribe [::i18n-subs/locale])]
+    (let [expiry (second (first (filter #(= :expiry (first %)) data)))]
+      (->> data
+           (filter #(session-keys (first %)))
+           (cons [:time-remaining (time/remaining expiry @locale)])
+           (map add-index)
+           (sort-by first)
+           (map rest)))))
 
 
 (defn session-info

@@ -1,4 +1,7 @@
-(ns sixsq.slipstream.webui.i18n.dictionary)
+(ns sixsq.slipstream.webui.i18n.dictionary
+  ;; the moment.js locale must be included for any supported language
+  (:require
+    [cljsjs.moment.locale.fr]))
 
 
 (def dictionary
@@ -31,8 +34,11 @@
         :fields              "fields"
         :filter              "filter"
         :first               "first"
+        :from                "from"
         :id                  "id"
         :last                "last"
+        :last-30-days        "last 30 days"
+        :last-7-days         "last 7 days"
         :less                "less"
         :limit               "limit"
         :loading             "loading"
@@ -63,6 +69,8 @@
         :tags                "tags"
         :terminate           "terminate"
         :timestamp           "timestamp"
+        :to                  "to"
+        :today               "today"
         :type                "type"
         :unauthorized        "unauthorized"
         :update              "update"
@@ -70,7 +78,8 @@
         :url                 "URL"
         :username            "username"
         :vms                 "VMs"
-        :welcome             "welcome"}
+        :welcome             "welcome"
+        :yesterday           "yesterday"}
 
    :fr {:lang                "français"
 
@@ -101,8 +110,11 @@
         :fields              "champs"
         :filter              "filtre"
         :first               "début"
+        :from                "de"
         :id                  "id"
         :last                "fin"
+        :last-30-days        "derniers 30 jours"
+        :last-7-days         "derniers 7 jours"
         :less                "moins"
         :limit               "limite"
         :loading             "chargement en cours"
@@ -133,6 +145,8 @@
         :tags                "mots clés"
         :terminate           "terminer"
         :timestamp           "horodatage"
+        :to                  "à"
+        :today               "aujourd'hui"
         :type                "type"
         :unauthorized        "non autorisé"
         :update              "mettre à jour"
@@ -140,4 +154,5 @@
         :usage               "usage"
         :username            "nom d'utilisateur"
         :vms                 "VMs"
-        :welcome             "bienvenue"}})
+        :welcome             "bienvenue"
+        :yesterday           "hier"}})

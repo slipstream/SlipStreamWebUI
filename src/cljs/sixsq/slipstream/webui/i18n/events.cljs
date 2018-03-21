@@ -6,7 +6,7 @@
 
 (reg-event-db
   ::set-locale
-  (fn [{:keys [:sixsq.slipstream.webui.main.spec/sidebar-open?] :as db} [_ locale]]
+  (fn [db [_ locale]]
     (-> db
         (assoc :sixsq.slipstream.webui.i18n.spec/locale locale)
         (assoc :sixsq.slipstream.webui.i18n.spec/tr (utils/create-tr-fn locale)))))

@@ -1,20 +1,16 @@
 (ns sixsq.slipstream.webui.usage.views
   (:require
     [re-frame.core :refer [subscribe dispatch]]
-    [reagent.core :as r]
-    [cljsjs.moment]
-    [cljsjs.react-date-range]
-    [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.usage.subs :as usage-subs]
-    [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.usage.events :as usage-events]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-
     [clojure.string :as str]
     [cljs.pprint :as pprint]
-    [taoensso.timbre :as log]))
+    [cljsjs.react-date-range]
+    [sixsq.slipstream.webui.authn.subs :as authn-subs]
+    [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.usage.subs :as usage-subs]
+    [sixsq.slipstream.webui.usage.events :as usage-events]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 (defn set-dates [calendar-data]
   (let [date-after (-> (.-startDate calendar-data) .clone)
@@ -22,36 +18,37 @@
     (dispatch [::usage-events/set-date-after-before date-after date-before])))
 
 (defn search-calendar []
-  (let [date-before (subscribe [::usage-subs/date-before])
+  (let [tr (subscribe [::i18n-subs/tr])
+        date-before (subscribe [::usage-subs/date-before])
         date-after (subscribe [::usage-subs/date-after])
-        initial-after-date (-> (js/moment) (.startOf "date") (.add -30 "days"))
-        initial-before-date (-> (js/moment) (.startOf "date") (.add -1 "days"))]
+        initial-after-date (time/days-before 30)
+        initial-before-date (time/days-before 1)]
     (fn []
       [ui/Container
        (js/React.createElement
          js/ReactDateRange.DateRange
          (clj->js {:onInit         set-dates
                    :onChange       set-dates
-                   :ranges         {"Today"        {:startDate (-> (js/moment) (.startOf "date"))
-                                                    :endDate   (-> (js/moment) (.startOf "date"))}
-                                    "Yesterday"    {:startDate (-> (js/moment) (.startOf "date") (.add -1 "days"))
-                                                    :endDate   (-> (js/moment) (.startOf "date") (.add -1 "days"))}
-                                    "Last 7 days"  {:startDate (-> (js/moment) (.startOf "date") (.add -7 "days"))
-                                                    :endDate   (-> (js/moment) (.startOf "date") (.add -1 "days"))}
-                                    "Last 30 days" {:startDate (-> initial-after-date .clone)
-                                                    :endDate   (-> initial-before-date .clone)}}
+                   :ranges         {(@tr [:today])        {:startDate (time/days-before 0)
+                                                           :endDate   (time/days-before 0)}
+                                    (@tr [:yesterday])    {:startDate (time/days-before 1)
+                                                           :endDate   (time/days-before 1)}
+                                    (@tr [:last-7-days])  {:startDate (time/days-before 7)
+                                                           :endDate   (time/days-before 1)}
+                                    (@tr [:last-30-days]) {:startDate (-> initial-after-date .clone)
+                                                           :endDate   (-> initial-before-date .clone)}}
                    :calendars      2
                    :firstDayOfWeek 1
                    :startDate      (-> initial-after-date .clone)
                    :endDate        (-> initial-before-date .clone)
-                   :minDate        (.add (js/moment) -90 "days")
+                   :minDate        (time/days-before 90)
                    :theme          (clj->js {:Calendar         {:width 200}
                                              :PredefinedRanges {:height 10 :width 100 :marginLeft 10 :marginTop 10}})
-                   :maxDate        (js/moment)}))
-       [ui/Label "From" [ui/LabelDetail (or (some-> @date-after
-                                                    (.format "dddd, Do MMMM YYYY")) "-")]]
-       [ui/Label "To" [ui/LabelDetail (or (some-> @date-before
-                                                  (.format "dddd, Do MMMM YYYY")) "-")]]])))
+                   :maxDate        (time/now)}))
+       [ui/Label (@tr [:from]) [ui/LabelDetail (or (some-> @date-after
+                                                           (.format "dddd, Do MMMM YYYY")) "-")]]
+       [ui/Label (@tr [:to]) [ui/LabelDetail (or (some-> @date-before
+                                                         (.format "dddd, Do MMMM YYYY")) "-")]]])))
 
 (defn search-all-clouds-dropdown []
   (let [connectors-list (subscribe [::usage-subs/connectors-list])
