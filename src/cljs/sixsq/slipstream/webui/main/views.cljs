@@ -10,6 +10,7 @@
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.usage.views]
+    [sixsq.slipstream.webui.welcome.views]
 
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.history.events :as history-events]
@@ -23,7 +24,8 @@
     [sixsq.slipstream.webui.panel :as panel]
 
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [reagent.core :as r]))
+    [reagent.core :as r]
+    [sixsq.slipstream.webui.history.utils :as history-utils]))
 
 
 (defn sidebar []
@@ -40,7 +42,7 @@
                          :vertical   true
                          :borderless true
                          :inverted   true}]
-               [^{:key "logo"} [ui/MenuItem
+               [^{:key "logo"} [ui/MenuItem {:on-click #(dispatch [::history-events/navigate "welcome"])}
                                 [ui/Image {:src "/images/cubic-logo.png"}]]]
                (for [[label-kw url icon]
                      (vec
@@ -48,7 +50,6 @@
                          (when @is-user? [[:dashboard "dashboard" "dashboard"]
                                           [:application "application" "sitemap"]
                                           [:deployment "deployment" "cloud"]
-                                          [:profile "profile" "user circle"]
                                           [:usage "usage" "history"]])
                          (when @is-admin?
                            [[:metrics "metrics" "bar chart"]])
@@ -58,8 +59,10 @@
                                :onClick (fn []
                                           (log/info "navigate event" url)
                                           (dispatch [::history-events/navigate url]))}
-                  [ui/Icon {:name icon}] (@tr [label-kw])]
-                 )))))))
+                  [ui/Icon {:name icon}] (@tr [label-kw])])
+               [[ui/MenuItem]
+                [i18n-views/locale-dropdown]]
+               ))))))
 
 
 (defn crumb
@@ -77,15 +80,13 @@
                              (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))))
 
 (defn footer []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    (fn []
-      [:footer.webui-footer
-       [:div.webui-footer-left
-        [:span#release-version (str "SlipStream v")]]
-       [:div.webui-footer-center
-        [:span " © 2018, SixSq Sàrl"]]
-       [:div.webui-footer-right
-        [:span " Open source under Apache 2.0 License"]]])))
+  [:footer.webui-footer
+   [:div.webui-footer-left
+    [:span#release-version (str "SlipStream v")]]
+   [:div.webui-footer-center
+    [:span " © 2018, SixSq Sàrl"]]
+   [:div.webui-footer-right
+    [:span " Open source under Apache 2.0 License"]]])
 
 
 (defn contents
@@ -101,16 +102,15 @@
         message (subscribe [::main-subs/message])]
     (fn []
       [:div
-       [ui/Menu {:className "webui-header"
+       [ui/Menu {:className  "webui-header"
                  :borderless true}
-        [ui/MenuItem {:link    true
-                      :onClick (fn [] (dispatch [::main-events/toggle-sidebar]))}
-         [ui/Icon {:name (if @show? "caret left" "bars")}]]
+        [ui/MenuItem {:link     true
+                      :on-click #(dispatch [::main-events/toggle-sidebar])}
+         [ui/Icon {:name (if @show? "bars" "bars")}]]       ;; FIXME: Find a better close icon.  Can't look like "back" button.
         [ui/MenuItem [breadcrumbs]]
 
         [ui/MenuMenu {:position "right"}
          [ui/MenuItem
-          [i18n-views/locale-dropdown]
           [authn-views/authn-menu]]]]
 
        (when @message
@@ -119,18 +119,16 @@
                                           :error "exclamation"
                                           "info")
                        (:type @message) true
-                       :onDismiss       #(dispatch [::main-events/clear-message])
+                       :on-dismiss      #(dispatch [::main-events/clear-message])
                        :header          (:header @message)
                        :content         (:content @message)}]])
        ])))
 
 
 (defn app []
-  (let [session (subscribe [::authn-subs/session])]
-    (fn []
-      [:div.webui-wrapper
-       [sidebar]
-       [ui/Container {:className "webui-main" :fluid true}
-        [header]
-        [contents]
-        [footer]]])))
+  [:div.webui-wrapper
+   [sidebar]
+   [ui/Container {:className "webui-main" :fluid true}
+    [header]
+    [contents]
+    [footer]]])

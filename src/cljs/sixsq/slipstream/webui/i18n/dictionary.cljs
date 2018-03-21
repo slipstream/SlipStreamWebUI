@@ -69,7 +69,8 @@
         :usage               "usage"
         :url                 "URL"
         :username            "username"
-        :vms                 "VMs"}
+        :vms                 "VMs"
+        :welcome             "welcome"}
 
    :fr {:lang                "français"
 
@@ -138,4 +139,5 @@
         :url                 "URL"
         :usage               "usage"
         :username            "nom d'utilisateur"
-        :vms                 "VMs"}})
+        :vms                 "VMs"
+        :welcome             "bienvenue"}})
