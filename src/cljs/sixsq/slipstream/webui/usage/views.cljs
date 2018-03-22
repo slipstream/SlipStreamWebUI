@@ -19,32 +19,34 @@
 
 (defn search-calendar []
   (let [tr (subscribe [::i18n-subs/tr])
+        filter-visible? (subscribe [::usage-subs/filter-visible?])
         date-before (subscribe [::usage-subs/date-before])
         date-after (subscribe [::usage-subs/date-after])
         initial-after-date (time/days-before 30)
         initial-before-date (time/days-before 1)]
     (fn []
       [ui/Container
-       (js/React.createElement
-         js/ReactDateRange.DateRange
-         (clj->js {:onInit         set-dates
-                   :onChange       set-dates
-                   :ranges         {(@tr [:today])        {:startDate (time/days-before 0)
-                                                           :endDate   (time/days-before 0)}
-                                    (@tr [:yesterday])    {:startDate (time/days-before 1)
-                                                           :endDate   (time/days-before 1)}
-                                    (@tr [:last-7-days])  {:startDate (time/days-before 7)
-                                                           :endDate   (time/days-before 1)}
-                                    (@tr [:last-30-days]) {:startDate (-> initial-after-date .clone)
-                                                           :endDate   (-> initial-before-date .clone)}}
-                   :calendars      2
-                   :firstDayOfWeek 1
-                   :startDate      (-> initial-after-date .clone)
-                   :endDate        (-> initial-before-date .clone)
-                   :minDate        (time/days-before 90)
-                   :theme          (clj->js {:Calendar         {:width 200}
-                                             :PredefinedRanges {:height 10 :width 100 :marginLeft 10 :marginTop 10}})
-                   :maxDate        (time/now)}))
+       (when @filter-visible?
+         (js/React.createElement
+           js/ReactDateRange.DateRange
+           (clj->js {:onInit         set-dates
+                     :onChange       set-dates
+                     :ranges         {(@tr [:today])        {:startDate (time/days-before 0)
+                                                             :endDate   (time/days-before 0)}
+                                      (@tr [:yesterday])    {:startDate (time/days-before 1)
+                                                             :endDate   (time/days-before 1)}
+                                      (@tr [:last-7-days])  {:startDate (time/days-before 7)
+                                                             :endDate   (time/days-before 1)}
+                                      (@tr [:last-30-days]) {:startDate (-> initial-after-date .clone)
+                                                             :endDate   (-> initial-before-date .clone)}}
+                     :calendars      2
+                     :firstDayOfWeek 1
+                     :startDate      (-> initial-after-date .clone)
+                     :endDate        (-> initial-before-date .clone)
+                     :minDate        (time/days-before 90)
+                     :theme          (clj->js {:Calendar         {:width 200}
+                                               :PredefinedRanges {:height 10 :width 100 :marginLeft 10 :marginTop 10}})
+                     :maxDate        (time/now)})))
        [ui/Label (@tr [:from]) [ui/LabelDetail (or (some-> @date-after
                                                            (.format "dddd, Do MMMM YYYY")) "-")]]
        [ui/Label (@tr [:to]) [ui/LabelDetail (or (some-> @date-before
@@ -57,7 +59,7 @@
     (fn []
       [ui/Menu {:secondary true :size "small"}
        [ui/Dropdown {:fluid       true
-                     :icon        "filter"
+                     :icon        "cloud"
                      :className   "icon"
                      :labeled     true
                      :button      true
@@ -100,28 +102,48 @@
 
 (defn search-header []
   (let [is-admin? (subscribe [::authn-subs/is-admin?])
-        loading? (subscribe [::usage-subs/loading-users-list?])]
+        loading? (subscribe [::usage-subs/loading-users-list?])
+        filter-visible? (subscribe [::usage-subs/filter-visible?])]
     (fn []
-      [:div
-       [ui/Segment {:size "mini"}
-        [ui/Grid {:stackable true :columns 2}
-         [ui/GridColumn {:width 10} [search-calendar]]
-         [ui/GridColumn {:width 6 :stretched true}
+      [ui/Grid {:stackable true :columns 2}
+       [ui/GridColumn {:width 10} [search-calendar]]
+       [ui/GridColumn {:width 6 :stretched true}
+        (when @filter-visible?
           [ui/Segment {:basic true}
            [search-all-clouds-dropdown]
            (when @is-admin?
              (when @loading?
                (dispatch [::usage-events/get-users-list]))
-             [search-users-dropdown])]]]]
-       ])))
+             [search-users-dropdown])])]])))
+
+
+(defn filter-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        filter-visible? (subscribe [::usage-subs/filter-visible?])]
+    (fn []
+      [ui/MenuMenu {:position "right"}
+       [ui/MenuItem {:name     "filter"
+                     :on-click #(dispatch [::usage-events/toggle-filter])}
+        [ui/IconGroup
+         [ui/Icon {:name "filter"}]
+         [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
+                   :corner true}]]
+        (str "\u00a0" (@tr [:filter]))]])))
+
 
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Menu
-     [ui/MenuItem {:name     "search"
-                   :on-click #(dispatch [::usage-events/fetch-meterings])}
-      [ui/Icon {:name "search"}]
-      (@tr [:search])]]))
+    [:div
+     [ui/Menu {:attached "top"}
+      [ui/MenuItem {:name     "search"
+                    :on-click #(dispatch [::usage-events/fetch-meterings])}
+       [ui/Icon {:name "search"}]
+       (@tr [:search])]
+      [filter-button]]
+     [ui/Segment {:attached "bottom"}
+      [search-header]]]))
+
 
 (defn format [fmt-str & v]
   (apply pprint/cl-format nil fmt-str v))
@@ -203,8 +225,8 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [ui/Container {:fluid true}
-       [search-header]
        [control-bar]
+       #_[search-header]
        [search-result]])))
 
 (defmethod panel/render :usage

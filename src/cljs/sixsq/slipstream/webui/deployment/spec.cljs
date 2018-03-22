@@ -6,6 +6,8 @@
 
 (s/def ::loading? boolean?)
 
+(s/def ::filter-visible? boolean?)
+
 (s/def ::offset string?)
 (s/def ::limit string?)
 (s/def ::cloud string?)
@@ -17,9 +19,10 @@
 
 (s/def ::db (s/keys :req [::loading? ::query-params ::deployments]))
 
-(def defaults {::loading?     false
-               ::query-params {:offset     ""
-                               :limit      ""
-                               :cloud      ""
-                               :activeOnly 1}
-               ::deployments  nil})
+(def defaults {::loading?        false
+               ::filter-visible? false
+               ::query-params    {:offset     ""
+                                  :limit      ""
+                                  :cloud      ""
+                                  :activeOnly 1}
+               ::deployments     nil})

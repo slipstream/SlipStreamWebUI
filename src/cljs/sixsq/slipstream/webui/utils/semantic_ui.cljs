@@ -54,6 +54,7 @@
 (def GridRow (adapt-component "GridRow"))
 
 (def Icon (adapt-component "Icon"))
+(def IconGroup (adapt-component "IconGroup"))
 
 (def Image (adapt-component "Image"))
 

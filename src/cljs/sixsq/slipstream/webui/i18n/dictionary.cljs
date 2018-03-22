@@ -7,7 +7,7 @@
 (def dictionary
   {:en {:lang                "english"
 
-        :active?             "active?"
+        :active?             "active only?"
         :add                 "add"
         :aggregation         "aggregation"
         :application         "application"
@@ -39,6 +39,7 @@
         :last                "last"
         :last-30-days        "last 30 days"
         :last-7-days         "last 7 days"
+        :legal               "legal information"
         :less                "less"
         :limit               "limit"
         :loading             "loading"
@@ -84,7 +85,7 @@
    :fr {:lang                "français"
 
         :add                 "ajouter"
-        :active?             "active?"
+        :active?             "uniquement active ?"
         :aggregation         "aggréger"
         :application         "application"
         :cancel              "annuler"
@@ -115,6 +116,7 @@
         :last                "fin"
         :last-30-days        "derniers 30 jours"
         :last-7-days         "derniers 7 jours"
+        :legal               "mentions légales"
         :less                "moins"
         :limit               "limite"
         :loading             "chargement en cours"

@@ -64,3 +64,9 @@
     (::cimi-spec/loading? db)))
 
 
+(reg-sub
+  ::filter-visible?
+  (fn [db]
+    (::cimi-spec/filter-visible? db)))
+
+

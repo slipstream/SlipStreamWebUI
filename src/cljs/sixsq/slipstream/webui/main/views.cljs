@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.metrics.views]
-    [sixsq.slipstream.webui.profile.views]
+    [sixsq.slipstream.webui.welcome.views]
+    [sixsq.slipstream.webui.legal.views]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.usage.views]
     [sixsq.slipstream.webui.welcome.views]
@@ -79,14 +80,17 @@
                              (map crumb (range))
                              (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))))
 
-(defn footer []
-  [:footer.webui-footer
-   [:div.webui-footer-left
-    [:span#release-version (str "SlipStream v")]]
-   [:div.webui-footer-center
-    [:span " © 2018, SixSq Sàrl"]]
-   [:div.webui-footer-right
-    [:span " Open source under Apache 2.0 License"]]])
+(defn footer
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    [:footer.webui-footer
+     #_[:div.webui-footer-left
+      [:span#release-version (str "SlipStream v")]]
+     [:div.webui-footer-center
+      [:span
+       "© 2018, SixSq Sàrl ("
+       [:a {:on-click #(dispatch [::history-events/navigate "legal"])} (@tr [:legal])]
+       ")"]]]))
 
 
 (defn contents

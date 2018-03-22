@@ -142,8 +142,30 @@
               [results-table @selected-fields entries]]))]))))
 
 
+(defn cloud-entry-point-title
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        cep (subscribe [::cimi-subs/cloud-entry-point])
+        selected-id (subscribe [::cimi-subs/collection-name])]
+    (fn []
+      (let [options (->> @cep
+                         :collection-href
+                         vals
+                         sort
+                         (map (fn [k] {:value k :text k}))
+                         vec)
+            callback #(dispatch [::history-events/navigate (str "cimi/" %)])]
+        [ui/Dropdown
+         {:value       @selected-id
+          :placeholder (@tr [:resource-type])
+          :scrolling   true
+          :options     options
+          :on-change   (cutil/callback :value callback)}]))))
+
+
 (defn search-header []
   (let [tr (subscribe [::i18n-subs/tr])
+        filter-visible? (subscribe [::cimi-subs/filter-visible?])
         query-params (subscribe [::cimi-subs/query-params])
         first-value (reagent/atom "1")
         last-value (reagent/atom "20")
@@ -161,65 +183,70 @@
         (reset! select-value (str (or $select "")))
         (reset! aggregation-value (str (or $aggregation ""))))
       [ui/Form
-       [ui/FormGroup {:widths "equal"}
-        [ui/FormField
-         [ui/Input {:type      "number"
-                    :min       0
-                    :label     (@tr [:first])
-                    :value     @first-value
-                    :on-change (cutil/callback :value
-                                               (fn [v]
-                                                 (reset! first-value v)
-                                                 (dispatch [::cimi-events/set-first v])))}]]
+       [ui/FormField
+        [cloud-entry-point-title]]
+       (when @filter-visible?
+         [ui/FormGroup {:widths "equal"}
+          [ui/FormField
+           [ui/Input {:type      "number"
+                      :min       0
+                      :label     (@tr [:first])
+                      :value     @first-value
+                      :on-change (cutil/callback :value
+                                                 (fn [v]
+                                                   (reset! first-value v)
+                                                   (dispatch [::cimi-events/set-first v])))}]]
 
-        [ui/FormField
-         [ui/Input {:type      "number"
-                    :min       0
-                    :label     (@tr [:last])
-                    :value     @last-value
-                    :on-change (cutil/callback :value
-                                               (fn [v]
-                                                 (reset! last-value v)
-                                                 (dispatch [::cimi-events/set-last v])))}]]
+          [ui/FormField
+           [ui/Input {:type      "number"
+                      :min       0
+                      :label     (@tr [:last])
+                      :value     @last-value
+                      :on-change (cutil/callback :value
+                                                 (fn [v]
+                                                   (reset! last-value v)
+                                                   (dispatch [::cimi-events/set-last v])))}]]
 
-        [ui/FormField
-         [ui/Input {:type      "text"
-                    :label     (@tr [:select])
-                    :value     @select-value
-                    :on-change (cutil/callback :value
-                                               (fn [v]
-                                                 (reset! select-value v)
-                                                 (dispatch [::cimi-events/set-select v])))}]]]
+          [ui/FormField
+           [ui/Input {:type      "text"
+                      :label     (@tr [:select])
+                      :value     @select-value
+                      :on-change (cutil/callback :value
+                                                 (fn [v]
+                                                   (reset! select-value v)
+                                                   (dispatch [::cimi-events/set-select v])))}]]])
 
-       [ui/FormGroup {:widths "equal"}
-        [ui/FormField
-         [ui/Input {:type      "text"
-                    :label     (@tr [:order])
-                    :value     @orderby-value
-                    :on-change (cutil/callback :value
-                                               (fn [v]
-                                                 (reset! orderby-value v)
-                                                 (dispatch [::cimi-events/set-orderby v])))}]]
+       (when @filter-visible?
+         [ui/FormGroup {:widths "equal"}
+          [ui/FormField
+           [ui/Input {:type      "text"
+                      :label     (@tr [:order])
+                      :value     @orderby-value
+                      :on-change (cutil/callback :value
+                                                 (fn [v]
+                                                   (reset! orderby-value v)
+                                                   (dispatch [::cimi-events/set-orderby v])))}]]
 
 
-        [ui/FormField
-         [ui/Input {:type      "text"
-                    :label     (@tr [:aggregation])
-                    :value     @aggregation-value
-                    :on-change (cutil/callback :value
-                                               (fn [v]
-                                                 (reset! aggregation-value v)
-                                                 (dispatch [::cimi-events/set-aggregation v])))}]]]
+          [ui/FormField
+           [ui/Input {:type      "text"
+                      :label     (@tr [:aggregation])
+                      :value     @aggregation-value
+                      :on-change (cutil/callback :value
+                                                 (fn [v]
+                                                   (reset! aggregation-value v)
+                                                   (dispatch [::cimi-events/set-aggregation v])))}]]])
 
-       [ui/FormGroup {:widths "equal"}
-        [ui/FormField
-         [ui/Input {:type      "text"
-                    :label     (@tr [:filter])
-                    :value     @filter-value
-                    :on-change (cutil/callback :value
-                                               (fn [v]
-                                                 (reset! filter-value v)
-                                                 (dispatch [::cimi-events/set-filter v])))}]]]])))
+       (when @filter-visible?
+         [ui/FormGroup {:widths "equal"}
+          [ui/FormField
+           [ui/Input {:type      "text"
+                      :label     (@tr [:filter])
+                      :value     @filter-value
+                      :on-change (cutil/callback :value
+                                                 (fn [v]
+                                                   (reset! filter-value v)
+                                                   (dispatch [::cimi-events/set-filter v])))}]]])])))
 
 
 (defn format-field-item [selections-atom item]
@@ -271,29 +298,6 @@
                        (reset! show? false)
                        (dispatch [::cimi-events/set-selected-fields @selections]))}
           (@tr [:update])]]]])))
-
-
-(defn cloud-entry-point-title
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        cep (subscribe [::cimi-subs/cloud-entry-point])
-        selected-id (subscribe [::cimi-subs/collection-name])]
-    (fn []
-      (let [options (->> @cep
-                         :collection-href
-                         vals
-                         sort
-                         (map (fn [k] {:value k :text k}))
-                         vec)
-            callback #(dispatch [::history-events/navigate (str "cimi/" %)])]
-        [ui/Dropdown
-         {:as          :h1
-          :value       @selected-id
-          :placeholder (@tr [:resource-type])
-          :inline      true
-          :scrolling   true
-          :options     options
-          :on-change   (cutil/callback :value callback)}]))))
 
 
 (defn resource-add-form
@@ -386,7 +390,22 @@
          (@tr [:add])]))))
 
 
-(defn results-bar []
+(defn filter-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        filter-visible? (subscribe [::cimi-subs/filter-visible?])]
+    (fn []
+      [ui/MenuMenu {:position "right"}
+       [ui/MenuItem {:name     "filter"
+                     :on-click #(dispatch [::cimi-events/toggle-filter])}
+        [ui/IconGroup
+         [ui/Icon {:name "filter"}]
+         [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
+                   :corner true}]]
+        (str "\u00a0" (@tr [:filter]))]])))
+
+
+(defn menu-bar []
   (let [tr (subscribe [::i18n-subs/tr])
         resources (subscribe [::cimi-subs/collection])]
     (fn []
@@ -394,19 +413,16 @@
         (dispatch [::main-events/set-message {:header  (@tr [:error])
                                               :message (str @resources)
                                               :error   true}]))
-      [ui/Menu
-       [search-button]
-       [select-fields]
-       (when (can-add? (-> @resources :operations))
-         [create-button])])))
-
-
-(defn control-bar
-  []
-  [cc/collapsible-card
-   [cloud-entry-point-title]
-   [resource-add-form]
-   [search-header]])
+      [:div
+       [resource-add-form]
+       [ui/Menu {:attached "top"}
+        [search-button]
+        [select-fields]
+        (when (can-add? (-> @resources :operations))
+          [create-button])
+        [filter-button]]
+       [ui/Segment {:attached "bottom"}
+        [search-header]]])))
 
 
 (defn cimi-resource
@@ -420,14 +436,11 @@
           (dispatch [::cimi-events/set-query-params @query-params])))
       (let [n (count @path)
             children (case n
-                       1 [[control-bar]
-                          [results-bar]]
-                       2 [[control-bar]
-                          [results-bar]
+                       1 [[menu-bar]]
+                       2 [[menu-bar]
                           [results-display]]
                        3 [[cimi-detail-views/cimi-detail]]
-                       [[control-bar]
-                        [results-bar]])]
+                       [[menu-bar]])]
         (vec (concat [:div] children))))))
 
 

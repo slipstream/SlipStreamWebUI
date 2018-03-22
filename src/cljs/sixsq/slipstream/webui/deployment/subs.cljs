@@ -11,6 +11,12 @@
 
 
 (reg-sub
+  ::filter-visible?
+  (fn [db]
+    (::deployment-spec/filter-visible? db)))
+
+
+(reg-sub
   ::query-params
   (fn [db]
     (::deployment-spec/query-params db)))

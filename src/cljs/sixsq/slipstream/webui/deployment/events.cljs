@@ -5,7 +5,6 @@
 
     [sixsq.slipstream.webui.utils.general :as general-utils]
 
-    [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.deployment.spec :as deployment-spec]
     [sixsq.slipstream.webui.deployment.effects :as deployment-fx]))
@@ -16,6 +15,12 @@
   (fn [db [_ deployments]]
     (assoc db ::deployment-spec/loading? false
               ::deployment-spec/deployments deployments)))
+
+
+(reg-event-db
+  ::toggle-filter
+  (fn [{:keys [::deployment-spec/filter-visible?] :as db} _]
+    (assoc db ::deployment-spec/filter-visible? (not filter-visible?))))
 
 
 (reg-event-fx
