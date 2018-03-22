@@ -1,32 +1,27 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
     [re-frame.core :refer [subscribe dispatch]]
+    [taoensso.timbre :as log]
 
     ;; all panel views must be included to define panel rendering method
     [sixsq.slipstream.webui.application.views]
+    [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.dashboard.views]
-    [sixsq.slipstream.webui.metrics.views]
-    [sixsq.slipstream.webui.welcome.views]
     [sixsq.slipstream.webui.legal.views]
-    [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.usage.views]
+    [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.welcome.views]
 
+    [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.i18n.views :as i18n-views]
-    [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
-
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
-
-    [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [reagent.core :as r]
-    [sixsq.slipstream.webui.history.utils :as history-utils]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn sidebar []
@@ -85,7 +80,7 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     [:footer.webui-footer
      #_[:div.webui-footer-left
-      [:span#release-version (str "SlipStream v")]]
+        [:span#release-version (str "SlipStream v")]]
      [:div.webui-footer-center
       [:span
        "© 2018, SixSq Sàrl ("
@@ -117,16 +112,19 @@
          [ui/MenuItem
           [authn-views/authn-menu]]]]
 
-       (when @message
-         [ui/Container
-          [ui/Message {:icon            (case (:type @message)
-                                          :error "exclamation"
-                                          "info")
-                       (:type @message) true
-                       :on-dismiss      #(dispatch [::main-events/clear-message])
-                       :header          (:header @message)
-                       :content         (:content @message)}]])
-       ])))
+       (when-let [{:keys [header content type]} @message]
+         [ui/Modal
+          {:closeIcon true
+           :open      (boolean @message)
+           :on-close  #(dispatch [::main-events/clear-message])}
+          [ui/ModalHeader {:class-name (if (= :error type) "webui-error" "webui-info")}
+           [ui/Icon {:size "big"
+                     :name  (if (= :error type) "exclamation" "info")}]
+           header]
+          (when content
+            [ui/ModalContent
+             {:scrolling true}
+             [:pre content]])])])))
 
 
 (defn app []

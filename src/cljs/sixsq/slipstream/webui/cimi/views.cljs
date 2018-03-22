@@ -42,10 +42,23 @@
       (get-in m ks))))
 
 
+(defn remove-column-fn
+  [label]
+  (fn []
+    (dispatch [::cimi-events/remove-field label])))
+
+
+(defn table-header-cell
+  [label]
+  ^{:key label} [ui/TableHeaderCell
+                 [:a {:on-click (remove-column-fn label)} [ui/Icon {:name "remove circle"}]]
+                 "\u00a0" label])
+
+
 (defn results-table-header [selected-fields]
   [ui/TableHeader
    (vec (concat [ui/TableRow]
-                (vec (map (fn [label] ^{:key label} [ui/TableHeaderCell label]) selected-fields))))])
+                (mapv table-header-cell selected-fields)))])
 
 
 (defn results-table-row-fn [selected-fields]
@@ -110,6 +123,7 @@
 
 (def tuple-fn (juxt (comp :value second)
                     (comp name first)))
+
 
 (defn aggregations-table
   []
@@ -276,14 +290,15 @@
         show? (reagent/atom false)]
     (fn []
       [ui/MenuItem {:name     "select-fields"
-                    :on-click #(reset! show? true)}
+                    :on-click (fn []
+                                (reset! selections (set @selected-fields))
+                                (reset! show? true))}
        [ui/Icon {:name "columns"}]
        (@tr [:columns])
        [ui/Modal
         {:closeIcon true
          :open      @show?
-         :on-close  #(reset! show? false)
-         :on-open   #(reset! selections (set @selected-fields))}
+         :on-close  #(reset! show? false)}
         [ui/ModalHeader (@tr [:fields])]
         [ui/ModalContent
          {:scrolling true}
