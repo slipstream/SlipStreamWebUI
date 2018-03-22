@@ -174,3 +174,9 @@
   (fn [db [_ description]]
     (let [description-map {(:id description) description}]
       (update db ::cimi-spec/descriptions-vector merge description))))
+
+
+(reg-event-db
+  ::toggle-filter
+  (fn [{:keys [::cimi-spec/filter-visible?] :as db} _]
+    (assoc db ::cimi-spec/filter-visible? (not filter-visible?))))

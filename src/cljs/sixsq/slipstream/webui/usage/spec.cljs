@@ -6,6 +6,8 @@
 
 (s/def ::loading? boolean?)
 
+(s/def ::filter-visible? boolean?)
+
 (s/def ::results any?)
 
 (s/def ::loading-connectors-list? boolean?)
@@ -39,6 +41,7 @@
                           ::is-admin?]))
 
 (def defaults {::loading?                 false
+               ::filter-visible?          false
                ::results                  nil
                ::loading-connectors-list? true
                ::loading-users-list?      true

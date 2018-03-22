@@ -5,9 +5,7 @@
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.usage.spec :as usage-spec]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.usage.effects :as usage-fx]
-    [clojure.string :as str]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.usage.effects :as usage-fx]))
 
 (reg-event-db
   ::set-connectors-list
@@ -96,4 +94,11 @@
                                          connectors-list
                                          selected-connectors) "all-clouds")
                                  #(dispatch [::set-results %])]}))
+
+
+(reg-event-db
+  ::toggle-filter
+  (fn [{:keys [::usage-spec/filter-visible?] :as db} _]
+    (assoc db ::usage-spec/filter-visible? (not filter-visible?))))
+
 

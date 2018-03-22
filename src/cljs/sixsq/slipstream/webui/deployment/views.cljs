@@ -40,7 +40,7 @@
         (reset! cloud-value cloud)
         (reset! activeOnly-value (-> activeOnly js/parseInt zero? not)))
       [ui/Form
-       [ui/FormGroup {:widths "equal"}
+       [ui/FormGroup
         [ui/FormField
          [ui/Input {:type      "number"
                     :min       0
@@ -69,32 +69,45 @@
                     :on-change (ui-utils/callback :value
                                                   (fn [v]
                                                     (reset! cloud-value v)
-                                                    (dispatch [::deployment-events/set-query-params {:cloud v}])))}]]]
-
-
-       [ui/FormGroup
+                                                    (dispatch [::deployment-events/set-query-params {:cloud v}])))}]]
         [ui/FormField
-         [ui/Checkbox
-          {:checked   @activeOnly-value
-           :label     (@tr [:active?])
-           :on-change (ui-utils/callback :checked
-                                         (fn [v]
-                                           (let [flag (bool->int v)]
-                                             (reset! activeOnly-value flag)
-                                             (dispatch [::deployment-events/set-query-params {:activeOnly flag}]))))}]]]])))
+         [ui/Checkbox {:checked   @activeOnly-value
+                       :slider    true
+                       :fitted    true
+                       :label     (@tr [:active?])
+                       :on-change (ui-utils/callback :checked
+                                                     (fn [v]
+                                                       (let [flag (bool->int v)]
+                                                         (reset! activeOnly-value flag)
+                                                         (dispatch [::deployment-events/set-query-params {:activeOnly flag}]))))}]]]])))
 
 
-(defn search-button
+(defn menu-bar
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::deployment-subs/loading?])]
+        loading? (subscribe [::deployment-subs/loading?])
+        filter-visible? (subscribe [::deployment-subs/filter-visible?])]
     (fn []
-      [ui/Menu
-       [ui/MenuItem {:name     "refresh"
-                     :on-click #(dispatch [::deployment-events/get-deployments])}
-        [ui/Icon {:name    "refresh"
-                  :loading @loading?}]
-        (@tr [:refresh])]])))
+      [:div
+       [ui/Menu {:attached (if @filter-visible? "top" false)}
+        [ui/MenuItem {:name     "refresh"
+                      :on-click #(dispatch [::deployment-events/get-deployments])}
+         [ui/Icon {:name    "refresh"
+                   :loading @loading?}]
+         (@tr [:refresh])]
+        [ui/MenuMenu {:position "right"}
+         [ui/MenuItem {:name     "filter"
+                       :on-click #(dispatch [::deployment-events/toggle-filter])}
+          [ui/IconGroup
+           [ui/Icon {:name "filter"}]
+           [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
+                     :corner true}]]
+          (str "\u00a0" (@tr [:filter]))]]]
+
+       (when @filter-visible?
+         [ui/Segment {:attached "bottom"}
+          [runs-control]])])))
+
 
 (defn service-url
   [url status]
@@ -119,32 +132,6 @@
   (let [tag (.substring uuid 0 8)
         on-click #(dispatch [::history-events/navigate (str "deployment/" uuid)])]
     [:a {:style {:cursor "pointer"} :on-click on-click} tag]))
-
-#_(defn abort-popup [message]
-    (fn []
-      [:div
-       (if-not (str/blank? message)
-         [row-button
-          :md-icon-name "zmdi zmdi-notifications-active"
-          :mouse-over-row? true
-          :tooltip message
-          :on-click #()]
-         [label :label "\u00a0"])]))
-
-
-#_(defn deployment-icon [type]
-    (let [icon (case type
-                 "Orchestration" "zmdi-apps"
-                 "Run" "zmdi-widgets"
-                 "zmdi-minus")]
-      [row-button
-       :md-icon-name (str "zmdi " icon)
-       :mouse-over-row? true
-       :on-click #()]))
-
-
-(def column-kws [;:type :error
-                 :url :id :module :vms :status :username :start :cloud :tags])
 
 
 (defn row-fn [entry]
@@ -207,10 +194,7 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Container {:fluid true}
-     [cc/collapsible-card
-      " "
-      [runs-control]]
-     [search-button]
+     [menu-bar]
      [cc/collapsible-card
       (@tr [:results])
       [runs-display]]]))

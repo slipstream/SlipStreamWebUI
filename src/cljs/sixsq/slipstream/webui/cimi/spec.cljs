@@ -27,6 +27,8 @@
 
 (s/def ::loading? boolean?)
 
+(s/def ::filter-visible? boolean?)
+
 (s/def ::aggregations any?)
 
 (s/def ::collection any?)
@@ -60,6 +62,7 @@
                                       :$select      nil
                                       :$aggregation nil}
                ::loading?            false
+               ::filter-visible?     false
                ::aggregations        nil
                ::collection          nil
                ::collection-name     nil
