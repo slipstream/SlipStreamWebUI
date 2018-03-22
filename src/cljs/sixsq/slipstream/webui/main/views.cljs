@@ -118,8 +118,7 @@
            :open      (boolean @message)
            :on-close  #(dispatch [::main-events/clear-message])}
           [ui/ModalHeader {:class-name (if (= :error type) "webui-error" "webui-info")}
-           [ui/Icon {:float "left"
-                     :size "large"
+           [ui/Icon {:size "big"
                      :name  (if (= :error type) "exclamation" "info")}]
            header]
           (when content
