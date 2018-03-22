@@ -160,13 +160,15 @@
   [ui/Dropdown {:inline        true
                 :default-value :execute
                 :on-change     (cutil/callback :value #(reset! state %))
-                :options       [{:key "pre-install", :value "pre-install", :text "pre-install"}
-                                {:key "install", :value "install", :text "install"}
-                                {:key "post-install", :value "post-install", :text "post-install"}
+                :options       [{:key "prerecipe", :value "prerecipe", :text "pre-install"}
+                                {:key "packages", :value "packages", :text "packages"}
+                                {:key "recipe", :value "recipe", :text "post-install"}
                                 {:key "execute", :value "execute", :text "deployment"}
                                 {:key "report", :value "report", :text "report"}
                                 {:key "onvmadd", :value "onvmadd", :text "on VM add"}
-                                {:key "onvmremove", :value "onvmremove", :text "on VM remove"}]}])
+                                {:key "onvmremove", :value "onvmremove", :text "on VM remove"}
+                                {:key "prescale", :value "prescale", :text "pre-scale"}
+                                {:key "postscale", :value "postscale", :text "post-scale"}]}])
 
 
 (defn format-targets

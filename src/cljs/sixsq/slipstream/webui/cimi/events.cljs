@@ -85,6 +85,16 @@
     (assoc db ::cimi-spec/selected-fields (sort (vec fields)))))
 
 
+(reg-event-db
+  ::remove-field
+  (fn [{:keys [::cimi-spec/selected-fields] :as db} [_ field]]
+    (->> selected-fields
+         (remove #{field})
+         vec
+         sort
+         (assoc db ::cimi-spec/selected-fields))))
+
+
 (reg-event-fx
   ::get-results
   (fn [{{:keys [::cimi-spec/collection-name

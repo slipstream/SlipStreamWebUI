@@ -137,3 +137,11 @@
     height: 30px;
     border-radius: unset !important;
 }
+
+.webui-error {
+    background-color: OrangeRed !important;
+}
+
+.webui-info {
+    background-color: Aquamarine !important;
+}
