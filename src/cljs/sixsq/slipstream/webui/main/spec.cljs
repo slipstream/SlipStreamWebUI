@@ -11,15 +11,10 @@
 
 (s/def ::nav-query-params any?)
 
-(s/def :message/header string?)
-
-(s/def :message/content string?)
-
-(s/def :message/type keyword?)
-
-(s/def ::message (s/nilable (only-keys :req-un [:message/header :message/content :message/type])))
-
-(s/def ::db (s/keys :req [::sidebar-open? ::nav-path ::nav-query-params]))
+(s/def ::db (s/keys :req [::sidebar-open?
+                          ::visible?
+                          ::nav-path
+                          ::nav-query-params]))
 
 (def defaults {::sidebar-open?    true
                ::visible?         true

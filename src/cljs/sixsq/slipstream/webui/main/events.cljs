@@ -11,7 +11,7 @@
 (reg-event-db
   ::toggle-sidebar
   (fn [{:keys [::main-spec/sidebar-open?] :as db} _]
-    (update db ::main-spec/sidebar-open? not)))
+    (update db ::main-spec/sidebar-open? not sidebar-open?)))
 
 (reg-event-fx
   ::visible
@@ -44,13 +44,3 @@
   ::trim-breadcrumb
   (fn [{{:keys [::main-spec/nav-path] :as db} :db} [_ index]]
     {::history-fx/navigate [(str/join "/" (take (inc index) nav-path))]}))
-
-(reg-event-db
-  ::set-message
-  (fn [db [_ message]]
-    (assoc db ::main-spec/message message)))
-
-(reg-event-db
-  ::clear-message
-  (fn [db [_ message]]
-    (assoc db ::main-spec/message nil)))

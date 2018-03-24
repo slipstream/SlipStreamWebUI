@@ -12,5 +12,6 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Container {:textAlign "center"}
      [ui/Header {:as "h1"}
-      (@tr [:welcome])]]))
-
+      (@tr [:welcome])]
+     [ui/Header {:as "h5"}
+      [:span#release-version (str "SlipStream v")]]]))
