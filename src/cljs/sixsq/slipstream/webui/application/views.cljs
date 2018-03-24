@@ -60,8 +60,7 @@
     (fn [state-atom]
       (let [label (if @more? (@tr [:less]) (@tr [:more]))
             icon-name (if @more? "caret down" "caret right")]
-        [:a {:style {:cursor "pointer"}
-             :on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
+        [:a {:on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
 
 
 (defn format-meta
@@ -89,7 +88,7 @@
 
 
 (defn error-text [tr error]
-  (if-let [{:keys [status body reason]} (-> error ex-data)]
+  (if-let [{:keys [:status :body :reason]} (-> error ex-data)]
     (str (or (@tr [reason]) (name reason)) " (" status ")")
     (str error)))
 

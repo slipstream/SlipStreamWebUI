@@ -3,7 +3,7 @@
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail-spec]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.client.impl.utils.json :as json]
@@ -22,9 +22,9 @@
                                    ::cimi-detail-spec/resource-id resource-id)
        ::cimi-api-fx/get [client resource-id #(if (instance? js/Error %)
                                                 (do
-                                                  (dispatch [::messages-events/add {:header  "Failure"
-                                                                                    :content (->> % ex-data :body)
-                                                                                    :type    :error}])
+                                                  (dispatch [::main-events/set-message {:header  "Failure"
+                                                                                        :content (->> % ex-data :body)
+                                                                                        :type    :error}])
                                                   (dispatch [::history-events/navigate (str "cimi/" collection-name)]))
                                                 (dispatch [::set-resource %]))]})))
 
@@ -78,13 +78,13 @@
       {::cimi-api-fx/delete [client resource-id
                              #(if (instance? js/Error %)
                                 (let [error (->> % ex-data)]
-                                  (dispatch [::messages-events/add {:header  "Failure"
-                                                                    :content (:body error)
-                                                                    :type    :error}]))
+                                  (dispatch [::main-events/set-message {:header  "Failure"
+                                                                        :content (:body error)
+                                                                        :type    :error}]))
                                 (do
-                                  (dispatch [::messages-events/add {:header  "Success"
-                                                                    :content (:message %)
-                                                                    :type    :success}])
+                                  (dispatch [::main-events/set-message {:header  "Success"
+                                                                        :content (:message %)
+                                                                        :type    :success}])
                                   (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]
        })))
 
@@ -94,9 +94,9 @@
     (when client
       {::cimi-api-fx/edit [client resource-id data #(if (instance? js/Error %)
                                                       (let [error (->> % ex-data)]
-                                                        (dispatch [::messages-events/add {:header  "Failure"
-                                                                                          :content (:body error)
-                                                                                          :type    :error}]))
+                                                        (dispatch [::main-events/set-message {:header  "Failure"
+                                                                                              :content (:body error)
+                                                                                              :type    :error}]))
                                                       (dispatch [::set-resource %]))]
        })))
 
@@ -105,11 +105,11 @@
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id operation]]
     {::cimi-api-fx/operation [client resource-id operation #(if (instance? js/Error %)
                                                               (let [error (->> % ex-data)]
-                                                                (dispatch [::messages-events/add
+                                                                (dispatch [::main-events/set-message
                                                                            {:header  "Failure"
                                                                             :content (:body error)
                                                                             :type    :error}]))
-                                                              (dispatch [::messages-events/add
+                                                              (dispatch [::main-events/set-message
                                                                          {:header  "Success"
                                                                           :content (with-out-str (cljs.pprint/pprint %))
                                                                           :type    :success}]))]}))

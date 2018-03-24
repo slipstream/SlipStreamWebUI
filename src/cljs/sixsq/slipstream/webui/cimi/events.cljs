@@ -1,13 +1,15 @@
 (ns sixsq.slipstream.webui.cimi.events
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
-
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
+    [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.general :as general-utils]))
+    [sixsq.slipstream.webui.i18n.utils :as utils]
+    [sixsq.slipstream.webui.utils.general :as general-utils]
+    [taoensso.timbre :as log]))
 
 
 (reg-event-fx
@@ -122,12 +124,12 @@
       {::cimi-api-fx/add [client resource-type data
                           #(if (instance? js/Error %)
                              (let [error (->> % ex-data)]
-                               (dispatch [::messages-events/add {:header  "Failure"
-                                                                 :content (:body error)
-                                                                 :type    :error}]))
-                             (dispatch [::messages-events/add {:header  "Success"
-                                                               :content (with-out-str (cljs.pprint/pprint %))
-                                                               :type    :success}]))]})))
+                               (dispatch [::main-events/set-message {:header  "Failure"
+                                                                     :content (:body error)
+                                                                     :type    :error}]))
+                             (dispatch [::main-events/set-message {:header  "Success"
+                                                                   :content (with-out-str (cljs.pprint/pprint %))
+                                                                   :type    :success}]))]})))
 
 (reg-event-db
   ::set-results
@@ -137,9 +139,9 @@
           aggregations (get listing :aggregations nil)
           fields (general-utils/merge-keys (conj entries {:id "id"}))]
       (when error?
-        (dispatch [::messages-events/add {:header  "Failure"
-                                          :content (:body (->> listing ex-data))
-                                          :type    :error}]))
+        (dispatch [::main-events/set-message {:header  "Failure"
+                                              :content (:body (->> listing ex-data))
+                                              :type    :error}]))
       (assoc db ::cimi-spec/aggregations aggregations
                 ::cimi-spec/collection (when-not error? listing)
                 ::cimi-spec/loading? false

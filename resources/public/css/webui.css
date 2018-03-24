@@ -138,19 +138,10 @@
     border-radius: unset !important;
 }
 
-/*
- * FIXME: Use the classes from the Semantic UI stylesheet
- * for error, success, and info message backgrounds.
- */
-
 .webui-error {
-    background-color: orangered !important;
+    background-color: OrangeRed !important;
 }
 
 .webui-info {
-    background-color: skyblue !important;
-}
-
-.webui-success {
-    background-color: lightgreen !important;
+    background-color: Aquamarine !important;
 }

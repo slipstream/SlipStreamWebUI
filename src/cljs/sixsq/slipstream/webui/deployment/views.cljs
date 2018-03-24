@@ -89,8 +89,7 @@
         filter-visible? (subscribe [::deployment-subs/filter-visible?])]
     (fn []
       [:div
-       [ui/Menu {:attached   (if @filter-visible? "top" false)
-                 :borderless true}
+       [ui/Menu {:attached (if @filter-visible? "top" false)}
         [ui/MenuItem {:name     "refresh"
                       :on-click #(dispatch [::deployment-events/get-deployments])}
          [ui/Icon {:name    "refresh"

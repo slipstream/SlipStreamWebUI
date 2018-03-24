@@ -19,7 +19,6 @@
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]
     [sixsq.slipstream.webui.main.events :as main-events]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
@@ -287,12 +286,10 @@
   (let [tr (subscribe [::i18n-subs/tr])
         available-fields (subscribe [::cimi-subs/available-fields])
         selected-fields (subscribe [::cimi-subs/selected-fields])
-        selected-id (subscribe [::cimi-subs/collection-name])
         selections (reagent/atom (set @selected-fields))
         show? (reagent/atom false)]
     (fn []
       [ui/MenuItem {:name     "select-fields"
-                    :disabled (nil? @selected-id)
                     :on-click (fn []
                                 (reset! selections (set @selected-fields))
                                 (reset! show? true))}
@@ -366,9 +363,9 @@
                                 (let [data (general/json->edn @text)]
                                   (dispatch [::cimi-events/create-resource data]))
                                 (catch js/Error e
-                                  (dispatch [::messages-events/add {:header  "Error"
-                                                                    :message (str "Unable to parse your json. " e)
-                                                                    :error   true}]))
+                                  (dispatch [::main-events/set-message {:header  "Error"
+                                                                        :message (str "Unable to parse your json. " e)
+                                                                        :error   true}]))
                                 (finally
                                   (dispatch [::cimi-events/hide-add-modal]))))}
                  (@tr [:create])]]])))))))
@@ -385,11 +382,9 @@
 (defn search-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::cimi-subs/loading?])
-        selected-id (subscribe [::cimi-subs/collection-name])]
+        loading? (subscribe [::cimi-subs/loading?])]
     (fn []
       [ui/MenuItem {:name     "search"
-                    :disabled (nil? @selected-id)
                     :on-click #(dispatch [::cimi-events/get-results])}
        (if @loading?
          [ui/Icon {:name    "refresh"
@@ -430,13 +425,12 @@
         resources (subscribe [::cimi-subs/collection])]
     (fn []
       (when (instance? js/Error @resources)
-        (dispatch [::messages-events/add {:header  (@tr [:error])
-                                          :message (str @resources)
-                                          :error   true}]))
+        (dispatch [::main-events/set-message {:header  (@tr [:error])
+                                              :message (str @resources)
+                                              :error   true}]))
       [:div
        [resource-add-form]
-       [ui/Menu {:attached   "top"
-                 :borderless true}
+       [ui/Menu {:attached "top"}
         [search-button]
         [select-fields]
         (when (can-add? (-> @resources :operations))

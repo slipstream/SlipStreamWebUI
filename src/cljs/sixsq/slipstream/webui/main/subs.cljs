@@ -25,3 +25,8 @@
   ::nav-query-params
   (fn [db]
     (::main-spec/nav-query-params db)))
+
+(reg-sub
+  ::message
+  (fn [db]
+    (::main-spec/message db)))

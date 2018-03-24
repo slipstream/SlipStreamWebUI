@@ -4,7 +4,7 @@
     [sixsq.slipstream.webui.deployment-detail.spec :as deployment-detail-spec]
     [sixsq.slipstream.webui.deployment-detail.effects :as deployment-detail-fx]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.effects :as main-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
@@ -67,9 +67,9 @@
        ::deployment-detail-fx/get-deployment
            [client resource-id #(if (instance? js/Error %)
                                   (do
-                                    (dispatch [::messages-events/add {:header  "Failure"
-                                                                      :content (->> % ex-data :body)
-                                                                      :type    :error}])
+                                    (dispatch [::main-events/set-message {:header  "Failure"
+                                                                          :content (->> % ex-data :body)
+                                                                          :type    :error}])
                                     (dispatch [::history-events/navigate "deployment"]))
                                   (dispatch [::set-deployment resource-id %]))]})))
 

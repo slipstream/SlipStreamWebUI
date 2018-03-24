@@ -9,7 +9,6 @@
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.legal.views]
-    [sixsq.slipstream.webui.messages.views :as messages]
     [sixsq.slipstream.webui.usage.views]
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.welcome.views]
@@ -80,14 +79,13 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     [:footer.webui-footer
-     [:div.webui-footer-left
-      [:span "© 2018, SixSq Sàrl"]]
-     [:div.webui-footer-right
+     #_[:div.webui-footer-left
+        [:span#release-version (str "SlipStream v")]]
+     [:div.webui-footer-center
       [:span
-       [ui/Icon {:name "balance"}]
-       [:a {:style    {:cursor "pointer"}
-            :on-click #(dispatch [::history-events/navigate "legal"])}
-        (@tr [:legal])]]]]))
+       "© 2018, SixSq Sàrl ("
+       [:a {:on-click #(dispatch [::history-events/navigate "legal"])} (@tr [:legal])]
+       ")"]]]))
 
 
 (defn contents
@@ -97,10 +95,10 @@
       [ui/Container {:class-name "webui-content", :fluid true}
        (panel/render @resource-path)])))
 
-
 (defn header
   []
-  (let [show? (subscribe [::main-subs/sidebar-open?])]
+  (let [show? (subscribe [::main-subs/sidebar-open?])
+        message (subscribe [::main-subs/message])]
     (fn []
       [:div
        [ui/Menu {:className  "webui-header"
@@ -111,11 +109,22 @@
         [ui/MenuItem [breadcrumbs]]
 
         [ui/MenuMenu {:position "right"}
-         [messages/bell-menu]
-         [ui/MenuItem {:fitted true}
+         [ui/MenuItem
           [authn-views/authn-menu]]]]
 
-       [messages/message-modal]])))
+       (when-let [{:keys [header content type]} @message]
+         [ui/Modal
+          {:closeIcon true
+           :open      (boolean @message)
+           :on-close  #(dispatch [::main-events/clear-message])}
+          [ui/ModalHeader {:class-name (if (= :error type) "webui-error" "webui-info")}
+           [ui/Icon {:size "big"
+                     :name  (if (= :error type) "exclamation" "info")}]
+           header]
+          (when content
+            [ui/ModalContent
+             {:scrolling true}
+             [:pre content]])])])))
 
 
 (defn app []

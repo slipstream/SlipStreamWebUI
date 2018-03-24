@@ -169,7 +169,6 @@
        (case label
          "download" "cloud download"
          "upload" "cloud upload"
-         "describe" "info"
          nil)
        (@tr [:execute-action] [label])
        [:p (@tr [:execute-action-msg] [label (:id data)])]
@@ -289,6 +288,6 @@
   "Provides a generic visualization of a CIMI resource document."
   [refresh-button title {:keys [name id operations] :as data} baseURI description]
   [:div
-   (vec (concat [ui/Menu {:borderless true}]
+   (vec (concat [ui/Menu]
                 (format-operations refresh-button data baseURI description)))
    (format-resource-data data description)])
