@@ -4,6 +4,7 @@
 
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.messages.subs :as message-subs]
     [sixsq.slipstream.webui.messages.events :as message-events]
     [sixsq.slipstream.webui.history.events :as history-events]
@@ -17,15 +18,17 @@
    messages. If there are no messages, the item will be disabled. If there are
    messages, then a label will show the number of them."
   []
-  (let [messages (subscribe [::message-subs/messages])]
+  (let [session (subscribe [::authn-subs/session])
+        messages (subscribe [::message-subs/messages])]
     (fn []
-      (let [n (count @messages)]
-        [ui/MenuItem {:disabled (zero? n)
-                      :fitted   "horizontally"
-                      :on-click #(dispatch [::history-events/navigate "messages"])}
-         [ui/Label {:size "large"}
-          [ui/Icon {:name "bell"}]
-          (str n)]]))))
+      (when @session
+        (let [n (count @messages)]
+          [ui/MenuItem {:disabled (zero? n)
+                        :fitted   "horizontally"
+                        :on-click #(dispatch [::history-events/navigate "messages"])}
+           [ui/Label {:size "large"}
+            [ui/Icon {:name "bell"}]
+            (str n)]])))))
 
 
 (defn type->icon-name
@@ -97,6 +100,6 @@
 
 (defmethod panel/render :messages
   [path]
-  [ui/Container #_{:fluid true}
+  [ui/Container
    [message-list]])
 
