@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.general :as general-utils]))
+    [sixsq.slipstream.webui.utils.general :as general-utils]
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-fx
@@ -120,14 +121,18 @@
                             :collection-key
                             (get collection-name))]
       {::cimi-api-fx/add [client resource-type data
-                          #(if (instance? js/Error %)
-                             (let [error (->> % ex-data)]
-                               (dispatch [::messages-events/add {:header  "Failure"
-                                                                 :content (:body error)
-                                                                 :type    :error}]))
-                             (dispatch [::messages-events/add {:header  "Success"
-                                                               :content (with-out-str (cljs.pprint/pprint %))
-                                                               :type    :success}]))]})))
+                          #(let [msg-map (if (instance? js/Error %)
+                                           (let [{:keys [status message]} (response/parse-ex-info %)]
+                                             {:header  (cond-> (str "failure adding " (name resource-type))
+                                                               status (str " (" status ")"))
+                                              :content message
+                                              :type    :error})
+                                           (let [{:keys [status message resource-id]} (response/parse %)]
+                                             {:header  (cond-> (str "added " resource-id)
+                                                               status (str " (" status ")"))
+                                              :content message
+                                              :type    :success}))]
+                             (dispatch [::messages-events/add msg-map]))]})))
 
 (reg-event-db
   ::set-results
@@ -137,9 +142,12 @@
           aggregations (get listing :aggregations nil)
           fields (general-utils/merge-keys (conj entries {:id "id"}))]
       (when error?
-        (dispatch [::messages-events/add {:header  "Failure"
-                                          :content (:body (->> listing ex-data))
-                                          :type    :error}]))
+        (dispatch [::messages-events/add
+                   (let [{:keys [status message]} (response/parse-ex-info listing)]
+                     {:header  (cond-> (str "failure getting " (name resource-type))
+                                       status (str " (" status ")"))
+                      :content message
+                      :type    :error})]))
       (assoc db ::cimi-spec/aggregations aggregations
                 ::cimi-spec/collection (when-not error? listing)
                 ::cimi-spec/loading? false

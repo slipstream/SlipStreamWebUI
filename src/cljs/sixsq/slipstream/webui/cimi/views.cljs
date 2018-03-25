@@ -18,12 +18,12 @@
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]
-    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.general :as general]
+    [sixsq.slipstream.webui.utils.response :as response]
 
     [taoensso.timbre :as log]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
@@ -366,9 +366,10 @@
                                 (let [data (general/json->edn @text)]
                                   (dispatch [::cimi-events/create-resource data]))
                                 (catch js/Error e
-                                  (dispatch [::messages-events/add {:header  "Error"
-                                                                    :message (str "Unable to parse your json. " e)
-                                                                    :error   true}]))
+                                  (dispatch [::messages-events/add
+                                             {:header  "invalid JSON document"
+                                              :message (str "invalid JSON:\n\n" e)
+                                              :type    :error}]))
                                 (finally
                                   (dispatch [::cimi-events/hide-add-modal]))))}
                  (@tr [:create])]]])))))))
@@ -430,9 +431,12 @@
         resources (subscribe [::cimi-subs/collection])]
     (fn []
       (when (instance? js/Error @resources)
-        (dispatch [::messages-events/add {:header  (@tr [:error])
-                                          :message (str @resources)
-                                          :error   true}]))
+        (dispatch [::messages-events/add
+                   (let [{:keys [status message]} (response/parse-ex-info @resources)]
+                     {:header  (cond-> (@tr [:error])
+                                       status (str " (" status ")"))
+                      :message message
+                      :type    :error})]))
       [:div
        [resource-add-form]
        [ui/Menu {:attached   "top"

@@ -139,12 +139,11 @@
 }
 
 /*
- * FIXME: Use the classes from the Semantic UI stylesheet
- * for error, success, and info message backgrounds.
+ * FIXME: Use the classes from the Semantic UI stylesheet for messages.
  */
 
 .webui-error {
-    background-color: orangered !important;
+    background-color: salmon !important;
 }
 
 .webui-info {

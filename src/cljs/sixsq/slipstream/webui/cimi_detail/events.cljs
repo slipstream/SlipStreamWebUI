@@ -1,16 +1,20 @@
 (ns sixsq.slipstream.webui.cimi-detail.events
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
+    [taoensso.timbre :as log]
+    [clojure.string :as str]
+
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail-spec]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
-    [sixsq.slipstream.client.impl.utils.json :as json]
     [sixsq.slipstream.webui.history.events :as history-events]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.utils.response :as response]))
+
+
+(defn operation-name [op-uri]
+  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 
 (reg-event-fx
@@ -21,17 +25,16 @@
       {:db               (assoc db ::cimi-detail-spec/loading? true
                                    ::cimi-detail-spec/resource-id resource-id)
        ::cimi-api-fx/get [client resource-id #(if (instance? js/Error %)
-                                                (do
-                                                  (dispatch [::messages-events/add {:header  "Failure"
-                                                                                    :content (->> % ex-data :body)
-                                                                                    :type    :error}])
-                                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)]))
+                                                (let [{:keys [status message]} (response/parse-ex-info %)]
+                                                  (dispatch [::messages-events/add
+                                                             {:header  (cond-> (str "error getting " resource-id)
+                                                                               status (str " (" status ")"))
+                                                              :content message
+                                                              :type    :error}])
+                                                  (dispatch [::history-events/navigate
+                                                             (str "cimi/" collection-name)]))
                                                 (dispatch [::set-resource %]))]})))
 
-
-
-(defn operation-name [op-uri]
-  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 (reg-event-fx
   ::set-resource
@@ -77,14 +80,18 @@
     (when client
       {::cimi-api-fx/delete [client resource-id
                              #(if (instance? js/Error %)
-                                (let [error (->> % ex-data)]
-                                  (dispatch [::messages-events/add {:header  "Failure"
-                                                                    :content (:body error)
-                                                                    :type    :error}]))
-                                (do
-                                  (dispatch [::messages-events/add {:header  "Success"
-                                                                    :content (:message %)
-                                                                    :type    :success}])
+                                (let [{:keys [status message]} (response/parse-ex-info %)]
+                                  (dispatch [::messages-events/add
+                                             {:header  (cond-> (str "error deleting " resource-id)
+                                                               status (str " (" status ")"))
+                                              :content message
+                                              :type    :error}]))
+                                (let [{:keys [status message]} (response/parse %)]
+                                  (dispatch [::messages-events/add
+                                             {:header  (cond-> (str "deleted " resource-id)
+                                                               status (str " (" status ")"))
+                                              :content message
+                                              :type    :success}])
                                   (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]
        })))
 
@@ -92,24 +99,31 @@
   ::edit
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id data]]
     (when client
-      {::cimi-api-fx/edit [client resource-id data #(if (instance? js/Error %)
-                                                      (let [error (->> % ex-data)]
-                                                        (dispatch [::messages-events/add {:header  "Failure"
-                                                                                          :content (:body error)
-                                                                                          :type    :error}]))
-                                                      (dispatch [::set-resource %]))]
-       })))
+      {::cimi-api-fx/edit [client resource-id data
+                           #(if (instance? js/Error %)
+                              (let [{:keys [status message]} (response/parse-ex-info %)]
+                                (dispatch [::messages-events/add
+                                           {:header  (cond-> (str "error editing " resource-id)
+                                                             status (str " (" status ")"))
+                                            :content message
+                                            :type    :error}]))
+                              (dispatch [::set-resource %]))]})))
 
 (reg-event-fx
   ::operation
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id operation]]
-    {::cimi-api-fx/operation [client resource-id operation #(if (instance? js/Error %)
-                                                              (let [error (->> % ex-data)]
-                                                                (dispatch [::messages-events/add
-                                                                           {:header  "Failure"
-                                                                            :content (:body error)
-                                                                            :type    :error}]))
-                                                              (dispatch [::messages-events/add
-                                                                         {:header  "Success"
-                                                                          :content (with-out-str (cljs.pprint/pprint %))
-                                                                          :type    :success}]))]}))
+    {::cimi-api-fx/operation [client resource-id operation
+                              #(let [op (second (re-matches #"(?:.*/)?(.*)" operation))]
+                                 (if (instance? js/Error %)
+                                   (let [{:keys [status message]} (response/parse-ex-info %)]
+                                     (dispatch [::messages-events/add
+                                                {:header  (cond-> (str "error executing operation " op)
+                                                                  status (str " (" status ")"))
+                                                 :content message
+                                                 :type    :error}]))
+                                   (let [{:keys [status message]} (response/parse %)]
+                                     (dispatch [::messages-events/add
+                                                {:header  (cond-> (str "success executing operation " op)
+                                                                  status (str " (" status ")"))
+                                                 :content message
+                                                 :type    :success}]))))]}))

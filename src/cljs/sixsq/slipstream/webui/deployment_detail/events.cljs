@@ -8,7 +8,8 @@
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.effects :as main-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.utils.general :as general-utils]))
+    [sixsq.slipstream.webui.utils.general :as general-utils]
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 (reg-event-fx
   ::set-runUUID
@@ -66,10 +67,12 @@
       {:db (assoc db ::deployment-detail-spec/loading? true)
        ::deployment-detail-fx/get-deployment
            [client resource-id #(if (instance? js/Error %)
-                                  (do
-                                    (dispatch [::messages-events/add {:header  "Failure"
-                                                                      :content (->> % ex-data :body)
-                                                                      :type    :error}])
+                                  (let [{:keys [status message]} (response/parse-ex-info %)]
+                                    (dispatch [::messages-events/add
+                                               {:header  (cond-> (str "error getting deployment " resource-id)
+                                                                 status (str " (" status ")"))
+                                                :content message
+                                                :type    :error}])
                                     (dispatch [::history-events/navigate "deployment"]))
                                   (dispatch [::set-deployment resource-id %]))]})))
 
