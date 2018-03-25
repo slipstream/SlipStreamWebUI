@@ -56,6 +56,15 @@
 (def Icon (adapt-component "Icon"))
 (def IconGroup (adapt-component "IconGroup"))
 
+(def Item (adapt-component "Item"))
+(def ItemContent (adapt-component "ItemContent"))
+(def ItemDescription (adapt-component "ItemDescription"))
+(def ItemExtra (adapt-component "ItemExtra"))
+(def ItemGroup (adapt-component "ItemGroup"))
+(def ItemHeader (adapt-component "ItemHeader"))
+(def ItemImage (adapt-component "ItemImage"))
+(def ItemMeta (adapt-component "ItemMeta"))
+
 (def Image (adapt-component "Image"))
 
 (def Input (adapt-component "Input"))

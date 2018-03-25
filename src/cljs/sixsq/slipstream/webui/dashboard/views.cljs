@@ -64,7 +64,7 @@
         loading? (subscribe [::dashboard-subs/loading?])]
     (fn []
       [ui/Container {:fluid true}
-       [ui/Menu
+       [ui/Menu {:borderless true}
         [ui/MenuItem {:name "refresh"
                       :on-click #(dispatch [::dashboard-events/get-statistics])}
          [ui/Icon {:name "refresh"

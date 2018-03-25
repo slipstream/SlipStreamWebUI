@@ -135,7 +135,8 @@
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])]
     [:div
-     [ui/Menu {:attached "top"}
+     [ui/Menu {:attached   "top"
+               :borderless true}
       [ui/MenuItem {:name     "search"
                     :on-click #(dispatch [::usage-events/fetch-meterings])}
        [ui/Icon {:name "search"}]

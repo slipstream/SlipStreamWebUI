@@ -10,6 +10,7 @@
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
     [sixsq.slipstream.webui.main.spec :as main]
+    [sixsq.slipstream.webui.messages.spec :as messages]
     [sixsq.slipstream.webui.metrics.spec :as metrics]
     [sixsq.slipstream.webui.usage.spec :as usage]))
 
@@ -22,6 +23,7 @@
                      ::i18n/db
                      ::main/db
                      ::metrics/db
+                     ::messages/db
                      ::usage/db))
 
 
@@ -35,4 +37,5 @@
          i18n/defaults
          main/defaults
          metrics/defaults
+         messages/defaults
          usage/defaults))
