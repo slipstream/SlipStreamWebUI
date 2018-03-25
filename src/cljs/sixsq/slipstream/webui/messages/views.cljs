@@ -80,7 +80,7 @@
            header]
           [ui/CardMeta (time/ago timestamp locale)]]
          (when @visible?
-           [ui/CardContent
+           [ui/CardContent {:class-name "webui-x-autoscroll"}
             [ui/CardDescription [:pre content]]])]))))
 
 
@@ -97,6 +97,6 @@
 
 (defmethod panel/render :messages
   [path]
-  [ui/Container {:fluid true}
+  [ui/Container #_{:fluid true}
    [message-list]])
 
