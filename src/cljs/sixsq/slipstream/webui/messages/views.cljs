@@ -23,10 +23,9 @@
         [ui/MenuItem {:disabled (zero? n)
                       :fitted   "horizontally"
                       :on-click #(dispatch [::history-events/navigate "messages"])}
-         [ui/Icon {:name "bell"}]
-         (when (pos? n)
-           [ui/Label {:size "mini"}
-            (str n)])]))))
+         [ui/Label {:size "large"}
+          [ui/Icon {:name "bell"}]
+          (str n)]]))))
 
 
 (defn type->icon-name
