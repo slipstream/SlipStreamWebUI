@@ -8,7 +8,8 @@
     [sixsq.slipstream.webui.messages.events :as message-events]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [reagent.core :as reagent]))
 
 
 (defn bell-menu
@@ -58,34 +59,45 @@
               [:pre content]])])))))
 
 
-(defn message-item
-  [index {:keys [type header content timestamp]}]
-  [ui/Item
-   [ui/ItemContent
-    [ui/ItemHeader
-     [ui/Icon {:name (type->icon-name type)}]
-     header]
-    [ui/ItemMeta (time/remaining timestamp)]
-    [ui/ItemDescription content]
-    [ui/ItemExtra [ui/Button
-                   {:on-click #(dispatch [::message-events/remove index])}
-                   "clear"]]]])
+(defn message-item-card
+  [locale index {:keys [type header content timestamp]}]
+  (let [visible? (reagent/atom false)]
+    (fn [locale index {:keys [type header content timestamp]}]
+      (let [header-class (str "webui-" (name type))]
+        [ui/Card {:fluid true}
+         [ui/Label {:as       :a
+                    :corner   "right"
+                    :size     "mini"
+                    :icon     (if @visible? "chevron down" "chevron up")
+                    :on-click #(reset! visible? (not @visible?))}]
+         [ui/Label {:as       :a
+                    :corner   "left"
+                    :size     "mini"
+                    :icon     "close"
+                    :on-click #(dispatch [::message-events/remove index])}]
+         [ui/CardContent {:class-name header-class}
+          [ui/CardHeader
+           [ui/Icon {:name (type->icon-name type)}]
+           header]
+          [ui/CardMeta (time/ago timestamp locale)]]
+         (when @visible?
+           [ui/CardContent
+            [ui/CardDescription [:pre content]]])]))))
 
 
 (defn message-list
   []
-  (let [messages (subscribe [::message-subs/messages])]
-    (fn []
-      (when @messages
-        (vec (concat [ui/ItemGroup]
-                     (vec (map message-item (range) @messages))))))))
+  (let [tr (subscribe [::i18n-subs/tr])
+        locale (subscribe [::i18n-subs/locale])
+        messages (subscribe [::message-subs/messages])]
+    (if (seq @messages)
+      (vec (concat [ui/ItemGroup]
+                   (vec (map (fn [i msg] [message-item-card @locale i msg]) (range) @messages))))
+      [ui/Header {:as "h1"} (@tr [:no-messages])])))
 
 
 (defmethod panel/render :messages
   [path]
-  (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Container {:textAlign "center"}
-     [ui/Header {:as "h1"}
-      (@tr [:messages])]
-     [message-list]]))
+  [ui/Container {:fluid true}
+   [message-list]])
 

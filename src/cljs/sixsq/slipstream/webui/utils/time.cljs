@@ -12,7 +12,7 @@
 
 (defn n-decimal-places
   ([decimal-string]
-    (n-decimal-places decimal-string 2))
+   (n-decimal-places decimal-string 2))
   ([decimal-string n]
    (let [[left right] (str/split decimal-string #"\.")]
      (str left "." (apply str (take n (concat right (repeat "0"))))))))
@@ -37,6 +37,30 @@
    (js/moment rfc2822 rfc2822-format locale true)))
 
 
+(defn invalid
+  ([]
+    (invalid "en"))
+  ([locale]
+    (-> js/moment
+        .invalid
+        (.locale locale)
+        .format)))
+
+
+(defn ago
+  "Returns a human-readable string on how much time is remaining before the
+   given expiry date (in RFC 2822 format). Uses English as the natural language
+   unless another locale is given."
+  ([moment]
+   (ago moment "en"))
+  ([moment locale]
+   (if-let [localized-moment (some-> moment
+                                     .clone
+                                     (.locale locale))]
+     (.fromNow localized-moment)
+     (invalid locale))))
+
+
 (defn remaining
   "Returns a human-readable string on how much time is remaining before the
    given expiry date (in RFC 2822 format). Uses English as the natural language
@@ -46,9 +70,10 @@
   ([expiry-rfc2822 locale]
    (if expiry-rfc2822
      (-> expiry-rfc2822
-         (parse-rfc2822 locale)
+         (parse-rfc2822)
+         (.locale locale)
          (.toNow true))
-     (.format (.invalid js/moment)))))
+     (invalid locale))))
 
 
 (defn delta-minutes
