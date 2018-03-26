@@ -6,7 +6,7 @@
     ;; all panel views must be included to define panel rendering method
     [sixsq.slipstream.webui.application.views]
     [sixsq.slipstream.webui.cimi.views]
-    [sixsq.slipstream.webui.deployment.views]
+    [sixsq.slipstream.webui.deployment.views :as deployment]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.legal.views]
     [sixsq.slipstream.webui.messages.views :as messages]
@@ -115,6 +115,7 @@
          [ui/MenuItem {:fitted true}
           [authn-views/authn-menu]]]]
 
+       [deployment/deployment-modal]
        [messages/message-modal]])))
 
 

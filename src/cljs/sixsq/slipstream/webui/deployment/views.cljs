@@ -6,6 +6,8 @@
 
     [sixsq.slipstream.webui.panel :as panel]
 
+    [sixsq.slipstream.webui.application.subs :as application-subs]
+
     [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -25,6 +27,98 @@
 
 (defn bool->int [bool]
   (if bool 1 0))
+
+
+(defn general-parameters
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    [ui/Segment
+     [ui/Header "general"]
+     [ui/FormField
+      [ui/Checkbox {:label "SSH access"
+                    :value true}]]
+     [ui/FormSelect {:placeholder (@tr [:cloud])
+                     :options     [{:key "alpha", :text "alpha", :value "alpha"}
+                                   {:key "beta", :text "beta", :value "beta"}
+                                   {:key "gamma", :text "gamma", :value "gamma"}]}]
+     [ui/FormInput {:placeholder "tags"}]]))
+
+
+
+(defn input-parameter-field
+  [[name description defaultValue]]
+  [ui/Input (cond-> {:fluid          true
+                     :placeholder    name
+                     :label-position "left"}
+                    defaultValue (assoc :defaultValue defaultValue)
+                    description (assoc :icon true))
+   (if description
+     [ui/Popup {:content description
+                :trigger (reagent/as-element [ui/Label [ui/Icon {:name "help circle"}] name])}]
+     [ui/Label name])
+   [:input]])
+
+
+(defn input-parameters-form
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        module (subscribe [::application-subs/module])]
+    (fn []
+      (let [{:keys [parameters]} @module]
+        (when parameters
+          (let [children (->> parameters
+                              (filter #(= "Input" (:category %)))
+                              (map (juxt :name :description :defaultValue))
+                              (sort-by first)
+                              (map input-parameter-field)
+                              (cons [ui/Header (@tr [:parameters])]))]
+            (vec (concat [ui/Segment {:fluid true}] children))))))))
+
+
+(defn cpu-ram-disk
+  []
+  [ui/Segment
+   [ui/Header "resources"]
+   [ui/FormGroup
+    [ui/FormField
+     [ui/Input {:type           "number"
+                :min            0
+                :placeholder    "CPU"
+                :icon           true
+                :label-position "left"}
+      [ui/Popup {:content "override the required number of CPUs"
+                 :trigger (reagent/as-element [ui/Label [ui/Icon {:name "help circle"}] "CPU"])}]
+      [:input]]]
+    [ui/FormInput {:type        "number"
+                   :min         0
+                   :placeholder "RAM"
+                   :label       (reagent/as-element [ui/Popup {:content "override the required amount of RAM"
+                                                               :trigger (reagent/as-element [ui/Label {:attached "bottom", :basic true, :compact true} [ui/Icon {:name "help circle"}] "RAM"])}])}]
+    [ui/FormField
+     [ui/Input {:type        "number"
+                :min         0
+                :placeholder "disk"
+                :label       "disk"}]]]])
+
+(defn deployment-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        target-module (subscribe [::deployment-subs/deployment-target])]
+    (fn []
+      [ui/Modal {:close-icon true
+                 :open       (boolean @target-module)
+                 :on-close   #(dispatch [::deployment-events/clear-deployment-target])}
+       [ui/ModalHeader (@tr [:deploy])]
+       [ui/ModalContent {:scrolling true}
+        [ui/Header @target-module]
+        [ui/Form
+         [general-parameters]
+         [input-parameters-form]
+         [cpu-ram-disk]]]
+       [ui/ModalContent
+        [ui/Button (@tr [:cancel])]
+        [ui/Button {:primary true} (@tr [:deploy])]]])))
+
 
 (defn runs-control []
   (let [tr (subscribe [::i18n-subs/tr])

@@ -28,3 +28,7 @@
     (::deployment-spec/deployments db)))
 
 
+(reg-sub
+  ::deployment-target
+  (fn [db]
+    (::deployment-spec/deployment-target db)))

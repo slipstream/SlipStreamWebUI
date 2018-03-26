@@ -17,12 +17,19 @@
 
 (s/def ::deployments any?)
 
-(s/def ::db (s/keys :req [::loading? ::query-params ::deployments]))
+(s/def ::deployment-target (s/nilable string?))
 
-(def defaults {::loading?        false
-               ::filter-visible? false
-               ::query-params    {:offset     ""
-                                  :limit      ""
-                                  :cloud      ""
-                                  :activeOnly 1}
-               ::deployments     nil})
+(s/def ::db (s/keys :req [::loading?
+                          ::filter-visible?
+                          ::query-params
+                          ::deployments
+                          ::deployment-target]))
+
+(def defaults {::loading?          false
+               ::filter-visible?   false
+               ::query-params      {:offset     ""
+                                    :limit      ""
+                                    :cloud      ""
+                                    :activeOnly 1}
+               ::deployments       nil
+               ::deployment-target nil})

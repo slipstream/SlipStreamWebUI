@@ -34,3 +34,17 @@
   ::set-query-params
   (fn [db [_ params-map]]
     (update db ::deployment-spec/query-params merge params-map)))
+
+
+(reg-event-db
+  ::set-deployment-target
+  (fn [db [_ deployment-target]]
+    (assoc db ::deployment-spec/deployment-target deployment-target)))
+
+
+(reg-event-db
+  ::clear-deployment-target
+  (fn [db _]
+    (assoc db ::deployment-spec/deployment-target nil)))
+
+

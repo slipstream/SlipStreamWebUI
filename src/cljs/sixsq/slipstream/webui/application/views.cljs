@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.events :as application-events]
+    [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.component :as cutil]))
@@ -60,7 +61,7 @@
     (fn [state-atom]
       (let [label (if @more? (@tr [:less]) (@tr [:more]))
             icon-name (if @more? "caret down" "caret right")]
-        [:a {:style {:cursor "pointer"}
+        [:a {:style    {:cursor "pointer"}
              :on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
 
 
@@ -155,7 +156,6 @@
             (vec (concat [ui/TableBody] (map parameter-table-row rows)))]])))))
 
 
-;; FIXME: The first three target keywords are not correct.
 (defn target-dropdown
   [state]
   [ui/Dropdown {:inline        true
@@ -185,20 +185,32 @@
 
 
 (defn module-resource []
-  (let [data (subscribe [::application-subs/module])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        module-id (subscribe [::application-subs/module-id])
+        data (subscribe [::application-subs/module])]
     (fn []
       (let [loading? (not @data)]
-        [ui/DimmerDimmable
-         (vec (concat [:div [dimmer]]
-                      (when-not loading?
-                        (if (instance? js/Error @data)
-                          [[format-error @data]]
-                          (let [{:keys [metadata children targets parameters]} @data
-                                module-type (:category metadata)]
-                            [[format-meta metadata]
-                             (when (= module-type "Image") [format-parameters parameters])
-                             (when (= module-type "Image") [format-targets targets])
-                             [format-module-children children]])))))]))))
+        [:div
+         [ui/Menu {:borderless true}
+          [ui/MenuItem {:name     "deploy"
+                        :disabled (or loading? (nil? @module-id))
+                        :on-click #(dispatch [::deployment-events/set-deployment-target @module-id])}
+           [ui/IconGroup
+            [ui/Icon {:name "cloud"}]
+            [ui/Icon {:name   "plus"
+                      :corner true}]]
+           (@tr [:deploy])]]
+         [ui/DimmerDimmable
+          (vec (concat [:div [dimmer]]
+                       (when-not loading?
+                         (if (instance? js/Error @data)
+                           [[format-error @data]]
+                           (let [{:keys [metadata children targets parameters]} @data
+                                 module-type (:category metadata)]
+                             [[format-meta metadata]
+                              (when (= module-type "Image") [format-parameters parameters])
+                              (when (= module-type "Image") [format-targets targets])
+                              [format-module-children children]])))))]]))))
 
 
 (defmethod panel/render :application
