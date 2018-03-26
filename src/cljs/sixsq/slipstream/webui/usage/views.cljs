@@ -12,19 +12,35 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.time :as time]))
 
+
 (defn set-dates [calendar-data]
   (let [date-after (-> (.-startDate calendar-data) .clone)
         date-before (-> (.-endDate calendar-data) .clone (.add 1 "days") (.add -1 "seconds"))]
     (dispatch [::usage-events/set-date-after-before date-after date-before])))
 
+
+(defn date-label
+  [label date]
+  (let [tr (subscribe [::i18n-subs/tr])
+        locale (subscribe [::i18n-subs/locale])]
+    [ui/Label (@tr [label])
+     [ui/LabelDetail (or (some-> date
+                                 (.locale @locale)
+                                 (.format "dddd, Do MMMM YYYY"))
+                         (time/invalid @locale))]]))
+
+
 (defn search-calendar []
   (let [tr (subscribe [::i18n-subs/tr])
+        locale (subscribe [::i18n-subs/locale])
         filter-visible? (subscribe [::usage-subs/filter-visible?])
         date-before (subscribe [::usage-subs/date-before])
         date-after (subscribe [::usage-subs/date-after])
         initial-after-date (time/days-before 30)
         initial-before-date (time/days-before 1)]
     (fn []
+      (when-not (and @date-before @date-after)
+        (dispatch [::usage-events/set-date-after-before initial-after-date initial-before-date]))
       [ui/Container
        (when @filter-visible?
          (js/React.createElement
@@ -46,11 +62,11 @@
                      :minDate        (time/days-before 90)
                      :theme          (clj->js {:Calendar         {:width 200}
                                                :PredefinedRanges {:height 10 :width 100 :marginLeft 10 :marginTop 10}})
-                     :maxDate        (time/now)})))
-       [ui/Label (@tr [:from]) [ui/LabelDetail (or (some-> @date-after
-                                                           (.format "dddd, Do MMMM YYYY")) "-")]]
-       [ui/Label (@tr [:to]) [ui/LabelDetail (or (some-> @date-before
-                                                         (.format "dddd, Do MMMM YYYY")) "-")]]])))
+                     :maxDate        (time/now)
+                     :lang           @locale})))            ;; FIXME: Locale seems to be ignored.
+       [date-label :from @date-after]
+       [date-label :to @date-before]])))
+
 
 (defn search-all-clouds-dropdown []
   (let [connectors-list (subscribe [::usage-subs/connectors-list])
@@ -76,6 +92,7 @@
                                        {:key connector-href :value connector-href :text connector-name})
                                     @connectors-list)}]])))
 
+
 (defn search-users-dropdown []
   (let [selected-user (subscribe [::usage-subs/selected-user])
         users (subscribe [::usage-subs/users-list])
@@ -99,6 +116,7 @@
        (when @selected-user
          [ui/MenuItem {:icon "close" :link true :onClick #(dispatch [::usage-events/clear-user])}])
        ])))
+
 
 (defn search-header []
   (let [is-admin? (subscribe [::authn-subs/is-admin?])
@@ -149,8 +167,10 @@
 (defn format [fmt-str & v]
   (apply pprint/cl-format nil fmt-str v))
 
+
 (defn to-hour [v]
   (/ v 60))
+
 
 (defn value-in-table [v]
   (let [v-hour (to-hour v)
@@ -158,11 +178,14 @@
         v-float-part (- v-hour v-int-part)]
     (format "~,,'',3:d~0,2f" v-int-part v-float-part)))
 
+
 (defn value-in-statistic [v]
   (->> v to-hour Math/round (format "~,,'',3:d ")))
 
+
 (defn to-GB-from-MB [v]
   (/ v 1024))
+
 
 (defn statistics-all-cloud []
   (let [results (subscribe [::usage-subs/results])]
@@ -189,6 +212,18 @@
            [ui/Icon {:size "small" :name "database"}]]
           [ui/StatisticLabel {} "Disk"]]]))))
 
+
+(defn results-table-row
+  [[connector result]]
+  ^{:key (name connector)}
+  [ui/TableRow
+   [ui/TableCell (str/replace (name connector) #"^connector/" "")]
+   [ui/TableCell {:textAlign "right"} (value-in-table (:vms result))]
+   [ui/TableCell {:textAlign "right"} (value-in-table (:vcpu result))]
+   [ui/TableCell {:textAlign "right"} (value-in-table (to-GB-from-MB (:ram result)))]
+   [ui/TableCell {:textAlign "right"} (value-in-table (to-GB-from-MB (:disk result)))]])
+
+
 (defn table-results-clouds []
   (let [results (subscribe [::usage-subs/results])]
     (fn []
@@ -197,38 +232,27 @@
         [ui/TableHeader
          [ui/TableRow
           [ui/TableHeaderCell "Cloud"]
-          [ui/TableHeaderCell {:textAlign "center"} "VMs" [:br] "[h]"]
-          [ui/TableHeaderCell {:textAlign "center"} "CPUs" [:br] "[h]"]
-          [ui/TableHeaderCell {:textAlign "center"} "RAM" [:br] "[GBh]"]
-          [ui/TableHeaderCell {:textAlign "center"} "DISK" [:br] "[GBh]"]]]
+          [ui/TableHeaderCell {:textAlign "right"} "VMs [h]"]
+          [ui/TableHeaderCell {:textAlign "right"} "CPUs [h]"]
+          [ui/TableHeaderCell {:textAlign "right"} "RAM [GB\u00b7h]"]
+          [ui/TableHeaderCell {:textAlign "right"} "DISK [GB\u00b7h]"]]]
         [ui/TableBody
-         (map (fn [connector result]
-                ^{:key (name connector)}
-                [ui/TableRow
-                 [ui/TableCell (str/replace (name connector) #"^connector/" "")]
-                 [ui/TableCell {:textAlign "center"} (value-in-table (:vms result))]
-                 [ui/TableCell {:textAlign "center"} (value-in-table (:vcpu result))]
-                 [ui/TableCell {:textAlign "center"} (value-in-table (to-GB-from-MB (:ram result)))]
-                 [ui/TableCell {:textAlign "center"} (value-in-table (to-GB-from-MB (:disk result)))]])
-              (keys @results) (vals @results))]
-        ]])))
+         (map results-table-row (sort-by first @results))]]])))
+
 
 (defn search-result []
-  (let [loading? (subscribe [::usage-subs/loading?])
-        results (subscribe [::usage-subs/results])]
-    (fn []
-      [ui/Segment {:basic true :loading @loading?}
-       [statistics-all-cloud]
-       [table-results-clouds]])))
+  (let [loading? (subscribe [::usage-subs/loading?])]
+    [ui/Segment {:basic true, :loading @loading?}
+     [statistics-all-cloud]
+     [table-results-clouds]]))
+
 
 (defn usage
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    (fn []
-      [ui/Container {:fluid true}
-       [control-bar]
-       #_[search-header]
-       [search-result]])))
+  [ui/Container {:fluid true}
+   [control-bar]
+   [search-result]])
+
 
 (defmethod panel/render :usage
   [path]
