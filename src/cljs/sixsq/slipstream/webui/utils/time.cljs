@@ -1,8 +1,11 @@
 (ns sixsq.slipstream.webui.utils.time
   (:require
     [cljsjs.moment]
-    [clojure.string :as str]
-    [taoensso.timbre :as log]))
+    [clojure.string :as str]))
+
+
+(def ^:const default-locale "en")
+
 
 (def ^:private iso8601-format (.-ISO_8601 js/moment))
 
@@ -19,32 +22,34 @@
 
 
 (defn now
-  []
-  (js/moment))
+  ([]
+   (now default-locale))
+  ([locale]
+   (.locale (js/moment) locale)))
 
 
 (defn parse-iso8601
   ([iso8601]
-   (parse-iso8601 iso8601 "en"))
+   (parse-iso8601 iso8601 default-locale))
   ([iso8601 locale]
    (js/moment iso8601 iso8601-format locale true)))
 
 
 (defn parse-rfc2822
   ([rfc2822]
-   (parse-rfc2822 rfc2822 "en"))
+   (parse-rfc2822 rfc2822 default-locale))
   ([rfc2822 locale]
    (js/moment rfc2822 rfc2822-format locale true)))
 
 
 (defn invalid
   ([]
-    (invalid "en"))
+   (invalid default-locale))
   ([locale]
-    (-> js/moment
-        .invalid
-        (.locale locale)
-        .format)))
+   (-> js/moment
+       .invalid
+       (.locale locale)
+       .format)))
 
 
 (defn ago
@@ -52,7 +57,7 @@
    given expiry date (in RFC 2822 format). Uses English as the natural language
    unless another locale is given."
   ([moment]
-   (ago moment "en"))
+   (ago moment default-locale))
   ([moment locale]
    (if-let [localized-moment (some-> moment
                                      .clone
@@ -66,7 +71,7 @@
    given expiry date (in RFC 2822 format). Uses English as the natural language
    unless another locale is given."
   ([expiry-rfc2822]
-   (remaining expiry-rfc2822 "en"))
+   (remaining expiry-rfc2822 default-locale))
   ([expiry-rfc2822 locale]
    (if expiry-rfc2822
      (-> expiry-rfc2822
@@ -88,5 +93,7 @@
 
 
 (defn days-before
-  [n]
-  (-> (now) (.startOf "date") (.add (- n) "days")))
+  ([n]
+   (days-before n default-locale))
+  ([n locale]
+   (-> (now locale) (.startOf "date") (.add (- n) "days"))))
