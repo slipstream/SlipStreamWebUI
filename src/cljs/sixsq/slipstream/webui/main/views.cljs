@@ -10,6 +10,7 @@
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.legal.views]
     [sixsq.slipstream.webui.messages.views :as messages]
+    [sixsq.slipstream.webui.metrics.views]
     [sixsq.slipstream.webui.usage.views]
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.welcome.views]
