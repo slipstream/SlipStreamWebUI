@@ -28,7 +28,8 @@
       (log/info "navigation query params:" query-params)
       {:db                       (merge db {::main-spec/nav-path         path-vec
                                             ::main-spec/nav-query-params query-params})
-       ::main-fx/action-interval [{:action :clean}]})))
+       ::main-fx/action-interval [{:action :clean}]
+       ::history-fx/replace-url-history [path]})))
 
 (reg-event-fx
   ::action-interval

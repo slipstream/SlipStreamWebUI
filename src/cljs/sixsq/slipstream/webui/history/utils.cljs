@@ -88,3 +88,9 @@
           port (.-port location)
           port-field (when-not (str/blank? port) (str ":" port))]
       (str protocol "//" host port-field))))
+
+(defn replace-url-history
+  "Replace url in history with the given URL."
+  [url]
+  (.replaceState js/history (clj->js {}) "" url))
+
