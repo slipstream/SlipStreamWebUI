@@ -182,90 +182,68 @@
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::cimi-subs/filter-visible?])
         query-params (subscribe [::cimi-subs/query-params])
-        first-value (reagent/atom nil)
-        last-value (reagent/atom nil)
-        ;filter-value (reagent/atom nil)
-        orderby-value (reagent/atom nil)
-        select-value (reagent/atom nil)
-        aggregation-value (reagent/atom nil)
-        nav-query-params (subscribe [::main-subs/nav-query-params])
-        nav-query-params-local (reagent/atom nil)]
+        nav-query-params (subscribe [::main-subs/nav-query-params])]
     (fn []
       ;; reset visible values of parameters
-
-      (when (and (not-empty @nav-query-params) (nil? @nav-query-params-local))
-        (reset! nav-query-params-local @nav-query-params))
-      (let [{:keys [$first $last $filter $select $aggregation $orderby]} @nav-query-params-local]
+      (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
         [ui/Form
-         (pr-str @nav-query-params-local)
          [ui/FormField
           [cloud-entry-point-title]]
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
-             [ui/Input (cond->
-                         {:type         "number"
-                          :min          0
-                          :label        (@tr [:first])
-                          :defaultValue (or $first "0")
-                          :on-blur      #(dispatch [::cimi-events/set-first (-> %1 .-target .-value)])}
-                         (:$first @nav-query-params-local) (merge {:value (:$first @nav-query-params-local)})
-                         )]]
+             ; the key below is a workaround react issue with controlled input cursor position,
+             ; this will force to re-render defaultValue on change of the value
+             ^{:key (str "first:" $first)}
+             [ui/Input {:type         "number"
+                        :min          0
+                        :label        (@tr [:first])
+                        :defaultValue $first
+                        :on-blur      #(dispatch [::cimi-events/set-first (-> %1 .-target .-value)])}]]
 
             [ui/FormField
-             [ui/Input (cond->
-                         {:type         "number"
-                          :min          0
-                          :label        (@tr [:last])
-                          :defaultValue (or $last "20")
-                          :on-blur      #(dispatch [::cimi-events/set-last (-> %1 .-target .-value)])}
-                         (:$last @nav-query-params-local) (merge {:value (:$last @nav-query-params-local)})
-                         )]]
+             ^{:key (str "last:" $last)}
+             [ui/Input {:type         "number"
+                        :min          0
+                        :label        (@tr [:last])
+                        :defaultValue $last
+                        :on-blur      #(dispatch
+                                         [::cimi-events/set-last (-> %1 .-target .-value)])}]]
 
             [ui/FormField
-             [ui/Input (cond->
-                         {:type         "text"
-                          :label        (@tr [:select])
-                          :defaultValue (or $select "")
-                          :on-blur      #(dispatch [::cimi-events/set-select (-> %1 .-target .-value)])}
-                         (:$select @nav-query-params-local) (merge {:value (:$select @nav-query-params-local)})
-                         )]]])
+             ^{:key (str "select:" $select)}
+             [ui/Input {:type         "text"
+                        :label        (@tr [:select])
+                        :defaultValue $select
+                        :on-blur      #(dispatch
+                                         [::cimi-events/set-select (-> %1 .-target .-value)])}]]])
 
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
-             [ui/Input (cond->
-                         {:type         "text"
-                          :label        (@tr [:order])
-                          :defaultValue (or $orderby "")
-                          :on-blur      #(dispatch [::cimi-events/set-orderby (-> %1 .-target .-value)])}
-                         (:$orderby @nav-query-params-local) (merge {:value (:$orderby @nav-query-params-local)})
-                         )]]
-
+             ^{:key (str "orderby:" $orderby)}
+             [ui/Input {:type         "text"
+                        :label        (@tr [:order])
+                        :defaultValue $orderby
+                        :on-blur      #(dispatch
+                                         [::cimi-events/set-orderby (-> %1 .-target .-value)])}]]
 
             [ui/FormField
-             [ui/Input (cond->
-                         {:type         "text"
-                          :label        (@tr [:aggregation])
-                          :defaultValue (or $aggregation "")
-                          :on-blur      #(dispatch [::cimi-events/set-aggregation (-> %1 .-target .-value)])}
-                         (:$aggregation @nav-query-params-local) (merge {:value (:$aggregation @nav-query-params-local)})
-                         )]]])
+             ^{:key (str "aggregation:" $aggregation)}
+             [ui/Input {:type         "text"
+                        :label        (@tr [:aggregation])
+                        :defaultValue $aggregation
+                        :on-blur      #(dispatch [::cimi-events/set-aggregation (-> %1 .-target .-value)])}]]])
 
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
-             [ui/Input (cond->
-                         {:type         "text"
-                          :label        (@tr [:filter])
-                          :defaultValue (or $filter "")
-                          :on-blur      #(dispatch [::cimi-events/set-filter (-> %1 .-target .-value)])}
-                         (:$filter @nav-query-params-local) (merge {:value (:$filter @nav-query-params-local)})
-                         )]]])
-         (when @nav-query-params-local
-           (reset! nav-query-params-local "consumed"))]
-        )
-      )))
+             ^{:key (str "filter:" $filter)}
+             [ui/Input
+              {:type         "text"
+               :label        (@tr [:filter])
+               :defaultValue $filter
+               :on-blur      #(dispatch [::cimi-events/set-filter (-> %1 .-target .-value)])}]]])]))))
 
 
 (defn format-field-item [selections-atom item]
