@@ -6,7 +6,7 @@
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.history.events :as history-events]
-    [sixsq.slipstream.webui.main.effects :as main-fx]
+    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.utils.general :as general-utils]
     [sixsq.slipstream.webui.utils.response :as response]))
@@ -43,13 +43,7 @@
   ::download-report
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ id]]
     {::cimi-api-fx/operation [client id "http://sixsq.com/slipstream/1/action/download"
-                              #(dispatch [::download (:uri %)])]}))
-
-
-(reg-event-fx
-  ::download
-  (fn [_ [_ uri]]
-    {::main-fx/open-new-window [uri]}))
+                              #(dispatch [::main-events/open-new-window (:uri %)])]}))
 
 
 (reg-event-db
@@ -106,9 +100,3 @@
                              "events"
                              (general-utils/prepare-params query-params)
                              #(dispatch [::set-events %])]})))
-
-
-(reg-event-fx
-  ::open-link
-  (fn [_ [_ uri]]
-    {::main-fx/open-new-window [uri]}))

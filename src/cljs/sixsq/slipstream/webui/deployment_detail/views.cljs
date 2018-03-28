@@ -332,7 +332,7 @@
         (when (and link (= "Ready" state))
           [ui/MenuItem
            {:name     "open"
-            :on-click #(dispatch [::deployment-detail-events/open-link link])}
+            :on-click #(dispatch [::main-events/open-new-window link])}
            [ui/Icon {:name "external"}]
            link])))))
 

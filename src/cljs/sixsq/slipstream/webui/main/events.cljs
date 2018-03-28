@@ -44,3 +44,8 @@
   ::trim-breadcrumb
   (fn [{{:keys [::main-spec/nav-path] :as db} :db} [_ index]]
     {::history-fx/navigate [(str/join "/" (take (inc index) nav-path))]}))
+
+(reg-event-fx
+  ::open-new-window
+  (fn [_ [_ uri]]
+    {::main-fx/open-new-window [uri]}))

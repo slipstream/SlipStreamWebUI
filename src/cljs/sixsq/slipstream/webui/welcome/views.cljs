@@ -11,7 +11,8 @@
   [path]
   (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Container {:textAlign "center"}
-     [ui/Header {:as "h1"}
-      (@tr [:welcome])]
+     [ui/Image {:src "/images/login_page_content_big_image.png"
+                :centered true
+                :size "big"}]
      [ui/Header {:as "h5"}
       [:span#release-version (str "SlipStream v")]]]))

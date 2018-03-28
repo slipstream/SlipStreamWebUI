@@ -6,9 +6,14 @@
 
 
 (reg-sub
+  ::modal-reset-pass-open?
+  (fn [db]
+    (::authn-spec/modal-reset-pass-open? db)))
+
+(reg-sub
   ::modal-open?
   (fn [db]
-    (::authn-spec/modal-open? db)))
+    (::authn-spec/modal-login-open? db)))
 
 (reg-sub
   ::session
@@ -16,7 +21,7 @@
     (::authn-spec/session db)))
 
 (defn has-role? [session role]
-  (some-> session :roles (str/split  #"\s+") set (contains? role)))
+  (some-> session :roles (str/split #"\s+") set (contains? role)))
 
 (reg-sub
   ::is-admin?

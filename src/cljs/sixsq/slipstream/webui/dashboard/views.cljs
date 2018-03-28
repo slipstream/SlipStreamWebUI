@@ -78,7 +78,7 @@
        [vms-deployments]])))
 
 (defn ^:export set-cloud-filter [cloud]
-  (log/debug "dispatch open-modal for authn view")
+  (log/debug "dispatch set-cloud-filter:" cloud)
   (dispatch [::dashboard-events/set-filtered-cloud cloud]))
 
 (defmethod panel/render :dashboard

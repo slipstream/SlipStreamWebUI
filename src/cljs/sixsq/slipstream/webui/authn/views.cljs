@@ -146,7 +146,7 @@
 
          (when loading [ui/Dimmer {:active true :inverted true} [ui/Loader (@tr [:loading])]])
 
-         [ui/Grid {:columns 2 :textAlign "center" :stackable true :celled "internally"}
+         [ui/Grid {:columns 2 :textAlign "center" :stackable true}
 
           [ui/GridColumn {:stretched true}
            [ui/Segment {:basic externals? :textAlign "left"}
@@ -170,52 +170,96 @@
        {:id        "modal-login-id"
         :open      @modal-open?
         :closeIcon true
-        :on-close  #(dispatch [::authn-events/close-modal])}
+        :on-close  #(dispatch [::authn-events/close-modal-login])}
        [ui/ModalHeader (@tr [:login])]
        [ui/ModalContent {:scrolling true}
         [login-form-container]]])))
 
-(defn login-button
-  "This panel shows the login button and modal (if open)."
-  []
+(defn modal-reset-password [reset-password-open]
+  (let [tr (subscribe [::i18n-subs/tr])
+        modal-reset-pass-open? (subscribe [::authn-subs/modal-reset-pass-open?])]
+    [ui/Modal {:basic     true
+               :open      @modal-reset-pass-open?
+               :closeIcon true
+               :on-close  #(dispatch [::authn-events/close-modal-reset-pass])}
+     [ui/ModalHeader (@tr [:reset-password])]
+     [ui/ModalContent
+      [ui/Form {:warning true :inverted true}
+       [ui/FormInput {:autoFocus     true
+                      :labelPosition "left"
+                      :placeholder   (@tr [:username])}]
+       [ui/Message {:warning true
+                    :content (@tr [:reset-pass-message])}]]]
+     [ui/ModalActions
+      [ui/Button {:basic    true
+                  :inverted true
+                  :icon     "send"
+                  :content  (@tr [:send])
+                  :on-click #(dispatch [::authn-events/close-modal-reset-pass])}]]]))
+
+(defn login-menu []
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [:div
-       [ui/Button
-        {:size "tiny" :primary true :on-click #(dispatch [::authn-events/open-modal])}
-        (@tr [:login])]
-       [modal-login]])))
+       [ui/ButtonGroup {:primary true :size "tiny"}
+        [ui/Button {:on-click #(dispatch [::authn-events/open-modal-login])}
+         [ui/Icon {:name "sign in"}] (@tr [:login])]
+        [ui/Dropdown {:inline    true
+                      :button    true
+                      :className "icon"}
+         [ui/DropdownMenu
+          [ui/DropdownItem {:icon     "lightning"
+                            :text     (@tr [:reset-password])
+                            :on-click #(dispatch [::authn-events/open-modal-reset-pass])}]
+          [ui/DropdownDivider]
+          [ui/DropdownItem {:icon     "book"
+                            :text     (@tr [:documentation])
+                            :href "http://ssdocs.sixsq.com/"
+                            :target "_blank"}]
+          [ui/DropdownItem {:icon     "info circle"
+                            :text     (@tr [:knowledge-base])
+                            :href "http://support.sixsq.com/solution/categories"
+                            :target "_blank"}]
+          [ui/DropdownItem {:icon "mail"
+                            :text (@tr [:support])
+                            :href (str "mailto:support%40sixsq%2Ecom"
+                                       "?subject=%5BSlipStream%5D%20Support%20question%20%2D%20Not%20logged%20in")}]]]]
+       [modal-login]
+       [modal-reset-password]])))
 
-(defn authn-menu
-  "Provides either a login or user dropdown depending on whether the user has
-   an active session. The login button will bring up a modal dialog."
-  []
+(defn user-menu []
   (let [tr (subscribe [::i18n-subs/tr])
         user (subscribe [::authn-subs/user])
         on-click (fn []
                    (dispatch [::authn-events/logout])
                    (dispatch [::history-events/navigate "welcome"]))]
-    (fn []
-      (if-not @user
-        [login-button]
-        [ui/Dropdown {:item            true
-                      :simple          false
-                      :icon            nil
-                      :close-on-change true
-                      :trigger         (r/as-element [:span [ui/Icon {:name "user circle"}] @user])}
-         [ui/DropdownMenu
-          [ui/DropdownItem
-           {:key      "profile"
-            :text     (@tr [:profile])
-            :icon     "user"
-            :on-click #(history-utils/navigate "profile")}]
-          [ui/DropdownItem
-           {:key      "sign-out"
-            :text     (@tr [:logout])
-            :icon     "sign out"
-            :on-click on-click}]]]))))
+    [ui/Dropdown {:item            true
+                  :simple          false
+                  :icon            nil
+                  :close-on-change true
+                  :trigger         (r/as-element [:span [ui/Icon {:name "user circle"}] @user])}
+     [ui/DropdownMenu
+      [ui/DropdownItem
+       {:key      "profile"
+        :text     (@tr [:profile])
+        :icon     "user"
+        :on-click #(history-utils/navigate "profile")}]
+      [ui/DropdownItem
+       {:key      "sign-out"
+        :text     (@tr [:logout])
+        :icon     "sign out"
+        :on-click on-click}]]]))
+
+(defn authn-menu
+  "Provides either a login or user dropdown depending on whether the user has
+   an active session. The login button will bring up a modal dialog."
+  []
+  (let [user (subscribe [::authn-subs/user])]
+    (if-not @user
+      [login-menu]
+      [user-menu])))
 
 
 (defn ^:export open-authn-modal []
-  (log/debug "dispatch open-modal for authn view")
-  (dispatch [::authn-events/open-modal]))
+  (log/debug "dispatch open-modal-login for authn view")
+  (dispatch [::authn-events/open-modal-login]))

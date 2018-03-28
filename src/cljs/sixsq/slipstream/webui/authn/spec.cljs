@@ -5,8 +5,9 @@
     [sixsq.slipstream.webui.config :as config]
     [taoensso.timbre :as log]))
 
+(s/def ::modal-reset-pass-open? boolean?)
 
-(s/def ::modal-open? boolean?)
+(s/def ::modal-login-open? boolean?)
 
 (s/def ::session (s/nilable any?))
 
@@ -35,14 +36,23 @@
 
 (s/def ::methods (s/coll-of :method/method-defn :kind vector?))
 
-(s/def ::db (s/keys :req [::modal-open? ::session ::error-message ::total ::count ::methods ::forms ::redirect-uri]))
+(s/def ::db (s/keys :req [::modal-reset-pass-open?
+                          ::modal-login-open?
+                          ::session
+                          ::error-message
+                          ::total
+                          ::count
+                          ::methods
+                          ::forms
+                          ::redirect-uri]))
 
 (def defaults
-  {::modal-open?         false
-   ::session             nil
-   ::error-message       nil
-   ::total               0
-   ::count               0
-   ::methods             []
-   ::server-redirect-uri (str @config/path-prefix "/profile")
-   ::redirect-uri        nil})
+  {::modal-reset-pass-open? false
+   ::modal-login-open?      false
+   ::session                nil
+   ::error-message          nil
+   ::total                  0
+   ::count                  0
+   ::methods                []
+   ::server-redirect-uri    (str @config/path-prefix "/profile")
+   ::redirect-uri           nil})

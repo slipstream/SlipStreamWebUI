@@ -60,15 +60,27 @@
 
 
 (reg-event-db
-  ::open-modal
+  ::open-modal-login
   (fn [db _]
-    (assoc db ::authn-spec/modal-open? true)))
+    (assoc db ::authn-spec/modal-login-open? true)))
 
 
 (reg-event-db
-  ::close-modal
+  ::close-modal-login
   (fn [db _]
-    (assoc db ::authn-spec/modal-open? false)))
+    (assoc db ::authn-spec/modal-login-open? false)))
+
+
+(reg-event-db
+  ::open-modal-reset-pass
+  (fn [db _]
+    (assoc db ::authn-spec/modal-reset-pass-open? true)))
+
+
+(reg-event-db
+  ::close-modal-reset-pass
+  (fn [db _]
+    (assoc db ::authn-spec/modal-reset-pass-open? false)))
 
 
 (reg-event-db
