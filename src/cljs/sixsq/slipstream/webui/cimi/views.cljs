@@ -181,8 +181,7 @@
 (defn search-header []
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::cimi-subs/filter-visible?])
-        query-params (subscribe [::cimi-subs/query-params])
-        nav-query-params (subscribe [::main-subs/nav-query-params])]
+        query-params (subscribe [::cimi-subs/query-params])]
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
