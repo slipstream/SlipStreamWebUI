@@ -92,5 +92,6 @@
 (defn replace-url-history
   "Replace url in history with the given URL."
   [url]
-  (.replaceState js/history (clj->js {}) "" url))
+  (let [short-url (last (str/split url #"/"))]              ;; FIXME: Revisit logic to make sure it works in all cases.
+    (.replaceState js/history nil nil short-url)))
 
