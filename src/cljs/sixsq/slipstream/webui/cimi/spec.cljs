@@ -62,7 +62,7 @@
                                       :$select      nil
                                       :$aggregation nil}
                ::loading?            false
-               ::filter-visible?     false
+               ::filter-visible?     true
                ::aggregations        nil
                ::collection          nil
                ::collection-name     nil
