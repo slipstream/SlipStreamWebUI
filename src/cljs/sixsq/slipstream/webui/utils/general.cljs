@@ -51,60 +51,9 @@
        vec))
 
 
-(declare xml->json)
-
-
-(defn node-name [node]
-  (.-nodeName node))
-
-
-(defn node-value [node]
-  (.-nodeValue node))
-
-
-(defn attributes [node]
-  (for [i (range (.-attributes.length node))] (.attributes.item node i)))
-
-
-(defn children [node]
-  (for [i (range (.-childNodes.length node))] (.childNodes.item node i)))
-
-
-(defn attribute-map [element]
-  (if (and element (= 1 (.-nodeType element)))
-    (into {} (map (juxt node-name node-value) (attributes element)))))
-
-
-(defn unwrap-single-item [coll]
-  (if (= 1 (count coll))
-    (first coll)
-    coll))
-
-
-(defn blank-text-node? [[k v]]
-  (and (= "#text" k) (str/blank? v)))
-
-
-(defn child-map [element]
-  (if (.hasChildNodes element)
-    (->> (children element)
-         (map (juxt node-name xml->json))
-         (remove blank-text-node?)
-         (group-by first)
-         (map (fn [[k v]] [k (unwrap-single-item (map second v))]))
-         (into {}))))
-
-
-(defn xml->json [node]
-  (if node
-    (if (= (.-nodeType node) 3)
-      (.-nodeValue node)                                    ;; text node
-      (merge (attribute-map node) (child-map node)))))
-
-
 (defn parse-resource-path
   "Utility to split a resource path into a vector of terms. Returns an empty
-   vector for a nil argument. Removes blank or empty terms from the result."
+   vector for a nil argument. Removes blank or nil terms from the result."
   [path]
   (vec (remove str/blank? (str/split path #"/"))))
 
@@ -130,9 +79,13 @@
   (js->clj (.parse js/JSON json) :keywordize-keys keywordize-keys))
 
 
-(defn random-id
-  "Random six character string that can be used to generate unique
-   identifiers."
-  []
-  (let [rand-alphanum #(rand-nth (vec "abcdefghijklmnopqrstuvwxyz0123456789"))]
-    (str/join "" (take 6 (repeatedly rand-alphanum)))))
+(def rand-alphanums (repeatedly #(rand-nth (vec "abcdefghijklmnopqrstuvwxyz0123456789"))))
+
+
+(defn random-element-id
+  "Random character string that can be used to generate unique element
+   identifiers. By default, will produce a string with 6 characters."
+  ([]
+   (random-element-id 6))
+  ([n]
+   (str/join "" (take n rand-alphanums))))
