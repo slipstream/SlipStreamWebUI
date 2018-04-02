@@ -23,8 +23,8 @@
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.general :as utils]))
+    [sixsq.slipstream.webui.utils.general :as utils]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn sidebar []
