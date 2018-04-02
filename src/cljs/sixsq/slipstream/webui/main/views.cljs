@@ -23,7 +23,8 @@
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.general :as utils]))
 
 
 (defn sidebar []
@@ -66,7 +67,8 @@
 (defn crumb
   [index segment]
   (let [nav-fn (fn [& _] (dispatch [::main-events/trim-breadcrumb index]))]
-    ^{:key segment} [ui/BreadcrumbSection [:a {:on-click nav-fn :style {:cursor "pointer"}} (str segment)]]))
+    ^{:key segment} [ui/BreadcrumbSection [:a {:on-click nav-fn :style {:cursor "pointer"}}
+                                           (utils/truncate (str segment))]]))
 
 
 (defn breadcrumbs []
