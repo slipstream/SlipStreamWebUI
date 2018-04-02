@@ -16,7 +16,7 @@
   "Function that acts as the reagent component for the Vega-Lite div. This
    should only be used via the public component function."
   [plot-defn data {:keys [options] :as args}]
-  (let [plot-id (str "plot-" (general/random-id))
+  (let [plot-id (str "plot-" (general/random-element-id))
         options (merge default-vega-opts options)]
     (reagent/create-class
       {:display-name "vega-lite-plot"

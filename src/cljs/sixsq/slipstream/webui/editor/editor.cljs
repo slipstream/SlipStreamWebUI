@@ -29,7 +29,7 @@
    only be used via the public component function."
   [text {:keys [options] :as args}]
   (let [ref (reagent/atom nil)
-        editor-id (str "editor-" (general/random-id))
+        editor-id (str "editor-" (general/random-element-id))
         options (clj->js options)]
     (reagent/create-class
       {:display-name "codemirror-editor"
