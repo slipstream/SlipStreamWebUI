@@ -122,58 +122,48 @@
 
 (defn runs-control []
   (let [tr (subscribe [::i18n-subs/tr])
-        query-params (subscribe [::deployment-subs/query-params])
-        offset-value (reagent/atom (:offset @query-params))
-        limit-value (reagent/atom (:limit @query-params))
-        cloud-value (reagent/atom (:cloud @query-params))
-        activeOnly-value (reagent/atom (-> @query-params :activeOnly js/parseInt zero? not))]
+        query-params (subscribe [::deployment-subs/query-params])]
     (fn []
       (let [{:keys [offset limit cloud activeOnly]} @query-params]
-        (reset! offset-value offset)
-        (reset! limit-value limit)
-        (reset! cloud-value cloud)
-        (reset! activeOnly-value (-> activeOnly js/parseInt zero? not)))
-      [ui/Form
-       [ui/FormGroup
-        [ui/FormField
-         [ui/Input {:type      "number"
-                    :min       0
-                    :label     (@tr [:offset])
-                    :value     @offset-value
-                    :on-change (ui-utils/callback :value
-                                                  (fn [v]
-                                                    (reset! offset-value v)
-                                                    (dispatch [::deployment-events/set-query-params {:offset v}])))}]]
+        [ui/Form
+         [ui/FormGroup
+          [ui/FormField
+           ^{:key (str "offset:" offset)}
+           [ui/Input {:type         "number"
+                      :min          0
+                      :label        (@tr [:offset])
+                      :defaultValue offset
+                      :on-blur      #(dispatch
+                                       [::deployment-events/set-query-params {:offset (-> %1 .-target .-value)}])
+                      }]]
 
-        [ui/FormField
-         [ui/Input {:type      "number"
-                    :min       0
-                    :label     (@tr [:limit])
-                    :value     @limit-value
-                    :on-change (ui-utils/callback :value
-                                                  (fn [v]
-                                                    (reset! limit-value v)
-                                                    (dispatch [::deployment-events/set-query-params {:limit v}])))}]]]
+          [ui/FormField
+           ^{:key (str "limit:" limit)}
+           [ui/Input {:type         "number"
+                      :min          0
+                      :label        (@tr [:limit])
+                      :defaultValue limit
+                      :on-blur      #(dispatch
+                                       [::deployment-events/set-query-params {:limit (-> %1 .-target .-value)}])}]]]
 
-       [ui/FormGroup
-        [ui/FormField
-         [ui/Input {:type      "text"
-                    :label     (@tr [:cloud])
-                    :value     @cloud-value
-                    :on-change (ui-utils/callback :value
-                                                  (fn [v]
-                                                    (reset! cloud-value v)
-                                                    (dispatch [::deployment-events/set-query-params {:cloud v}])))}]]
-        [ui/FormField
-         [ui/Checkbox {:checked   @activeOnly-value
-                       :slider    true
-                       :fitted    true
-                       :label     (@tr [:active?])
-                       :on-change (ui-utils/callback :checked
-                                                     (fn [v]
-                                                       (let [flag (bool->int v)]
-                                                         (reset! activeOnly-value flag)
-                                                         (dispatch [::deployment-events/set-query-params {:activeOnly flag}]))))}]]]])))
+         [ui/FormGroup
+          [ui/FormField
+           ^{:key (str "cloud:" cloud)}
+           [ui/Input {:type         "text"
+                      :label        (@tr [:cloud])
+                      :defaultValue cloud
+                      :on-blur      #(dispatch
+                                       [::deployment-events/set-query-params {:cloud (-> %1 .-target .-value)}])}]]
+          [ui/FormField
+           ^{:key (str "activeOnly:" activeOnly)}
+           [ui/Checkbox {:defaultChecked (-> activeOnly js/parseInt zero? not)
+                         :slider         true
+                         :fitted         true
+                         :label          (@tr [:active?])
+                         :on-change      (ui-utils/callback
+                                           :checked #(dispatch [::deployment-events/set-query-params
+                                                                {:activeOnly (bool->int %)}]))}]]]]
+        ))))
 
 
 (defn menu-bar

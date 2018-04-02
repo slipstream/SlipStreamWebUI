@@ -1,17 +1,18 @@
 (ns sixsq.slipstream.webui.authn.views
   (:require
     [re-frame.core :refer [subscribe dispatch]]
+    [taoensso.timbre :as log]
+    [reagent.core :as r]
 
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.history.utils :as history-utils]
-    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.utils.general :as utils]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]
-    [reagent.core :as r]))
 
 (defn method-comparator
   "Compares two login method types. The value 'internal' will always compare
@@ -24,10 +25,12 @@
     (< x y) -1
     :else 1))
 
+
 (defn sort-value [[tag [{:keys [authn-method]}]]]
   (if (= "internal" authn-method)
     "internal"
     (or tag authn-method)))
+
 
 (defn order-and-group
   "Sorts the methods by ID and then groups them (true/false) on whether it is
@@ -38,13 +41,16 @@
        (group-by #(or (:group %) (:authn-method %)))
        (sort-by sort-value method-comparator)))
 
+
 (defn internal-or-api-key
   [[_ methods]]
   (let [authn-method (:authn-method (first methods))]
     (#{"internal" "api-key"} authn-method)))
 
+
 (defn hidden? [{:keys [type] :as param-desc}]
   (= "hidden" type))
+
 
 (defn ordered-params
   "Extracts and orders the parameter descriptions for rendering the form."
@@ -54,14 +60,17 @@
        seq
        (sort-by (fn [[_ {:keys [order]}]] order))))
 
+
 (defn keep-param-mandatory-not-readonly? [[k {:keys [mandatory readOnly]}]]
   (and mandatory (not readOnly)))
+
 
 (defn select-method-by-id
   [id methods]
   (->> methods
        (filter #(= id (:id %)))
        first))
+
 
 (defn form-component
   "Provides a single element of a form. This should provide a reasonable
@@ -82,6 +91,7 @@
                    :icon         "user"
                    :iconPosition "left"
                    :required     mandatory}]))
+
 
 (defn method-form
   "Renders the form for a particular login method. The fields are taken from
@@ -118,6 +128,7 @@
                                                 with-params? (-> selected-method :params-desc true?)]
                                             (reset! selected-method-group selected-method))
                             :style       {:text-align "center"}}]]])]))))))
+
 
 (defn login-form-container
   "Container that holds all of the login forms. These will be placed into two
@@ -158,9 +169,8 @@
              [ui/Segment {:textAlign "left"}
               [:div
                (vec (concat [:div]
-                            (map (fn [[k v]] [method-form k v]) externals)))]]])
-          ]
-         ]))))
+                            (map (fn [[k v]] [method-form k v]) externals)))]]])]]))))
+
 
 (defn modal-login []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -175,6 +185,7 @@
        [ui/ModalContent {:scrolling true}
         [login-form-container]]])))
 
+
 (defn login-button
   "This panel shows the login button and modal (if open)."
   []
@@ -185,6 +196,7 @@
         {:size "tiny" :primary true :on-click #(dispatch [::authn-events/open-modal])}
         (@tr [:login])]
        [modal-login]])))
+
 
 (defn authn-menu
   "Provides either a login or user dropdown depending on whether the user has
@@ -202,7 +214,8 @@
                       :simple          false
                       :icon            nil
                       :close-on-change true
-                      :trigger         (r/as-element [:span [ui/Icon {:name "user circle"}] @user])}
+                      :trigger         (r/as-element [:span [ui/Icon {:name "user circle"}]
+                                                      (utils/truncate @user)])}
          [ui/DropdownMenu
           [ui/DropdownItem
            {:key      "profile"

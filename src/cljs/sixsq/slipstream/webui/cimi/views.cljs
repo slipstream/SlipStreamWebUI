@@ -181,87 +181,68 @@
 (defn search-header []
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::cimi-subs/filter-visible?])
-        query-params (subscribe [::cimi-subs/query-params])
-        first-value (reagent/atom "1")
-        last-value (reagent/atom "20")
-        filter-value (reagent/atom "")
-        orderby-value (reagent/atom "")
-        select-value (reagent/atom "")
-        aggregation-value (reagent/atom "")]
+        query-params (subscribe [::cimi-subs/query-params])]
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
-        (reset! first-value (str (or $first "")))
-        (reset! last-value (str (or $last "")))
-        (reset! filter-value (str (or $filter "")))
-        (reset! orderby-value (str (or $orderby "")))
-        (reset! select-value (str (or $select "")))
-        (reset! aggregation-value (str (or $aggregation ""))))
-      [ui/Form
-       [ui/FormField
-        [cloud-entry-point-title]]
-       (when @filter-visible?
-         [ui/FormGroup {:widths "equal"}
-          [ui/FormField
-           [ui/Input {:type      "number"
-                      :min       0
-                      :label     (@tr [:first])
-                      :value     @first-value
-                      :on-change (cutil/callback :value
-                                                 (fn [v]
-                                                   (reset! first-value v)
-                                                   (dispatch [::cimi-events/set-first v])))}]]
+        [ui/Form
+         [ui/FormField
+          [cloud-entry-point-title]]
+         (when @filter-visible?
+           [ui/FormGroup {:widths "equal"}
+            [ui/FormField
+             ; the key below is a workaround react issue with controlled input cursor position,
+             ; this will force to re-render defaultValue on change of the value
+             ^{:key (str "first:" $first)}
+             [ui/Input {:type         "number"
+                        :min          0
+                        :label        (@tr [:first])
+                        :defaultValue $first
+                        :on-blur      #(dispatch [::cimi-events/set-first (-> %1 .-target .-value)])}]]
 
-          [ui/FormField
-           [ui/Input {:type      "number"
-                      :min       0
-                      :label     (@tr [:last])
-                      :value     @last-value
-                      :on-change (cutil/callback :value
-                                                 (fn [v]
-                                                   (reset! last-value v)
-                                                   (dispatch [::cimi-events/set-last v])))}]]
+            [ui/FormField
+             ^{:key (str "last:" $last)}
+             [ui/Input {:type         "number"
+                        :min          0
+                        :label        (@tr [:last])
+                        :defaultValue $last
+                        :on-blur      #(dispatch
+                                         [::cimi-events/set-last (-> %1 .-target .-value)])}]]
 
-          [ui/FormField
-           [ui/Input {:type      "text"
-                      :label     (@tr [:select])
-                      :value     @select-value
-                      :on-change (cutil/callback :value
-                                                 (fn [v]
-                                                   (reset! select-value v)
-                                                   (dispatch [::cimi-events/set-select v])))}]]])
+            [ui/FormField
+             ^{:key (str "select:" $select)}
+             [ui/Input {:type         "text"
+                        :label        (@tr [:select])
+                        :defaultValue $select
+                        :on-blur      #(dispatch
+                                         [::cimi-events/set-select (-> %1 .-target .-value)])}]]])
 
-       (when @filter-visible?
-         [ui/FormGroup {:widths "equal"}
-          [ui/FormField
-           [ui/Input {:type      "text"
-                      :label     (@tr [:order])
-                      :value     @orderby-value
-                      :on-change (cutil/callback :value
-                                                 (fn [v]
-                                                   (reset! orderby-value v)
-                                                   (dispatch [::cimi-events/set-orderby v])))}]]
+         (when @filter-visible?
+           [ui/FormGroup {:widths "equal"}
+            [ui/FormField
+             ^{:key (str "orderby:" $orderby)}
+             [ui/Input {:type         "text"
+                        :label        (@tr [:order])
+                        :defaultValue $orderby
+                        :on-blur      #(dispatch
+                                         [::cimi-events/set-orderby (-> %1 .-target .-value)])}]]
 
+            [ui/FormField
+             ^{:key (str "aggregation:" $aggregation)}
+             [ui/Input {:type         "text"
+                        :label        (@tr [:aggregation])
+                        :defaultValue $aggregation
+                        :on-blur      #(dispatch [::cimi-events/set-aggregation (-> %1 .-target .-value)])}]]])
 
-          [ui/FormField
-           [ui/Input {:type      "text"
-                      :label     (@tr [:aggregation])
-                      :value     @aggregation-value
-                      :on-change (cutil/callback :value
-                                                 (fn [v]
-                                                   (reset! aggregation-value v)
-                                                   (dispatch [::cimi-events/set-aggregation v])))}]]])
-
-       (when @filter-visible?
-         [ui/FormGroup {:widths "equal"}
-          [ui/FormField
-           [ui/Input {:type      "text"
-                      :label     (@tr [:filter])
-                      :value     @filter-value
-                      :on-change (cutil/callback :value
-                                                 (fn [v]
-                                                   (reset! filter-value v)
-                                                   (dispatch [::cimi-events/set-filter v])))}]]])])))
+         (when @filter-visible?
+           [ui/FormGroup {:widths "equal"}
+            [ui/FormField
+             ^{:key (str "filter:" $filter)}
+             [ui/Input
+              {:type         "text"
+               :label        (@tr [:filter])
+               :defaultValue $filter
+               :on-blur      #(dispatch [::cimi-events/set-filter (-> %1 .-target .-value)])}]]])]))))
 
 
 (defn format-field-item [selections-atom item]

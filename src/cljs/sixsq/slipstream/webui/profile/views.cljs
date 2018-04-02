@@ -17,7 +17,10 @@
 (defn tuple-to-row [[v1 v2]]
   [ui/TableRow
    [ui/TableCell {:collapsing true} (str v1)]
-   [ui/TableCell v2]])
+   [ui/TableCell {:style {:max-width     "80ex"             ;; FIXME: need to get this from parent container
+                          :text-overflow "ellipsis"
+                          :overflow      "hidden"}}
+    v2]])
 
 
 (def data-to-tuple
@@ -87,12 +90,11 @@
     [cc/collapsible-card
      (@tr [:session])
      (if session
-       (group-table-sui data)
+       [group-table-sui data]
        [:p (@tr [:no-session])])]))
 
 
 (defmethod panel/render :profile
   [path]
-  [ui/Container {:fluid true}
-   [session-info]])
+  [session-info])
 
