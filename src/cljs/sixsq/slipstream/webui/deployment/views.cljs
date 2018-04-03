@@ -4,25 +4,18 @@
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as reagent]
 
-    [sixsq.slipstream.webui.panel :as panel]
-
     [sixsq.slipstream.webui.application.subs :as application-subs]
-
     [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-
-    [sixsq.slipstream.webui.utils.component :as ui-utils]
-
-    [sixsq.slipstream.webui.history.events :as history-events]
-
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-
-    [sixsq.slipstream.webui.main.subs :as main-subs]
-
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.component :as ui-utils]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn bool->int [bool]
@@ -47,16 +40,34 @@
 
 (defn input-parameter-field
   [[name description defaultValue]]
-  [ui/Input (cond-> {:fluid          true
-                     :placeholder    name
-                     :label-position "left"}
-                    defaultValue (assoc :defaultValue defaultValue)
-                    description (assoc :icon true))
-   (if description
-     [ui/Popup {:content description
-                :trigger (reagent/as-element [ui/Label [ui/Icon {:name "help circle"}] name])}]
-     [ui/Label name])
-   [:input]])
+  [ui/TableRow
+   [ui/TableCell {:collapsing true}
+    (if description
+      [ui/Popup {:content description
+                 :trigger (reagent/as-element [:span [ui/Icon {:name "help circle"}] name])}]
+      [:span name])]
+   [ui/TableCell
+    [ui/Input (cond-> {:fluid       true
+                       :placeholder name
+                       :transparent true}
+                      defaultValue (assoc :defaultValue defaultValue))]]])
+
+
+(defn input-parameter-field-number
+  [[name description defaultValue]]
+  [ui/TableRow
+   [ui/TableCell {:collapsing true}
+    (if description
+      [ui/Popup {:content description
+                 :trigger (reagent/as-element [:span [ui/Icon {:name "help circle"}] name])}]
+      [:span name])]
+   [ui/TableCell
+    [ui/Input (cond-> {:type        "number"
+                       :min         0
+                       :fluid       true
+                       :placeholder name
+                       :transparent true}
+                      defaultValue (assoc :defaultValue defaultValue))]]])
 
 
 (defn input-parameters-form
@@ -70,42 +81,34 @@
                               (filter #(= "Input" (:category %)))
                               (map (juxt :name :description :defaultValue))
                               (sort-by first)
-                              (map input-parameter-field)
-                              (cons [ui/Header (@tr [:parameters])]))]
-            (vec (concat [ui/Segment {:fluid true}] children))))))))
+                              (map input-parameter-field))]
+            [ui/Segment
+             [ui/Header (@tr [:parameters])]
+             [ui/Table {:definition  true
+                        :compact     true
+                        :single-line true}
+              (vec (concat [ui/TableBody] children))]]))))))
 
 
 (defn cpu-ram-disk
   []
   [ui/Segment
    [ui/Header "resources"]
-   [ui/FormGroup
-    [ui/FormField
-     [ui/Input {:type           "number"
-                :min            0
-                :placeholder    "CPU"
-                :icon           true
-                :label-position "left"}
-      [ui/Popup {:content "override the required number of CPUs"
-                 :trigger (reagent/as-element [ui/Label [ui/Icon {:name "help circle"}] "CPU"])}]
-      [:input]]]
-    [ui/FormInput {:type        "number"
-                   :min         0
-                   :placeholder "RAM"
-                   :label       (reagent/as-element [ui/Popup {:content "override the required amount of RAM"
-                                                               :trigger (reagent/as-element [ui/Label {:attached "bottom", :basic true, :compact true} [ui/Icon {:name "help circle"}] "RAM"])}])}]
-    [ui/FormField
-     [ui/Input {:type        "number"
-                :min         0
-                :placeholder "disk"
-                :label       "disk"}]]]])
+   [ui/Table {:definition  true
+              :compact     true
+              :single-line true}
+    [input-parameter-field-number ["CPU" "override the required number of CPUs"]]
+    [input-parameter-field-number ["RAM" "override the required amount of RAM"]]
+    [input-parameter-field-number ["disk" "override the required amount of disk"]]]])
+
 
 (defn deployment-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
         target-module (subscribe [::deployment-subs/deployment-target])]
     (fn []
-      [ui/Modal {:close-icon true
+      [ui/Modal {:size       "small"
+                 :close-icon true
                  :open       (boolean @target-module)
                  :on-close   #(dispatch [::deployment-events/clear-deployment-target])}
        [ui/ModalHeader (@tr [:deploy])]
@@ -162,8 +165,7 @@
                          :label          (@tr [:active?])
                          :on-change      (ui-utils/callback
                                            :checked #(dispatch [::deployment-events/set-query-params
-                                                                {:activeOnly (bool->int %)}]))}]]]]
-        ))))
+                                                                {:activeOnly (bool->int %)}]))}]]]]))))
 
 
 (defn menu-bar
