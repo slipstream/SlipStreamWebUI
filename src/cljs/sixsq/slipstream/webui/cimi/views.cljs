@@ -26,7 +26,8 @@
     [sixsq.slipstream.webui.utils.response :as response]
 
     [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [cljs.pprint :as pprint]))
 
 
 (defn id-selector-formatter [entry]
@@ -100,7 +101,9 @@
   (when data
     ^{:key label}
     [ui/Statistic {:size "tiny"}
-     [ui/StatisticValue value]
+     (if (int? value)
+       [ui/StatisticValue (pprint/cl-format nil "~D" value)]
+       [ui/StatisticValue (pprint/cl-format nil "~,2F" value)])
      [ui/StatisticLabel label]]))
 
 
