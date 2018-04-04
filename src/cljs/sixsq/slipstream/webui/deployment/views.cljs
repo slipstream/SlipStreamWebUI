@@ -15,7 +15,8 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.component :as ui-utils]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.general :as utils]))
 
 
 (defn bool->int [bool]
@@ -28,8 +29,8 @@
     [ui/Segment
      [ui/Header "general"]
      [ui/FormField
-      [ui/Checkbox {:label "SSH access"
-                    :value true}]]
+      [ui/Checkbox {:label   "SSH access"
+                    :checked true}]]
      [ui/FormSelect {:placeholder (@tr [:cloud])
                      :options     [{:key "alpha", :text "alpha", :value "alpha"}
                                    {:key "beta", :text "beta", :value "beta"}
@@ -82,12 +83,13 @@
                               (map (juxt :name :description :defaultValue))
                               (sort-by first)
                               (map input-parameter-field))]
-            [ui/Segment
-             [ui/Header (@tr [:parameters])]
-             [ui/Table {:definition  true
-                        :compact     true
-                        :single-line true}
-              (vec (concat [ui/TableBody] children))]]))))))
+            (when (seq children)
+              [ui/Segment
+               [ui/Header (@tr [:parameters])]
+               [ui/Table {:definition  true
+                          :compact     true
+                          :single-line true}
+                (vec (concat [ui/TableBody] children))]])))))))
 
 
 (defn cpu-ram-disk
@@ -97,15 +99,17 @@
    [ui/Table {:definition  true
               :compact     true
               :single-line true}
-    [input-parameter-field-number ["CPU" "override the required number of CPUs"]]
-    [input-parameter-field-number ["RAM" "override the required amount of RAM"]]
-    [input-parameter-field-number ["disk" "override the required amount of disk"]]]])
+    [ui/TableBody
+     [input-parameter-field-number ["CPU" "override the required number of CPUs"]]
+     [input-parameter-field-number ["RAM" "override the required amount of RAM"]]
+     [input-parameter-field-number ["disk" "override the required amount of disk"]]]]])
 
 
 (defn deployment-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        target-module (subscribe [::deployment-subs/deployment-target])]
+        target-module (subscribe [::deployment-subs/deployment-target])
+        form-id (utils/random-element-id)]
     (fn []
       [ui/Modal {:size       "small"
                  :close-icon true
@@ -114,13 +118,19 @@
        [ui/ModalHeader (@tr [:deploy])]
        [ui/ModalContent {:scrolling true}
         [ui/Header @target-module]
-        [ui/Form
+        [ui/Form {:id        form-id
+                  :onSubmit (fn [& args] (with-out-str (cljs.pprint/pprint args)))}
          [general-parameters]
          [input-parameters-form]
          [cpu-ram-disk]]]
        [ui/ModalContent
-        [ui/Button (@tr [:cancel])]
-        [ui/Button {:primary true} (@tr [:deploy])]]])))
+        [ui/Button
+         {:on-click #(dispatch [::deployment-events/clear-deployment-target])}
+         (@tr [:cancel])]
+        [ui/Button
+         {:primary  true
+          :on-click #(->> form-id js/document.getElementById .submit)}
+         (@tr [:deploy])]]])))
 
 
 (defn runs-control []
