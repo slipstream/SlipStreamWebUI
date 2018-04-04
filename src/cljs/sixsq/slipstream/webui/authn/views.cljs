@@ -101,7 +101,8 @@
         selected-method-group (r/atom (when (= 1 (count methods)) (first methods)))
         server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])]
     (fn [method-type methods]
-      (let [{:keys [id label] :as method} @selected-method-group
+      (let [dropdown? (> (count methods) 1)
+            {:keys [id label] :as method} @selected-method-group
             {:keys [baseURI collection-href]} @cep
             id (or id method-type)
             post-uri (str baseURI (:sessions collection-href)) ;; FIXME: Should be part of CIMI API.
@@ -113,21 +114,22 @@
                                :action post-uri
                                :method "post"}]
                      (map #(form-component %) inputs-method)
-                     [(if @selected-method-group
+                     [(if-not dropdown?
                         [ui/FormButton {:primary true :fluid true} label]
                         [ui/FormField
-                         [ui/ButtonGroup {:primary true :fluid true}
+                         [ui/ButtonGroup {:primary true, :fluid true}
+                          [ui/FormButton {:disabled (not @selected-method-group)} method-type]
                           [ui/Dropdown
-                           {:options     (map #(identity {:key   (:id %)
-                                                          :text  (:label %)
-                                                          :value (:id %)}) methods)
-                            :placeholder method-type
-                            :button      true
-                            :onChange    #(let [id (-> (js->clj %2 :keywordize-keys true) :value)
-                                                selected-method (select-method-by-id id methods)
-                                                with-params? (-> selected-method :params-desc true?)]
-                                            (reset! selected-method-group selected-method))
-                            :style       {:text-align "center"}}]]])]))))))
+                           {:options       (map #(identity {:key   (:id %)
+                                                            :text  (:label %)
+                                                            :value (:id %)}) methods)
+                            :button        true
+                            :class-name    "icon"
+                            :close-on-blur true
+                            :onChange      #(let [id (-> (js->clj %2 :keywordize-keys true) :value)
+                                                  selected-method (select-method-by-id id methods)]
+                                              (reset! selected-method-group selected-method))
+                            :style         {:text-align "center"}}]]])]))))))
 
 
 (defn login-form-container
