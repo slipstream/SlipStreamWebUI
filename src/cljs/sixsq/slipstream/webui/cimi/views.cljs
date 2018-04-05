@@ -2,31 +2,29 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as reagent]
+    [taoensso.timbre :as log]
 
-    [clojure.pprint :refer [pprint]]
+    [cljs.pprint :refer [pprint cl-format]]
     [clojure.set :as set]
     [clojure.string :as str]
-
-    [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.editor.editor :as editor]
-    [sixsq.slipstream.webui.utils.component :as cutil]
-    [sixsq.slipstream.webui.utils.forms :as form-utils]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
-
-    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.cimi.events :as cimi-events]
+    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.component :as cutil]
+    [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
-
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn id-selector-formatter [entry]
@@ -100,7 +98,9 @@
   (when data
     ^{:key label}
     [ui/Statistic {:size "tiny"}
-     [ui/StatisticValue value]
+     (if (int? value)
+       [ui/StatisticValue (cl-format nil "~D" value)]
+       [ui/StatisticValue (cl-format nil "~,2F" value)])
      [ui/StatisticLabel label]]))
 
 
