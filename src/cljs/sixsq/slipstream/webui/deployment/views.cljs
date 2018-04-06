@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.deployment.views
   (:require
     [clojure.string :as str]
+    [cljs.pprint :refer [cl-format]]
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as reagent]
 
@@ -23,52 +24,79 @@
   (if bool 1 0))
 
 
+(defn offer-option
+  [{:keys [id name currency price connector]}]
+  (let [formatted-price (if (neg? price)
+                          "no price"
+                          (str currency " " (cl-format nil "~,4F" price) "/h"))
+        formatted-name (if-not (str/blank? name)
+                         (str " \u2014 " name)
+                         "")
+        label (str connector " \u2014 " formatted-price " " formatted-name)]
+    {:key   id
+     :text  label
+     :value id}))
+
+
+(defn offer-options
+  [{:keys [connectors]}]
+  (mapv offer-option connectors))
+
+
+(defn offer-selector
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        place-and-rank-loading? (subscribe [::deployment-subs/place-and-rank-loading?])
+        place-and-rank (subscribe [::deployment-subs/place-and-rank])]
+    (fn []
+      (let [options (offer-options (first (filter #(nil? (:node %)) (:components @place-and-rank))))]
+        [ui/FormSelect {:loading     @place-and-rank-loading?
+                        :placeholder (@tr [:offer])
+                        :options     options}]))))
+
+
 (defn general-parameters
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Segment
-     [ui/Header "general"]
-     [ui/FormField
-      [ui/Checkbox {:label   "SSH access"
-                    :checked true}]]
-     [ui/FormSelect {:placeholder (@tr [:cloud])
-                     :options     [{:key "alpha", :text "alpha", :value "alpha"}
-                                   {:key "beta", :text "beta", :value "beta"}
-                                   {:key "gamma", :text "gamma", :value "gamma"}]}]
-     [ui/FormInput {:placeholder "tags"}]]))
+  [ui/Segment
+   [ui/Header "general"]
+   [ui/FormField
+    [ui/Checkbox {:label   "SSH access"
+                  :checked true}]]
+   [offer-selector]
+   [ui/FormInput {:placeholder "tags"}]])
 
 
 
 (defn input-parameter-field
   [[name description defaultValue]]
   [ui/TableRow
-   [ui/TableCell {:collapsing true}
-    (if description
-      [ui/Popup {:content description
-                 :trigger (reagent/as-element [:span [ui/Icon {:name "help circle"}] name])}]
-      [:span name])]
+   [ui/TableCell {:collapsing true} name]
    [ui/TableCell
     [ui/Input (cond-> {:fluid       true
                        :placeholder name
                        :transparent true}
-                      defaultValue (assoc :defaultValue defaultValue))]]])
+                      defaultValue (assoc :defaultValue defaultValue))]]
+   [ui/TableCell {:collapsing true}
+    (when-not (str/blank? description)
+      [ui/Popup {:content description
+                 :trigger (reagent/as-element [ui/Icon {:name "help circle"}])}])]])
 
 
 (defn input-parameter-field-number
   [[name description defaultValue]]
   [ui/TableRow
-   [ui/TableCell {:collapsing true}
-    (if description
-      [ui/Popup {:content description
-                 :trigger (reagent/as-element [:span [ui/Icon {:name "help circle"}] name])}]
-      [:span name])]
+   [ui/TableCell {:collapsing true} name]
    [ui/TableCell
     [ui/Input (cond-> {:type        "number"
                        :min         0
                        :fluid       true
                        :placeholder name
                        :transparent true}
-                      defaultValue (assoc :defaultValue defaultValue))]]])
+                      defaultValue (assoc :defaultValue defaultValue))]]
+   [ui/TableCell {:collapsing true}
+    (when-not (str/blank? description)
+      [ui/Popup {:content description
+                 :trigger (reagent/as-element [ui/Icon {:name "help circle"}])}])]])
 
 
 (defn input-parameters-form
@@ -109,21 +137,28 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])
         target-module (subscribe [::deployment-subs/deployment-target])
+        user-connectors (subscribe [::deployment-subs/user-connectors])
         form-id (utils/random-element-id)]
     (fn []
-      [ui/Modal {:size       "small"
-                 :close-icon true
+      (when (and (boolean @target-module) (nil? @user-connectors))
+        (dispatch [::deployment-events/get-user-connectors]))
+      (when (and (boolean @target-module) (not (nil? @user-connectors)))
+        (dispatch [::deployment-events/place-and-rank @target-module @user-connectors]))
+      [ui/Modal {:close-icon true
                  :open       (boolean @target-module)
-                 :on-close   #(dispatch [::deployment-events/clear-deployment-target])}
-       [ui/ModalHeader (@tr [:deploy])]
+                 :on-close   (fn []
+                               (dispatch [::deployment-events/clear-deployment-target])
+                               (dispatch [::deployment-events/clear-user-connectors]))}
+       [ui/Header {:icon    "cloud"
+                   :content (@tr [:deploy])}]
        [ui/ModalContent {:scrolling true}
         [ui/Header @target-module]
-        [ui/Form {:id        form-id
+        [ui/Form {:id       form-id
                   :onSubmit (fn [& args] (with-out-str (cljs.pprint/pprint args)))}
          [general-parameters]
          [input-parameters-form]
          [cpu-ram-disk]]]
-       [ui/ModalContent
+       [ui/ModalActions
         [ui/Button
          {:on-click #(dispatch [::deployment-events/clear-deployment-target])}
          (@tr [:cancel])]

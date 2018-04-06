@@ -19,17 +19,33 @@
 
 (s/def ::deployment-target (s/nilable string?))
 
+(s/def ::user-connectors-loading? boolean?)
+
+(s/def ::user-connectors (s/nilable (s/coll-of string? :kind vector?)))
+
+(s/def ::place-and-rank-loading? boolean?)
+
+(s/def ::place-and-rank (s/nilable any?))
+
 (s/def ::db (s/keys :req [::loading?
                           ::filter-visible?
                           ::query-params
                           ::deployments
-                          ::deployment-target]))
+                          ::deployment-target
+                          ::user-connectors-loading?
+                          ::user-connectors
+                          ::place-and-rank-loading?
+                          ::place-and-rank]))
 
-(def defaults {::loading?          false
-               ::filter-visible?   false
-               ::query-params      {:offset     ""
-                                    :limit      ""
-                                    :cloud      ""
-                                    :activeOnly 1}
-               ::deployments       nil
-               ::deployment-target nil})
+(def defaults {::loading?                 false
+               ::filter-visible?          false
+               ::query-params             {:offset     ""
+                                           :limit      ""
+                                           :cloud      ""
+                                           :activeOnly 1}
+               ::deployments              nil
+               ::deployment-target        nil
+               ::user-connectors-loading? false
+               ::user-connectors          nil
+               ::place-and-rank-loading?  false
+               ::place-and-rank           nil})

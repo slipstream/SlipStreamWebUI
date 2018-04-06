@@ -32,3 +32,27 @@
   ::deployment-target
   (fn [db]
     (::deployment-spec/deployment-target db)))
+
+
+(reg-sub
+  ::user-connectors-loading?
+  (fn [db]
+    (::deployment-spec/user-connectors-loading? db)))
+
+
+(reg-sub
+  ::user-connectors
+  (fn [db]
+    (::deployment-spec/user-connectors db)))
+
+
+(reg-sub
+  ::place-and-rank-loading?
+  (fn [db]
+    (::deployment-spec/place-and-rank-loading? db)))
+
+
+(reg-sub
+  ::place-and-rank
+  (fn [db]
+    (::deployment-spec/place-and-rank db)))

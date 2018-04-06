@@ -1,3 +1,4 @@
+
 (ns sixsq.slipstream.webui.cimi-api.effects
   "Provides effects that use the CIMI client to interact asynchronously with
    the server."
@@ -9,6 +10,7 @@
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.authn :as authn]
+    [sixsq.slipstream.client.api.pricing :as pricing]
     [sixsq.slipstream.client.api.metrics :as metrics]
     [taoensso.timbre :as log]))
 
@@ -47,6 +49,7 @@
   (fn [[client resource-id data callback]]
     (go
       (callback (<! (cimi/edit client resource-id data))))))
+
 
 (reg-fx
   ::add
@@ -104,5 +107,13 @@
   (fn [[client callback]]
     (go
       (callback (<! (metrics/get-metrics client {}))))))
+
+
+(reg-fx
+  ::place-and-rank
+  (fn [[client module user-connectors callback]]
+    (go
+      (callback (<! (pricing/place-and-rank client module user-connectors))))))
+
 
 
