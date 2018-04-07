@@ -5,7 +5,8 @@
     [cljs.core.async :refer [<!]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-fx]]
-    [sixsq.slipstream.client.api.modules :as modules]))
+    [sixsq.slipstream.client.api.modules :as modules]
+    [taoensso.timbre :as log]))
 
 
 (def ^:const metadata-fields #{:shortName :description :category :creation :version :logoLink})
@@ -37,6 +38,8 @@
     (go
       (let [module (if (nil? module-id) {} (<! (modules/get-module client module-id)))
 
+            _ (log/error (with-out-str (cljs.pprint/pprint module)))
+
             {:keys [prerecipe packages recipe]} (-> module vals first (select-keys recipe-fields))
 
             metadata (-> module vals first (select-keys metadata-fields))
@@ -49,13 +52,15 @@
                             recipe (assoc :recipe recipe)
                             packages (assoc :packages (format-packages packages)))
 
-            output-parameters (->> (-> module vals first :parameters :entry)
-                                   (map :parameter)
-                                   (filter #(= "Output" (:category %))))
+            all-parameters (map :parameter (-> module vals first :parameters :entry))
 
-            input-parameters (->> (-> module vals first :parameters :entry)
-                                  (map :parameter)
-                                  (filter #(= "Input" (:category %))))
+            output-parameters (filter #(= "Output" (:category %)) all-parameters)
+
+            input-parameters (filter #(= "Input" (:category %)) all-parameters)
+
+            nodes (map (juxt :imageUri :name #(-> % :parameterMappings :entry)) (map :node (-> module vals first :nodes :entry)))
+
+            _ (log/error "NODES:" (with-out-str (cljs.pprint/pprint nodes)))
 
             children (if (nil? module-id)
                        (<! (modules/get-module-children client nil))

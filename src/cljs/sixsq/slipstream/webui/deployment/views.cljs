@@ -138,6 +138,8 @@
   (let [tr (subscribe [::i18n-subs/tr])
         target-module (subscribe [::deployment-subs/deployment-target])
         user-connectors (subscribe [::deployment-subs/user-connectors])
+        place-and-rank (subscribe [::deployment-subs/place-and-rank])
+        module (subscribe [::application-subs/module])
         form-id (utils/random-element-id)]
     (fn []
       (when (and (boolean @target-module) (nil? @user-connectors))
@@ -153,14 +155,20 @@
                    :content (@tr [:deploy])}]
        [ui/ModalContent {:scrolling true}
         [ui/Header @target-module]
-        [ui/Form {:id       form-id
-                  :onSubmit (fn [& args] (with-out-str (cljs.pprint/pprint args)))}
+        (when @module
+          [:pre (with-out-str (cljs.pprint/pprint @module))])
+        (when @place-and-rank
+          [:pre (with-out-str (cljs.pprint/pprint @place-and-rank))])
+        [ui/Form {:id        form-id
+                  :on-submit (fn [& args] (with-out-str (cljs.pprint/pprint args)))}
          [general-parameters]
          [input-parameters-form]
          [cpu-ram-disk]]]
        [ui/ModalActions
         [ui/Button
-         {:on-click #(dispatch [::deployment-events/clear-deployment-target])}
+         {:on-click (fn []
+                      (dispatch [::deployment-events/clear-deployment-target])
+                      (dispatch [::deployment-events/clear-user-connectors]))}
          (@tr [:cancel])]
         [ui/Button
          {:primary  true
