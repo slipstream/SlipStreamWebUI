@@ -117,6 +117,10 @@ To compile the SlipStream WebUI electron application, you must have
 installed on your machine. On Mac OS, these can be installed with
 [`homebrew`](https://brew.sh/).
 
+The configuration is based on the
+[cljs-electron](https://github.com/Gonzih/cljs-electron) project on
+GitHub. 
+
 At the root of this repository, run the command:
 
 ```sh
