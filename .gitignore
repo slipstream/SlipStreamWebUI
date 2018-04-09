@@ -12,3 +12,14 @@ doo-index.html
 resources/public/js/webui.js
 resources/public/css/version.css
 resources/public/css/codemirror.css
+
+resources/electron-main.js
+resources/public/js/electron-renderer.js
+resources/public/js/electron-renderer.js.map
+resources/public/js/electron-renderer-out
+
+resources/public/js/electron-release
+
+package.json
+package-lock.json
+node_modules

@@ -103,3 +103,78 @@ in development mode. From the REPL do:
 The default value is `:debug` which will log all of the HTTP requests
 and responses.  This is useful when debugging interactions with
 SlipStream, but annoying otherwise.
+
+## Electron
+
+The SlipStream WebUI can be run as an
+[electron](https://electronjs.org/) application.  This support is
+experimental and feedback is welcome. It has only been tested on Mac
+OS and there are numerous things that do not work correctly, notably
+those related to links between pages.
+
+To compile the SlipStream WebUI electron application, you must have
+[`nodejs`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/)
+installed on your machine. On Mac OS, these can be installed with
+[`homebrew`](https://brew.sh/).
+
+The configuration is based on the
+[cljs-electron](https://github.com/Gonzih/cljs-electron) project on
+GitHub. 
+
+At the root of this repository, run the command:
+
+```sh
+$ npm install \
+    electron \
+    electron-packager \
+    electron-installer-dmg
+```
+
+This will install both electron and the electron-packager within the
+`node_modules` subdirectory.  Update your path with the following:
+
+```
+$ export PATH=$PATH:`pwd`/node_modules/.bin
+```
+
+Both `electron` and `electron-packager` should be in your PATH.
+
+To build and run the electron application from the command line,
+run the following commands:
+
+```
+$ lein electron
+$ electron .
+```
+
+This should compile and then start the SlipStream WebUI as an electron
+application.
+
+To package the application,
+
+```
+$ electron-packager . CUBIC \
+    --platform=darwin \
+    --arch=x64 \
+    --electron-version=1.8.4 \
+    --overwrite \
+    --out target
+```
+
+You can then run this application with `open
+target/CUBIC-darwin-x64/CUBIC.app`.
+
+This can be packaged as a DMG file with the following:
+
+```
+$ electron-installer-dmg \
+    target/CUBIC-darwin-x64/CUBIC.app \
+    CUBIC \
+    --out target
+```
+
+This will generate the file `CUBIC.dmg` which can then be used to
+install the application as usual on Mac OS.
+
+
+

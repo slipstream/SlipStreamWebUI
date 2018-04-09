@@ -118,7 +118,7 @@
                         [ui/FormButton {:primary true :fluid true} label]
                         [ui/FormField
                          [ui/ButtonGroup {:primary true, :fluid true}
-                          [ui/FormButton {:disabled (not @selected-method-group)} method-type]
+                          [ui/Button {:disabled (not @selected-method-group)} method-type]
                           [ui/Dropdown
                            {:options       (map #(identity {:key   (:id %)
                                                             :text  (:label %)
@@ -159,7 +159,7 @@
 
          (when loading [ui/Dimmer {:active true :inverted true} [ui/Loader (@tr [:loading])]])
 
-         [ui/Grid {:columns 2 :textAlign "center" :stackable true :celled "internally"}
+         [ui/Grid {:columns 2 :textAlign "center" :stackable true}
 
           [ui/GridColumn {:stretched true}
            [ui/Segment {:basic externals? :textAlign "left"}
@@ -188,15 +188,32 @@
         [login-form-container]]])))
 
 
-(defn login-button
+(defn login-menu
   "This panel shows the login button and modal (if open)."
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [:div
-       [ui/Button
-        {:size "tiny" :primary true :on-click #(dispatch [::authn-events/open-modal])}
-        (@tr [:login])]
+       [ui/ButtonGroup {:primary true :size "tiny"}
+        [ui/Button {:on-click #(dispatch [::authn-events/open-modal])}
+         [ui/Icon {:name "sign in"}] (@tr [:login])]
+        [ui/Dropdown {:inline    true
+                      :button    true
+                      :pointing  "top right"
+                      :className "icon"}
+         [ui/DropdownMenu
+          [ui/DropdownItem {:icon   "book"
+                            :text   (@tr [:documentation])
+                            :href   "http://ssdocs.sixsq.com/"
+                            :target "_blank"}]
+          [ui/DropdownItem {:icon   "info circle"
+                            :text   (@tr [:knowledge-base])
+                            :href   "http://support.sixsq.com/solution/categories"
+                            :target "_blank"}]
+          [ui/DropdownItem {:icon "mail"
+                            :text (@tr [:support])
+                            :href (str "mailto:support%40sixsq%2Ecom"
+                                       "?subject=%5BSlipStream%5D%20Support%20question%20%2D%20Not%20logged%20in")}]]]]
        [modal-login]])))
 
 
@@ -211,7 +228,7 @@
                    (dispatch [::history-events/navigate "welcome"]))]
     (fn []
       (if-not @user
-        [login-button]
+        [login-menu]
         [ui/Dropdown {:item            true
                       :simple          false
                       :icon            nil
