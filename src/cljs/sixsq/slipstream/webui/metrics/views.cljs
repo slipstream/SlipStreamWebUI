@@ -117,11 +117,9 @@
 
 (defn metrics-info
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        jvm-threads (subscribe [::metrics-subs/jvm-threads])
-        rates (subscribe [::metrics-subs/ring-response-rates])]
+  (let [raw-metrics (subscribe [::metrics-subs/raw-metrics])]
     (fn []
-      (when (or (nil? @rates) (nil? @jvm-threads))
+      (when (nil? @raw-metrics)
         (dispatch [::metrics-events/fetch-metrics]))
       [ui/Container {:fluid true}
        [controls]
