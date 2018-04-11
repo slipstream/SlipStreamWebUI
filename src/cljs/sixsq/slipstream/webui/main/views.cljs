@@ -60,8 +60,7 @@
                                           (dispatch [::history-events/navigate url]))}
                   [ui/Icon {:name icon}] (@tr [label-kw])])
                [[ui/MenuItem]
-                [i18n-views/locale-dropdown]]
-               ))))))
+                [i18n-views/locale-dropdown]]))))))
 
 
 (defn crumb
@@ -78,6 +77,7 @@
                    (vec (->> @path
                              (map crumb (range))
                              (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))))
+
 
 (defn footer
   []
