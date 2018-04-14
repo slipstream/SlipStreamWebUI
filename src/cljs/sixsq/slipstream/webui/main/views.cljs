@@ -6,6 +6,7 @@
     ;; all panel views must be included to define panel rendering method
     [sixsq.slipstream.webui.application.views]
     [sixsq.slipstream.webui.cimi.views]
+    [sixsq.slipstream.webui.data.views]
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.legal.views]
@@ -51,7 +52,8 @@
                                           [:deployment "deployment" "cloud"]
                                           [:usage "usage" "history"]])
                          (when @is-admin?
-                           [[:metrics "metrics" "bar chart"]])
+                           [[:metrics "metrics" "bar chart"]
+                            [:data "data" "database"]])
                          [[:cimi "cimi" "code"]]))
                      :when (some? label-kw)]
                  [ui/MenuItem {:active  (= (first @nav-path) url)
