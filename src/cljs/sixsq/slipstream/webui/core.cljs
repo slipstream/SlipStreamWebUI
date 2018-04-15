@@ -2,11 +2,15 @@
   (:require
     [reagent.core :as r]
     [re-frame.core :refer [clear-subscription-cache! dispatch-sync dispatch]]
+    [taoensso.timbre :as log]
+    [clojure.string :as str]
+
     [sixsq.slipstream.webui.config :as config]
     [sixsq.slipstream.webui.routes :as routes]
     [sixsq.slipstream.webui.utils.defines :as defines]
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
+    [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
@@ -17,19 +21,19 @@
     [sixsq.slipstream.webui.main.views :as main-views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
-    [sixsq.slipstream.webui.history.utils :as utils]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.history.utils :as utils]))
 
 ;;
 ;; determine the host url
 ;;
 (def SLIPSTREAM_URL (delay (if-not (str/blank? defines/HOST_URL) defines/HOST_URL (utils/host-url))))
 
+
 (defn dev-setup []
   (when config/debug?
     (enable-console-print!)
     (log/info "development mode")))
+
 
 (defn render-component-when-present
   ([tag comp & {:keys [initialization-fn]}]
@@ -37,6 +41,7 @@
      (log/info "Rendering " tag)
      (when initialization-fn (initialization-fn))
      (r/render [comp] container-element))))
+
 
 (defn mount-root []
   (clear-subscription-cache!)
@@ -47,16 +52,18 @@
                             (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
   (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
   (render-component-when-present "usage" usage-views/usage)
-  (render-component-when-present "deployment-detail-reports" deployment-detail-views/reports-section)
-  )
+  (render-component-when-present "deployment-detail-reports" deployment-detail-views/reports-section))
+
 
 (defn visibility-watcher []
   (let [callback #(dispatch [::main-events/visible (not (.-hidden js/document))])]
     (. js/document (addEventListener "visibilitychange" callback))))
 
+
 (defn ^:export init []
   (routes/routes)
   (visibility-watcher)
+  (dnd-utils/disable-browser-dnd)
   (dispatch-sync [::db-events/initialize-db])
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
   (dispatch-sync [::history-events/initialize @config/path-prefix])

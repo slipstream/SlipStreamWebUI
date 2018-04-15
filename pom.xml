@@ -5,14 +5,14 @@
 
   <artifactId>SlipStreamWebUI-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.49-SNAPSHOT</version>
+  <version>3.50-SNAPSHOT</version>
   <name>SlipStreamWebUI</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCommunity</artifactId>
-    <version>3.49-SNAPSHOT</version>
+    <version>3.50-SNAPSHOT</version>
     <relativePath>../SlipStream/community</relativePath>
   </parent>
 
@@ -39,6 +39,40 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>run-tests</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>lein-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>lein</executable>
+                  <arguments>
+                    <argument>test</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>

@@ -53,22 +53,38 @@
 
 (defn parse-resource-path
   "Utility to split a resource path into a vector of terms. Returns an empty
-   vector for a nil argument. Removes blank or nil terms from the result."
+   vector for a nil argument. Removes blank or nil terms from the result.
+   The input path will be coerced to a string."
   [path]
   (vec (remove str/blank? (str/split path #"/"))))
+
+
+;;
+;; manual truncation of strings
+;;
+
+(def default-truncate-length 20)
+
+
+(def ellipsis "\u2026")
 
 
 (defn truncate
   "Truncates a string to the given size and adds the optional suffix if the
    string was actually truncated."
   ([s]
-    (truncate s 20 "\u2026"))
+    (truncate s default-truncate-length ellipsis))
   ([s max-size]
-    (truncate s max-size "\u2026"))
+    (truncate s max-size ellipsis))
   ([s max-size suffix]
    (if (> (count s) max-size)
      (str (subs s 0 max-size) suffix)
      s)))
+
+
+;;
+;; json/edn conversions
+;;
 
 
 (defn edn->json [edn & {:keys [spaces] :or {spaces 2}}]
@@ -78,14 +94,21 @@
 (defn json->edn [json & {:keys [keywordize-keys] :or {keywordize-keys true}}]
   (js->clj (.parse js/JSON json) :keywordize-keys keywordize-keys))
 
+;;
+;; utilities for random element identifiers
+;;
 
-(def rand-alphanums (repeatedly #(rand-nth (vec "abcdefghijklmnopqrstuvwxyz0123456789"))))
+(def default-random-id-size 6)
+
+
+(def rand-alphanum #(rand-nth (vec "abcdefghijklmnopqrstuvwxyz0123456789")))
 
 
 (defn random-element-id
   "Random character string that can be used to generate unique element
    identifiers. By default, will produce a string with 6 characters."
   ([]
-   (random-element-id 6))
+   (random-element-id default-random-id-size))
+
   ([n]
-   (str/join "" (take n rand-alphanums))))
+   (str/join "" (repeatedly n rand-alphanum))))
