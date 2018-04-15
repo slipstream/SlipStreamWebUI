@@ -15,7 +15,7 @@
             (log/debug "routing /*" path query-params)
             (when-let [error (:error query-params)]
               (dispatch [::authn-events/set-error-message error])
-              (dispatch [::authn-events/open-modal]))
+              (dispatch [::authn-events/open-modal :login]))
             (when (not-empty path)
               (dispatch [::main-events/set-navigation-info path query-params])))
 

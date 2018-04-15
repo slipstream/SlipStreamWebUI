@@ -6,9 +6,9 @@
 
 
 (reg-sub
-  ::modal-open?
+  ::open-modal
   (fn [db]
-    (::authn-spec/modal-open? db)))
+    (::authn-spec/open-modal db)))
 
 (reg-sub
   ::session
@@ -40,21 +40,6 @@
   ::error-message
   (fn [db]
     (::authn-spec/error-message db)))
-
-(reg-sub
-  ::total
-  (fn [db]
-    (::authn-spec/total db)))
-
-(reg-sub
-  ::count
-  (fn [db]
-    (::authn-spec/count db)))
-
-(reg-sub
-  ::methods
-  (fn [db]
-    (::authn-spec/methods db)))
 
 (reg-sub
   ::redirect-uri

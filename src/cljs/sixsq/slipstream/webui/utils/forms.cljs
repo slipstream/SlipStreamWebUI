@@ -63,28 +63,26 @@
 
 
 (defn form-container-inner-modal
-  [show? descriptions-atom on-submit on-cancel]
+  [show? templates on-submit on-cancel]
   (let [tr (subscribe [::i18n-subs/tr])
         selected-id (reagent/atom nil)
         form-data (reagent/atom nil)]
-    (fn []
+    (fn [show? templates on-submit on-cancel]
       (when (nil? @selected-id)
-        (reset! selected-id (:id (first (sort-by :id @descriptions-atom))))
+        (reset! selected-id (:id (first (sort-by :id templates))))
         (update-data form-data @selected-id nil nil))
-      (let [descriptions (sort-by :id @descriptions-atom)
-            selected-description (first (filter #(= @selected-id (:id %)) descriptions))]
-        [ui/Modal
-         {:open @show?
-          :onClose on-cancel
-          :closeIcon true}
+      (let [templates (sort-by :id templates)
+            selected-description (first (filter #(= @selected-id (:id %)) templates))]
+        [ui/Modal {:open      show?
+                   :onClose   on-cancel
+                   :closeIcon true}
          [ui/ModalHeader (@tr [:create])]
-         [ui/ModalContent
-          {:scrolling true}
+         [ui/ModalContent {:scrolling true}
           (vec (concat [ui/Form]
                        [[template-selector
                          (partial update-data form-data)
                          selected-id
-                         descriptions]]
+                         templates]]
                        (template-form form-data selected-description)))]
          [ui/ModalActions
           [ui/Button
@@ -95,13 +93,42 @@
             :on-click #(on-submit @form-data)}
            (@tr [:create])]]]))))
 
+
+(defn form-container-inner-modal-single
+  [show? template on-submit on-cancel]
+  (let [tr (subscribe [::i18n-subs/tr])
+        form-data (reagent/atom nil)]
+    (fn [show? template on-submit on-cancel]
+      (update-data form-data (:id template) nil nil)
+      [ui/Modal {:open      show?
+                 :onClose   on-cancel
+                 :closeIcon true}
+       [ui/ModalHeader (@tr [:create])]
+       [ui/ModalContent {:scrolling true}
+        (vec (concat [ui/Form]
+                     (template-form form-data template)))]
+       [ui/ModalActions
+        [ui/Button
+         {:on-click on-cancel}
+         (@tr [:cancel])]
+        [ui/Button
+         {:primary  true
+          :on-click #(on-submit @form-data)}
+         (@tr [:create])]]])))
 ;;
 ;; public component
 ;;
 
 (defn form-container-modal
-  [& {:keys [show? descriptions on-submit on-cancel]
+  [& {:keys [show? templates on-submit on-cancel]
       :or   {on-submit #()
              on-cancel #()}
       :as   args}]
-  [form-container-inner-modal show? descriptions on-submit on-cancel])
+  [form-container-inner-modal show? templates on-submit on-cancel])
+
+(defn form-container-modal-single-template
+  [& {:keys [show? template on-submit on-cancel]
+      :or   {on-submit #()
+             on-cancel #()}
+      :as   args}]
+  [form-container-inner-modal-single show? template on-submit on-cancel])

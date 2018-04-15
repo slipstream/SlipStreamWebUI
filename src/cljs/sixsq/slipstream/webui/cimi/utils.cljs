@@ -1,5 +1,8 @@
-(ns sixsq.slipstream.webui.cimi.utils)
+(ns sixsq.slipstream.webui.cimi.utils
+  (:require [clojure.string :as str]))
 
+
+(def template-suffix "-template")
 
 (defn collection-href-map
   "Creates a map from the CloudEntryPoint that maps the resource collection
@@ -20,22 +23,25 @@
                   collection-href-map
                   (map (juxt second first))))))
 
+(defn collections-template-map
+  "Creates a map with only templates collections href as key and nil as a value."
+  [cep]
+  (into {} (->> cep
+                collection-href-map
+                (filter #(str/ends-with? (-> % second) template-suffix))
+                (map (juxt #(-> % second keyword) (constantly {:templates {}
+                                                               :total     0
+                                                               :loaded    -1}))))))
+
+(defn template-href
+  "Returns the collection template href for the collection href."
+  [collection-href]
+  (-> collection-href name (str template-suffix)))
+
 (defn template-resource-key
   "Returns the collection keyword for the template resource associated with
    the given collection. If there is no template resource, then nil is
    returned."
   [cloud-entry-point collection-href]
   (when-let [href->key (:collection-key cloud-entry-point)]
-    (href->key (str collection-href "-template"))))
-
-(defn strip-common-attrs
-  "Strips all common resource attributes from the map."
-  [m]
-  (dissoc m :id :name :description :created :updated :properties))
-
-(defn strip-service-attrs
-  "Strips common attributes from the map whose values are controlled
-   entirely by the service.  These include :id, :created, :updated,
-   :resourceURI, and :operations."
-  [m]
-  (dissoc m :id :created :updated :resourceURI :operations))
+    (href->key (str collection-href template-suffix))))

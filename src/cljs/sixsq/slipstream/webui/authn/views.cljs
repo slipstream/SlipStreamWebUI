@@ -6,12 +6,16 @@
 
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
+    [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as utils]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]))
 
 
 (defn method-comparator
@@ -26,10 +30,10 @@
     :else 1))
 
 
-(defn sort-value [[tag [{:keys [authn-method]}]]]
-  (if (= "internal" authn-method)
+(defn sort-value [[tag [{:keys [method]}]]]
+  (if (= "internal" method)
     "internal"
-    (or tag authn-method)))
+    (or tag method)))
 
 
 (defn order-and-group
@@ -38,13 +42,13 @@
   [methods]
   (->> methods
        (sort-by :id)
-       (group-by #(or (:group %) (:authn-method %)))
+       (group-by #(or (:group %) (:method %)))
        (sort-by sort-value method-comparator)))
 
 
 (defn internal-or-api-key
   [[_ methods]]
-  (let [authn-method (:authn-method (first methods))]
+  (let [authn-method (:method (first methods))]
     (#{"internal" "api-key"} authn-method)))
 
 
@@ -137,17 +141,16 @@
    columns. The first has the 'internal' login forms and the second contains
    all of the rest."
   []
-  (let [methods (subscribe [::authn-subs/methods])
-        total (subscribe [::authn-subs/total])
-        count (subscribe [::authn-subs/count])
+  (let [template-href (cimi-utils/template-href :session)
+        templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
+        loading? (subscribe [::cimi-subs/collection-templates-loading? (keyword template-href)])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])]
     (fn []
-      (let [method-groups (order-and-group @methods)
+      (let [method-groups (order-and-group (-> @templates :templates vals))
             internals (filter internal-or-api-key method-groups)
             externals (remove internal-or-api-key method-groups)
-            externals? (empty? externals)
-            loading (or (= @total 0) (> @total @count))]
+            externals? (empty? externals)]
 
         [ui/Segment {:basic true}
          (when @error-message
@@ -157,64 +160,95 @@
             [ui/MessageHeader (@tr [:login-failed])]
             [:p @error-message]])
 
-         (when loading [ui/Dimmer {:active true :inverted true} [ui/Loader (@tr [:loading])]])
+         (if @loading?
+           [ui/Dimmer {:active true :inverted true} [ui/Loader (@tr [:loading])]]
+           [ui/Grid {:columns 2 :textAlign "center" :stackable true}
 
-         [ui/Grid {:columns 2 :textAlign "center" :stackable true}
-
-          [ui/GridColumn {:stretched true}
-           [ui/Segment {:basic externals? :textAlign "left"}
-            (vec (concat [:div]
-                         (map (fn [[k v]] [method-form k v]) internals)))]]
-
-          (when-not externals?
             [ui/GridColumn {:stretched true}
-             [ui/Segment {:textAlign "left"}
-              [:div
-               (vec (concat [:div]
-                            (map (fn [[k v]] [method-form k v]) externals)))]]])]]))))
+             [ui/Segment {:basic externals? :textAlign "left"}
+              (vec (concat [:div]
+                           (map (fn [[k v]] [method-form k v]) internals)))]]
+
+            (when-not externals?
+              [ui/GridColumn {:stretched true}
+               [ui/Segment {:textAlign "left"}
+                [:div
+                 (vec (concat [:div]
+                              (map (fn [[k v]] [method-form k v]) externals)))]]])])]))))
 
 
 (defn modal-login []
   (let [tr (subscribe [::i18n-subs/tr])
-        modal-open? (subscribe [::authn-subs/modal-open?])]
+        open-modal (subscribe [::authn-subs/open-modal])]
     (fn []
       [ui/Modal
        {:id        "modal-login-id"
-        :open      @modal-open?
+        :open      (= @open-modal :login)
         :closeIcon true
         :on-close  #(dispatch [::authn-events/close-modal])}
        [ui/ModalHeader (@tr [:login])]
        [ui/ModalContent {:scrolling true}
         [login-form-container]]])))
 
+(defn modal-signup []
+  (let [tr (subscribe [::i18n-subs/tr])
+        modal-open (subscribe [::authn-subs/open-modal])
+        template-href (cimi-utils/template-href :user)
+        user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
+    (fn []
+      (let [self-registration-template (-> @user-templates :templates :user-template/self-registration)
+            mandatory-descriptions (->> self-registration-template
+                                        :params-desc
+                                        (filter (fn [[_ {:keys [mandatory]}]] mandatory)))
+            self-registration-template-filtered (assoc self-registration-template :params-desc mandatory-descriptions)]
+        [form-utils/form-container-modal-single-template
+         :show? (= @modal-open :signup)
+         :template self-registration-template-filtered
+         :on-cancel #(dispatch [::authn-events/close-modal])
+         :on-submit (fn [data]
+                      (dispatch [::cimi-events/create-resource-independent
+                                 :users (cimi-api-utils/create-template "user" data)])
+                      (dispatch [::authn-events/close-modal]))]))))
+
 
 (defn login-menu
   "This panel shows the login button and modal (if open)."
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        template-href (cimi-utils/template-href :user)
+        user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
     (fn []
       [:div
        [ui/ButtonGroup {:primary true :size "tiny"}
-        [ui/Button {:on-click #(dispatch [::authn-events/open-modal])}
+        [ui/Button {:on-click #(dispatch [::authn-events/open-modal :login])}
          [ui/Icon {:name "sign in"}] (@tr [:login])]
         [ui/Dropdown {:inline    true
                       :button    true
                       :pointing  "top right"
                       :className "icon"}
-         [ui/DropdownMenu
-          [ui/DropdownItem {:icon   "book"
-                            :text   (@tr [:documentation])
-                            :href   "http://ssdocs.sixsq.com/"
-                            :target "_blank"}]
-          [ui/DropdownItem {:icon   "info circle"
-                            :text   (@tr [:knowledge-base])
-                            :href   "http://support.sixsq.com/solution/categories"
-                            :target "_blank"}]
-          [ui/DropdownItem {:icon "mail"
-                            :text (@tr [:support])
-                            :href (str "mailto:support%40sixsq%2Ecom"
-                                       "?subject=%5BSlipStream%5D%20Support%20question%20%2D%20Not%20logged%20in")}]]]]
-       [modal-login]])))
+         (vec
+           (concat
+             [ui/DropdownMenu]
+             (when
+               (get-in @user-templates [:templates (keyword (str template-href "/self-registration"))])
+               [[ui/DropdownItem {:icon     "signup"
+                                  :text     (@tr [:signup])
+                                  :on-click #(dispatch [::authn-events/open-modal :signup])}]
+                [ui/DropdownDivider]])
+             [[ui/DropdownItem {:icon   "book"
+                                :text   (@tr [:documentation])
+                                :href   "http://ssdocs.sixsq.com/"
+                                :target "_blank"}]
+              [ui/DropdownItem {:icon   "info circle"
+                                :text   (@tr [:knowledge-base])
+                                :href   "http://support.sixsq.com/solution/categories"
+                                :target "_blank"}]
+              [ui/DropdownItem {:icon "mail"
+                                :text (@tr [:support])
+                                :href (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"
+                                           "question%20%2D%20Not%20logged%20in")}]]))]]
+       [modal-login]
+       [modal-signup]])))
 
 
 (defn authn-menu
@@ -250,4 +284,4 @@
 
 (defn ^:export open-authn-modal []
   (log/debug "dispatch open-modal for authn view")
-  (dispatch [::authn-events/open-modal]))
+  (dispatch [::authn-events/open-modal :login]))

@@ -7,7 +7,7 @@
     [cljs.pprint :refer [pprint cl-format]]
     [clojure.set :as set]
     [clojure.string :as str]
-    
+
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
@@ -304,56 +304,50 @@
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::cimi-subs/show-add-modal?])
         collection-name (subscribe [::cimi-subs/collection-name])
-        cloud-entry-point (subscribe [::cimi-subs/cloud-entry-point])
-        descriptions-vector-atom (subscribe [::cimi-subs/descriptions-vector])
         text (reagent/atom "")]
     (fn []
-      (let [resource-key (get (:collection-key @cloud-entry-point) @collection-name)
-            tpl-resource-key (cimi-utils/template-resource-key @cloud-entry-point @collection-name)]
-        (when (and tpl-resource-key (empty? @descriptions-vector-atom))
-          (log/info "retrieving templates for" tpl-resource-key)
-          (dispatch [::cimi-events/get-templates tpl-resource-key]))
+      (let[template-href (when @collection-name (-> @collection-name keyword cimi-utils/template-href keyword))
+           templates-info (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
         (when @show?
-          (cond
-            (and tpl-resource-key (seq @descriptions-vector-atom))
-            [form-utils/form-container-modal
-             :show? show?
-             :descriptions descriptions-vector-atom
-             :on-cancel #(dispatch [::cimi-events/hide-add-modal])
-             :on-submit (fn [data]
-                          (dispatch [::cimi-events/create-resource
-                                     (cimi-api-utils/create-template @collection-name data)])
-                          (dispatch [::cimi-events/hide-add-modal]))]
+         (cond @templates-info
+               [form-utils/form-container-modal
+                :show? @show?
+                :templates (-> @templates-info :templates vals)
+                :on-cancel #(dispatch [::cimi-events/hide-add-modal])
+                :on-submit (fn [data]
+                             (dispatch [::cimi-events/create-resource
+                                        (cimi-api-utils/create-template @collection-name data)])
+                             (dispatch [::cimi-events/hide-add-modal]))]
 
-            :else
-            (do
-              (reset! text (general/edn->json {:key "value"}))
-              [ui/Modal
-               {:size       "large"
-                :scrollable true
-                :closeIcon  true
-                :open       @show?}
-               [ui/ModalContent
-                [editor/json-editor text]]
-               [ui/ModalActions
-                [ui/Button
-                 {:on-click (fn []
-                              (dispatch [::cimi-events/hide-add-modal]))}
-                 (@tr [:cancel])]
-                [ui/Button
-                 {:primary  true
-                  :on-click (fn []
-                              (try
-                                (let [data (general/json->edn @text)]
-                                  (dispatch [::cimi-events/create-resource data]))
-                                (catch js/Error e
-                                  (dispatch [::messages-events/add
-                                             {:header  "invalid JSON document"
-                                              :message (str "invalid JSON:\n\n" e)
-                                              :type    :error}]))
-                                (finally
-                                  (dispatch [::cimi-events/hide-add-modal]))))}
-                 (@tr [:create])]]])))))))
+               :else
+               (do
+                 (reset! text (general/edn->json {:key "value"}))
+                 [ui/Modal
+                  {:size       "large"
+                   :scrollable true
+                   :closeIcon  true
+                   :open       @show?}
+                  [ui/ModalContent
+                   [editor/json-editor text]]
+                  [ui/ModalActions
+                   [ui/Button
+                    {:on-click (fn []
+                                 (dispatch [::cimi-events/hide-add-modal]))}
+                    (@tr [:cancel])]
+                   [ui/Button
+                    {:primary  true
+                     :on-click (fn []
+                                 (try
+                                   (let [data (general/json->edn @text)]
+                                     (dispatch [::cimi-events/create-resource data]))
+                                   (catch js/Error e
+                                     (dispatch [::messages-events/add
+                                                {:header  "invalid JSON document"
+                                                 :message (str "invalid JSON:\n\n" e)
+                                                 :type    :error}]))
+                                   (finally
+                                     (dispatch [::cimi-events/hide-add-modal]))))}
+                    (@tr [:create])]]])))))))
 
 
 (defn can-add?

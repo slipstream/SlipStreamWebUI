@@ -43,6 +43,8 @@
 
 (s/def ::descriptions-vector any?)
 
+(s/def ::collections-templates-cache (s/map-of keyword? any?))
+
 (s/def ::db (s/keys :req [::cloud-entry-point
                           ::query-params
                           ::loading?
@@ -52,7 +54,7 @@
                           ::selected-fields
                           ::available-fields
                           ::show-add-modal?
-                          ::descriptions-vector]))
+                          ::collections-templates-cache]))
 
 (def defaults {::cloud-entry-point   nil
                ::query-params        {:$first       0
@@ -69,4 +71,4 @@
                ::selected-fields     ["id"]
                ::available-fields    ["id"]
                ::show-add-modal?     false
-               ::descriptions-vector []})
+               ::collections-templates-cache {}})
