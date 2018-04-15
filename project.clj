@@ -1,18 +1,18 @@
 (def +version+ "3.50-SNAPSHOT")
 
 (def package-json-template
-"
-{
-    \"name\": \"CUBIC\",
-    \"version\": \"3.49-SNAPSHOT\",
-    \"main\": \"resources/electron-main.js\",
-    \"devDependencies\": {
-        \"electron\": \"^1.8.4\",
-        \"electron-packager\": \"^12.0.0\",
-        \"electron-installer-dmg\": \"0.2.1\"
-    }
-}
-")
+  "
+  {
+      \"name\": \"CUBIC\",
+      \"version\": \"3.49-SNAPSHOT\",
+      \"main\": \"resources/electron-main.js\",
+      \"devDependencies\": {
+          \"electron\": \"^1.8.4\",
+          \"electron-packager\": \"^12.0.0\",
+          \"electron-installer-dmg\": \"0.2.1\"
+      }
+  }
+  ")
 
 (defproject com.sixsq.slipstream/SlipStreamWebUI "3.50-SNAPSHOT"
 
@@ -107,7 +107,7 @@
                     :preloads             [devtools.preload
                                            day8.re-frame-10x.preload]
                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_"         true
-                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://localhost"
+                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
                     :external-config      {:devtools/config {:features-to-install :all}}
