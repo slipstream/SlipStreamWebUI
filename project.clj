@@ -107,7 +107,7 @@
                     :preloads             [devtools.preload
                                            day8.re-frame-10x.preload]
                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_"         true
-                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
+                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://localhost"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
                     :external-config      {:devtools/config {:features-to-install :all}}
