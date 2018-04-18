@@ -2,7 +2,6 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as reagent]
-    [taoensso.timbre :as log]
 
     [cljs.pprint :refer [pprint cl-format]]
     [clojure.set :as set]
