@@ -306,48 +306,46 @@
         collection-name (subscribe [::cimi-subs/collection-name])
         text (reagent/atom "")]
     (fn []
-      (let[template-href (when @collection-name (-> @collection-name keyword cimi-utils/template-href keyword))
-           templates-info (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
+      (let [template-href (some-> @collection-name keyword cimi-utils/template-href keyword)
+            templates-info (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
         (when @show?
-         (cond @templates-info
-               [form-utils/form-container-modal
-                :show? @show?
-                :templates (-> @templates-info :templates vals)
-                :on-cancel #(dispatch [::cimi-events/hide-add-modal])
-                :on-submit (fn [data]
-                             (dispatch [::cimi-events/create-resource
-                                        (cimi-api-utils/create-template @collection-name data)])
-                             (dispatch [::cimi-events/hide-add-modal]))]
-
-               :else
-               (do
-                 (reset! text (general/edn->json {:key "value"}))
-                 [ui/Modal
-                  {:size       "large"
-                   :scrollable true
-                   :closeIcon  true
-                   :open       @show?}
-                  [ui/ModalContent
-                   [editor/json-editor text]]
-                  [ui/ModalActions
-                   [ui/Button
-                    {:on-click (fn []
-                                 (dispatch [::cimi-events/hide-add-modal]))}
-                    (@tr [:cancel])]
-                   [ui/Button
-                    {:primary  true
-                     :on-click (fn []
-                                 (try
-                                   (let [data (general/json->edn @text)]
-                                     (dispatch [::cimi-events/create-resource data]))
-                                   (catch js/Error e
-                                     (dispatch [::messages-events/add
-                                                {:header  "invalid JSON document"
-                                                 :message (str "invalid JSON:\n\n" e)
-                                                 :type    :error}]))
-                                   (finally
-                                     (dispatch [::cimi-events/hide-add-modal]))))}
-                    (@tr [:create])]]])))))))
+          (if @templates-info
+            [form-utils/form-container-modal
+             :show? @show?
+             :templates (-> @templates-info :templates vals)
+             :on-cancel #(dispatch [::cimi-events/hide-add-modal])
+             :on-submit (fn [data]
+                          (dispatch [::cimi-events/create-resource
+                                     (cimi-api-utils/create-template @collection-name data)])
+                          (dispatch [::cimi-events/hide-add-modal]))]
+            (do
+              (reset! text (general/edn->json {:key "value"}))
+              [ui/Modal
+               {:size       "large"
+                :scrollable true
+                :closeIcon  true
+                :open       @show?}
+               [ui/ModalContent
+                [editor/json-editor text]]
+               [ui/ModalActions
+                [ui/Button
+                 {:on-click (fn []
+                              (dispatch [::cimi-events/hide-add-modal]))}
+                 (@tr [:cancel])]
+                [ui/Button
+                 {:primary  true
+                  :on-click (fn []
+                              (try
+                                (let [data (general/json->edn @text)]
+                                  (dispatch [::cimi-events/create-resource data]))
+                                (catch js/Error e
+                                  (dispatch [::messages-events/add
+                                             {:header  "invalid JSON document"
+                                              :message (str "invalid JSON:\n\n" e)
+                                              :type    :error}]))
+                                (finally
+                                  (dispatch [::cimi-events/hide-add-modal]))))}
+                 (@tr [:create])]]])))))))
 
 
 (defn can-add?
