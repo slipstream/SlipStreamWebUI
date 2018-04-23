@@ -38,6 +38,7 @@
 (def Divider (adapt-component "Divider"))
 
 (def Dropdown (adapt-component "Dropdown"))
+(def DropdownDivider (adapt-component "DropdownDivider"))
 (def DropdownItem (adapt-component "DropdownItem"))
 (def DropdownMenu (adapt-component "DropdownMenu"))
 
