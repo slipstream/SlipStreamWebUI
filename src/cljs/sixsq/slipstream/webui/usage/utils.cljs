@@ -15,11 +15,11 @@
           filter-str (str/join " and " (remove nil? [filter-created-str filter-user-str filter-connectors]))
           request-opts {"$last"        0
                         "$filter"      filter-str
-                        "$aggregation" (str "cardinality:instanceID, sum:serviceOffer/resource:vcpu, "
-                                            "sum:serviceOffer/resource:ram, sum:serviceOffer/resource:disk")}
+                        "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
+                                            "sum:serviceOffer/resource:disk")}
           response (<! (cimi/search client "meterings" request-opts))]
       (resolve
-        [(keyword connector) {:vms  (get-in response [:aggregations :cardinality:instanceID :value] 0)
+        [(keyword connector) {:vms  (get response :count 0)
                               :vcpu (get-in response [:aggregations :sum:serviceOffer/resource:vcpu :value] 0)
                               :ram  (get-in response [:aggregations :sum:serviceOffer/resource:ram :value] 0)
                               :disk (get-in response [:aggregations :sum:serviceOffer/resource:disk :value] 0)}]))))

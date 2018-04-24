@@ -9,11 +9,10 @@
 
 (reg-event-db
   ::set-connectors-list
-  (fn [db [_ response]]
-    (let [connectors (->> (get-in response [:aggregations :terms:connector/href :buckets] []) (map #(:key %)))]
-      (-> db
-          (assoc ::usage-spec/connectors-list connectors)
-          (assoc ::usage-spec/loading-connectors-list? false)))))
+  (fn [db [_ {:keys [connectors] :as response}]]
+    (-> db
+        (assoc ::usage-spec/connectors-list (map :id connectors))
+        (assoc ::usage-spec/loading-connectors-list? false))))
 
 (reg-event-db
   ::set-selected-connectors
@@ -26,11 +25,11 @@
                 ::cimi-spec/cloud-entry-point] :as db} :db} _]
     (let [resource-type (-> cloud-entry-point
                             :collection-key
-                            (get "metering"))]
+                            (get "connector"))]
       {::cimi-api-fx/search [client
                              resource-type
-                             {:$last        0
-                              :$aggregation "terms:connector/href"}
+                             {:$orderby "id"
+                              :$select  "id"}
                              #(dispatch [::set-connectors-list %])]})))
 
 (reg-event-fx
