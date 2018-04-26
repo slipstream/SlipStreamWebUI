@@ -9,7 +9,7 @@
 
 (defn fetch-metering [resolve client date-after date-before user connector]
   (go
-    (let [filter-created-str (str "created>'" date-after "' and created<'" date-before "'")
+    (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-user-str (when user (str "acl/rules/principal='" user "'"))
           filter-connectors (when-not (= connector "all-clouds") (str "connector/href='" connector "'"))
           filter-str (str/join " and " (remove nil? [filter-created-str filter-user-str filter-connectors]))
