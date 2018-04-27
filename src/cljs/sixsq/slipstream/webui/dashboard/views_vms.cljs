@@ -17,7 +17,7 @@
       [ui/TableRow {:error (empty? deployment-href)}
        [ui/TableCell {:collapsing true}
         (when (empty? deployment-href)
-          [ui/Popup {:trigger  (r/as-element [:div [ui/Icon {:name "exclamation circle"}] "Unkown"])
+          [ui/Popup {:trigger  (r/as-element [:div [ui/Icon {:name "exclamation circle"}] "Unknown"])
                      :inverted true
                      :size     "mini" :content "Deployment UUID unknown" :position "left center"}])
         [:a {:href (str @slipstream-url "/" deployment-href)} (or (-> deployment-href
