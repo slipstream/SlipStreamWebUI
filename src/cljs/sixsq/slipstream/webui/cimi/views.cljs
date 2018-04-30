@@ -180,13 +180,22 @@
 (defn search-header []
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::cimi-subs/filter-visible?])
-        query-params (subscribe [::cimi-subs/query-params])]
+        query-params (subscribe [::cimi-subs/query-params])
+        selected-id (subscribe [::cimi-subs/collection-name])]
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
-        [ui/Form
+        [ui/Form {:on-key-press #(when
+                                   (and
+                                     (= (.-charCode %) 13)  ; enter charcode = 13
+                                     (some? @selected-id))
+                                   ; blur active element in form to get last value in query-params
+                                   (-> js/document .-activeElement .blur)
+                                   (dispatch [::cimi-events/get-results]))}
          [ui/FormField
-          [cloud-entry-point-title]]
+          [cloud-entry-point-title]
+          [ui/Button {:circular true :compact true :size "tiny" :floated "right" :basic true :icon "info"
+                      :href     "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]]
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
@@ -213,6 +222,7 @@
              [ui/Input {:type         "text"
                         :label        (@tr [:select])
                         :defaultValue $select
+                        :placeholder  "e.g. id, endpoint, ..."
                         :on-blur      #(dispatch
                                          [::cimi-events/set-select (-> %1 .-target .-value)])}]]])
 
@@ -223,6 +233,7 @@
              [ui/Input {:type         "text"
                         :label        (@tr [:order])
                         :defaultValue $orderby
+                        :placeholder  "e.g. created:desc, ..."
                         :on-blur      #(dispatch
                                          [::cimi-events/set-orderby (-> %1 .-target .-value)])}]]
 
@@ -231,6 +242,7 @@
              [ui/Input {:type         "text"
                         :label        (@tr [:aggregation])
                         :defaultValue $aggregation
+                        :placeholder  "e.g. min:resource:vcpu, ..."
                         :on-blur      #(dispatch [::cimi-events/set-aggregation (-> %1 .-target .-value)])}]]])
 
          (when @filter-visible?
@@ -241,7 +253,9 @@
               {:type         "text"
                :label        (@tr [:filter])
                :defaultValue $filter
-               :on-blur      #(dispatch [::cimi-events/set-filter (-> %1 .-target .-value)])}]]])]))))
+               :placeholder  "e.g. connector/href^='exoscale-' and resource:type='VM' and resource:ram>=8096"
+               :on-blur      #(dispatch [::cimi-events/set-filter (-> %1 .-target .-value)])}]]])
+         ]))))
 
 
 (defn format-field-item [selections-atom item]
@@ -250,7 +264,7 @@
     [ui/ListHeader
      [ui/Checkbox {:default-checked (contains? @selections-atom item)
                    :label           item
-                   :on-change       (cutil/callback :checked
+                   :on-blur         (cutil/callback :checked
                                                     (fn [checked]
                                                       (if checked
                                                         (swap! selections-atom set/union #{item})
