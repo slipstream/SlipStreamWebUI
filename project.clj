@@ -1,4 +1,4 @@
-(def +version+ "3.50-SNAPSHOT")
+(def +version+ "3.51-SNAPSHOT")
 
 (def package-json-template
   "
@@ -14,7 +14,7 @@
   }
   ")
 
-(defproject com.sixsq.slipstream/SlipStreamWebUI "3.50-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.51-SNAPSHOT"
 
   :description "Web Browser User Interface"
 
@@ -32,7 +32,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.1.1"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.2.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
