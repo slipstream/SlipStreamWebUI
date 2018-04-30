@@ -31,7 +31,10 @@
         query-params (subscribe [::deployment-subs/query-params])]
     (fn []
       (let [{:keys [offset limit cloud activeOnly]} @query-params]
-        [ui/Form
+        [ui/Form {:on-key-press #(when (= (.-charCode %) 13)
+                                   ; blur active element in form to get last value in query-params
+                                   (-> js/document .-activeElement .blur)
+                                   (dispatch [::deployment-events/get-deployments]))}
          [ui/FormGroup
           [ui/FormField
            ^{:key (str "offset:" offset)}
@@ -39,6 +42,7 @@
                       :min          0
                       :label        (@tr [:offset])
                       :defaultValue offset
+                      :placeholder  "e.g. 0"
                       :on-blur      #(dispatch
                                        [::deployment-events/set-query-params {:offset (-> %1 .-target .-value)}])
                       }]]
@@ -49,6 +53,7 @@
                       :min          0
                       :label        (@tr [:limit])
                       :defaultValue limit
+                      :placeholder  "e.g. 20"
                       :on-blur      #(dispatch
                                        [::deployment-events/set-query-params {:limit (-> %1 .-target .-value)}])}]]]
 
@@ -58,6 +63,7 @@
            [ui/Input {:type         "text"
                       :label        (@tr [:cloud])
                       :defaultValue cloud
+                      :placeholder  "e.g. exoscale-ch-dk"
                       :on-blur      #(dispatch
                                        [::deployment-events/set-query-params {:cloud (-> %1 .-target .-value)}])}]]
           [ui/FormField
