@@ -111,7 +111,7 @@
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
                     :external-config      {:devtools/config {:features-to-install :all}}
-                    }}
+                    :npm-deps             false}}
 
     {:id           "prod"
      :source-paths ["src/cljs"]
@@ -119,14 +119,16 @@
                     :output-to       "resources/public/js/webui.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
+                    :pretty-print    false
+                    :npm-deps        false}}
 
     {:id           "test"
      :source-paths ["src/cljs" "test/cljs"]
      :compiler     {:main          sixsq.slipstream.webui.runner
                     :output-to     "target/test/webui/webui-test.js"
                     :output-dir    "target/test/webui/out"
-                    :optimizations :whitespace}}
+                    :optimizations :whitespace
+                    :npm-deps      false}}
 
     ;;
     ;; electron UI builds
