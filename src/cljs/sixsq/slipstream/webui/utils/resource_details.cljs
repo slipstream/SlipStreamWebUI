@@ -189,7 +189,7 @@
   (case label
     "edit" ^{:key "edit"} [edit-button data description #(dispatch [::cimi-detail-events/edit id %])]
     "delete" ^{:key "delete"} [delete-button data #(dispatch [::cimi-detail-events/delete id])]
-    ^{:key other-button} [other-button label data #(dispatch [::cimi-detail-events/operation id operation-uri])]))
+    ^{:key operation-uri} [other-button label data #(dispatch [::cimi-detail-events/operation id operation-uri])]))
 
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
