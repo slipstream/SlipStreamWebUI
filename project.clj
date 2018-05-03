@@ -25,9 +25,9 @@
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
-            [lein-figwheel "0.5.14"]
+            [lein-figwheel "0.5.15"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
-            [lein-doo "0.1.8"]
+            [lein-doo "0.1.10"]
             [lein-unpack-resources "0.1.1"]
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
@@ -72,7 +72,7 @@
 
   :dependencies [[org.clojure/clojure]
                  [org.clojure/clojurescript]
-                 [reagent]
+                 [reagent "0.7.0"] ;temporary fix blocked on issue #146
 
                  [re-frame]
                  [secretary]
@@ -110,8 +110,7 @@
                                            sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
-                    :external-config      {:devtools/config {:features-to-install :all}}
-                    :npm-deps             false}}
+                    :external-config      {:devtools/config {:features-to-install :all}}}}
 
     {:id           "prod"
      :source-paths ["src/cljs"]
@@ -119,16 +118,14 @@
                     :output-to       "resources/public/js/webui.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false
-                    :npm-deps        false}}
+                    :pretty-print    false}}
 
     {:id           "test"
      :source-paths ["src/cljs" "test/cljs"]
      :compiler     {:main          sixsq.slipstream.webui.runner
                     :output-to     "target/test/webui/webui-test.js"
                     :output-dir    "target/test/webui/out"
-                    :optimizations :whitespace
-                    :npm-deps      false}}
+                    :optimizations :whitespace}}
 
     ;;
     ;; electron UI builds

@@ -13,7 +13,6 @@
     [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.client.events :as client-events]
-    [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
     [sixsq.slipstream.webui.usage.views :as usage-views]
     [sixsq.slipstream.webui.db.events :as db-events]

@@ -264,7 +264,7 @@
     [ui/ListHeader
      [ui/Checkbox {:default-checked (contains? @selections-atom item)
                    :label           item
-                   :on-blur         (cutil/callback :checked
+                   :on-change       (cutil/callback :checked
                                                     (fn [checked]
                                                       (if checked
                                                         (swap! selections-atom set/union #{item})
