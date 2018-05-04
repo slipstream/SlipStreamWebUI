@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.usage.views
   (:require
     [re-frame.core :refer [subscribe dispatch]]
+    [reagent.core :as r]
     [clojure.string :as str]
     [cljs.pprint :as pprint]
-    [cljsjs.react-date-range]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -18,54 +18,57 @@
         date-before (-> (.-endDate calendar-data) .clone (.add 1 "days") (.add -1 "seconds"))]
     (dispatch [::usage-events/set-date-after-before date-after date-before])))
 
-
-(defn date-label
-  [label date]
-  (let [tr (subscribe [::i18n-subs/tr])
-        locale (subscribe [::i18n-subs/locale])]
-    [ui/Label (@tr [label])
-     [ui/LabelDetail (or (some-> date
-                                 (.locale @locale)
-                                 (.format "dddd, Do MMMM YYYY"))
-                         (time/invalid @locale))]]))
-
-
 (defn search-calendar []
   (let [tr (subscribe [::i18n-subs/tr])
         locale (subscribe [::i18n-subs/locale])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])
         date-before (subscribe [::usage-subs/date-before])
         date-after (subscribe [::usage-subs/date-after])
         initial-after-date (time/days-before 30)
-        initial-before-date (time/days-before 1)]
+        initial-before-date (.endOf (time/days-before 1) "day")]
     (fn []
       (when-not (and @date-before @date-after)
         (dispatch [::usage-events/set-date-after-before initial-after-date initial-before-date]))
-      [ui/Container
-       (when @filter-visible?
-         (js/React.createElement
-           js/ReactDateRange.DateRange
-           (clj->js {:onInit         set-dates
-                     :onChange       set-dates
-                     :ranges         {(@tr [:today])        {:startDate (time/days-before 0)
-                                                             :endDate   (time/days-before 0)}
-                                      (@tr [:yesterday])    {:startDate (time/days-before 1)
-                                                             :endDate   (time/days-before 1)}
-                                      (@tr [:last-7-days])  {:startDate (time/days-before 7)
-                                                             :endDate   (time/days-before 1)}
-                                      (@tr [:last-30-days]) {:startDate (-> initial-after-date .clone)
-                                                             :endDate   (-> initial-before-date .clone)}}
-                     :calendars      2
-                     :firstDayOfWeek 1
-                     :startDate      (-> initial-after-date .clone)
-                     :endDate        (-> initial-before-date .clone)
-                     :minDate        (time/days-before 90)
-                     :theme          (clj->js {:Calendar         {:width 200}
-                                               :PredefinedRanges {:height 10 :width 100 :marginLeft 10 :marginTop 10}})
-                     :maxDate        (time/now)
-                     :lang           @locale})))            ;; FIXME: Locale seems to be ignored.
-       [date-label :from @date-after]
-       [date-label :to @date-before]])))
+      [ui/FormGroup
+       [ui/FormField
+        (vec (concat [ui/Menu {:secondary true :vertical true :size "small"}]
+                     (mapv (fn [[key start end]]
+                             ^{:key key} [ui/MenuItem
+                                          {:name   (@tr [key])
+                                           :active (and
+                                                     (= (int (time/delta-minutes @date-after start)) 0)
+                                                     (= (int (time/delta-minutes @date-before end)) 0))
+                                           :on-click
+                                                   #(dispatch [::usage-events/set-date-after-before start end])}])
+                           [[:today (time/days-before 0) (.endOf (time/days-before 0) "day")]
+                            [:yesterday (time/days-before 1) (.endOf (time/days-before 1) "day")]
+                            [:last-7-days (time/days-before 7) (.endOf (time/days-before 1) "day")]
+                            [:last-30-days (.clone initial-after-date) (.clone initial-before-date)]])))]
+       [ui/FormField
+        [ui/DatePicker {:custom-input  (r/as-element [ui/Input {:label (@tr [:from])}])
+                        :selected      @date-after
+                        :start-date    @date-after
+                        :end-date      @date-before
+                        :min-date      (time/days-before 90)
+                        :max-date      (time/now)
+                        :selects-start true
+                        :locale        @locale
+                        :fixed-height  true
+                        :date-format   "dd, Do MMMM YY"
+                        :on-change     #(dispatch [::usage-events/set-date-after-before % @date-before])
+                        }]]
+       [ui/FormField
+        [ui/DatePicker {:custom-input (r/as-element [ui/Input {:label (@tr [:to])}])
+                        :selected     @date-before
+                        :start-date   @date-after
+                        :end-date     @date-before
+                        :locale       @locale
+                        :fixed-height true
+                        :date-format  "dd, Do MMMM YY"
+                        :min-date     @date-after
+                        :max-date     (time/now)
+                        :selects-end  true
+                        :on-change    #(dispatch [::usage-events/set-date-after-before @date-after (.endOf % "day")])
+                        }]]])))
 
 
 (defn search-all-clouds-dropdown []
@@ -73,24 +76,25 @@
         loading-connectors-list? (subscribe [::usage-subs/loading-connectors-list?])]
     (dispatch [::usage-events/get-connectors-list])
     (fn []
-      [ui/Menu {:secondary true :size "small"}
-       [ui/Dropdown {:fluid       true
-                     :icon        "cloud"
-                     :className   "icon"
-                     :labeled     true
-                     :button      true
-                     :placeholder "All clouds"
-                     :loading     @loading-connectors-list?
-                     :multiple    true
-                     :search      true
-                     :selection   true
-                     :onChange    #(dispatch [::usage-events/set-selected-connectors
-                                              (-> (js->clj %2 :keywordize-keys true) :value)])
-                     :options     (map
-                                    #(let [connector-href %
-                                           connector-name (str/replace connector-href #"^connector/" "")]
-                                       {:key connector-href :value connector-href :text connector-name})
-                                    @connectors-list)}]])))
+      [ui/FormField
+       [ui/Dropdown
+        {:fluid       true
+         :icon        "cloud"
+         :className   "icon"
+         :labeled     true
+         :button      true
+         :placeholder "All clouds"
+         :loading     @loading-connectors-list?
+         :multiple    true
+         :search      true
+         :selection   true
+         :onChange    #(dispatch [::usage-events/set-selected-connectors
+                                  (-> (js->clj %2 :keywordize-keys true) :value)])
+         :options     (map
+                        #(let [connector-href %
+                               connector-name (str/replace connector-href #"^connector/" "")]
+                           {:key connector-href :value connector-href :text connector-name})
+                        @connectors-list)}]])))
 
 
 (defn search-users-dropdown []
@@ -98,41 +102,44 @@
         users (subscribe [::usage-subs/users-list])
         loading? (subscribe [::usage-subs/loading-users-list?])]
     (fn []
-      [ui/Menu {:secondary true :size "small"}
-       [ui/Dropdown {:fluid       true
-                     :placeholder "Filter by user"
-                     :search      true
-                     :icon        "users"
-                     :labeled     true
-                     :button      true
-                     :value       @selected-user
-                     :className   "icon multiple"
-                     :selection   true
-                     :loading     @loading?
-                     :onChange    #(dispatch [::usage-events/set-user (-> (js->clj %2 :keywordize-keys true) :value)])
-                     :options     (map #(let [user-name (str/replace % #"^user/" "")]
-                                          {:key user-name :value user-name :text user-name})
-                                       @users)}]
-       (when @selected-user
-         [ui/MenuItem {:icon "close" :link true :onClick #(dispatch [::usage-events/clear-user])}])
-       ])))
+      [ui/FormField
+       [ui/ButtonGroup {:fluid true}
+        [ui/Dropdown {:as          :div
+                      :placeholder "Filter by user"
+                      :search      true
+                      :icon        "users"
+                      :labeled     true
+                      :button      true
+                      :value       @selected-user
+                      :className   "icon multiple"
+                      :selection   true
+                      :loading     @loading?
+                      :onChange    #(dispatch [::usage-events/set-user (-> (js->clj %2 :keywordize-keys true) :value)])
+                      :options     (map #(let [user-name (str/replace % #"^user/" "")]
+                                           {:key user-name :value user-name :text user-name})
+                                        @users)}]
+        (when @selected-user
+          [ui/Button {:compact true
+                      :basic   true
+                      :icon    "delete"
+                      :floated "right"
+                      :onClick #(dispatch [::usage-events/clear-user])}])]])))
 
 
 (defn search-header []
   (let [is-admin? (subscribe [::authn-subs/is-admin?])
-        loading? (subscribe [::usage-subs/loading-users-list?])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])]
+        loading? (subscribe [::usage-subs/loading-users-list?])]
     (fn []
-      [ui/Grid {:stackable true :columns 2}
-       [ui/GridColumn {:width 10} [search-calendar]]
-       [ui/GridColumn {:width 6 :stretched true}
-        (when @filter-visible?
-          [ui/Segment {:basic true}
-           [search-all-clouds-dropdown]
-           (when @is-admin?
-             (when @loading?
-               (dispatch [::usage-events/get-users-list]))
-             [search-users-dropdown])])]])))
+      [ui/Form
+       [ui/FormGroup {
+                      :widths "equal"
+                      }
+        [search-calendar]
+        [search-all-clouds-dropdown]
+        (when @is-admin?
+          (when @loading?
+            (dispatch [::usage-events/get-users-list]))
+          [search-users-dropdown])]])))
 
 
 (defn filter-button
@@ -151,7 +158,8 @@
 
 
 (defn control-bar []
-  (let [tr (subscribe [::i18n-subs/tr])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        filter-visible? (subscribe [::usage-subs/filter-visible?])]
     [:div
      [ui/Menu {:attached   "top"
                :borderless true}
@@ -160,8 +168,9 @@
        [ui/Icon {:name "search"}]
        (@tr [:search])]
       [filter-button]]
-     [ui/Segment {:attached "bottom"}
-      [search-header]]]))
+     (when @filter-visible?
+       [ui/Segment {:attached "bottom"}
+        [search-header]])]))
 
 
 (defn format [fmt-str & v]
@@ -255,5 +264,5 @@
 
 
 (defmethod panel/render :usage
-  [path]
+  [_]
   [usage])
