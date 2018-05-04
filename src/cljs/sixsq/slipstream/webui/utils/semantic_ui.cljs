@@ -4,6 +4,7 @@
    about undefined symbols."
   (:require                                                 ;[soda-ash.core :as sa]
     [reagent.core :as r]
+    [cljsjs.react-datepicker]
     cljsjs.semantic-ui-react))
 
 (defn adapt-component [tag]
@@ -31,6 +32,8 @@
 (def Confirm (adapt-component "Confirm"))
 
 (def Container (adapt-component "Container"))
+
+(def DatePicker (r/adapt-react-class js/DatePicker))
 
 (def Dimmer (adapt-component "Dimmer"))
 (def DimmerDimmable (adapt-component "DimmerDimmable"))
