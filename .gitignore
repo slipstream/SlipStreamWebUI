@@ -8,7 +8,7 @@ target
 */.cljs_rhino_repl/*
 figwheel_server.log
 doo-index.html
-.lein-failures
+.lein-*
 resources/public/js/webui.js
 resources/public/css/version.css
 resources/public/css/codemirror.css
