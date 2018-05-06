@@ -5,50 +5,40 @@
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::usage-spec/loading? db)))
+  ::usage-spec/loading?)
 
 (reg-sub
   ::filter-visible?
-  (fn [db]
-    (::usage-spec/filter-visible? db)))
+  ::usage-spec/filter-visible?)
 
 (reg-sub
   ::results
-  (fn [db]
-    (::usage-spec/results db)))
+  ::usage-spec/results)
 
 (reg-sub
   ::loading-connectors-list?
-  (fn [db]
-    (::usage-spec/loading-connectors-list? db)))
+  ::usage-spec/loading-connectors-list?)
 
 (reg-sub
   ::connectors-list
-  (fn [db]
-    (::usage-spec/connectors-list db)))
+  ::usage-spec/connectors-list)
 
 (reg-sub
   ::loading-users-list?
-  (fn [db]
-    (::usage-spec/loading-connectors-list? db)))
+  ::usage-spec/loading-connectors-list?)
 
 (reg-sub
   ::users-list
-  (fn [db]
-    (::usage-spec/users-list db)))
+  ::usage-spec/users-list)
 
 (reg-sub
   ::selected-user
-  (fn [db]
-    (::usage-spec/selected-user db)))
+  ::usage-spec/selected-user)
 
 (reg-sub
   ::date-after
-  (fn [db]
-    (::usage-spec/date-after db)))
+  ::usage-spec/date-after)
 
 (reg-sub
   ::date-before
-  (fn [db]
-    (::usage-spec/date-before db)))
+  ::usage-spec/date-before)

@@ -47,7 +47,7 @@
 (reg-event-db
   ::set-users-list
   (fn [db [_ response]]
-    (let [users (map #(:id %) (get response :users []))]
+    (let [users (map :id (get response :users []))]
       (-> db
           (assoc ::usage-spec/users-list users)
           (assoc ::usage-spec/loading-users-list? false)))))

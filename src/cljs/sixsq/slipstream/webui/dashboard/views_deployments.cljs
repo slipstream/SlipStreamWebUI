@@ -105,7 +105,7 @@
                  [ui/TableCell {:collapsing true :style {:max-width     "150px"
                                                          :overflow      "hidden"
                                                          :text-overflow "ellipsis"}}
-                  (let [module-uri-vec (-> module-uri (str/split #"/"))
+                  (let [module-uri-vec (str/split module-uri #"/")
                         module-uri-version (str (nth module-uri-vec
                                                      (- (count module-uri-vec) 2))
                                                 " " (last module-uri-vec))]
@@ -115,7 +115,8 @@
                                                          :overflow      "hidden"
                                                          :text-overflow "ellipsis"}}
                   [:a {:href service-url :target "_blank"}
-                   (when-not (empty? service-url) [ui/Icon {:name "external"}]) service-url]]
+                   (when (seq service-url) [ui/Icon {:name "external"}])
+                   service-url]]
 
                  [ui/TableCell (merge {:collapsing true} global-prop) state]
 

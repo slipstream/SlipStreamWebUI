@@ -6,23 +6,19 @@
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::cimi-detail-spec/loading? db)))
+  ::cimi-detail-spec/loading?)
 
 
 (reg-sub
   ::resource-id
-  (fn [db _]
-    (::cimi-detail-spec/resource-id db)))
+  ::cimi-detail-spec/resource-id)
 
 
 (reg-sub
   ::resource
-  (fn [db _]
-    (::cimi-detail-spec/resource db)))
+  ::cimi-detail-spec/resource)
 
 
 (reg-sub
   ::description
-  (fn [db _]
-    (::cimi-detail-spec/description db)))
+  ::cimi-detail-spec/description)

@@ -7,14 +7,12 @@
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::metrics-spec/loading? db)))
+  ::metrics-spec/loading?)
 
 
 (reg-sub
   ::raw-metrics
-  (fn [db]
-    (::metrics-spec/raw-metrics db)))
+  ::metrics-spec/raw-metrics)
 
 
 (reg-sub

@@ -9,56 +9,47 @@
 
 (reg-sub
   ::query-params
-  (fn [db _]
-    (::cimi-spec/query-params db)))
+  ::cimi-spec/query-params)
 
 
 (reg-sub
   ::aggregations
-  (fn [db _]
-    (::cimi-spec/aggregations db)))
+  ::cimi-spec/aggregations)
 
 
 (reg-sub
   ::collection
-  (fn [db _]
-    (::cimi-spec/collection db)))
+  ::cimi-spec/collection)
 
 
 (reg-sub
   ::collection-name
-  (fn [db _]
-    (::cimi-spec/collection-name db)))
+  ::cimi-spec/collection-name)
 
 
 (reg-sub
   ::selected-fields
-  (fn [db _]
-    (::cimi-spec/selected-fields db)))
+  ::cimi-spec/selected-fields)
 
 
 (reg-sub
   ::available-fields
-  (fn [db _]
-    (::cimi-spec/available-fields db)))
+  ::cimi-spec/available-fields)
 
 
 (reg-sub
   ::cloud-entry-point
-  (fn [db _]
-    (::cimi-spec/cloud-entry-point db)))
+  ::cimi-spec/cloud-entry-point)
 
 
 (reg-sub
   ::show-add-modal?
-  (fn [db _]
-    (::cimi-spec/show-add-modal? db)))
+  ::cimi-spec/show-add-modal?)
 
 
 (reg-sub
   ::collections-templates-cache
-  (fn [db]
-    (::cimi-spec/collections-templates-cache db)))
+  ::cimi-spec/collections-templates-cache)
 
 
 (reg-sub
@@ -66,7 +57,7 @@
   :<- [::collections-templates-cache]
   (fn [collections-templates-cache [_ template-href]]
     (when (contains? collections-templates-cache template-href)
-      (let [templates-info (-> collections-templates-cache template-href)]
+      (let [templates-info (template-href collections-templates-cache)]
         (when (neg-int? (:loaded templates-info))
           (dispatch [::cimi-events/get-templates (name template-href)]))
         templates-info))))
@@ -85,13 +76,11 @@
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::cimi-spec/loading? db)))
+  ::cimi-spec/loading?)
 
 
 (reg-sub
   ::filter-visible?
-  (fn [db]
-    (::cimi-spec/filter-visible? db)))
+  ::cimi-spec/filter-visible?)
 
 

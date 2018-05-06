@@ -117,7 +117,7 @@
         (vec (concat [ui/Form {:id     (str "login_" id)
                                :action post-uri
                                :method "post"}]
-                     (map #(form-component %) inputs-method)
+                     (map form-component inputs-method)
                      [(if-not dropdown?
                         [ui/FormButton {:primary true :fluid true} label]
                         [ui/FormField

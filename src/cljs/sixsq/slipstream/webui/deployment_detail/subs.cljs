@@ -6,35 +6,29 @@
 
 (reg-sub
   ::runUUID
-  (fn [db]
-    (::deployment-detail-spec/runUUID db)))
+  ::deployment-detail-spec/runUUID)
 
 
 (reg-sub
   ::reports
-  (fn [db]
-    (::deployment-detail-spec/reports db)))
+  ::deployment-detail-spec/reports)
 
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::deployment-detail-spec/loading? db)))
+  ::deployment-detail-spec/loading?)
 
 
 (reg-sub
   ::cached-resource-id
-  (fn [db]
-    (::deployment-detail-spec/cached-resource-id db)))
+  ::deployment-detail-spec/cached-resource-id)
 
 
 (reg-sub
   ::resource
-  (fn [db]
-    (::deployment-detail-spec/resource db)))
+  ::deployment-detail-spec/resource)
 
 
 (reg-sub
   ::events
-  (fn [db]
-    (::deployment-detail-spec/events db)))
+  ::deployment-detail-spec/events)

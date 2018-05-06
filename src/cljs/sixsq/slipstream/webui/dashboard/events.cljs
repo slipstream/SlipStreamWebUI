@@ -54,7 +54,7 @@
                               ::dashboard-spec/page
                               ::dashboard-spec/records-displayed] :as db}]
   (let [last (* page records-displayed)
-        first (+ (- last records-displayed) 1)]
+        first (inc (- last records-displayed))]
     {::dashboard-fx/get-virtual-machines [client {:$filter (when filtered-cloud
                                                              (str "connector/href=\"connector/" filtered-cloud "\""))
                                                   :$order  "created:desc"

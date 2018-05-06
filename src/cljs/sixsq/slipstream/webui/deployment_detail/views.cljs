@@ -232,8 +232,7 @@
           [ui/TableHeaderCell [:span (@tr [:type])]]
           [ui/TableHeaderCell [:span (@tr [:state])]]]]
         (vec (concat [ui/TableBody]
-                     (->> events
-                          (map event-map-to-row))))]])))
+                     (map event-map-to-row events)))]])))
 
 
 (defn gantt

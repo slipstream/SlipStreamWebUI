@@ -132,7 +132,7 @@
       (let [stats (->> @aggregations
                        (map tuple-fn)
                        (sort second)
-                       (map #(statistic %))
+                       (map statistic)
                        vec)]
         (vec (concat [ui/StatisticGroup {:size :mini}] [[results-statistic]] stats))))))
 
@@ -390,7 +390,7 @@
   (let [tr (subscribe [::i18n-subs/tr])
         search-results (subscribe [::cimi-subs/collection])]
     (fn []
-      (when (can-add? (-> @search-results :operations))
+      (when (can-add? (:operations @search-results))
         [ui/MenuItem {:name     "add"
                       :on-click #(dispatch [::cimi-events/show-add-modal])}
          [ui/Icon {:name "add"}]
@@ -429,7 +429,7 @@
                  :borderless true}
         [search-button]
         [select-fields]
-        (when (can-add? (-> @resources :operations))
+        (when (can-add? (:operations @resources))
           [create-button])
         [filter-button]]
        [ui/Segment {:attached "bottom"}

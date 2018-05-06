@@ -6,22 +6,19 @@
 
 (reg-sub
   ::sidebar-open?
-  (fn [db]
-    (::main-spec/sidebar-open? db)))
+  ::main-spec/sidebar-open?)
+
 
 (reg-sub
   ::visible?
-  (fn [db]
-    (::main-spec/visible? db)))
+  ::main-spec/visible?)
 
 
 (reg-sub
   ::nav-path
-  (fn [db]
-    (::main-spec/nav-path db)))
+  ::main-spec/nav-path)
 
 
 (reg-sub
   ::nav-query-params
-  (fn [db]
-    (::main-spec/nav-query-params db)))
+  ::main-spec/nav-query-params)

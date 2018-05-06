@@ -12,14 +12,14 @@
 (reg-event-fx
   ::initialize
   (fn [{:keys [db]} _]
-    (when-let [client (-> db ::client-spec/client)]
+    (when-let [client (::client-spec/client db)]
       {::cimi-api-fx/session [client #(dispatch [::set-session %])]})))
 
 
 (reg-event-fx
   ::set-session
   (fn [{:keys [db]} [_ session]]
-    (let [redirect-uri (-> db ::authn-spec/redirect-uri)]
+    (let [redirect-uri (::authn-spec/redirect-uri db)]
       (cond-> {:db (assoc db ::authn-spec/session session)}
               (and session redirect-uri)
               (assoc ::history-fx/navigate-js-location [redirect-uri])))))

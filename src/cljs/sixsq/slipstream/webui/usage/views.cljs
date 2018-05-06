@@ -14,7 +14,7 @@
 
 
 (defn set-dates [calendar-data]
-  (let [date-after (-> (.-startDate calendar-data) .clone)
+  (let [date-after (.clone (.-startDate calendar-data))
         date-before (-> (.-endDate calendar-data) .clone (.add 1 "days") (.add -1 "seconds"))]
     (dispatch [::usage-events/set-date-after-before date-after date-before])))
 

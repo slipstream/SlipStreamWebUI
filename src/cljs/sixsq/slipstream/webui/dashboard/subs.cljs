@@ -6,66 +6,53 @@
 
 (reg-sub
   ::statistics
-  (fn [db]
-    (::dashboard-spec/statistics db)))
+  ::dashboard-spec/statistics)
 
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::dashboard-spec/loading? db)))
+  ::dashboard-spec/loading?)
 
 (reg-sub
   ::selected-tab
-  (fn [db]
-    (::dashboard-spec/selected-tab db)))
+  ::dashboard-spec/selected-tab)
 
 (reg-sub
   ::virtual-machines
-  (fn [db]
-    (::dashboard-spec/virtual-machines db)))
+  ::dashboard-spec/virtual-machines)
 
 (reg-sub
   ::deployments
-  (fn [db]
-    (::dashboard-spec/deployments db)))
+  ::dashboard-spec/deployments)
 
 (reg-sub
   ::records-displayed
-  (fn [db]
-    (::dashboard-spec/records-displayed db)))
+  ::dashboard-spec/records-displayed)
 
 (reg-sub
   ::page
-  (fn [db]
-    (::dashboard-spec/page db)))
+  ::dashboard-spec/page)
 
 (reg-sub
   ::total-pages
-  (fn [db]
-    (::dashboard-spec/total-pages db)))
+  ::dashboard-spec/total-pages)
 
 (reg-sub
   ::active-deployments-only
-  (fn [db]
-    (::dashboard-spec/active-deployments-only db)))
+  ::dashboard-spec/active-deployments-only)
 
 (reg-sub
   ::deleted-deployments
-  (fn [db]
-    (::dashboard-spec/deleted-deployments db)))
+  ::dashboard-spec/deleted-deployments)
 
 (reg-sub
   ::delete-deployment-modal
-  (fn [db]
-    (::dashboard-spec/delete-deployment-modal db)))
+  ::dashboard-spec/delete-deployment-modal)
 
 (reg-sub
   ::error-message-deployment
-  (fn [db]
-    (::dashboard-spec/error-message-deployment db)))
+  ::dashboard-spec/error-message-deployment)
 
 (reg-sub
   ::loading-tab?
-  (fn [db]
-    (::dashboard-spec/loading-tab? db)))
+  ::dashboard-spec/loading-tab?)

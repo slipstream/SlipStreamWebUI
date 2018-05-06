@@ -6,25 +6,21 @@
 
 (reg-sub
   ::loading?
-  (fn [db]
-    (::deployment-spec/loading? db)))
+  ::deployment-spec/loading?)
 
 
 (reg-sub
   ::filter-visible?
-  (fn [db]
-    (::deployment-spec/filter-visible? db)))
+  ::deployment-spec/filter-visible?)
 
 
 (reg-sub
   ::query-params
-  (fn [db]
-    (::deployment-spec/query-params db)))
+  ::deployment-spec/query-params)
 
 
 (reg-sub
   ::deployments
-  (fn [db]
-    (::deployment-spec/deployments db)))
+  ::deployment-spec/deployments)
 
 

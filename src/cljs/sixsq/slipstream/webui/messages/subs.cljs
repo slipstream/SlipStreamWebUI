@@ -6,11 +6,9 @@
 
 (reg-sub
   ::messages
-  (fn [db]
-    (::messages-spec/messages db)))
+  ::messages-spec/messages)
 
 
 (reg-sub
   ::alert-message
-  (fn [db]
-    (::messages-spec/alert-message db)))
+  ::messages-spec/alert-message)

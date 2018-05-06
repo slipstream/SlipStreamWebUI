@@ -6,17 +6,14 @@
 
 (reg-sub
   ::completed?
-  (fn [db]
-    (::application-spec/completed? db)))
+  ::application-spec/completed?)
 
 
 (reg-sub
   ::module-id
-  (fn [db _]
-    (::application-spec/module-id db)))
+  ::application-spec/module-id)
 
 
 (reg-sub
   ::module
-  (fn [db _]
-    (::application-spec/module db)))
+  ::application-spec/module)

@@ -56,7 +56,7 @@
 
 (defn visibility-watcher []
   (let [callback #(dispatch [::main-events/visible (not (.-hidden js/document))])]
-    (. js/document (addEventListener "visibilitychange" callback))))
+    (.addEventListener js/document "visibilitychange" callback)))
 
 
 (defn ^:export init []

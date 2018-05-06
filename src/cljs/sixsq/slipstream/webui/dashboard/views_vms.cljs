@@ -34,7 +34,7 @@
        [ui/TableCell
         {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}} instance-id]
        [ui/TableCell {:collapsing true :style {:max-width "150px" :overflow "hidden" :text-overflow "ellipsis"}}
-        (or (-> connector-href (str/replace #"^connector/" "")) "")]
+        (or (str/replace connector-href #"^connector/" "") "")]
        [ui/TableCell {:style {:max-width "250px" :overflow "hidden" :text-overflow "ellipsis"}}
         [:a {:href (str @slipstream-url "/" user-href)} (str/replace user-href #"^user/" "")]]])))
 

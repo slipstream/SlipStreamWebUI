@@ -6,10 +6,8 @@
 
 (reg-sub
   ::client
-  (fn [db]
-    (::client-spec/client db)))
+  ::client-spec/client)
 
 (reg-sub
   ::slipstream-url
-  (fn [db]
-    (::client-spec/slipstream-url db)))
+  ::client-spec/slipstream-url)

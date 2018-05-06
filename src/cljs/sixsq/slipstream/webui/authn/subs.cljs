@@ -7,13 +7,11 @@
 
 (reg-sub
   ::open-modal
-  (fn [db]
-    (::authn-spec/open-modal db)))
+  ::authn-spec/open-modal)
 
 (reg-sub
   ::session
-  (fn [db]
-    (::authn-spec/session db)))
+  ::authn-spec/session)
 
 (defn has-role? [session role]
   (some-> session :roles (str/split  #"\s+") set (contains? role)))
@@ -38,15 +36,12 @@
 
 (reg-sub
   ::error-message
-  (fn [db]
-    (::authn-spec/error-message db)))
+  ::authn-spec/error-message)
 
 (reg-sub
   ::redirect-uri
-  (fn [db]
-    (::authn-spec/redirect-uri db)))
+  ::authn-spec/redirect-uri)
 
 (reg-sub
   ::server-redirect-uri
-  (fn [db]
-    (::authn-spec/server-redirect-uri db)))
+  ::authn-spec/server-redirect-uri)

@@ -89,7 +89,7 @@
 
 
 (defn error-text [tr error]
-  (if-let [{:keys [status body reason]} (-> error ex-data)]
+  (if-let [{:keys [status body reason]} (ex-data error)]
     (str (or (@tr [reason]) (name reason)) " (" status ")")
     (str error)))
 
