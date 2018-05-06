@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.utils.general-test
   (:require
-    [cljs.test :refer-macros [deftest is are testing run-tests]]
+    [cljs.test :refer-macros [are deftest is run-tests testing]]
     [sixsq.slipstream.webui.utils.general :as t]))
 
 

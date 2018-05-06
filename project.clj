@@ -30,7 +30,8 @@
             [lein-doo "0.1.10"]
             [lein-unpack-resources "0.1.1"]
             [pdok/lein-filegen "0.1.0"]
-            [lein-resource "16.9.1"]]
+            [lein-resource "16.9.1"]
+            [lein-nsorg "0.1.4"]]
 
   :parent-project {:coords  [sixsq/slipstream-parent "5.3.2"]
                    :inherit [:min-lein-version
