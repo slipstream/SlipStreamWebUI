@@ -15,7 +15,7 @@
    (n-decimal-places decimal-string 2))
   ([decimal-string n]
    (let [[left right] (str/split decimal-string #"\.")]
-     (str left "." (apply str (take n (concat right (repeat "0"))))))))
+     (str left "." (str/join (take n (concat right (repeat "0"))))))))
 
 
 (defn now

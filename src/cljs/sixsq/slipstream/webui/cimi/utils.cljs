@@ -28,7 +28,7 @@
   [cep]
   (into {} (->> cep
                 collection-href-map
-                (filter #(str/ends-with? (-> % second) template-suffix))
+                (filter #(-> % second (str/ends-with? template-suffix)))
                 (map (juxt #(-> % second keyword) (constantly {:templates {}
                                                                :total     0
                                                                :loaded    -1}))))))

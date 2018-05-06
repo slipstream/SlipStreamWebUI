@@ -40,22 +40,21 @@
     {total-max :value}          :jvm.memory.total.max
     :as                         metrics}]
   (when metrics
-    (->> [{:type "non-heap committed", :memory non-heap-committed}
-          {:type "non-heap init", :memory non-heap-init}
-          {:type "non-heap used", :memory non-heap-used}
-          {:type "non-heap max", :memory non-heap-max}
+    (filter #(not (neg? (:memory %)))
+            [{:type "non-heap committed", :memory non-heap-committed}
+             {:type "non-heap init", :memory non-heap-init}
+             {:type "non-heap used", :memory non-heap-used}
+             {:type "non-heap max", :memory non-heap-max}
 
-          {:type "heap committed", :memory heap-committed}
-          {:type "heap init", :memory heap-init}
-          {:type "heap used", :memory heap-used}
-          {:type "heap max", :memory heap-max}
+             {:type "heap committed", :memory heap-committed}
+             {:type "heap init", :memory heap-init}
+             {:type "heap used", :memory heap-used}
+             {:type "heap max", :memory heap-max}
 
-          {:type "total committed", :memory total-committed}
-          {:type "total init", :memory total-init}
-          {:type "total used", :memory total-used}
-          {:type "total max", :memory total-max}]
-
-         (filter #(not (neg? (:memory %)))))))
+             {:type "total committed", :memory total-committed}
+             {:type "total init", :memory total-init}
+             {:type "total used", :memory total-used}
+             {:type "total max", :memory total-max}])))
 
 
 (defn get-rate

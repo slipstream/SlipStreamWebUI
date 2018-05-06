@@ -5,11 +5,9 @@
 
 (reg-sub
   ::locale
-  (fn [db]
-    (:sixsq.slipstream.webui.i18n.spec/locale db)))
+  :sixsq.slipstream.webui.i18n.spec/locale)
 
 
 (reg-sub
   ::tr
-  (fn [db]
-    (:sixsq.slipstream.webui.i18n.spec/tr db)))
+  :sixsq.slipstream.webui.i18n.spec/tr)

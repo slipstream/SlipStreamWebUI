@@ -22,7 +22,7 @@
                            (handler [opts])))
                :start (do
                         (log/info "Starting dispatch timer: " opts)
-                        (when (-> @live-intervals id)
+                        (when (id @live-intervals)
                           (handler [{:action :end :id id}])) ; avoid duplication of same action
                         (dispatch event)
                         (swap! live-intervals assoc id

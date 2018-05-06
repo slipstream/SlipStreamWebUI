@@ -54,5 +54,5 @@
     (is (= test-size (count (t/random-element-id test-size))))
 
     ;; all calls produce unique identifiers
-    (let [ids (take 20 (repeatedly t/random-element-id))]
+    (let [ids (repeatedly 20 t/random-element-id)]
       (is (= (count ids) (count (set ids)))))))
