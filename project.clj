@@ -25,7 +25,7 @@
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
-            [lein-figwheel "0.5.15"]
+            [lein-figwheel "0.5.16"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-doo "0.1.10"]
             [lein-unpack-resources "0.1.1"]
