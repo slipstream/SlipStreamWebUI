@@ -32,7 +32,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.3"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.5"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
