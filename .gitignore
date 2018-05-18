@@ -7,6 +7,7 @@ target
 .DS_Store
 */.cljs_rhino_repl/*
 figwheel_server.log
+.rebel_readline_history
 doo-index.html
 .lein-*
 resources/public/js/webui.js

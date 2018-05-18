@@ -181,6 +181,7 @@
                    [day8.re-frame/re-frame-10x]
                    [ring]
                    [ring/ring-defaults]
+                   [commons-io] ; dependency of ring
                    [compojure]]
     :figwheel     {:server-port  3000
                    :ring-handler sixsq.slipstream.webui.dev_server/http-handler}}}
