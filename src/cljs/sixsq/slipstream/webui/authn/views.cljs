@@ -6,16 +6,13 @@
 
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
-    [sixsq.slipstream.webui.utils.forms :as form-utils]
-    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]))
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]))
 
 
 (defn method-comparator
@@ -50,6 +47,12 @@
   [[_ methods]]
   (let [authn-method (:method (first methods))]
     (#{"internal" "api-key"} authn-method)))
+
+
+(defn self-registration
+  [[_ methods]]
+  (let [authn-method (:method (first methods))]
+    (#{"self-registration"} authn-method)))
 
 
 (defn hidden? [{:keys [type] :as param-desc}]
@@ -97,24 +100,24 @@
                    :required     mandatory}]))
 
 
-(defn method-form
-  "Renders the form for a particular login method. The fields are taken from
-   the login method description."
-  [method-type methods]
+(defn authn-method-form
+  "Renders the form for a particular authentication (login or sign up) method.
+   The fields are taken from the method description."
+  [method-type methods collections-kw id-prefix]
   (let [cep (subscribe [::cimi-subs/cloud-entry-point])
         selected-method-group (r/atom (when (= 1 (count methods)) (first methods)))
         server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])]
-    (fn [method-type methods]
+    (fn [method-type methods collections-kw id-prefix]
       (let [dropdown? (> (count methods) 1)
             {:keys [id label] :as method} @selected-method-group
             {:keys [baseURI collection-href]} @cep
             id (or id method-type)
-            post-uri (str baseURI (:sessions collection-href)) ;; FIXME: Should be part of CIMI API.
+            post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
             inputs-method (conj (->> method ordered-params (filter keep-param-mandatory-not-readonly?))
                                 ["href" {:displayName "href" :data id :type "hidden"}]
                                 ["redirectURI" {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])]
-        (log/info "creating login form for method" id)
-        (vec (concat [ui/Form {:id     (str "login_" id)
+        (log/infof "creating authentication form: %s %s" (name collections-kw) id)
+        (vec (concat [ui/Form {:id     (str id-prefix id)
                                :action post-uri
                                :method "post"}]
                      (map form-component inputs-method)
@@ -136,20 +139,30 @@
                             :style         {:text-align "center"}}]]])]))))))
 
 
-(defn login-form-container
-  "Container that holds all of the login forms. These will be placed into two
-   columns. The first has the 'internal' login forms and the second contains
-   all of the rest."
-  []
-  (let [template-href (cimi-utils/template-href :session)
+(defn login-method-form
+  [method-type methods]
+  [authn-method-form method-type methods :sessions "login_"])
+
+
+(defn signup-method-form
+  [method-type methods]
+  [authn-method-form method-type methods :users "signup_"])
+
+
+(defn authn-form-container
+  "Container that holds all of the authentication (login or sign up) forms.
+   These will be placed into two columns. The first has the 'internal' login
+   forms and the second contains all of the rest."
+  [collection-kw failed-kw group-fn method-form-fn]
+  (let [template-href (cimi-utils/template-href collection-kw)
         templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
         loading? (subscribe [::cimi-subs/collection-templates-loading? (keyword template-href)])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])]
-    (fn []
+    (fn [collection-kw failed-kw group-fn method-form-fn]
       (let [method-groups (order-and-group (-> @templates :templates vals))
-            internals (filter internal-or-api-key method-groups)
-            externals (remove internal-or-api-key method-groups)
+            internals (filter group-fn method-groups)
+            externals (remove group-fn method-groups)
             externals? (empty? externals)]
 
         [ui/Segment {:basic true}
@@ -157,7 +170,7 @@
            [ui/Message {:negative  true
                         :size      "tiny"
                         :onDismiss #(dispatch [::authn-events/clear-error-message])}
-            [ui/MessageHeader (@tr [:login-failed])]
+            [ui/MessageHeader (@tr [failed-kw])]
             [:p @error-message]])
 
          (if @loading?
@@ -167,48 +180,48 @@
             [ui/GridColumn {:stretched true}
              [ui/Segment {:basic externals? :textAlign "left"}
               (vec (concat [:div]
-                           (map (fn [[k v]] [method-form k v]) internals)))]]
+                           (map (fn [[k v]] [method-form-fn k v]) internals)))]]
 
             (when-not externals?
               [ui/GridColumn {:stretched true}
                [ui/Segment {:textAlign "left"}
                 [:div
                  (vec (concat [:div]
-                              (map (fn [[k v]] [method-form k v]) externals)))]]])])]))))
+                              (map (fn [[k v]] [method-form-fn k v]) externals)))]]])])]))))
+
+
+(defn login-form-container
+  []
+  [authn-form-container :session :login-failed internal-or-api-key login-method-form])
+
+
+(defn signup-form-container
+  []
+  [authn-form-container :user :signup-failed self-registration signup-method-form])
+
+
+(defn authn-modal
+  "Modal that holds the authentication (login or sign up) forms."
+  [id label form-fn]
+  (let [tr (subscribe [::i18n-subs/tr])
+        open-modal (subscribe [::authn-subs/open-modal])]
+    (fn [id label form-fn]
+      [ui/Modal
+       {:id        id
+        :open      (= @open-modal label)
+        :closeIcon true
+        :on-close  #(dispatch [::authn-events/close-modal])}
+       [ui/ModalHeader (@tr [label])]
+       [ui/ModalContent {:scrolling true}
+        [form-fn]]])))
 
 
 (defn modal-login []
-  (let [tr (subscribe [::i18n-subs/tr])
-        open-modal (subscribe [::authn-subs/open-modal])]
-    (fn []
-      [ui/Modal
-       {:id        "modal-login-id"
-        :open      (= @open-modal :login)
-        :closeIcon true
-        :on-close  #(dispatch [::authn-events/close-modal])}
-       [ui/ModalHeader (@tr [:login])]
-       [ui/ModalContent {:scrolling true}
-        [login-form-container]]])))
+  [authn-modal "modal-login-id" :login login-form-container])
+
 
 (defn modal-signup []
-  (let [tr (subscribe [::i18n-subs/tr])
-        modal-open (subscribe [::authn-subs/open-modal])
-        template-href (cimi-utils/template-href :user)
-        user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
-    (fn []
-      (let [self-registration-template (-> @user-templates :templates :user-template/self-registration)
-            mandatory-descriptions (->> self-registration-template
-                                        :params-desc
-                                        (filter (fn [[_ {:keys [mandatory]}]] mandatory)))
-            self-registration-template-filtered (assoc self-registration-template :params-desc mandatory-descriptions)]
-        [form-utils/form-container-modal-single-template
-         :show? (= @modal-open :signup)
-         :template self-registration-template-filtered
-         :on-cancel #(dispatch [::authn-events/close-modal])
-         :on-submit (fn [data]
-                      (dispatch [::cimi-events/create-resource-independent
-                                 :users (cimi-api-utils/create-template "user" data)])
-                      (dispatch [::authn-events/close-modal]))]))))
+  [authn-modal "modal-signup-id" :signup signup-form-container])
 
 
 (defn login-menu
