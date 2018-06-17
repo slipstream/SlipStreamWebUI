@@ -10,21 +10,22 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
 
-    [sixsq.slipstream.webui.plot.plot :as plot]
-    [reagent.core :as reagent]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.plot.plot :as plot]))
 
 
 (defn controls
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::metrics-subs/loading?])]
+        loading? (subscribe [::metrics-subs/loading?])
+        loading-job-info? (subscribe [::metrics-subs/loading-job-info?])]
     (fn []
       [ui/Menu
        [ui/MenuItem {:name     "refresh"
-                     :on-click #(dispatch [::metrics-events/fetch-metrics])}
+                     :on-click (fn []
+                                 (dispatch [::metrics-events/fetch-metrics])
+                                 (dispatch [::metrics-events/fetch-job-info]))}
         [ui/Icon {:name    "refresh"
-                  :loading @loading?}]
+                  :loading (or @loading? @loading-job-info?)}]
         (@tr [:refresh])]])))
 
 
@@ -99,6 +100,33 @@
       [plot/plot responses-vega-spec {:values @rates} :style {:float :right}])))
 
 
+(def job-stats-vega-spec
+  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
+   :description "job statistics"
+   :layer       [{:mark     :bar
+                  :encoding {:x {:field :value
+                                 :type  "quantitative"}
+                             :y {:field :category
+                                 :type  "ordinal"}}}
+                 {:mark     {:type     :text
+                             :align    :left
+                             :baseline :middle
+                             :dx       3}
+                  :encoding {:text {:field :value
+                                    :type  "quantitative"}
+                             :x    {:field :value
+                                    :type  "quantitative"}
+                             :y    {:field :category
+                                    :type  "ordinal"}}}]})
+
+
+(defn job-stats
+  []
+  (let [job-info (subscribe [::metrics-subs/job-info])]
+    (fn []
+      [plot/plot job-stats-vega-spec {:values (vals @job-info)} :style {:float :left}])))
+
+
 (defn request-statistics
   []
   [cc/collapsible-card
@@ -115,16 +143,27 @@
    [memory-plot]])
 
 
+(defn job-statistics
+  []
+  [cc/collapsible-card
+   "job statistics"
+   [job-stats]])
+
+
 (defn metrics-info
   []
-  (let [raw-metrics (subscribe [::metrics-subs/raw-metrics])]
+  (let [raw-metrics (subscribe [::metrics-subs/raw-metrics])
+        job-info (subscribe [::metrics-subs/job-info])]
     (fn []
       (when (nil? @raw-metrics)
         (dispatch [::metrics-events/fetch-metrics]))
+      (when (nil? @job-info)
+        (dispatch [::metrics-events/fetch-job-info]))
       [ui/Container {:fluid true}
        [controls]
        [request-statistics]
-       [server-statistics]])))
+       [server-statistics]
+       [job-statistics]])))
 
 
 (defmethod panel/render :metrics

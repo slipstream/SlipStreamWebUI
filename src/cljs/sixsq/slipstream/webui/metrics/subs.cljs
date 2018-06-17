@@ -45,3 +45,16 @@
     (subscribe [::raw-metrics]))
   (fn [raw-metrics query-v _]
     (metrics-utils/extract-ring-responses-rates raw-metrics)))
+
+
+(reg-sub
+  ::loading-job-info?
+  ::metrics-spec/loading-job-info?)
+
+
+(reg-sub
+  ::job-info
+  ::metrics-spec/job-info)
+
+
+
