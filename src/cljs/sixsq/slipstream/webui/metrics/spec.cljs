@@ -6,39 +6,30 @@
 
 (s/def ::loading? boolean?)
 
-
 (s/def ::raw-metrics (s/nilable map?))
-
 
 (s/def ::jvm-threads (s/nilable vector?))
 
-
 (s/def ::jvm-memory (s/nilable vector?))
-
 
 (s/def ::ring-request-rates (s/nilable vector?))
 
-
 (s/def ::ring-response-rates (s/nilable vector?))
-
 
 (s/def ::loading-job-info? boolean?)
 
 
-(s/def ::category string?)
-(s/def ::value nat-int?)
-(s/def ::job-stat (s/keys :req [::category ::value]))
+(s/def ::key string?)
+(s/def ::doc_count nat-int?)
+(s/def ::job-stat (s/keys :req-un [::key ::doc_count]))
 
-(s/def ::success ::job-stat)
-(s/def ::failed ::job-stat)
-(s/def ::queued ::job-stat)
-(s/def ::running ::job-stat)
-(s/def ::total ::job-stat)
-(s/def ::job-info (s/keys :req [::success
-                                ::failed
-                                ::queued
-                                ::running
-                                ::total]))
+(s/def ::states (s/coll-of ::job-stat :type :vector))
+
+(s/def ::old nat-int?)
+
+(s/def ::stale nat-int?)
+
+(s/def ::job-info (s/keys :req-un [::old ::stale ::states]))
 
 
 (s/def ::db (s/keys :req [::loading?
@@ -56,8 +47,6 @@
                ::ring-request-rates  nil
                ::ring-response-rates nil
                ::loading-job-info?   false
-               ::job-info            {::success {:category "success", :value 0}
-                                      ::failed  {:category "failed", :value 0}
-                                      ::queued  {:category "queued", :value 0}
-                                      ::running {:category "running", :value 0}
-                                      ::total   {:category "total", :value 0}}})
+               ::job-info            {:old 0
+                                      :stale 0
+                                      :states []}})

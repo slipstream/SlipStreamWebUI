@@ -1,5 +1,7 @@
 (ns sixsq.slipstream.webui.metrics.views
   (:require
+    [cljs.pprint :refer [cl-format]]
+
     [re-frame.core :refer [subscribe dispatch]]
     [sixsq.slipstream.webui.panel :as panel]
 
@@ -104,27 +106,62 @@
   {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
    :description "job statistics"
    :layer       [{:mark     :bar
-                  :encoding {:x {:field :value
+                  :encoding {:x {:field :doc_count
                                  :type  "quantitative"}
-                             :y {:field :category
+                             :y {:field :key
                                  :type  "ordinal"}}}
                  {:mark     {:type     :text
                              :align    :left
                              :baseline :middle
                              :dx       3}
-                  :encoding {:text {:field :value
+                  :encoding {:text {:field :doc_count
                                     :type  "quantitative"}
-                             :x    {:field :value
+                             :x    {:field :doc_count
                                     :type  "quantitative"}
-                             :y    {:field :category
+                             :y    {:field :key
                                     :type  "ordinal"}}}]})
 
 
-(defn job-stats
+(defn job-plot
   []
   (let [job-info (subscribe [::metrics-subs/job-info])]
     (fn []
-      [plot/plot job-stats-vega-spec {:values (vals @job-info)} :style {:float :left}])))
+      [plot/plot job-stats-vega-spec {:values (:states @job-info)} :style {:float :left}])))
+
+
+(defn success-rate
+  [success failed]
+  (let [success (or success 0)
+        failed (or failed 0)
+        total (+ success failed)]
+    (if (zero? total)
+      "0.0%"
+      (str (cl-format nil "~,1F" (* 100. (/ success total))) "%"))))
+
+
+(defn statistic
+  [label value]
+  ^{:key label}
+  [ui/Statistic {:size "tiny"}
+   [ui/StatisticValue value]
+   [ui/StatisticLabel label]])
+
+
+(defn job-numbers
+  []
+  (let [job-info (subscribe [::metrics-subs/job-info])]
+    (fn []
+      (let [{:keys [old stale states]} @job-info
+            {:strs [QUEUED RUNNING SUCCESS FAILED]} (->> states
+                                                         (map (juxt :key :doc_count))
+                                                         (into {}))
+            rate (success-rate SUCCESS FAILED)]
+        [:div
+         [statistic "running" RUNNING]
+         [statistic "queued" QUEUED]
+         [statistic "success rate" rate]
+         [statistic "old" old]
+         [statistic "stale" stale]]))))
 
 
 (defn request-statistics
@@ -147,7 +184,8 @@
   []
   [cc/collapsible-card
    "job statistics"
-   [job-stats]])
+   [job-numbers]
+   [job-plot]])
 
 
 (defn metrics-info

@@ -1,4 +1,25 @@
-(ns sixsq.slipstream.webui.metrics.utils)
+(ns sixsq.slipstream.webui.metrics.utils
+  (:require [sixsq.slipstream.client.api.cimi :as cimi]
+            [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]))
+
+(def default-params {:$first 1, :$last 0})
+
+(def old-jobs (assoc default-params :$filter "created < 'now-8d'"))
+
+(def stale-jobs (assoc default-params :$filter "created < 'now-30m' and state = 'QUEUED'"))
+
+(def job-states (assoc default-params :$aggregation "terms:state"))
+
+(defn job-search
+  [client params]
+  (cimi/search client "jobs" (cimi-api-utils/sanitize-params params)))
+
+(defn add-total
+  [buckets]
+  (let [total (->> buckets
+                   (map :doc_count)
+                   (reduce +))]
+    (conj buckets {:key "TOTAL", :doc_count total})))
 
 (defn extract-thread-metrics
   [{{terminated :value}    :jvm.thread.terminated.count
