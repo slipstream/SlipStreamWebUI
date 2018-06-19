@@ -29,7 +29,9 @@
 
 (s/def ::stale nat-int?)
 
-(s/def ::job-info (s/keys :req-un [::old ::stale ::states]))
+(s/def ::blocked nat-int?)
+
+(s/def ::job-info (s/keys :req-un [::old ::stale ::blocked ::states]))
 
 
 (s/def ::db (s/keys :req [::loading?
@@ -47,6 +49,7 @@
                ::ring-request-rates  nil
                ::ring-response-rates nil
                ::loading-job-info?   false
-               ::job-info            {:old 0
-                                      :stale 0
-                                      :states []}})
+               ::job-info            {:old     0
+                                      :stale   0
+                                      :blocked 0
+                                      :states  []}})

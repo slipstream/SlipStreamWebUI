@@ -14,9 +14,10 @@
     (go
       (let [old (:count (<! (u/job-search client u/old-jobs)))
             stale (:count (<! (u/job-search client u/stale-jobs)))
+            blocked (:count (<! (u/job-search client u/blocked-jobs)))
             states (-> (<! (u/job-search client u/job-states))
                        :aggregations
                        :terms:state
                        :buckets
                        u/add-total)]
-        (callback {:old old, :stale stale, :states states})))))
+        (callback {:old old, :stale stale, :blocked blocked, :states states})))))

@@ -8,6 +8,8 @@
 
 (def stale-jobs (assoc default-params :$filter "created < 'now-30m' and state = 'QUEUED'"))
 
+(def blocked-jobs (assoc default-params :$filter "updated < 'now-15m' and state = 'RUNNING'"))
+
 (def job-states (assoc default-params :$aggregation "terms:state"))
 
 (defn job-search

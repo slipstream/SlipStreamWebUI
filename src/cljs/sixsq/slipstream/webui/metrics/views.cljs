@@ -151,7 +151,7 @@
   []
   (let [job-info (subscribe [::metrics-subs/job-info])]
     (fn []
-      (let [{:keys [old stale states]} @job-info
+      (let [{:keys [old stale blocked states]} @job-info
             {:strs [QUEUED RUNNING SUCCESS FAILED]} (->> states
                                                          (map (juxt :key :doc_count))
                                                          (into {}))
@@ -161,7 +161,8 @@
          [statistic "queued" QUEUED]
          [statistic "success rate" rate]
          [statistic "old" old]
-         [statistic "stale" stale]]))))
+         [statistic "stale" stale]
+         [statistic "blocked" blocked]]))))
 
 
 (defn request-statistics
