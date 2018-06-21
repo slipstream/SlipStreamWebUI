@@ -84,9 +84,9 @@
                  [com.taoensso/tempura]
                  [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
-                 [cljsjs/react-datepicker]
+                 [cljsjs/react-datepicker "1.4.1-0"]        ;; downgrade, problem with 1.5.0-0
                  [funcool/promesa]
-                 [com.taoensso/encore]                      ;fix conflict, needed indirectly
+                 [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
                  [cljsjs/vega-embed]
                  ]
@@ -181,7 +181,7 @@
                    [day8.re-frame/re-frame-10x]
                    [ring]
                    [ring/ring-defaults]
-                   [commons-io] ; dependency of ring
+                   [commons-io]                             ; dependency of ring
                    [compojure]]
     :figwheel     {:server-port  3000
                    :ring-handler sixsq.slipstream.webui.dev_server/http-handler}}}
