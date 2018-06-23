@@ -9,66 +9,64 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.usage.subs :as usage-subs]
     [sixsq.slipstream.webui.usage.events :as usage-events]
+    [sixsq.slipstream.webui.usage.utils :as u]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.time :as time]))
 
 
-(defn set-dates [calendar-data]
-  (let [date-after (.clone (.-startDate calendar-data))
-        date-before (-> (.-endDate calendar-data) .clone (.add 1 "days") (.add -1 "seconds"))]
-    (dispatch [::usage-events/set-date-after-before date-after date-before])))
+(defn date-range-menu-item
+  [key [start end :as range]]
+  (let [tr (subscribe [::i18n-subs/tr])
+        date-range (subscribe [::usage-subs/date-range])]
+    (fn [key [start end :as range]]
+      (let [[date-after date-before] @date-range]
+        ^{:key key}
+        [ui/MenuItem
+         {:name     (@tr [key])
+          :active   (and (u/same-date? date-after start)
+                         (u/same-date? date-before end))
+          :on-click #(dispatch [::usage-events/set-date-range range])}]))))
+
 
 (defn search-calendar []
   (let [tr (subscribe [::i18n-subs/tr])
         locale (subscribe [::i18n-subs/locale])
-        date-before (subscribe [::usage-subs/date-before])
-        date-after (subscribe [::usage-subs/date-after])
-        initial-after-date (time/days-before 30)
-        initial-before-date (.endOf (time/days-before 1) "day")]
+        date-range (subscribe [::usage-subs/date-range])]
     (fn []
-      (when-not (and @date-before @date-after)
-        (dispatch [::usage-events/set-date-after-before initial-after-date initial-before-date]))
-      [ui/FormGroup
-       [ui/FormField
-        (vec (concat [ui/Menu {:secondary true :vertical true :size "small"}]
-                     (mapv (fn [[key start end]]
-                             ^{:key key} [ui/MenuItem
-                                          {:name   (@tr [key])
-                                           :active (and
-                                                     (= (int (time/delta-minutes @date-after start)) 0)
-                                                     (= (int (time/delta-minutes @date-before end)) 0))
-                                           :on-click
-                                                   #(dispatch [::usage-events/set-date-after-before start end])}])
-                           [[:today (time/days-before 0) (.endOf (time/days-before 0) "day")]
-                            [:yesterday (time/days-before 1) (.endOf (time/days-before 1) "day")]
-                            [:last-7-days (time/days-before 7) (.endOf (time/days-before 1) "day")]
-                            [:last-30-days (.clone initial-after-date) (.clone initial-before-date)]])))]
-       [ui/FormField
-        [ui/DatePicker {:custom-input  (r/as-element [ui/Input {:label (@tr [:from])}])
-                        :selected      @date-after
-                        :start-date    @date-after
-                        :end-date      @date-before
-                        :min-date      (time/days-before 90)
-                        :max-date      (time/now)
-                        :selects-start true
-                        :locale        @locale
-                        :fixed-height  true
-                        :date-format   "dd, Do MMMM YY"
-                        :on-change     #(dispatch [::usage-events/set-date-after-before % @date-before])
-                        }]]
-       [ui/FormField
-        [ui/DatePicker {:custom-input (r/as-element [ui/Input {:label (@tr [:to])}])
-                        :selected     @date-before
-                        :start-date   @date-after
-                        :end-date     @date-before
-                        :locale       @locale
-                        :fixed-height true
-                        :date-format  "dd, Do MMMM YY"
-                        :min-date     @date-after
-                        :max-date     (time/now)
-                        :selects-end  true
-                        :on-change    #(dispatch [::usage-events/set-date-after-before @date-after (.endOf % "day")])
-                        }]]])))
+      (let [[date-after date-before :as range] @date-range]
+        [ui/FormGroup
+         [ui/FormField
+          [ui/Menu {:secondary true :vertical true :size "small"}
+           [date-range-menu-item :today (u/date-range 0 0)]
+           [date-range-menu-item :yesterday (u/date-range 1 1)]
+           [date-range-menu-item :last-7-days (u/date-range 7 1)]
+           [date-range-menu-item :last-30-days (u/date-range 30 1)]]]
+         [ui/FormField
+          [ui/DatePicker {:custom-input  (r/as-element [ui/Input {:label (@tr [:from])}])
+                          :selected      date-after
+                          :start-date    date-after
+                          :end-date      date-before
+                          :min-date      (time/days-before 90)
+                          :max-date      (time/now)
+                          :selects-start true
+                          :locale        @locale
+                          :fixed-height  true
+                          :date-format   "ddd, D MMMM YYYY"
+                          :on-change     #(dispatch [::usage-events/set-date-range [% date-before]])
+                          }]]
+         [ui/FormField
+          [ui/DatePicker {:custom-input (r/as-element [ui/Input {:label (@tr [:to])}])
+                          :selected     date-before
+                          :start-date   date-after
+                          :end-date     date-before
+                          :locale       @locale
+                          :fixed-height true
+                          :date-format  "ddd, D MMMM YYYY"
+                          :min-date     date-after
+                          :max-date     (time/now)
+                          :selects-end  true
+                          :on-change    #(dispatch [::usage-events/set-date-range [date-after (.endOf % "day")]])
+                          }]]]))))
 
 
 (defn search-all-clouds-dropdown []

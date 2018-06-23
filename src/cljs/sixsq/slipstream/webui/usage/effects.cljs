@@ -4,8 +4,8 @@
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [reg-fx dispatch]]
-    [sixsq.slipstream.webui.usage.utils :as usage-utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.usage.utils :as usage-utils]))
+
 
 (reg-fx
   ::fetch-meterings
