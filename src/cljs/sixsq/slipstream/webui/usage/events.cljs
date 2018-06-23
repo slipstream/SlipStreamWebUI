@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.usage.effects :as usage-fx]))
 
+
 (reg-event-db
   ::set-connectors-list
   (fn [db [_ {:keys [connectors] :as response}]]
@@ -14,10 +15,12 @@
         (assoc ::usage-spec/connectors-list (map :id connectors))
         (assoc ::usage-spec/loading-connectors-list? false))))
 
+
 (reg-event-db
   ::set-selected-connectors
   (fn [db [_ connectors]]
     (assoc db ::usage-spec/selected-connectors connectors)))
+
 
 (reg-event-fx
   ::get-connectors-list
@@ -32,6 +35,7 @@
                               :$select  "id"}
                              #(dispatch [::set-connectors-list %])]})))
 
+
 (reg-event-fx
   ::get-users-list
   (fn [{{:keys [::client-spec/client
@@ -44,6 +48,7 @@
                              {:$select "id"}
                              #(dispatch [::set-users-list %])]})))
 
+
 (reg-event-db
   ::set-users-list
   (fn [db [_ response]]
@@ -52,22 +57,24 @@
           (assoc ::usage-spec/users-list users)
           (assoc ::usage-spec/loading-users-list? false)))))
 
+
 (reg-event-db
   ::set-user
   (fn [db [_ user]]
     (assoc db ::usage-spec/selected-user user)))
+
 
 (reg-event-db
   ::clear-user
   (fn [db [_ user]]
     (assoc db ::usage-spec/selected-user nil)))
 
+
 (reg-event-db
-  ::set-date-after-before
-  (fn [db [_ date-after date-before]]
-    (-> db
-        (assoc ::usage-spec/date-after date-after)
-        (assoc ::usage-spec/date-before date-before))))
+  ::set-date-range
+  (fn [db [_ date-range]]
+    (assoc db ::usage-spec/date-range date-range)))
+
 
 (reg-event-db
   ::set-results
@@ -76,18 +83,18 @@
         (assoc ::usage-spec/results results)
         (assoc ::usage-spec/loading? false))))
 
+
 (reg-event-fx
   ::fetch-meterings
   (fn [{{:keys [::client-spec/client
-                ::usage-spec/date-after
-                ::usage-spec/date-before
+                ::usage-spec/date-range
                 ::usage-spec/selected-connectors
                 ::usage-spec/connectors-list
                 ::usage-spec/selected-user] :as db} :db}]
     {:db                        (assoc db ::usage-spec/loading? true)
      ::usage-fx/fetch-meterings [client
-                                 (-> date-after .clone .utc .format)
-                                 (-> date-before .clone .utc .format)
+                                 (-> date-range first .clone .utc .format)
+                                 (-> date-range second .clone .utc .format)
                                  selected-user
                                  (conj (if (empty? selected-connectors)
                                          connectors-list

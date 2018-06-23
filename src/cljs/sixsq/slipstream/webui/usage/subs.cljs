@@ -36,9 +36,5 @@
   ::usage-spec/selected-user)
 
 (reg-sub
-  ::date-after
-  ::usage-spec/date-after)
-
-(reg-sub
-  ::date-before
-  ::usage-spec/date-before)
+  ::date-range
+  ::usage-spec/date-range)

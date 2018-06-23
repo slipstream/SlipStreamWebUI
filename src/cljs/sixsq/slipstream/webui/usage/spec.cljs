@@ -1,7 +1,9 @@
+
 (ns sixsq.slipstream.webui.usage.spec
   (:require-macros [sixsq.slipstream.webui.utils.spec :refer [only-keys]])
   (:require
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [sixsq.slipstream.webui.usage.utils :as u]))
 
 
 (s/def ::loading? boolean?)
@@ -22,33 +24,30 @@
 
 (s/def ::selected-user (s/nilable string?))
 
-(s/def ::date-after any?)
-
-(s/def ::date-before any?)
+(s/def ::date-range (s/tuple any? any?))
 
 (s/def ::is-admin? boolean?)
 
 (s/def ::db (s/keys :req [::loading?
+                          ::filter-visible?
                           ::results
                           ::loading-connectors-list?
-                          ::selected-connectors
                           ::connectors-list
-                          ::users-list
+                          ::selected-connectors
                           ::loading-users-list?
+                          ::users-list
                           ::selected-user
-                          ::date-after
-                          ::date-before
+                          ::date-range
                           ::is-admin?]))
 
 (def defaults {::loading?                 false
                ::filter-visible?          false
                ::results                  nil
                ::loading-connectors-list? true
-               ::loading-users-list?      true
                ::connectors-list          []
                ::selected-connectors      []
-               ::selected-user            nil
+               ::loading-users-list?      true
                ::users-list               []
-               ::date-after               nil
-               ::date-before              nil
+               ::selected-user            nil
+               ::date-range               (u/default-date-range)
                ::is-admin?                false})

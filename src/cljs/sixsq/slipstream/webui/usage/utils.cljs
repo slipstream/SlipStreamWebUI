@@ -5,7 +5,30 @@
     [cljs.core.async :refer [<! >! chan timeout]]
     [promesa.core :as p]
     [clojure.string :as str]
-    [sixsq.slipstream.client.api.cimi :as cimi]))
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [sixsq.slipstream.webui.utils.time :as time]))
+
+
+(defn same-date?
+  "Returns true if the two dates represent the same time to within 1 minute,
+   otherwise false. If either argument is nil, false is returned."
+  [d1 d2]
+  (boolean (and d1 d2 (zero? (int (time/delta-minutes d1 d2))))))
+
+
+(defn date-range
+  "Provides a tuple that represents the start/end of a range of days relative
+   to the current day. The arguments [0 0] would represent the start/end of the
+   current day."
+  [start end]
+  [(time/days-before start) (.endOf (time/days-before end) "day")])
+
+
+(defn default-date-range
+  "Provides the default date range."
+  []
+  (date-range 30 1))
+
 
 (defn fetch-metering [resolve client date-after date-before user connector]
   (go
