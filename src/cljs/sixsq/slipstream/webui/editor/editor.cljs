@@ -1,12 +1,12 @@
 (ns sixsq.slipstream.webui.editor.editor
   (:require
-    [re-frame.core :refer [subscribe]]
-    [reagent.core :as reagent]
+    [cljs.spec.alpha :as s]
     [cljsjs.codemirror]
     [cljsjs.codemirror.mode.javascript]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [re-frame.core :refer [subscribe]]
+    [reagent.core :as reagent]
     [sixsq.slipstream.webui.utils.general :as general]
-    [cljs.spec.alpha :as s]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (def json-options {:lineNumbers true

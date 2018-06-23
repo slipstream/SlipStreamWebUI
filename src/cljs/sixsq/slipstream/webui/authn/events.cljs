@@ -1,10 +1,10 @@
 (ns sixsq.slipstream.webui.authn.events
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
-    [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.history.effects :as history-fx]
     [sixsq.slipstream.webui.authn.spec :as authn-spec]
+    [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
+    [sixsq.slipstream.webui.history.effects :as history-fx]
     [sixsq.slipstream.webui.i18n.utils :as utils]
     [taoensso.timbre :as log]))
 

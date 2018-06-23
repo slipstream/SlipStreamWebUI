@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.main.effects
   (:require
-    [re-frame.core :refer [reg-fx dispatch]]
+    [re-frame.core :refer [dispatch reg-fx]]
     [taoensso.timbre :as log]))
 
 (defonce interval-handler                                   ;; we use of defonce to avoid creation of multiple interval

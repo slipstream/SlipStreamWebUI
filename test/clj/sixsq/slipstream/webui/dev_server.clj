@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.webui.dev_server
   (:require
-    [compojure.core :refer [GET defroutes]]
+    [compojure.core :refer [defroutes GET]]
     [compojure.route :as route]
-    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
     [ring.util.response :as response]))
 
 

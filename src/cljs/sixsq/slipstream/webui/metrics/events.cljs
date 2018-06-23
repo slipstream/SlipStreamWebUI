@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.webui.metrics.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
-    [sixsq.slipstream.webui.client.spec :as client-spec]
+    [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
+    [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.metrics.effects :as metrics-fx]
     [sixsq.slipstream.webui.metrics.spec :as metrics-spec]))
 

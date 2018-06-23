@@ -1,16 +1,16 @@
 (ns sixsq.slipstream.webui.messages.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
 
-    [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [reagent.core :as reagent]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.messages.subs :as message-subs]
-    [sixsq.slipstream.webui.messages.events :as message-events]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.messages.events :as message-events]
+    [sixsq.slipstream.webui.messages.subs :as message-subs]
+    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [reagent.core :as reagent]))
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn bell-menu

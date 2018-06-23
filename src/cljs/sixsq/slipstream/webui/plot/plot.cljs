@@ -1,10 +1,10 @@
 (ns sixsq.slipstream.webui.plot.plot
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.plot.events :as plot-evts]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.general :as general]))
+    [sixsq.slipstream.webui.utils.general :as general]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (def default-vega-opts

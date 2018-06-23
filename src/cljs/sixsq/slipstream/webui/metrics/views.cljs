@@ -2,17 +2,17 @@
   (:require
     [cljs.pprint :refer [cl-format]]
 
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+
+    [sixsq.slipstream.webui.metrics.events :as metrics-events]
+    [sixsq.slipstream.webui.metrics.subs :as metrics-subs]
     [sixsq.slipstream.webui.panel :as panel]
 
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.metrics.subs :as metrics-subs]
-    [sixsq.slipstream.webui.metrics.events :as metrics-events]
-
+    [sixsq.slipstream.webui.plot.plot :as plot]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
 
-    [sixsq.slipstream.webui.plot.plot :as plot]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn controls

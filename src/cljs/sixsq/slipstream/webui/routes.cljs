@@ -1,12 +1,12 @@
 (ns sixsq.slipstream.webui.routes
   (:require-macros [secretary.core :refer [defroute]])
   (:require
-    [secretary.core :refer [defroute]]
     [re-frame.core :refer [dispatch]]
-    [taoensso.timbre :as log]
+    [secretary.core :refer [defroute]]
+    [sixsq.slipstream.webui.authn.events :as authn-events]
 
     [sixsq.slipstream.webui.main.events :as main-events]
-    [sixsq.slipstream.webui.authn.events :as authn-events]))
+    [taoensso.timbre :as log]))
 
 (defn routes []
 

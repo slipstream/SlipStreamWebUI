@@ -2,14 +2,14 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
-    [reagent.core :as r]
-    [taoensso.timbre :as log]
     [clojure.string :as str]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.core :as r]
     [sixsq.slipstream.webui.client.subs :as client-subs]
-    [sixsq.slipstream.webui.dashboard.events :as dashboard-events]))
+    [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
+    [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [taoensso.timbre :as log]))
 
 (defn table-vm-row [vm]
   (let [slipstream-url (subscribe [::client-subs/slipstream-url])]

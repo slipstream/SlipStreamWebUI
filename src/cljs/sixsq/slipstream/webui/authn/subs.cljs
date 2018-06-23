@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.webui.authn.subs
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [reg-sub subscribe]]
-    [sixsq.slipstream.webui.authn.spec :as authn-spec]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.authn.spec :as authn-spec]))
 
 
 (reg-sub

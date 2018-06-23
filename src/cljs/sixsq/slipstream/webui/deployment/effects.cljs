@@ -3,7 +3,7 @@
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<!]]
-    [re-frame.core :refer [reg-fx dispatch]]
+    [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.runs :as runs]))
 
 

@@ -3,9 +3,9 @@
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
   (:require                                                 ;[soda-ash.core :as sa]
-    [reagent.core :as r]
     [cljsjs.react-datepicker]
-    cljsjs.semantic-ui-react))
+    cljsjs.semantic-ui-react
+    [reagent.core :as r]))
 
 (defn adapt-component [tag]
   (r/adapt-react-class (aget js/semanticUIReact tag)))

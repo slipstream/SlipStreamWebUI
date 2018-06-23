@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.webui.cimi.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
-    [reagent.core :as reagent]
-
-    [cljs.pprint :refer [pprint cl-format]]
+    [cljs.pprint :refer [cl-format pprint]]
     [clojure.set :as set]
+
     [clojure.string :as str]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.core :as reagent]
 
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]

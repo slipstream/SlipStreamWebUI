@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.electron.renderer
   (:require
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.core :as webui-core]))
+    [sixsq.slipstream.webui.core :as webui-core]
+    [taoensso.timbre :as log]))
 
 
 (defn ^:export init []

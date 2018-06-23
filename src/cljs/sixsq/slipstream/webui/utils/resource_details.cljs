@@ -1,27 +1,27 @@
 (ns sixsq.slipstream.webui.utils.resource-details
   (:require
+    [cljs.pprint :refer [pprint]]
+    [cljsjs.codemirror]
+
+    [cljsjs.codemirror.mode.clojure]
+
+    [cljsjs.codemirror.mode.javascript]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
 
-    [cljs.pprint :refer [pprint]]
-
-    [cljsjs.codemirror]
-    [cljsjs.codemirror.mode.clojure]
-    [cljsjs.codemirror.mode.javascript]
-
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.editor.editor :as editor]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
+    [sixsq.slipstream.webui.editor.editor :as editor]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
 
-    [sixsq.slipstream.webui.utils.form-fields :as ff]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+
     [sixsq.slipstream.webui.utils.component :as comp]
+    [sixsq.slipstream.webui.utils.form-fields :as ff]
 
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.general :as general]
-    [sixsq.slipstream.webui.utils.values :as values]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.values :as values]))
 
 
 (defn action-buttons

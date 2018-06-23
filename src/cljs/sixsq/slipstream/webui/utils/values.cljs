@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.utils.values
   "General functions for rendering values."
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.history.events :as history-events]))
 
 

@@ -1,12 +1,12 @@
 (ns sixsq.slipstream.webui.history.utils
   (:require
-    [goog.events :as events]
     [clojure.string :as str]
+    [goog.events :as events]
     [secretary.core :as secretary]
     [taoensso.timbre :as log])
   (:import
     [goog History]
-    [goog.history Html5History EventType]
+    [goog.history EventType Html5History]
     [goog.history.Html5History TokenTransformer]))
 
 

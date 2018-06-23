@@ -2,24 +2,24 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [cljs.core.async :refer [<! >! chan timeout]]
+
+    [re-frame.core :refer [dispatch subscribe]]
 
     [reagent.core :as r]
 
-    [cljs.core.async :refer [<! >! chan timeout]]
-
-    [sixsq.slipstream.webui.panel :as panel]
-
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
+
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
-    [sixsq.slipstream.webui.main.subs :as main-subs]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.dashboard.views-vms :as vms]
     [sixsq.slipstream.webui.dashboard.views-deployments :as dep]
+    [sixsq.slipstream.webui.dashboard.views-vms :as vms]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [taoensso.timbre :as log]))
 
 
 (defn as-statistic [{:keys [label value]}]

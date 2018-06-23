@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.deployment-detail.gantt
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
 
     [sixsq.slipstream.webui.plot.plot :as plot]
     [sixsq.slipstream.webui.utils.time :as time]))

@@ -1,14 +1,14 @@
 (ns sixsq.slipstream.webui.usage.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
-    [reagent.core :as r]
-    [clojure.string :as str]
     [cljs.pprint :as pprint]
+    [clojure.string :as str]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.core :as r]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.usage.subs :as usage-subs]
+    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.usage.events :as usage-events]
+    [sixsq.slipstream.webui.usage.subs :as usage-subs]
     [sixsq.slipstream.webui.usage.utils :as u]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.time :as time]))
