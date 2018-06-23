@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.webui.utils.forms
   (:require
-    [reagent.core :as reagent]
     [re-frame.core :refer [subscribe]]
+    [reagent.core :as reagent]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.utils.component :as ui-utils]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.component :as ui-utils]
     [taoensso.timbre :as log]))
 
 

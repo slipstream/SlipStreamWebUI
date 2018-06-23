@@ -1,13 +1,13 @@
 (ns sixsq.slipstream.webui.dnd.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
 
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
     [sixsq.slipstream.webui.utils.general :as general]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [taoensso.timbre :as log]))
 
 
 (defn file-stats

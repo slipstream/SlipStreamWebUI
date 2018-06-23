@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.utils.form-fields
   (:require
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.component :as ui-utils]
     [sixsq.slipstream.webui.utils.general :as utils]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [taoensso.timbre :as log]))
 
 

@@ -1,18 +1,18 @@
 (ns sixsq.slipstream.webui.authn.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
-    [taoensso.timbre :as log]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
-
     [sixsq.slipstream.webui.authn.events :as authn-events]
+
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]))
+    [taoensso.timbre :as log]))
 
 
 (defn method-comparator

@@ -3,7 +3,7 @@
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<!]]
-    [re-frame.core :refer [reg-fx dispatch]]
+    [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.webui.metrics.utils :as u]
     [taoensso.timbre :as log]))
 

@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.messages.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
+    [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.messages.spec :as messages-spec]
     [sixsq.slipstream.webui.utils.time :as time]))
 

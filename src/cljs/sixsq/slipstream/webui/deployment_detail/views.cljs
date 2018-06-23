@@ -1,21 +1,21 @@
 (ns sixsq.slipstream.webui.deployment-detail.views
   (:require
     [clojure.string :as str]
-    [re-frame.core :refer [subscribe dispatch]]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
-
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-
-    [sixsq.slipstream.webui.main.events :as main-events]
-    [sixsq.slipstream.webui.history.events :as history-events]
-    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
+
+    [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
+
     [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
-    [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [taoensso.timbre :as log]))
 
 
 (defn ^:export set-runUUID [uuid]

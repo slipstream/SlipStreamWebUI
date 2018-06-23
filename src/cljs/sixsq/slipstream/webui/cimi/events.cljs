@@ -3,8 +3,8 @@
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
 
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.cimi.effects :as cimi-fx]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
+    [sixsq.slipstream.webui.cimi.effects :as cimi-fx]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.client.spec :as client-spec]

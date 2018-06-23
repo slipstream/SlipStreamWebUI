@@ -91,9 +91,9 @@
                  [cljsjs/vega-embed]
                  ]
 
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "src/cljs"]
 
-  :test-paths ["test/cljs"]
+  :test-paths ["test/clj" "test/cljs"]
 
   :cljsbuild
   {:builds

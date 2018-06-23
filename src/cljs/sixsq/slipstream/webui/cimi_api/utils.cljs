@@ -2,14 +2,14 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
+    [camel-snake-kebab.core :as csk]
     [cljs.core.async :refer [<! >! chan]]
-    [re-frame.core :refer [reg-fx dispatch]]
+    [clojure.walk :as walk]
+    [re-frame.core :refer [dispatch reg-fx]]
+    [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.impl.utils.http-async :as http]
     [sixsq.slipstream.client.impl.utils.json :as json]
-    [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
-    [clojure.walk :as walk]
-    [camel-snake-kebab.core :as csk]
     [taoensso.timbre :as log]))
 
 

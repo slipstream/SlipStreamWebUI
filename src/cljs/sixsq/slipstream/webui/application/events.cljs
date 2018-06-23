@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.webui.application.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx]]
     [clojure.string :as str]
+    [re-frame.core :refer [reg-event-db reg-event-fx]]
     [sixsq.slipstream.client.async :as async-client]
 
-    [sixsq.slipstream.webui.application.spec :as spec]
     [sixsq.slipstream.webui.application.effects :as application-fx]
+    [sixsq.slipstream.webui.application.spec :as spec]
 
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.main.spec :as main-spec]))

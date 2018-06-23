@@ -5,11 +5,11 @@
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<!]]
-    [re-frame.core :refer [reg-fx dispatch]]
-    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [sixsq.slipstream.client.api.cimi :as cimi]
+    [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.authn :as authn]
+    [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.metrics :as metrics]
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [taoensso.timbre :as log]))
 
 

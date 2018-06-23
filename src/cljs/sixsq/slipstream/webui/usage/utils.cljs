@@ -3,8 +3,8 @@
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<! >! chan timeout]]
-    [promesa.core :as p]
     [clojure.string :as str]
+    [promesa.core :as p]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.webui.utils.time :as time]))
 

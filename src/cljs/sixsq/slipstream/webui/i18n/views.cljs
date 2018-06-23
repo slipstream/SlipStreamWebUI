@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.webui.i18n.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
 
     [sixsq.slipstream.webui.i18n.events :as i18n-events]

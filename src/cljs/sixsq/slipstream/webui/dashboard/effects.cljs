@@ -3,11 +3,11 @@
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<! timeout]]
-    [re-frame.core :refer [reg-fx dispatch]]
+    [clojure.string :as str]
+    [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.runs :as runs]
     [sixsq.slipstream.webui.utils.general :as general-utils]
-    [clojure.string :as str]
     [taoensso.timbre :as log]))
 
 (reg-fx

@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.webui.utils.general
   (:require
     [cljs.tools.reader.edn :as edn]
-    [clojure.string :as str]
-    [clojure.set :as set]))
+    [clojure.set :as set]
+    [clojure.string :as str]))
 
 
 (defn str->int

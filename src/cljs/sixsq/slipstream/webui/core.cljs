@@ -1,26 +1,26 @@
 (ns sixsq.slipstream.webui.core
   (:require
-    [reagent.core :as r]
-    [re-frame.core :refer [clear-subscription-cache! dispatch-sync dispatch]]
-    [taoensso.timbre :as log]
     [clojure.string :as str]
-
-    [sixsq.slipstream.webui.config :as config]
-    [sixsq.slipstream.webui.routes :as routes]
-    [sixsq.slipstream.webui.utils.defines :as defines]
+    [re-frame.core :refer [clear-subscription-cache! dispatch dispatch-sync]]
+    [reagent.core :as r]
     [sixsq.slipstream.webui.authn.events :as authn-events]
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
-    [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
-    [sixsq.slipstream.webui.main.events :as main-events]
-    [sixsq.slipstream.webui.client.events :as client-events]
-    [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
-    [sixsq.slipstream.webui.usage.views :as usage-views]
-    [sixsq.slipstream.webui.db.events :as db-events]
-    [sixsq.slipstream.webui.history.events :as history-events]
-    [sixsq.slipstream.webui.main.views :as main-views]
+
     [sixsq.slipstream.webui.authn.views :as authn-views]
+    [sixsq.slipstream.webui.cimi.events :as cimi-events]
+    [sixsq.slipstream.webui.client.events :as client-events]
+    [sixsq.slipstream.webui.config :as config]
+    [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
+    [sixsq.slipstream.webui.db.events :as db-events]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
-    [sixsq.slipstream.webui.history.utils :as utils]))
+    [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
+    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.utils :as utils]
+    [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.main.views :as main-views]
+    [sixsq.slipstream.webui.routes :as routes]
+    [sixsq.slipstream.webui.usage.views :as usage-views]
+    [sixsq.slipstream.webui.utils.defines :as defines]
+    [taoensso.timbre :as log]))
 
 ;;
 ;; determine the host url

@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.cimi.subs
   (:require
-    [re-frame.core :refer [reg-sub dispatch]]
+    [re-frame.core :refer [dispatch reg-sub]]
+    [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [taoensso.timbre :as log]))
 
 

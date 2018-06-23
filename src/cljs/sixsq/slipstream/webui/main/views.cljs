@@ -1,30 +1,30 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
-    [taoensso.timbre :as log]
+    [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.application.views]
 
     ;; all panel views must be included to define panel rendering method
-    [sixsq.slipstream.webui.application.views]
-    [sixsq.slipstream.webui.cimi.views]
-    [sixsq.slipstream.webui.deployment.views]
-    [sixsq.slipstream.webui.dashboard.views]
-    [sixsq.slipstream.webui.legal.views]
-    [sixsq.slipstream.webui.messages.views :as messages]
-    [sixsq.slipstream.webui.metrics.views]
-    [sixsq.slipstream.webui.usage.views]
-    [sixsq.slipstream.webui.profile.views]
-    [sixsq.slipstream.webui.welcome.views]
-
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.authn.views :as authn-views]
+    [sixsq.slipstream.webui.cimi.views]
+    [sixsq.slipstream.webui.dashboard.views]
+    [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.i18n.views :as i18n-views]
+    [sixsq.slipstream.webui.legal.views]
     [sixsq.slipstream.webui.main.events :as main-events]
+
     [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.messages.views :as messages]
+    [sixsq.slipstream.webui.metrics.views]
     [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.profile.views]
+    [sixsq.slipstream.webui.usage.views]
     [sixsq.slipstream.webui.utils.general :as utils]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.welcome.views]
+    [taoensso.timbre :as log]))
 
 
 (defn sidebar []

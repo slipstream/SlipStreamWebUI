@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.plot.effects
   (:require
-    [re-frame.core :refer [reg-fx dispatch]]
     [cljsjs.vega-embed]
+    [re-frame.core :refer [dispatch reg-fx]]
     [taoensso.timbre :as log]))
 
 

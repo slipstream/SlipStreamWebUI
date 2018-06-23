@@ -1,26 +1,26 @@
 (ns sixsq.slipstream.webui.deployment.views
   (:require
     [clojure.string :as str]
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
 
-    [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
 
+    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-
-    [sixsq.slipstream.webui.utils.component :as ui-utils]
 
     [sixsq.slipstream.webui.history.events :as history-events]
 
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
 
     [sixsq.slipstream.webui.main.subs :as main-subs]
 
-    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
-    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]))
+    [sixsq.slipstream.webui.panel :as panel]
+
+    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.component :as ui-utils]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn bool->int [bool]

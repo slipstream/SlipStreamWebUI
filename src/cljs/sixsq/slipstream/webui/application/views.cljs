@@ -1,16 +1,16 @@
 (ns sixsq.slipstream.webui.application.views
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
+    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.application.events :as application-events]
+    [sixsq.slipstream.webui.application.subs :as application-subs]
 
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.application.subs :as application-subs]
-    [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.component :as cutil]))
+    [sixsq.slipstream.webui.utils.component :as cutil]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn category-icon

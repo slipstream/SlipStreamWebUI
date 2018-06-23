@@ -3,11 +3,11 @@
   (:require
     [clojure.spec.alpha :as s]
     [sixsq.slipstream.webui.authn.spec :as authn]
-    [sixsq.slipstream.webui.cimi.spec :as cimi]
-    [sixsq.slipstream.webui.deployment.spec :as deployment]
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail]
+    [sixsq.slipstream.webui.cimi.spec :as cimi]
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
+    [sixsq.slipstream.webui.deployment.spec :as deployment]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
     [sixsq.slipstream.webui.main.spec :as main]
     [sixsq.slipstream.webui.messages.spec :as messages]
