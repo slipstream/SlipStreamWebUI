@@ -79,17 +79,16 @@
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
-                 [cljsjs/codemirror "5.31.0-0"]
+                 [cljsjs/codemirror]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
                  [cljsjs/semantic-ui-react]
                  [cljsjs/moment]
-                 [cljsjs/react-datepicker "1.4.1-0"]        ;; downgrade, problem with 1.5.0-0
+                 [cljsjs/react-datepicker]
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/vega-embed]
-                 ]
+                 [cljsjs/vega-embed]]
 
   :source-paths ["src/clj" "src/cljs"]
 
