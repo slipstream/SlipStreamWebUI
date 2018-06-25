@@ -129,9 +129,7 @@
         loading? (subscribe [::usage-subs/loading-users-list?])]
     (fn []
       [ui/Form
-       [ui/FormGroup {
-                      :widths "equal"
-                      }
+       [ui/FormGroup {:widths "equal"}
         [search-calendar]
         [search-all-clouds-dropdown]
         (when @is-admin?
