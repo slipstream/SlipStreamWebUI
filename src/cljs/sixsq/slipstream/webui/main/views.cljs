@@ -2,6 +2,7 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.application.views]
+    [sixsq.slipstream.webui.legacy-application.views]
 
     ;; all panel views must be included to define panel rendering method
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
@@ -47,6 +48,7 @@
                      (vec
                        (concat
                          (when @is-user? [[:dashboard "dashboard" "dashboard"]
+                                          [:legacy-application "legacy-application" "sitemap"]
                                           [:application "application" "sitemap"]
                                           [:deployment "deployment" "cloud"]
                                           [:usage "usage" "history"]])

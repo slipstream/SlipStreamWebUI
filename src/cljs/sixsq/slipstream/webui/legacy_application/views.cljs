@@ -1,39 +1,37 @@
-(ns sixsq.slipstream.webui.application.views
+(ns sixsq.slipstream.webui.legacy-application.views
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.application.events :as application-events]
-    [sixsq.slipstream.webui.application.subs :as application-subs]
+    [sixsq.slipstream.webui.legacy-application.events :as application-events]
+    [sixsq.slipstream.webui.legacy-application.subs :as application-subs]
 
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.component :as cutil]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn category-icon
   [category]
   (case category
-    "PROJECT" "folder"
-    "APPLICATION" "sitemap"
-    "IMAGE" "file"
-    "COMPONENT" "microchip"
+    "Project" "folder"
+    "Deployment" "sitemap"
+    "Image" "microchip"
     "question circle"))
 
 
-(defn format-module [{:keys [type name description] :as module}]
+(defn format-module [{:keys [category name version description] :as module}]
   (when module
     (let [on-click #(dispatch [::main-events/push-breadcrumb name])
-          icon-name (category-icon type)]
+          icon-name (category-icon category)]
       [ui/ListItem
        [ui/ListIcon {:name           icon-name
                      :size           "large"
                      :vertical-align "middle"}]
        [ui/ListContent
-        [ui/ListHeader [:a {:on-click on-click} name]]
+        [ui/ListHeader [:a {:on-click on-click} (str name " (" version ")")]]
         [ui/ListDescription [:span description]]]])))
 
 
@@ -62,15 +60,15 @@
     (fn [state-atom]
       (let [label (if @more? (@tr [:less]) (@tr [:more]))
             icon-name (if @more? "caret down" "caret right")]
-        [:a {:style    {:cursor "pointer"}
+        [:a {:style {:cursor "pointer"}
              :on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
 
 
 (defn format-meta
-  [{:keys [name path version description logoLink type] :as module-meta}]
+  [{:keys [shortName version description logoLink category] :as module-meta}]
   (let [more? (reagent/atom false)]
-    (fn [{:keys [name path version description logoLink type] :as module-meta}]
-      (let [data (sort-by first (dissoc module-meta :versions :children :acl :operations))]
+    (fn [{:keys [shortName version description logoLink category] :as module-meta}]
+      (let [data (sort-by first module-meta)]
         (when (pos? (count data))
           [ui/Card {:fluid true}
            [ui/CardContent
@@ -79,8 +77,8 @@
                          :size    :tiny
                          :src     logoLink}])
             [ui/CardHeader
-             [ui/Icon {:name (category-icon type)}]
-             (str " " name " (" path ")")]
+             [ui/Icon {:name (category-icon category)}]
+             (str " " shortName " (" version ")")]
             (when description
               [ui/CardMeta
                [:p description]])
@@ -138,21 +136,21 @@
 
 
 (defn parameter-table-row
-  [[name description value]]
+  [[category name description]]
   [ui/TableRow
+   [ui/TableCell category]
    [ui/TableCell name]
-   [ui/TableCell description]
-   [ui/TableCell value]])
+   [ui/TableCell description]])
 
 
 (defn format-parameters
-  [title-kw parameters]
+  [parameters]
   (let [tr (subscribe [::i18n-subs/tr])]
-    (fn [title-kw parameters]
+    (fn [parameters]
       (when parameters
-        (let [rows (map (fn [[k {:keys [description value]}]] [(name k) description value]) parameters)]
+        (let [rows (map (juxt :category :name :description) parameters)]
           [cc/collapsible-card
-           (@tr [title-kw])
+           (@tr [:parameters])
            [ui/Table
             (vec (concat [ui/TableBody] (map parameter-table-row rows)))]])))))
 
@@ -163,13 +161,13 @@
   [ui/Dropdown {:inline        true
                 :default-value :execute
                 :on-change     (cutil/callback :value #(reset! state %))
-                :options       [{:key "preinstall", :value "preinstall", :text "pre-install"}
+                :options       [{:key "prerecipe", :value "prerecipe", :text "pre-install"}
                                 {:key "packages", :value "packages", :text "packages"}
-                                {:key "postinstall", :value "postinstall", :text "post-install"}
-                                {:key "deployment", :value "deployment", :text "deployment"}
-                                {:key "reporting", :value "reporting", :text "reporting"}
-                                {:key "onVmAdd", :value "onVmAdd", :text "on VM add"}
-                                {:key "onVmRemove", :value "onVmRemove", :text "on VM remove"}
+                                {:key "recipe", :value "recipe", :text "post-install"}
+                                {:key "execute", :value "execute", :text "deployment"}
+                                {:key "report", :value "report", :text "report"}
+                                {:key "onvmadd", :value "onvmadd", :text "on VM add"}
+                                {:key "onvmremove", :value "onvmremove", :text "on VM remove"}
                                 {:key "prescale", :value "prescale", :text "pre-scale"}
                                 {:key "postscale", :value "postscale", :text "post-scale"}]}])
 
@@ -195,25 +193,15 @@
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]
-                          (let [{:keys [children content]} @data
-                                _ (println @data)
-                                metadata (dissoc @data :content)
-                                {:keys [targets inputParameters outputParameters]} content
-                                type (:type metadata)]
+                          (let [{:keys [metadata children targets parameters]} @data
+                                module-type (:category metadata)]
                             [[format-meta metadata]
-                             (log/error (with-out-str (cljs.pprint/pprint metadata)))
-                             (log/error (with-out-str (cljs.pprint/pprint type)))
-                             (log/error (with-out-str (cljs.pprint/pprint targets)))
-                             (log/error (with-out-str (cljs.pprint/pprint inputParameters)))
-                             (log/error (with-out-str (cljs.pprint/pprint outputParameters)))
-
-                             (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
-                             (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
-                             (when (= type "COMPONENT") [format-targets targets])
+                             (when (= module-type "Image") [format-parameters parameters])
+                             (when (= module-type "Image") [format-targets targets])
                              [format-module-children children]])))))]))))
 
 
-(defmethod panel/render :application
+(defmethod panel/render :legacy-application
   [path]
   (dispatch [::application-events/get-module])
   [module-resource])

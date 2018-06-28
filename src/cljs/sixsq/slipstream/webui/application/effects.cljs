@@ -5,64 +5,29 @@
     [cljs.core.async :refer [<!]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-fx]]
-    [sixsq.slipstream.client.api.modules :as modules]))
-
-
-(def ^:const metadata-fields #{:shortName :description :category :creation :version :logoLink})
-
-
-(def ^:const item-keys #{:name :description :category :version})
-
-
-(def ^:const recipe-fields #{:prerecipe :packages :recipe})
-
-
-(defn get-module-items
-  [module]
-  (let [items (->> module vals first :children :item)]
-    (if (map? items)
-      [(select-keys items item-keys)]                       ;; single item
-      (mapv #(select-keys % item-keys) items))))            ;; multiple items
-
-
-(defn format-packages
-  [{:keys [package] :as packages}]
-  (let [package (if (map? package) [package] package)]
-    (str/join "\n" (mapv :name package))))
+    [sixsq.slipstream.client.api.cimi :as cimi]))
 
 
 (reg-fx
   ::get-module
-  (fn [[client module-id]]
+  (fn [[client path]]
     (go
-      (let [module (if (nil? module-id) {} (<! (modules/get-module client module-id)))
+      (let [path-filter (str "path='" path "'")
+            children-filter (str "parentPath='" path "'")
 
-            {:keys [prerecipe packages recipe]} (-> module vals first (select-keys recipe-fields))
+            {:keys [type id] :as project-metadata} (if-not (str/blank? path)
+                                                     (-> (<! (cimi/search client "modules" {:$filter path-filter}))
+                                                         :modules
+                                                         first)
+                                                     {:type "PROJECT"})
 
-            metadata (-> module vals first (select-keys metadata-fields))
+            module (if (not= "PROJECT" type)
+                     (<! (cimi/get client id))
+                     project-metadata)
 
-            targets (cond-> (->> (-> module vals first :targets :target)
-                                 (map (juxt #(-> % :name keyword) :content))
-                                 (filter second)
-                                 (into {}))
-                            prerecipe (assoc :prerecipe prerecipe)
-                            recipe (assoc :recipe recipe)
-                            packages (assoc :packages (format-packages packages)))
+            children (when (= type "PROJECT")
+                       (:modules (<! (cimi/search client "modules" {:$filter children-filter}))))
 
-            output-parameters (->> (-> module vals first :parameters :entry)
-                                   (map :parameter)
-                                   (filter #(= "Output" (:category %))))
+            module-data (assoc module :children children)]
 
-            input-parameters (->> (-> module vals first :parameters :entry)
-                                  (map :parameter)
-                                  (filter #(= "Input" (:category %))))
-
-            children (if (nil? module-id)
-                       (<! (modules/get-module-children client nil))
-                       (get-module-items module))
-
-            module-data {:metadata   metadata
-                         :targets    targets
-                         :parameters (concat input-parameters output-parameters)
-                         :children   children}]
-        (dispatch [:sixsq.slipstream.webui.application.events/set-module module-id module-data])))))
+        (dispatch [:sixsq.slipstream.webui.application.events/set-module path module-data])))))
