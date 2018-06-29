@@ -223,7 +223,7 @@
   (let [parameter-name (name parameter)
         label (cond-> parameter-name
                       mapped (str " \u2192 ")
-                      (not mapped) (str " \ff1d ")
+                      (not mapped) (str " \uff1d ")
                       value (str value)
                       (not value) (str "empty"))]
     ^{:key parameter-name}
