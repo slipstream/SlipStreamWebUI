@@ -1,21 +1,18 @@
 (ns sixsq.slipstream.webui.nuvlabox.views
   (:require
     [cljs.pprint :refer [cl-format]]
-
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-
     [sixsq.slipstream.webui.history.events :as history-events]
-
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.nuvlabox.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox.subs :as nuvlabox-subs]
-
+    [sixsq.slipstream.webui.nuvlabox.utils :as u]
     [sixsq.slipstream.webui.panel :as panel]
-
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.plot.plot :as plot]))
 
 
 (defn controls
@@ -34,8 +31,7 @@
 (defn controls-detail
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::nuvlabox-subs/detail-loading?])
-        ]
+        loading? (subscribe [::nuvlabox-subs/detail-loading?])]
     (fn []
       [ui/Menu
        [ui/MenuItem {:name     "refresh"
@@ -83,16 +79,85 @@
           [nuvlabox-summary-table active]]]))))
 
 
+(defn hw-id
+  [{:keys [bus-id device-id] :as device}]
+  (str bus-id "." device-id))
+
+
+(defn device-row-header
+  []
+  [ui/TableHeader
+   [ui/TableHeaderCell "busy"]
+   [ui/TableHeaderCell "bus"]
+   [ui/TableHeaderCell "device"]
+   [ui/TableHeaderCell "vendor"]
+   [ui/TableHeaderCell "product"]
+   [ui/TableHeaderCell "description"]])
+
+
 (defn device-row
   [{:keys [bus-id device-id vendor-id product-id busy description] :as device}]
-  ^{:key (str bus-id "." device-id)}
-  [:tr
-   [:td (str busy)]
-   [:td bus-id]
-   [:td device-id]
-   [:td vendor-id]
-   [:td product-id]
-   [:td description]])
+  ^{:key (hw-id device)}
+  [ui/TableRow
+   [ui/TableCell (if busy "busy" "free")]
+   [ui/TableCell bus-id]
+   [ui/TableCell device-id]
+   [ui/TableCell vendor-id]
+   [ui/TableCell product-id]
+   [ui/TableCell description]])
+
+
+(def load-stats-vega-spec
+  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
+   :description "machine load"
+   :layer       [{:mark     :bar
+                  :encoding {:x {:field :percentage
+                                 :type  "quantitative"
+                                 :axis  {:ticks false
+                                         :title " "}
+                                 :scale {:domain [0, 100]}}
+                             :y {:field :label
+                                 :type  "ordinal"
+                                 :axis  {:ticks false
+                                         :title " "}
+                                 :sort  nil}}}
+                 {:mark     {:type     :text
+                             :align    :left
+                             :baseline :middle
+                             :dx       3}
+                  :encoding {:text {:field :value
+                                    :type  "ordinal"}
+                             :x    {:field :percentage
+                                    :type  "quantitative"}
+                             :y    {:field :label
+                                    :type  "ordinal"}}}]})
+
+
+(defn load-plot
+  [_ load]
+  (let [load-stats (u/load-statistics load)]
+    [plot/plot load-stats-vega-spec {:values load-stats} :style {:float :left}]))
+
+
+
+(defn load
+  [cpu ram disks]
+  [cc/collapsible-card
+   [:span [ui/Icon {:name "thermometer half"}] " load"]
+   #_[:div (with-out-str (cljs.pprint/pprint cpu))]
+   #_[:div (with-out-str (cljs.pprint/pprint ram))]
+   #_[:div (with-out-str (cljs.pprint/pprint disks))]
+   #_[:div (with-out-str (cljs.pprint/pprint (u/load-statistics {:cpu cpu :ram ram :disks disks})))]
+   [load-plot {} {:cpu cpu :ram ram :disks disks}]])
+
+
+(defn usb-devices
+  [usb]
+  [cc/collapsible-card
+   [:span [ui/Icon {:name "usb"}] " usb devices"]
+   [ui/Table
+    [device-row-header]
+    (vec (concat [ui/TableBody] (mapv device-row (sort-by hw-id usb))))]])
 
 
 (defn detail-table
@@ -101,10 +166,8 @@
     (fn []
       (let [{:keys [cpu ram disks usb]} @detail]
         [ui/Container {:fluid true}
-         [:div (with-out-str (cljs.pprint/pprint cpu))]
-         [:div (with-out-str (cljs.pprint/pprint ram))]
-         [:div (with-out-str (cljs.pprint/pprint disks))]
-         [:table (vec (concat [:tbody] (mapv device-row usb)))]]))))
+         [load cpu ram disks]
+         [usb-devices usb]]))))
 
 
 (defn state-detail
