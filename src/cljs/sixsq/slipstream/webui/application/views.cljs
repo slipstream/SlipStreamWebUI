@@ -1,10 +1,12 @@
 (ns sixsq.slipstream.webui.application.views
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
-
+    [sixsq.slipstream.webui.editor.editor :as editor]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]
@@ -16,22 +18,23 @@
 (defn category-icon
   [category]
   (case category
-    "Project" "folder"
-    "Deployment" "sitemap"
-    "Image" "microchip"
+    "PROJECT" "folder"
+    "APPLICATION" "sitemap"
+    "IMAGE" "file"
+    "COMPONENT" "microchip"
     "question circle"))
 
 
-(defn format-module [{:keys [category name version description] :as module}]
+(defn format-module [{:keys [type name description] :as module}]
   (when module
     (let [on-click #(dispatch [::main-events/push-breadcrumb name])
-          icon-name (category-icon category)]
+          icon-name (category-icon type)]
       [ui/ListItem
        [ui/ListIcon {:name           icon-name
                      :size           "large"
                      :vertical-align "middle"}]
        [ui/ListContent
-        [ui/ListHeader [:a {:on-click on-click} (str name " (" version ")")]]
+        [ui/ListHeader [:a {:on-click on-click} name]]
         [ui/ListDescription [:span description]]]])))
 
 
@@ -60,25 +63,26 @@
     (fn [state-atom]
       (let [label (if @more? (@tr [:less]) (@tr [:more]))
             icon-name (if @more? "caret down" "caret right")]
-        [:a {:style {:cursor "pointer"}
+        [:a {:style    {:cursor "pointer"}
              :on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
 
 
 (defn format-meta
-  [{:keys [shortName version description logoLink category] :as module-meta}]
+  [{:keys [name path version description logo type] :as module-meta}]
   (let [more? (reagent/atom false)]
-    (fn [{:keys [shortName version description logoLink category] :as module-meta}]
-      (let [data (sort-by first module-meta)]
+    (fn [{:keys [name path version description logo type] :as module-meta}]
+      (let [data (sort-by first (dissoc module-meta :versions :children :acl :operations))]
         (when (pos? (count data))
           [ui/Card {:fluid true}
            [ui/CardContent
-            (when logoLink
+            (when logo
               [ui/Image {:floated "right"
                          :size    :tiny
-                         :src     logoLink}])
+                         :src     (:href logo)}])
             [ui/CardHeader
-             [ui/Icon {:name (category-icon category)}]
-             (str " " shortName " (" version ")")]
+             [ui/Icon {:name (category-icon type)}]
+             (cond-> name
+                     (not (str/blank? path)) (str " (" path ")"))]
             (when description
               [ui/CardMeta
                [:p description]])
@@ -136,52 +140,121 @@
 
 
 (defn parameter-table-row
-  [[category name description]]
+  [[name description value]]
   [ui/TableRow
-   [ui/TableCell category]
    [ui/TableCell name]
-   [ui/TableCell description]])
+   [ui/TableCell description]
+   [ui/TableCell value]])
 
 
 (defn format-parameters
-  [parameters]
+  [title-kw parameters]
   (let [tr (subscribe [::i18n-subs/tr])]
-    (fn [parameters]
+    (fn [title-kw parameters]
       (when parameters
-        (let [rows (map (juxt :category :name :description) parameters)]
+        (let [rows (map (fn [[k {:keys [description value]}]] [(name k) description value]) parameters)]
           [cc/collapsible-card
-           (@tr [:parameters])
+           (@tr [title-kw])
            [ui/Table
             (vec (concat [ui/TableBody] (map parameter-table-row rows)))]])))))
 
 
-;; FIXME: The first three target keywords are not correct.
 (defn target-dropdown
   [state]
   [ui/Dropdown {:inline        true
-                :default-value :execute
+                :default-value :deployment
                 :on-change     (cutil/callback :value #(reset! state %))
-                :options       [{:key "prerecipe", :value "prerecipe", :text "pre-install"}
+                :options       [{:key "preinstall", :value "preinstall", :text "pre-install"}
                                 {:key "packages", :value "packages", :text "packages"}
-                                {:key "recipe", :value "recipe", :text "post-install"}
-                                {:key "execute", :value "execute", :text "deployment"}
-                                {:key "report", :value "report", :text "report"}
-                                {:key "onvmadd", :value "onvmadd", :text "on VM add"}
-                                {:key "onvmremove", :value "onvmremove", :text "on VM remove"}
+                                {:key "postinstall", :value "postinstall", :text "post-install"}
+                                {:key "deployment", :value "deployment", :text "deployment"}
+                                {:key "reporting", :value "reporting", :text "reporting"}
+                                {:key "onVmAdd", :value "onVmAdd", :text "on VM add"}
+                                {:key "onVmRemove", :value "onVmRemove", :text "on VM remove"}
                                 {:key "prescale", :value "prescale", :text "pre-scale"}
                                 {:key "postscale", :value "postscale", :text "post-scale"}]}])
 
 
+(defn render-package
+  [package]
+  ^{:key package}
+  [ui/ListItem
+   [ui/ListContent
+    [ui/ListHeader package]]])
+
+
+(defn render-packages
+  [packages]
+  (if (empty? packages)
+    [:span "no packages defined"]
+    (vec (concat [ui/ListSA] (mapv render-package packages)))))
+
+
+(defn render-script
+  [script]
+  (if (str/blank? script)
+    [:span "undefined"]
+    [editor/editor (reagent/atom script) :options {:lineNumbers true, :readOnly true}]))
+
+
 (defn format-targets
   [targets]
-  (let [tr (subscribe [::i18n-subs/tr])
-        selected-target (reagent/atom "execute")]
+  (let [selected-target (reagent/atom "deployment")]
     (fn [targets]
       (when targets
-        [cc/collapsible-card
-         [:span [target-dropdown selected-target] "target"]
-         [ui/Segment
-          [:pre (get targets (keyword @selected-target))]]]))))
+        (let [selected (keyword @selected-target)
+              target-value (get targets selected)]
+          [cc/collapsible-card
+           [:span [target-dropdown selected-target] "target"]
+           [ui/Segment
+            (if (= :packages selected)
+              (render-packages target-value)
+              (render-script target-value))]])))))
+
+
+(defn format-component-link
+  [label href]
+  (let [on-click #(dispatch [::history-events/navigate (str "cimi/" href)])]
+    [:a {:style {:cursor "pointer"} :on-click on-click} label]))
+
+
+(defn render-parameter-mapping
+  [[parameter {:keys [value mapped]}]]
+  (let [parameter-name (name parameter)
+        label (cond-> parameter-name
+                      mapped (str " \u2192 ")
+                      (not mapped) (str " \ff1d ")
+                      value (str value)
+                      (not value) (str "empty"))]
+    ^{:key parameter-name}
+    [ui/ListItem
+     [ui/ListContent
+      [ui/ListHeader label]]]))
+
+
+(defn render-parameter-mappings
+  [parameter-mappings]
+  (if (empty? parameter-mappings)
+    [:span "none"]
+    (vec (concat [ui/ListSA] (mapv render-parameter-mapping (sort-by #(% first name) parameter-mappings))))))
+
+
+(defn render-node
+  [[node {:keys [multiplicity component parameterMappings] :as content}]]
+  (let [label (name node)]
+    [cc/collapsible-card
+     [:span label]
+     [ui/Table
+      (vec (concat [ui/TableBody]
+                   [[:tr [:td "component"] [:td (format-component-link label (:href component))]]
+                    [:tr [:td "multiplicity"] [:td multiplicity]]
+                    [:tr [:td "parameterMappings"] [:td (render-parameter-mappings parameterMappings)]]]))]]))
+
+
+(defn format-nodes
+  [nodes]
+  (let [sorted-nodes (sort-by #(-> % first name) nodes)]
+    (vec (concat [ui/Segment] (mapv render-node sorted-nodes)))))
 
 
 (defn module-resource []
@@ -189,15 +262,19 @@
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable
-         (vec (concat [:div [dimmer]]
+         (vec (concat [ui/Container [dimmer]]
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]
-                          (let [{:keys [metadata children targets parameters]} @data
-                                module-type (:category metadata)]
+                          (let [{:keys [children content]} @data
+                                metadata (dissoc @data :content)
+                                {:keys [targets nodes inputParameters outputParameters]} content
+                                type (:type metadata)]
                             [[format-meta metadata]
-                             (when (= module-type "Image") [format-parameters parameters])
-                             (when (= module-type "Image") [format-targets targets])
+                             (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
+                             (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
+                             (when (= type "COMPONENT") [format-targets targets])
+                             (when (= type "APPLICATION") [format-nodes nodes])
                              [format-module-children children]])))))]))))
 
 
