@@ -2,10 +2,10 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.legacy-application.events :as application-events]
-    [sixsq.slipstream.webui.legacy-application.subs :as application-subs]
-
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.legacy-application.events :as application-events]
+
+    [sixsq.slipstream.webui.legacy-application.subs :as application-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]

@@ -1,18 +1,19 @@
 (ns sixsq.slipstream.webui.application.views
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
-
+    [sixsq.slipstream.webui.editor.editor :as editor]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.component :as cutil]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [taoensso.timbre :as log]))
 
 
 (defn category-icon
@@ -159,7 +160,6 @@
             (vec (concat [ui/TableBody] (map parameter-table-row rows)))]])))))
 
 
-;; FIXME: The first three target keywords are not correct.
 (defn target-dropdown
   [state]
   [ui/Dropdown {:inline        true
@@ -186,12 +186,16 @@
 
 (defn render-packages
   [packages]
-  (vec (concat [ui/ListSA] (mapv render-package packages))))
+  (if (empty? packages)
+    [:span "no packages defined"]
+    (vec (concat [ui/ListSA] (mapv render-package packages)))))
 
 
 (defn render-script
   [script]
-  [:pre script])
+  (if (str/blank? script)
+    [:span "undefined"]
+    [editor/editor (reagent/atom script) :options {:lineNumbers true, :readOnly true}]))
 
 
 (defn format-targets
@@ -209,23 +213,70 @@
               (render-script target-value))]])))))
 
 
+(defn format-component-link
+  [label href]
+  (let [on-click #(dispatch [::history-events/navigate (str "cimi/" href)])]
+    [:a {:style {:cursor "pointer"} :on-click on-click} label]))
+
+
+(defn render-parameter-mapping
+  [[parameter {:keys [value mapped]}]]
+  (let [parameter-name (name parameter)
+        label (cond-> parameter-name
+                      mapped (str " \u2192 ")
+                      (not mapped) (str " \ff1d ")
+                      value (str value)
+                      (not value) (str "empty"))]
+    ^{:key parameter-name}
+    [ui/ListItem
+     [ui/ListContent
+      [ui/ListHeader label]]]))
+
+
+(defn render-parameter-mappings
+  [parameter-mappings]
+  (if (empty? parameter-mappings)
+    [:span "none"]
+    (vec (concat [ui/ListSA] (mapv render-parameter-mapping (sort-by #(% first name) parameter-mappings))))))
+
+
+(defn render-node
+  [[node {:keys [multiplicity component parameterMappings] :as content}]]
+  (let [label (name node)]
+    [cc/collapsible-card
+     [:span label]
+     [ui/Table
+      (vec (concat [ui/TableBody]
+                   [[:tr [:td "component"] [:td (format-component-link label (:href component))]]
+                    [:tr [:td "multiplicity"] [:td multiplicity]]
+                    [:tr [:td "parameterMappings"] [:td (render-parameter-mappings parameterMappings)]]]))]]))
+
+
+(defn format-nodes
+  [nodes]
+  (let [sorted-nodes (sort-by #(-> % first name) nodes)]
+    (vec (concat [ui/Segment] (mapv render-node sorted-nodes)))))
+
+
 (defn module-resource []
   (let [data (subscribe [::application-subs/module])]
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable
-         (vec (concat [:div [dimmer]]
+         (vec (concat [ui/Container [dimmer]]
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]
                           (let [{:keys [children content]} @data
                                 metadata (dissoc @data :content)
-                                {:keys [targets inputParameters outputParameters]} content
+                                {:keys [targets nodes inputParameters outputParameters]} content
                                 type (:type metadata)]
+                            (log/error (with-out-str (cljs.pprint/pprint nodes)))
                             [[format-meta metadata]
                              (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
                              (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
                              (when (= type "COMPONENT") [format-targets targets])
+                             (when (= type "APPLICATION") [format-nodes nodes])
                              [format-module-children children]])))))]))))
 
 
