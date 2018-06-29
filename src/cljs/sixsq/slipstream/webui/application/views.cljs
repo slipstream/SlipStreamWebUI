@@ -11,7 +11,8 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.component :as cutil]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 
 (defn category-icon
@@ -67,20 +68,21 @@
 
 
 (defn format-meta
-  [{:keys [name path version description logoLink type] :as module-meta}]
+  [{:keys [name path version description logo type] :as module-meta}]
   (let [more? (reagent/atom false)]
-    (fn [{:keys [name path version description logoLink type] :as module-meta}]
+    (fn [{:keys [name path version description logo type] :as module-meta}]
       (let [data (sort-by first (dissoc module-meta :versions :children :acl :operations))]
         (when (pos? (count data))
           [ui/Card {:fluid true}
            [ui/CardContent
-            (when logoLink
+            (when logo
               [ui/Image {:floated "right"
                          :size    :tiny
-                         :src     logoLink}])
+                         :src     (:href logo)}])
             [ui/CardHeader
              [ui/Icon {:name (category-icon type)}]
-             (str " " name " (" path ")")]
+             (cond-> name
+                     (not (str/blank? path)) (str " (" path ")"))]
             (when description
               [ui/CardMeta
                [:p description]])
@@ -161,7 +163,7 @@
 (defn target-dropdown
   [state]
   [ui/Dropdown {:inline        true
-                :default-value :execute
+                :default-value :deployment
                 :on-change     (cutil/callback :value #(reset! state %))
                 :options       [{:key "preinstall", :value "preinstall", :text "pre-install"}
                                 {:key "packages", :value "packages", :text "packages"}
@@ -174,16 +176,37 @@
                                 {:key "postscale", :value "postscale", :text "post-scale"}]}])
 
 
+(defn render-package
+  [package]
+  ^{:key package}
+  [ui/ListItem
+   [ui/ListContent
+    [ui/ListHeader package]]])
+
+
+(defn render-packages
+  [packages]
+  (vec (concat [ui/ListSA] (mapv render-package packages))))
+
+
+(defn render-script
+  [script]
+  [:pre script])
+
+
 (defn format-targets
   [targets]
-  (let [tr (subscribe [::i18n-subs/tr])
-        selected-target (reagent/atom "execute")]
+  (let [selected-target (reagent/atom "deployment")]
     (fn [targets]
       (when targets
-        [cc/collapsible-card
-         [:span [target-dropdown selected-target] "target"]
-         [ui/Segment
-          [:pre (get targets (keyword @selected-target))]]]))))
+        (let [selected (keyword @selected-target)
+              target-value (get targets selected)]
+          [cc/collapsible-card
+           [:span [target-dropdown selected-target] "target"]
+           [ui/Segment
+            (if (= :packages selected)
+              (render-packages target-value)
+              (render-script target-value))]])))))
 
 
 (defn module-resource []
@@ -196,17 +219,10 @@
                         (if (instance? js/Error @data)
                           [[format-error @data]]
                           (let [{:keys [children content]} @data
-                                _ (println @data)
                                 metadata (dissoc @data :content)
                                 {:keys [targets inputParameters outputParameters]} content
                                 type (:type metadata)]
                             [[format-meta metadata]
-                             (log/error (with-out-str (cljs.pprint/pprint metadata)))
-                             (log/error (with-out-str (cljs.pprint/pprint type)))
-                             (log/error (with-out-str (cljs.pprint/pprint targets)))
-                             (log/error (with-out-str (cljs.pprint/pprint inputParameters)))
-                             (log/error (with-out-str (cljs.pprint/pprint outputParameters)))
-
                              (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
                              (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
                              (when (= type "COMPONENT") [format-targets targets])

@@ -19,7 +19,9 @@
                                                      (-> (<! (cimi/search client "modules" {:$filter path-filter}))
                                                          :modules
                                                          first)
-                                                     {:type "PROJECT"})
+                                                     {:type "PROJECT"
+                                                      :name "Applications"
+                                                      :description "cloud applications at your service"})
 
             module (if (not= "PROJECT" type)
                      (<! (cimi/get client id))
