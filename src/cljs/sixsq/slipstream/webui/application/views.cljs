@@ -12,8 +12,7 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.component :as cutil]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn category-icon
@@ -271,7 +270,6 @@
                                 metadata (dissoc @data :content)
                                 {:keys [targets nodes inputParameters outputParameters]} content
                                 type (:type metadata)]
-                            (log/error (with-out-str (cljs.pprint/pprint nodes)))
                             [[format-meta metadata]
                              (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
                              (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
