@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.nuvlabox.utils
   (:require
     [cljs.pprint :refer [cl-format]]
+    [clojure.string :as str]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]))
 
 
 (def default-params {:$first 1, :$last 20})
