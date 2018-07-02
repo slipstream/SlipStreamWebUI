@@ -50,6 +50,18 @@
        (invalid locale))))
 
 
+(defn before-now?
+  [iso8601]
+  (let [ts (parse-iso8601 iso8601)]
+    (boolean (.isBefore ts (now)))))
+
+
+(defn after-now?
+  [iso8601]
+  (let [ts (parse-iso8601 iso8601)]
+    (boolean (.isAfter ts (now)))))
+
+
 (defn remaining
   "Returns a human-readable string on how much time is remaining before the
    given expiry date (in ISO8601 format). Uses English as the natural language

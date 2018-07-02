@@ -19,6 +19,7 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.messages.views :as messages]
     [sixsq.slipstream.webui.metrics.views]
+    [sixsq.slipstream.webui.nuvlabox.views]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.usage.views]
@@ -53,7 +54,8 @@
                                           [:deployment "deployment" "cloud"]
                                           [:usage "usage" "history"]])
                          (when @is-admin?
-                           [[:metrics "metrics" "bar chart"]])
+                           [[:metrics "metrics" "bar chart"]
+                            [:nuvlabox "nuvlabox" "desktop"]])
                          [[:cimi "cimi" "code"]]))
                      :when (some? label-kw)]
                  [ui/MenuItem {:active  (= (first @nav-path) url)
