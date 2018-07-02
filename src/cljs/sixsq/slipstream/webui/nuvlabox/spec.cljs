@@ -6,23 +6,13 @@
 
 (s/def ::loading? boolean?)
 
-(s/def ::stale (s/nilable any?))
-(s/def ::active (s/nilable vector?))
-(s/def ::state-info (s/keys :req-un [::stale ::active]))
+(s/def ::stale-count nat-int?)
+(s/def ::active-count nat-int?)
+(s/def ::healthy? (s/map-of string? boolean?))
+(s/def ::health-info (s/keys :req-un [::stale-count
+                                      ::active-count
+                                      ::healthy?]))
 
-(s/def ::db (s/keys :req [::loading?
-                          ::state-info]))
-
-
-;; from CIMI
-
-(s/def ::baseURI string?)
-(s/def ::collection-key (s/map-of string? keyword?))
-(s/def ::collection-href (s/map-of keyword? string?))
-
-(s/def ::cloud-entry-point (s/nilable (only-keys :req-un [::baseURI
-                                                          ::collection-key
-                                                          ::collection-href])))
 
 (s/def ::$first nat-int?)
 (s/def ::$last nat-int?)
@@ -38,48 +28,28 @@
                                        ::$select
                                        ::$aggregation]))
 
-(s/def ::loading? boolean?)
-
 (s/def ::filter-visible? boolean?)
 
-(s/def ::aggregations any?)
-
 (s/def ::collection any?)
-
-(s/def ::collection-name (s/nilable string?))
-
-(s/def ::selected-fields (s/coll-of string? :min-count 1))
-
-(s/def ::available-fields (s/coll-of string? :min-count 1))
-
-(s/def ::show-add-modal? boolean?)
-
-(s/def ::descriptions-vector any?)
-
-(s/def ::collections-templates-cache (s/map-of keyword? any?))
 
 (s/def ::state-selector #{"all" "new" "activated" "quarantined"})
 
 
-(s/def ::db (s/keys :req [::cloud-entry-point
+(s/def ::db (s/keys :req [::loading?
+                          ::health-info
+
                           ::query-params
-                          ::loading?
-                          ::aggregations
+
+                          ::filter-visible?
                           ::collection
-                          ::collection-name
-                          ::selected-fields
-                          ::available-fields
-                          ::show-add-modal?
-                          ::collections-templates-cache
                           ::state-selector]))
 
 
 (def defaults {::loading?                    false
-               ::state-info                  {:stale nil, :active nil}
+               ::health-info                 {:stale-count  0
+                                              :active-count 0
+                                              :healthy?     {}}
 
-               ::cloud-entry-point           {:baseURI         "http://example.com/"
-                                              :collection-key  :nuvlaboxReports
-                                              :collection-href "nuvlabox-report"}
                ::query-params                {:$first       0
                                               :$last        20
                                               :$filter      nil
@@ -88,12 +58,6 @@
                                               :$aggregation nil}
 
                ::filter-visible?             true
-               ::aggregations                nil
                ::collection                  nil
-               ::collection-name             nil
-               ::selected-fields             ["id"]
-               ::available-fields            ["id"]
-               ::show-add-modal?             false
-               ::collections-templates-cache {}
                ::state-selector              "all"})
 

@@ -109,12 +109,12 @@
   (let [updated-moment (time/parse-iso8601 updated)
         next-check-moment (time/parse-iso8601 next-check)
 
-        check-ok? (time/after-now? updated)
+        check-ok? (time/after-now? next-check)
         icon (if check-ok? "heartbeat" "warning sign")
 
         msg-last (str "Last heartbeat was " (time/ago updated-moment) " (" updated ").")
         msg-next (if check-ok?
-                   (str "Next heartbeat is expected " (time/ago next-check-moment) " (" next-check ") from now.")
+                   (str "Next heartbeat is expected " (time/ago next-check-moment) " (" next-check ").")
                    (str "Next heartbeat was expected " (time/ago next-check-moment) " (" next-check ")."))]
 
     [cc/collapsible-card
@@ -128,25 +128,32 @@
   []
   (let [detail (subscribe [::nuvlabox-subs/state])]
     (fn []
-      (let [{:keys [cpu ram disks usb updated nextCheck]} @detail]
-        [ui/Container {:fluid true}
-         [heartbeat updated nextCheck]
-         [load cpu ram disks]
-         [usb-devices usb]]))))
+      (when @detail
+        (let [{:keys [cpu ram disks usb updated nextCheck]} @detail]
+          [ui/Container {:fluid true}
+           [heartbeat updated nextCheck]
+           [load cpu ram disks]
+           [usb-devices usb]])))))
 
 
 (defn record-info
   []
   (let [record (subscribe [::nuvlabox-subs/record])]
     (fn []
-      [cc/collapsible-card
-       [:span [ui/Icon {:name "list"}] " details"]
-       (details/format-resource-data @record {})])))
+      (when @record
+        [cc/collapsible-card
+         [:span [ui/Icon {:name "list"}] " details"]
+         (details/format-resource-data @record {})]))))
 
 
 (defn nb-detail
   []
-  [ui/Container {:fluid true}
-   [controls-detail]
-   [state-table]
-   [record-info]])
+  (let [detail (subscribe [::nuvlabox-subs/state])
+        record (subscribe [::nuvlabox-subs/record])]
+    (fn []
+      (when (or (nil? @detail) (nil? @record))
+        (dispatch [::nuvlabox-events/fetch-detail]))
+      [ui/Container {:fluid true}
+       [controls-detail]
+       [state-table]
+       [record-info]])))

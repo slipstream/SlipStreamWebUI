@@ -9,7 +9,11 @@
 (reg-event-db
   ::set-mac
   (fn [db [_ mac]]
-    (assoc db ::nuvlabox-spec/mac mac)))
+    (if mac
+      (assoc db ::nuvlabox-spec/mac mac)
+      (assoc db ::nuvlabox-spec/mac mac
+                ::nuvlabox-spec/state nil
+                ::nuvlabox-spec/record nil))))
 
 
 (reg-event-db
@@ -19,6 +23,15 @@
       ::nuvlabox-spec/loading? false
       ::nuvlabox-spec/state state
       ::nuvlabox-spec/record record)))
+
+
+(reg-event-db
+  ::clear-detail
+  (fn [db _]
+    (assoc db
+      ::nuvlabox-spec/loading? false
+      ::nuvlabox-spec/state nil
+      ::nuvlabox-spec/record nil)))
 
 
 (reg-event-fx

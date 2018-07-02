@@ -9,10 +9,12 @@
 (def default-params {:$first 1, :$last 20})
 
 
-(def stale-nb-machines (assoc default-params :$filter "nextCheck < 'now'"))
+(def stale-nb-machines (assoc default-params :$filter "nextCheck < 'now'"
+                                             :$select "nuvlabox"))
 
 
-(def active-nb-machines (assoc default-params :$filter "nextCheck >= 'now'"))
+(def active-nb-machines (assoc default-params :$filter "nextCheck >= 'now'"
+                                              :$select "nuvlabox"))
 
 
 (defn nuvlabox-search

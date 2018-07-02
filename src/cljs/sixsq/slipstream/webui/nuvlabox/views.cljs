@@ -3,7 +3,6 @@
     [cljs.pprint :refer [cl-format pprint]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as reagent]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
@@ -13,74 +12,37 @@
     [sixsq.slipstream.webui.nuvlabox.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox.subs :as nuvlabox-subs]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.component :as cutil]))
 
 
-(defn refresh-button
+(defn health-summary
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::nuvlabox-subs/loading?])]
+  (let [health-info (subscribe [::nuvlabox-subs/health-info])]
     (fn []
-      [ui/MenuItem {:name     "refresh"
-                    :on-click #(dispatch [::nuvlabox-events/fetch-state-info])}
-       [ui/Icon {:name    "refresh"
-                 :loading @loading?}]
-       (@tr [:refresh])])))
-
-
-(defn id-as-link
-  [id]
-  (let [mac (-> id (str/split #"/") second)
-        on-click #(dispatch [::history-events/navigate (str "nuvlabox/" mac)])]
-    [:a {:style {:cursor "pointer"} :on-click on-click} id]))
-
-
-(defn nuvlabox-summary-table
-  [{:keys [nuvlaboxStates] :as nb-info}]
-  (let [rows (doall
-               (for [{:keys [id updated nextCheck]} nuvlaboxStates]
-                 ^{:key id}
-                 [:tr
-                  [:td (id-as-link id)]
-                  [:td updated]
-                  [:td nextCheck]]))]
-    [:table (vec (concat [:tbody] rows))]))
-
-
-(defn state-summary
-  []
-  (let [state-info (subscribe [::nuvlabox-subs/state-info])]
-    (fn []
-      (let [{:keys [stale active]} @state-info
-            stale-count (:count stale)
-            active-count (:count active)]
-        [ui/Container {:fluid true}
-         [cc/collapsible-card
-          (str "stale nuvlabox machines (" stale-count ")")
-          [nuvlabox-summary-table stale]]
-         [cc/collapsible-card
-          (str "active nuvlabox machines (" active-count ")")
-          [nuvlabox-summary-table active]]]))))
+      (let [{:keys [stale-count active-count]} @health-info]
+        [ui/Segment
+         [ui/Statistic {:size "tiny"}
+          [ui/StatisticValue stale-count]
+          [ui/StatisticLabel "stale"]]
+         [ui/Statistic {:size "tiny"}
+          [ui/StatisticValue active-count]
+          [ui/StatisticLabel "active"]]]))))
 
 
 (defn search-header []
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::nuvlabox-subs/filter-visible?])
         query-params (subscribe [::nuvlabox-subs/query-params])
-        selected-id (subscribe [::nuvlabox-subs/collection-name])
         state-selector (subscribe [::nuvlabox-subs/state-selector])]
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$last $select]} @query-params]
-        [ui/Form {:on-key-press #(when
-                                   (and
-                                     (= (.-charCode %) 13)  ; enter charcode = 13
-                                     (some? @selected-id))
+        [ui/Form {:on-key-press #(when (= (.-charCode %) 13)
                                    ; blur active element in form to get last value in query-params
                                    (-> js/document .-activeElement .blur)
+                                   (dispatch [::nuvlabox-events/fetch-health-info])
                                    (dispatch [::nuvlabox-events/get-results]))}
 
          (when @filter-visible?
@@ -108,72 +70,22 @@
                            {:value "activated", :text "activated state"}
                            {:value "quarantined", :text "quarantined state"}]
                :on-change (cutil/callback :value
-                                          #(dispatch [::nuvlabox-events/set-state-selector %]))}]]])]))))
-
-
-(defn format-field-item [selections-atom item]
-  [ui/ListItem
-   [ui/ListContent
-    [ui/ListHeader
-     [ui/Checkbox {:default-checked (contains? @selections-atom item)
-                   :label           item
-                   :on-change       identity #_(cutil/callback :checked
-                                                               (fn [checked]
-                                                                 (if checked
-                                                                   (swap! selections-atom set/union #{item})
-                                                                   (swap! selections-atom set/difference #{item}))))}]]]])
-
-
-(defn format-field-list [available-fields-atom selections-atom]
-  (let [items (sort @available-fields-atom)]
-    (vec (concat [ui/ListSA]
-                 (map (partial format-field-item selections-atom) items)))))
-
-
-(defn select-fields []
-  (let [tr (subscribe [::i18n-subs/tr])
-        available-fields (subscribe [::nuvlabox-subs/available-fields])
-        selected-fields (subscribe [::nuvlabox-subs/selected-fields])
-        selected-id (subscribe [::nuvlabox-subs/collection-name])
-        selections (reagent/atom (set @selected-fields))
-        show? (reagent/atom false)]
-    (fn []
-      [ui/MenuItem {:name     "select-fields"
-                    :disabled (nil? @selected-id)
-                    :on-click (fn []
-                                (reset! selections (set @selected-fields))
-                                (reset! show? true))}
-       [ui/Icon {:name "columns"}]
-       (@tr [:columns])
-       [ui/Modal
-        {:closeIcon true
-         :open      @show?
-         :on-close  #(reset! show? false)}
-        [ui/ModalHeader (@tr [:fields])]
-        [ui/ModalContent
-         {:scrolling true}
-         (format-field-list available-fields selections)]
-        [ui/ModalActions
-         [ui/Button
-          {:on-click #(reset! show? false)}
-          (@tr [:cancel])]
-         [ui/Button
-          {:primary  true
-           :on-click (fn []
-                       (reset! show? false)
-                       (dispatch [::nuvlabox-events/set-selected-fields @selections]))}
-          (@tr [:update])]]]])))
+                                          (fn [value]
+                                            (dispatch [::nuvlabox-events/set-state-selector value])
+                                            (dispatch [::nuvlabox-events/fetch-health-info])
+                                            (dispatch [::nuvlabox-events/get-results])))}]]])]))))
 
 
 (defn search-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::nuvlabox-subs/loading?])
-        selected-id (subscribe [::nuvlabox-subs/collection-name])]
+        loading? (subscribe [::nuvlabox-subs/loading?])]
     (fn []
       [ui/MenuItem {:name     "search"
-                    :disabled (nil? @selected-id)
-                    :on-click #(dispatch [::nuvlabox-events/get-results])}
+                    :disabled false #_(nil? @selected-id)
+                    :on-click (fn []
+                                (dispatch [::nuvlabox-events/fetch-health-info])
+                                (dispatch [::nuvlabox-events/get-results]))}
        (if @loading?
          [ui/Icon {:name    "refresh"
                    :loading @loading?}]
@@ -210,15 +122,62 @@
       [:div
        [ui/Menu {:attached   "top"
                  :borderless true}
-        [refresh-button]
         [search-button]
-        [select-fields]
         [filter-button]]
        [ui/Segment {:attached "bottom"}
         [search-header]]])))
 
 
-(defn state-info
+(defn format-nb-link
+  [id mac]
+  (let [uuid (second (str/split id #"/"))]
+    [:a {:on-click (fn []
+                     (dispatch [::nuvlabox-detail-events/clear-detail])
+                     (dispatch [::history-events/navigate (str "nuvlabox/" uuid)]))} mac]))
+
+
+(defn format-nb-header
+  []
+  [ui/TableHeader
+   [ui/TableRow
+    [ui/TableHeaderCell [ui/Icon {:name "heartbeat", :size "large"}]]
+    [ui/TableHeaderCell "mac"]
+    [ui/TableHeaderCell "state"]
+    [ui/TableHeaderCell "name"]]])
+
+
+(defn health-icon
+  [value]
+  (case value
+    true [ui/Icon {:name "check", :size :large}]
+    false [ui/Icon {:name "warning sign", :size :large}]
+    [ui/Icon {:name "ellipsis horizontal", :size :large}]))
+
+
+(defn format-nb-row
+  [healthy? {:keys [id macAddress state name] :as row}]
+  [ui/TableRow
+   [ui/TableCell {:collapsing true} (health-icon (get healthy? id))]
+   [ui/TableCell {:collapsing true} (format-nb-link id macAddress)]
+   [ui/TableCell {:collapsing true} state]
+   [ui/TableCell name]])
+
+
+(defn nb-table
+  []
+  (let [results (subscribe [::nuvlabox-subs/collection])
+        health-info (subscribe [::nuvlabox-subs/health-info])]
+    (fn []
+      (let [{:keys [healthy?]} @health-info
+            data (some->> @results
+                          :nuvlaboxRecords
+                          (map #(select-keys % #{:id :macAddress :state :name})))]
+        (vec (concat [ui/Table
+                      (format-nb-header)]
+                     (mapv (partial format-nb-row healthy?) data)))))))
+
+
+(defn nb-info
   []
   (let [path (subscribe [::main-subs/nav-path])]
     (fn []
@@ -226,14 +185,16 @@
             n (count @path)
             children (case n
                        1 [[menu-bar]
-                          [state-summary]]
+                          [health-summary]
+                          [nb-table]]
                        2 [[nuvlabox-detail/nb-detail]]
                        [[menu-bar]
-                        [state-summary]])]
+                        [health-summary]
+                        [nb-table]])]
         (dispatch [::nuvlabox-detail-events/set-mac mac])
         (vec (concat [:div] children))))))
 
 
 (defmethod panel/render :nuvlabox
   [path]
-  [state-info])
+  [nb-info])
