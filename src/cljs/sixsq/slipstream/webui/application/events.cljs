@@ -23,8 +23,7 @@
   (fn [{{:keys [::client-spec/client ::main-spec/nav-path] :as db} :db} _]
     (when client
       (let [path (some->> nav-path rest seq (str/join "/"))]
-
         {:db                         (assoc db ::spec/completed? false
                                                ::spec/module-id nil
                                                ::spec/module nil)
-         ::application-fx/get-module [client path]}))))
+         ::application-fx/get-module [client path #(dispatch [::set-module path %])]}))))

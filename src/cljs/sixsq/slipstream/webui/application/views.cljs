@@ -40,7 +40,7 @@
 
 (defn tuple-to-row [[v1 v2]]
   [ui/TableRow
-   [ui/TableCell {:description true} (str v1)]
+   [ui/TableCell {:collapsing true} (str v1)]
    [ui/TableCell (str v2)]])
 
 
@@ -142,7 +142,7 @@
 (defn parameter-table-row
   [[name description value]]
   [ui/TableRow
-   [ui/TableCell name]
+   [ui/TableCell {:collapsing true} name]
    [ui/TableCell description]
    [ui/TableCell value]])
 
@@ -152,10 +152,10 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [title-kw parameters]
       (when parameters
-        (let [rows (map (fn [[k {:keys [description value]}]] [(name k) description value]) parameters)]
+        (let [rows (mapv (juxt :parameter :description :value) parameters)]
           [cc/collapsible-card
            (@tr [title-kw])
-           [ui/Table
+           [ui/Table {:definition true}
             (vec (concat [ui/TableBody] (map parameter-table-row rows)))]])))))
 
 
@@ -219,14 +219,11 @@
 
 
 (defn render-parameter-mapping
-  [[parameter {:keys [value mapped]}]]
-  (let [parameter-name (name parameter)
-        label (cond-> parameter-name
-                      mapped (str " \u2192 ")
-                      (not mapped) (str " \uff1d ")
-                      value (str value)
-                      (not value) (str "empty"))]
-    ^{:key parameter-name}
+  [{:keys [parameter value mapped]}]
+  (let [label (str parameter
+                   (if mapped " \u2192 " " \uff1d ")
+                   (or value "empty"))]
+    ^{:key parameter}
     [ui/ListItem
      [ui/ListContent
       [ui/ListHeader label]]]))
@@ -236,24 +233,30 @@
   [parameter-mappings]
   (if (empty? parameter-mappings)
     [:span "none"]
-    (vec (concat [ui/ListSA] (mapv render-parameter-mapping (sort-by #(% first name) parameter-mappings))))))
+    (vec (concat [ui/ListSA] (mapv render-parameter-mapping (sort-by :parameter parameter-mappings))))))
 
 
 (defn render-node
-  [[node {:keys [multiplicity component parameterMappings] :as content}]]
+  [{:keys [node multiplicity component parameterMappings] :as content}]
   (let [label (name node)]
     [cc/collapsible-card
      [:span label]
-     [ui/Table
-      (vec (concat [ui/TableBody]
-                   [[:tr [:td "component"] [:td (format-component-link label (:href component))]]
-                    [:tr [:td "multiplicity"] [:td multiplicity]]
-                    [:tr [:td "parameterMappings"] [:td (render-parameter-mappings parameterMappings)]]]))]]))
+     [ui/Table {:definition true}
+      [ui/TableBody
+       [ui/TableRow
+        [ui/TableCell {:collapsing true}  "component"]
+        [ui/TableCell (format-component-link label (:href component))]]
+       [ui/TableRow
+        [ui/TableCell {:collapsing true}  "multiplicity"]
+        [ui/TableCell multiplicity]]
+       [ui/TableRow
+        [ui/TableCell {:collapsing true}  "parameterMappings"]
+        [ui/TableCell (render-parameter-mappings parameterMappings)]]]]]))
 
 
 (defn format-nodes
   [nodes]
-  (let [sorted-nodes (sort-by #(-> % first name) nodes)]
+  (let [sorted-nodes (sort-by :node nodes)]
     (vec (concat [ui/Segment] (mapv render-node sorted-nodes)))))
 
 
@@ -262,7 +265,7 @@
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable
-         (vec (concat [ui/Container [dimmer]]
+         (vec (concat [ui/Container {:text true} [dimmer]]
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]
