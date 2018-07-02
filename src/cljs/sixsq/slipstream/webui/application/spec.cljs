@@ -12,5 +12,5 @@
 (s/def ::db (s/keys :req [::completed? ::module-id ::module]))
 
 (def defaults {::completed? true
-               ::module-id nil
-               ::module nil})
+               ::module-id  nil
+               ::module     nil})
