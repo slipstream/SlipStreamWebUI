@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.main.spec :as main]
     [sixsq.slipstream.webui.messages.spec :as messages]
     [sixsq.slipstream.webui.metrics.spec :as metrics]
+    [sixsq.slipstream.webui.nuvlabox.spec :as nuvlabox]
     [sixsq.slipstream.webui.usage.spec :as usage]))
 
 
@@ -24,6 +25,7 @@
                      ::main/db
                      ::metrics/db
                      ::messages/db
+                     ::nuvlabox/db
                      ::usage/db))
 
 
@@ -38,4 +40,5 @@
          main/defaults
          metrics/defaults
          messages/defaults
+         nuvlabox/defaults
          usage/defaults))
