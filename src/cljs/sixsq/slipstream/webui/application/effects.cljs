@@ -5,14 +5,16 @@
     [cljs.core.async :refer [<!]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-fx]]
-    [sixsq.slipstream.client.api.cimi :as cimi]))
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [taoensso.timbre :as log]))
 
 
 (reg-fx
   ::get-module
-  (fn [[client path]]
+  (fn [[client path callback]]
     (go
-      (let [path-filter (str "path='" path "'")
+      (let [path (or path "")
+            path-filter (str "path='" path "'")
             children-filter (str "parentPath='" path "'")
 
             {:keys [type id] :as project-metadata} (if-not (str/blank? path)
@@ -32,4 +34,4 @@
 
             module-data (assoc module :children children)]
 
-        (dispatch [:sixsq.slipstream.webui.application.events/set-module path module-data])))))
+        (callback module-data)))))
