@@ -25,11 +25,18 @@
     "question circle"))
 
 
+(defn meta-category-icon
+  [category]
+  (if (= "PROJECT" category)
+    "folder open"
+    (category-icon category)))
+
+
 (defn format-module [{:keys [type name description] :as module}]
   (when module
     (let [on-click #(dispatch [::main-events/push-breadcrumb name])
           icon-name (category-icon type)]
-      [ui/ListItem
+      [ui/ListItem {:on-click on-click}
        [ui/ListIcon {:name           icon-name
                      :size           "large"
                      :vertical-align "middle"}]
@@ -80,7 +87,7 @@
                          :size    :tiny
                          :src     (:href logo)}])
             [ui/CardHeader
-             [ui/Icon {:name (category-icon type)}]
+             [ui/Icon {:name (meta-category-icon type)}]
              (cond-> name
                      (not (str/blank? path)) (str " (" path ")"))]
             (when description
@@ -135,7 +142,8 @@
         [cc/collapsible-card
          (@tr [:modules])
          (vec (concat [ui/ListSA {:divided true
-                                  :relaxed true}]
+                                  :relaxed true
+                                  :selection true}]
                       (map format-module module-children)))]))))
 
 
