@@ -50,11 +50,11 @@
                        (concat
                          (when @is-user? [[:dashboard "dashboard" "dashboard"]
                                           [:legacy-application "legacy-application" "sitemap"]
-                                          [:application "application" "sitemap"]
                                           [:deployment "deployment" "cloud"]
                                           [:usage "usage" "history"]])
                          (when @is-admin?
-                           [[:metrics "metrics" "bar chart"]
+                           [[:application "application" "sitemap"]
+                            [:metrics "metrics" "bar chart"]
                             [:nuvlabox "nuvlabox" "desktop"]])
                          [[:cimi "cimi" "code"]]))
                      :when (some? label-kw)]
