@@ -39,7 +39,8 @@
 (reg-event-db
   ::close-modal
   (fn [db _]
-    (assoc db ::authn-spec/open-modal nil)))
+    (assoc db ::authn-spec/open-modal nil
+              ::authn-spec/selected-method nil)))
 
 
 (reg-event-db

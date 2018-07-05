@@ -164,8 +164,6 @@
     (fn [method-groups]
       (let [default (ffirst method-groups)
             options (mapv authn-method-group-option method-groups)]
-        (log/error default)
-        #_(log/error (with-out-str (cljs.pprint/pprint method-groups)))
         (when (nil? @selection)
           (dispatch [::authn-events/set-selected-method default]))
         [ui/Dropdown {:fluid     true
@@ -176,6 +174,11 @@
                       :on-change (ui-callback/dropdown ::authn-events/set-selected-method)}]))))
 
 
+(defn debug-dump
+  [v]
+  (log/error (with-out-str (cljs.pprint/pprint v)))
+  v)
+
 (defn authn-form-container
   "Container that holds all of the authentication (login or sign up) forms.
    These will be placed into two columns. The first has the 'internal' login
@@ -185,13 +188,15 @@
         templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
         loading? (subscribe [::cimi-subs/collection-templates-loading? (keyword template-href)])
         tr (subscribe [::i18n-subs/tr])
-        error-message (subscribe [::authn-subs/error-message])]
+        error-message (subscribe [::authn-subs/error-message])
+        selected-method (subscribe [::authn-subs/selected-method])]
     (fn [collection-kw failed-kw group-fn method-form-fn]
       (let [method-groups (order-and-group (-> @templates :templates vals))
             internals (filter group-fn method-groups)
             externals (remove group-fn method-groups)
             all (vec (concat internals externals))
-            externals? (seq externals)]
+            externals? (seq externals)
+            method @selected-method]
 
         [ui/Segment {:basic true}
          (when @error-message
@@ -204,8 +209,12 @@
          (if @loading?
            [ui/Dimmer {:active true :inverted true} [ui/Loader (@tr [:loading])]]
            [ui/Segment {:basic externals? :textAlign "left"}
-            (vec (concat [:div [authn-method-dropdown all]]
-                         (map (fn [[k v]] [method-form-fn k v]) all)))])]))))
+            [authn-method-dropdown all]
+            (some->> all
+                     (filter #(-> % first (= method)))
+                     first
+                     debug-dump
+                     ((fn [[k v]] [method-form-fn k v])))])]))))
 
 
 (defn login-form-container
