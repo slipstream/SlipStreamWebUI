@@ -1,10 +1,9 @@
 (ns sixsq.slipstream.webui.utils.form-fields
   (:require
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.utils.component :as ui-utils]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.general :as utils]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (def nbsp "\u00a0")
@@ -36,8 +35,7 @@
      :default-value (or data "")
      :read-only     readOnly
      :fluid         true
-     :on-change     (ui-utils/callback :value
-                                       #(update-fn form-id param-name %))}]])
+     :on-change     (ui-callback/value #(update-fn form-id param-name %))}]])
 
 
 (defmethod form-field :hidden
@@ -59,8 +57,7 @@
      :default-value (or data "")
      :read-only     readOnly
      :fluid         true
-     :on-change     (ui-utils/callback :value
-                                       #(update-fn form-id param-name %))}]])
+     :on-change     (ui-callback/value #(update-fn form-id param-name %))}]])
 
 
 (defmethod form-field :int
@@ -74,8 +71,7 @@
      :default-value (or data "")
      :read-only     readOnly
      :fluid         true
-     :on-change     (ui-utils/callback :value
-                                       #(update-fn form-id param-name (utils/str->int %)))}]])
+     :on-change     (ui-callback/value #(update-fn form-id param-name (utils/str->int %)))}]])
 
 
 (defmethod form-field :boolean
@@ -86,8 +82,7 @@
    [ui/Checkbox
     {:default-value false
      :read-only     readOnly
-     :on-change     (ui-utils/callback :checked
-                                       #(update-fn form-id param-name %))}]])
+     :on-change     (ui-callback/checked #(update-fn form-id param-name %))}]])
 
 (defmethod form-field :href
   [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description] :as param}]]
@@ -100,8 +95,7 @@
      :default-value (or (:href data) "")
      :read-only     readOnly
      :fluid         true
-     :on-change     (ui-utils/callback :value
-                                       #(update-fn form-id param-name {:href %}))}]])
+     :on-change     (ui-callback/value #(update-fn form-id param-name {:href %}))}]])
 
 
 (defmethod form-field :enum
@@ -111,6 +105,5 @@
    [:label displayName nbsp (help-popup description)]
    [ui/FormSelect
     {:options   (vec (map (fn [v] {:value v, :text v}) enum))
-     :value data
-     :on-change (ui-utils/callback :value
-                                   #(update-fn form-id param-name %))}]])
+     :value     data
+     :on-change (ui-callback/value #(update-fn form-id param-name %))}]])

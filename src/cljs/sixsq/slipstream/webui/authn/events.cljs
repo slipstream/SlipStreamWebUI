@@ -4,9 +4,7 @@
     [sixsq.slipstream.webui.authn.spec :as authn-spec]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.history.effects :as history-fx]
-    [sixsq.slipstream.webui.i18n.utils :as utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.history.effects :as history-fx]))
 
 
 (reg-event-fx
@@ -42,6 +40,12 @@
   ::close-modal
   (fn [db _]
     (assoc db ::authn-spec/open-modal nil)))
+
+
+(reg-event-db
+  ::set-selected-method
+  (fn [db [_ selected-method]]
+    (assoc db ::authn-spec/selected-method selected-method)))
 
 
 (reg-event-db

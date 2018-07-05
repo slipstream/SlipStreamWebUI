@@ -14,7 +14,7 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.component :as cutil]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn health-summary
@@ -56,8 +56,8 @@
                         :min          0
                         :label        (@tr [:last])
                         :defaultValue $last
-                        :on-blur      #(dispatch
-                                         [::nuvlabox-events/set-last (-> %1 .-target .-value)])}]]
+                        :on-blur      (ui-callback/input-callback
+                                        #(dispatch [::nuvlabox-events/set-last %]))}]]
 
             [ui/FormField
              ^{:key (str "state:" @state-selector)}
@@ -69,11 +69,10 @@
                            {:value "new", :text "new state"}
                            {:value "activated", :text "activated state"}
                            {:value "quarantined", :text "quarantined state"}]
-               :on-change (cutil/callback :value
-                                          (fn [value]
-                                            (dispatch [::nuvlabox-events/set-state-selector value])
-                                            (dispatch [::nuvlabox-events/fetch-health-info])
-                                            (dispatch [::nuvlabox-events/get-results])))}]]])]))))
+               :on-change (ui-callback/value (fn [value]
+                                               (dispatch [::nuvlabox-events/set-state-selector value])
+                                               (dispatch [::nuvlabox-events/fetch-health-info])
+                                               (dispatch [::nuvlabox-events/get-results])))}]]])]))))
 
 
 (defn search-button

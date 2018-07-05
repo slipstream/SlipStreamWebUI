@@ -12,7 +12,9 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [reagent.core :as reagent]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn method-comparator
@@ -133,9 +135,10 @@
                             :button        true
                             :class-name    "icon"
                             :close-on-blur true
-                            :onChange      #(let [id (-> (js->clj %2 :keywordize-keys true) :value)
-                                                  selected-method (select-method-by-id id methods)]
-                                              (reset! selected-method-group selected-method))
+                            :onChange      (ui-callback/value (fn [id]
+                                                                (let [selected-method (select-method-by-id id methods)]
+                                                                  (reset! selected-method-group selected-method))))
+
                             :style         {:text-align "center"}}]]])]))))))
 
 
@@ -147,6 +150,30 @@
 (defn signup-method-form
   [method-type methods]
   [authn-method-form method-type methods :users "signup_"])
+
+
+(defn authn-method-group-option
+  [[group _]]
+  (log/error group)
+  {:text group, :value group})
+
+
+(defn authn-method-dropdown
+  [method-groups]
+  (let [selection (subscribe [::authn-subs/selected-method])]
+    (fn [method-groups]
+      (let [default (ffirst method-groups)
+            options (mapv authn-method-group-option method-groups)]
+        (log/error default)
+        #_(log/error (with-out-str (cljs.pprint/pprint method-groups)))
+        (when (nil? @selection)
+          (dispatch [::authn-events/set-selected-method default]))
+        [ui/Dropdown {:fluid     true
+                      :selection true
+                      :loading   (nil? @selection)
+                      :value     @selection
+                      :options   options
+                      :on-change (ui-callback/dropdown ::authn-events/set-selected-method)}]))))
 
 
 (defn authn-form-container
@@ -163,7 +190,8 @@
       (let [method-groups (order-and-group (-> @templates :templates vals))
             internals (filter group-fn method-groups)
             externals (remove group-fn method-groups)
-            externals? (empty? externals)]
+            all (vec (concat internals externals))
+            externals? (seq externals)]
 
         [ui/Segment {:basic true}
          (when @error-message
@@ -175,19 +203,9 @@
 
          (if @loading?
            [ui/Dimmer {:active true :inverted true} [ui/Loader (@tr [:loading])]]
-           [ui/Grid {:columns 2 :textAlign "center" :stackable true}
-
-            [ui/GridColumn {:stretched true}
-             [ui/Segment {:basic externals? :textAlign "left"}
-              (vec (concat [:div]
-                           (map (fn [[k v]] [method-form-fn k v]) internals)))]]
-
-            (when-not externals?
-              [ui/GridColumn {:stretched true}
-               [ui/Segment {:textAlign "left"}
-                [:div
-                 (vec (concat [:div]
-                              (map (fn [[k v]] [method-form-fn k v]) externals)))]]])])]))))
+           [ui/Segment {:basic externals? :textAlign "left"}
+            (vec (concat [:div [authn-method-dropdown all]]
+                         (map (fn [[k v]] [method-form-fn k v]) all)))])]))))
 
 
 (defn login-form-container
@@ -208,6 +226,7 @@
     (fn [id label form-fn]
       [ui/Modal
        {:id        id
+        :size      :tiny
         :open      (= @open-modal label)
         :closeIcon true
         :on-close  #(dispatch [::authn-events/close-modal])}
@@ -232,7 +251,7 @@
         user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
     (fn []
       [:div
-       [ui/ButtonGroup {:primary true :size "tiny"}
+       [ui/ButtonGroup {:primary true, :size "tiny"}
         [ui/Button {:on-click #(dispatch [::authn-events/open-modal :login])}
          [ui/Icon {:name "sign in"}] (@tr [:login])]
         [ui/Dropdown {:inline    true
@@ -298,3 +317,8 @@
 (defn ^:export open-authn-modal []
   (log/debug "dispatch open-modal for authn view")
   (dispatch [::authn-events/open-modal :login]))
+
+
+(defn ^:export open-sign-up-modal []
+  (log/debug "dispatch open-modal for authn view")
+  (dispatch [::authn-events/open-modal :signup]))

@@ -15,7 +15,7 @@
 
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
 
-    [sixsq.slipstream.webui.utils.component :as comp]
+    [sixsq.slipstream.webui.utils.ui-callback :as comp]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
 
     [sixsq.slipstream.webui.utils.forms :as form-utils]
@@ -125,8 +125,7 @@
                                                              (reset! editor-mode? (not active-v))
                                                              (catch js/Object e
                                                                (reset! json-error? true)
-                                                               (reset! editor-mode? true)))
-                                                           ))}]
+                                                               (reset! editor-mode? true)))))}]
            (when @json-error?
              [ui/MenuItem [ui/Label "Invalid JSON!!!"]])]
           [ui/Segment {:attached "bottom"}
