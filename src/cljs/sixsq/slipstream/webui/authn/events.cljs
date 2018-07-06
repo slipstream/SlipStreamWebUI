@@ -43,6 +43,7 @@
               ::authn-spec/selected-method nil)))
 
 
+
 (reg-event-db
   ::set-selected-method
   (fn [db [_ selected-method]]

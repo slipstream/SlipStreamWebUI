@@ -17,6 +17,8 @@
 
 (s/def ::server-redirect-uri string?)
 
+(s/def ::form-id (s/nilable string?))
+
 (s/def ::db (s/keys :req [::open-modal
                           ::selected-method
                           ::session

@@ -13,7 +13,6 @@
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [taoensso.timbre :as log]
-    [reagent.core :as reagent]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
@@ -70,8 +69,14 @@
        (sort-by (fn [[_ {:keys [order]}]] order))))
 
 
-(defn keep-param-mandatory-not-readonly? [[k {:keys [mandatory readOnly]}]]
-  (and mandatory (not readOnly)))
+(defn keep-visible-params
+  "Keeps the form parameters that should be shown to the user. It removes all
+   readOnly parameters along with :name and :description."
+  [[k {:keys [readOnly]}]]
+  (and (not= :name k)
+       (not= :description k)
+       (not= :group k)
+       (not readOnly)))
 
 
 (defn select-method-by-id
@@ -105,56 +110,68 @@
 (defn authn-method-form
   "Renders the form for a particular authentication (login or sign up) method.
    The fields are taken from the method description."
-  [method-type methods collections-kw id-prefix]
-  (let [cep (subscribe [::cimi-subs/cloud-entry-point])
-        selected-method-group (r/atom (when (= 1 (count methods)) (first methods)))
-        server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])]
-    (fn [method-type methods collections-kw id-prefix]
-      (let [dropdown? (> (count methods) 1)
-            {:keys [id label] :as method} @selected-method-group
+  [method-type methods collections-kw button-label]
+  (let [tr (subscribe [::i18n-subs/tr])
+        cep (subscribe [::cimi-subs/cloud-entry-point])
+        server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])
+        selected-group-id (r/atom nil)]
+    (fn [method-type methods collections-kw button-label-kw]
+      (let [id-prefix (str (name button-label-kw) "_")
+            default-group-id (:id (when (= 1 (count methods)) (first methods)))
+            dropdown? (> (count methods) 1)
+            {:keys [id label] :as method} (first methods)
             {:keys [baseURI collection-href]} @cep
             id (or id method-type)
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
-            inputs-method (conj (->> method ordered-params (filter keep-param-mandatory-not-readonly?))
+            inputs-method (conj (->> method ordered-params (filter keep-visible-params))
                                 ["href" {:displayName "href" :data id :type "hidden"}]
                                 ["redirectURI" {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])]
+
+        (when (nil? @selected-group-id)
+          (reset! selected-group-id default-group-id))
+
         (log/infof "creating authentication form: %s %s" (name collections-kw) id)
         (vec (concat [ui/Form {:id     (str id-prefix id)
                                :action post-uri
                                :method "post"}]
-                     (map form-component inputs-method)
-                     [(if-not dropdown?
-                        [ui/FormButton {:primary true :fluid true} label]
-                        [ui/FormField
-                         [ui/ButtonGroup {:primary true, :fluid true}
-                          [ui/Button {:disabled (not @selected-method-group)} method-type]
-                          [ui/Dropdown
-                           {:options       (map #(identity {:key   (:id %)
-                                                            :text  (:label %)
-                                                            :value (:id %)}) methods)
-                            :button        true
-                            :class-name    "icon"
-                            :close-on-blur true
-                            :onChange      (ui-callback/value (fn [id]
-                                                                (let [selected-method (select-method-by-id id methods)]
-                                                                  (reset! selected-method-group selected-method))))
 
-                            :style         {:text-align "center"}}]]])]))))))
+                     [[ui/Divider]]
+
+                     [(vec (concat [ui/Segment {:style   {:min-height "35ex"
+                                                          :max-height "35ex"}}]
+                                   (when dropdown?
+                                     (let [options (map #(identity {:key   (:id %)
+                                                                    :text  (:label %)
+                                                                    :value (:id %)}) methods)]
+                                       [[ui/FormDropdown
+                                         {:options       options
+                                          :value         @selected-group-id
+                                          :fluid         true
+                                          :selection     true
+
+                                          :close-on-blur true
+                                          :on-change     (ui-callback/value (fn [id] (reset! selected-group-id id)))}]]))
+
+                                   (mapv form-component inputs-method)))]
+
+                     [[ui/FormButton {:primary  true
+                                      :fluid    true
+                                      :disabled (not @selected-group-id)}
+                       (@tr [button-label-kw])]]))))))
 
 
 (defn login-method-form
   [method-type methods]
-  [authn-method-form method-type methods :sessions "login_"])
+  [authn-method-form method-type methods :sessions :login])
 
 
 (defn signup-method-form
   [method-type methods]
-  [authn-method-form method-type methods :users "signup_"])
+  [authn-method-form method-type methods :users :signup])
 
 
 (defn authn-method-group-option
   [[group _]]
-  (log/error group)
   {:text group, :value group})
 
 
@@ -174,23 +191,34 @@
                       :on-change (ui-callback/dropdown ::authn-events/set-selected-method)}]))))
 
 
-(defn debug-dump
-  [v]
-  (log/error (with-out-str (cljs.pprint/pprint v)))
-  v)
+(defn login-footer-fn
+  []
+  (let [switch-panel (fn []
+                       (dispatch [::authn-events/close-modal])
+                       (dispatch [::authn-events/open-modal :signup]))]
+    [:p "No account? " [:a {:on-click switch-panel} "Sign up."]]))
+
+
+(defn signup-footer-fn
+  []
+  (let [switch-panel (fn []
+                       (dispatch [::authn-events/close-modal])
+                       (dispatch [::authn-events/open-modal :login]))]
+    [:p "Already registered? " [:a {:on-click switch-panel} "Login."]]))
+
 
 (defn authn-form-container
   "Container that holds all of the authentication (login or sign up) forms.
    These will be placed into two columns. The first has the 'internal' login
    forms and the second contains all of the rest."
-  [collection-kw failed-kw group-fn method-form-fn]
+  [collection-kw failed-kw group-fn method-form-fn footer-fn]
   (let [template-href (cimi-utils/template-href collection-kw)
         templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
         loading? (subscribe [::cimi-subs/collection-templates-loading? (keyword template-href)])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])
         selected-method (subscribe [::authn-subs/selected-method])]
-    (fn [collection-kw failed-kw group-fn method-form-fn]
+    (fn [collection-kw failed-kw group-fn method-form-fn footer-fn]
       (let [method-groups (order-and-group (-> @templates :templates vals))
             internals (filter group-fn method-groups)
             externals (remove group-fn method-groups)
@@ -213,18 +241,18 @@
             (some->> all
                      (filter #(-> % first (= method)))
                      first
-                     debug-dump
-                     ((fn [[k v]] [method-form-fn k v])))])]))))
+                     ((fn [[k v]] [method-form-fn k v])))
+            [footer-fn]])]))))
 
 
 (defn login-form-container
   []
-  [authn-form-container :session :login-failed internal-or-api-key login-method-form])
+  [authn-form-container :session :login-failed internal-or-api-key login-method-form login-footer-fn])
 
 
 (defn signup-form-container
   []
-  [authn-form-container :user :signup-failed self-registration signup-method-form])
+  [authn-form-container :user :signup-failed self-registration signup-method-form signup-footer-fn])
 
 
 (defn authn-modal
@@ -240,8 +268,12 @@
         :closeIcon true
         :on-close  #(dispatch [::authn-events/close-modal])}
        [ui/ModalHeader (@tr [label])]
-       [ui/ModalContent {:scrolling true}
-        [form-fn]]])))
+       [ui/ModalContent
+        [form-fn]]
+       [ui/ModalActions
+        [:span #_{:style {:float :left}} "No account? " [:a {:on-click (constantly nil)} "Login."]]
+        #_[ui/Button {:floated :left} "Do something..."]
+        [ui/Button {:positive true} (@tr [label])]]])))
 
 
 (defn modal-login []
