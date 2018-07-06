@@ -68,8 +68,15 @@
        (sort-by (fn [[_ {:keys [order]}]] order))))
 
 
-(defn keep-param-mandatory-not-readonly? [[k {:keys [mandatory readOnly]}]]
-  (and mandatory (not readOnly)))
+(defn keep-visible-params
+  "Keeps the form parameters that should be shown to the user. It removes all
+   readOnly parameters along with :name and :description."
+  [[k {:keys [readOnly]}]]
+  (and (not= :name k)
+       (not= :description k)
+       (not= :group k)
+       (not readOnly)))
+
 
 
 (defn select-method-by-id
@@ -113,7 +120,7 @@
             {:keys [baseURI collection-href]} @cep
             id (or id method-type)
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
-            inputs-method (conj (->> method ordered-params (filter keep-param-mandatory-not-readonly?))
+            inputs-method (conj (->> method ordered-params (filter keep-visible-params))
                                 ["href" {:displayName "href" :data id :type "hidden"}]
                                 ["redirectURI" {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])]
         (log/infof "creating authentication form: %s %s" (name collections-kw) id)
