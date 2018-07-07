@@ -12,8 +12,8 @@
 
 
 (reg-sub
-  ::selected-method
-  ::authn-spec/selected-method)
+  ::selected-method-group
+  ::authn-spec/selected-method-group)
 
 
 (reg-sub
@@ -55,3 +55,8 @@
 (reg-sub
   ::server-redirect-uri
   ::authn-spec/server-redirect-uri)
+
+
+(reg-sub
+  ::form-id
+  ::authn-spec/form-id)

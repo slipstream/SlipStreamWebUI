@@ -40,14 +40,14 @@
   ::close-modal
   (fn [db _]
     (assoc db ::authn-spec/open-modal nil
-              ::authn-spec/selected-method nil)))
+              ::authn-spec/selected-method-group nil)))
 
 
 
 (reg-event-db
-  ::set-selected-method
+  ::set-selected-method-group
   (fn [db [_ selected-method]]
-    (assoc db ::authn-spec/selected-method selected-method)))
+    (assoc db ::authn-spec/selected-method-group selected-method)))
 
 
 (reg-event-db
@@ -72,3 +72,9 @@
   ::server-redirect-uri
   (fn [db [_ uri]]
     (assoc db ::authn-spec/server-redirect-uri uri)))
+
+
+(reg-event-db
+  ::set-form-id
+  (fn [db [_ form-id]]
+    (assoc db ::authn-spec/form-id form-id)))
