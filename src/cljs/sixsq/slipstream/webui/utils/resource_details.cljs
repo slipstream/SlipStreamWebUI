@@ -15,12 +15,12 @@
 
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
 
-    [sixsq.slipstream.webui.utils.ui-callback :as comp]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
-
     [sixsq.slipstream.webui.utils.forms :as form-utils]
+
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.ui-callback :as comp]
     [sixsq.slipstream.webui.utils.values :as values]))
 
 
