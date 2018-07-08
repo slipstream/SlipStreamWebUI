@@ -3,10 +3,9 @@
     [re-frame.core :refer [subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.utils.component :as ui-utils]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn hidden?
@@ -56,8 +55,7 @@
      :value     @selected-id-atom
      :label     "resource template"
      :options   (descriptions->options descriptions)
-     :on-change (ui-utils/callback :value
-                                   (fn [value]
+     :on-change (ui-callback/value (fn [value]
                                      (reset! selected-id-atom value)
                                      (update-form-data-fn value nil nil)))}]])
 

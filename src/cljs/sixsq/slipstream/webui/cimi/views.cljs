@@ -19,11 +19,11 @@
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.component :as cutil]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn id-selector-formatter [entry]
@@ -174,7 +174,7 @@
           :placeholder (@tr [:resource-type])
           :scrolling   true
           :options     options
-          :on-change   (cutil/callback :value callback)}]))))
+          :on-change   (ui-callback/value callback)}]))))
 
 
 (defn search-header []
@@ -206,7 +206,7 @@
                         :min          0
                         :label        (@tr [:first])
                         :defaultValue $first
-                        :on-blur      #(dispatch [::cimi-events/set-first (-> %1 .-target .-value)])}]]
+                        :on-blur      (ui-callback/input ::cimi-events/set-first)}]]
 
             [ui/FormField
              ^{:key (str "last:" $last)}
@@ -214,8 +214,7 @@
                         :min          0
                         :label        (@tr [:last])
                         :defaultValue $last
-                        :on-blur      #(dispatch
-                                         [::cimi-events/set-last (-> %1 .-target .-value)])}]]
+                        :on-blur      (ui-callback/input ::cimi-events/set-last)}]]
 
             [ui/FormField
              ^{:key (str "select:" $select)}
@@ -223,8 +222,7 @@
                         :label        (@tr [:select])
                         :defaultValue $select
                         :placeholder  "e.g. id, endpoint, ..."
-                        :on-blur      #(dispatch
-                                         [::cimi-events/set-select (-> %1 .-target .-value)])}]]])
+                        :on-blur      (ui-callback/input ::cimi-events/set-select)}]]])
 
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
@@ -234,8 +232,7 @@
                         :label        (@tr [:order])
                         :defaultValue $orderby
                         :placeholder  "e.g. created:desc, ..."
-                        :on-blur      #(dispatch
-                                         [::cimi-events/set-orderby (-> %1 .-target .-value)])}]]
+                        :on-blur      (ui-callback/input ::cimi-events/set-orderby)}]]
 
             [ui/FormField
              ^{:key (str "aggregation:" $aggregation)}
@@ -243,7 +240,7 @@
                         :label        (@tr [:aggregation])
                         :defaultValue $aggregation
                         :placeholder  "e.g. min:resource:vcpu, ..."
-                        :on-blur      #(dispatch [::cimi-events/set-aggregation (-> %1 .-target .-value)])}]]])
+                        :on-blur      (ui-callback/input ::cimi-events/set-aggregation)}]]])
 
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
@@ -254,8 +251,7 @@
                :label        (@tr [:filter])
                :defaultValue $filter
                :placeholder  "e.g. connector/href^='exoscale-' and resource:type='VM' and resource:ram>=8096"
-               :on-blur      #(dispatch [::cimi-events/set-filter (-> %1 .-target .-value)])}]]])
-         ]))))
+               :on-blur      (ui-callback/input ::cimi-events/set-filter)}]]])]))))
 
 
 (defn format-field-item [selections-atom item]
@@ -264,11 +260,10 @@
     [ui/ListHeader
      [ui/Checkbox {:default-checked (contains? @selections-atom item)
                    :label           item
-                   :on-change       (cutil/callback :checked
-                                                    (fn [checked]
-                                                      (if checked
-                                                        (swap! selections-atom set/union #{item})
-                                                        (swap! selections-atom set/difference #{item}))))}]]]])
+                   :on-change       (ui-callback/checked (fn [checked]
+                                                           (if checked
+                                                             (swap! selections-atom set/union #{item})
+                                                             (swap! selections-atom set/difference #{item}))))}]]]])
 
 
 (defn format-field-list [available-fields-atom selections-atom]

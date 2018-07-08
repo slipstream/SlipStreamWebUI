@@ -19,8 +19,8 @@
     [sixsq.slipstream.webui.panel :as panel]
 
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.component :as ui-utils]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn bool->int [bool]
@@ -43,9 +43,8 @@
                       :label        (@tr [:offset])
                       :defaultValue offset
                       :placeholder  "e.g. 0"
-                      :on-blur      #(dispatch
-                                       [::deployment-events/set-query-params {:offset (-> %1 .-target .-value)}])
-                      }]]
+                      :on-blur      (ui-callback/input-callback
+                                      #(dispatch [::deployment-events/set-query-params {:offset %}]))}]]
 
           [ui/FormField
            ^{:key (str "limit:" limit)}
@@ -54,8 +53,8 @@
                       :label        (@tr [:limit])
                       :defaultValue limit
                       :placeholder  "e.g. 20"
-                      :on-blur      #(dispatch
-                                       [::deployment-events/set-query-params {:limit (-> %1 .-target .-value)}])}]]]
+                      :on-blur      (ui-callback/input-callback
+                                      #(dispatch [::deployment-events/set-query-params {:limit %}]))}]]]
 
          [ui/FormGroup
           [ui/FormField
@@ -64,18 +63,17 @@
                       :label        (@tr [:cloud])
                       :defaultValue cloud
                       :placeholder  "e.g. exoscale-ch-dk"
-                      :on-blur      #(dispatch
-                                       [::deployment-events/set-query-params {:cloud (-> %1 .-target .-value)}])}]]
+                      :on-blur      (ui-callback/input-callback
+                                      #(dispatch [::deployment-events/set-query-params {:cloud %}]))}]]
           [ui/FormField
            ^{:key (str "activeOnly:" activeOnly)}
            [ui/Checkbox {:defaultChecked (-> activeOnly js/parseInt zero? not)
                          :slider         true
                          :fitted         true
                          :label          (@tr [:active?])
-                         :on-change      (ui-utils/callback
-                                           :checked #(dispatch [::deployment-events/set-query-params
-                                                                {:activeOnly (bool->int %)}]))}]]]]
-        ))))
+                         :on-change      (ui-callback/checked
+                                           #(dispatch [::deployment-events/set-query-params
+                                                       {:activeOnly (bool->int %)}]))}]]]]))))
 
 
 (defn menu-bar

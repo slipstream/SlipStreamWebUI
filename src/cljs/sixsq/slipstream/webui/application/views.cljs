@@ -11,8 +11,8 @@
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.component :as cutil]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn category-icon
@@ -171,7 +171,7 @@
   [state]
   [ui/Dropdown {:inline        true
                 :default-value :deployment
-                :on-change     (cutil/callback :value #(reset! state %))
+                :on-change     (ui-callback/value #(reset! state %))
                 :options       [{:key "preinstall", :value "preinstall", :text "pre-install"}
                                 {:key "packages", :value "packages", :text "packages"}
                                 {:key "postinstall", :value "postinstall", :text "post-install"}
