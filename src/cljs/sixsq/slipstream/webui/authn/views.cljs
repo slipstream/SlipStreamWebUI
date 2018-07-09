@@ -12,8 +12,8 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [taoensso.timbre :as log]))
 
 
 (defn form-component
