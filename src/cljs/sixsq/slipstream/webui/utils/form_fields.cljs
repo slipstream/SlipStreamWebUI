@@ -25,7 +25,7 @@
 
 
 (defmethod form-field :default
-  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description] :as param}]]
+  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description autocomplete] :as param}]]
   ^{:key displayName}
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]
@@ -35,19 +35,21 @@
      :default-value (or data "")
      :read-only     readOnly
      :fluid         true
+     :autoComplete  (or autocomplete "off")
      :on-change     (ui-callback/value #(update-fn form-id param-name %))}]])
 
 
 (defmethod form-field :hidden
-  [_ _ [param-name {:keys [data]}]]
+  [_ _ [param-name {:keys [data autocomplete]}]]
   ^{:key param-name}
-  [:input {:name  param-name
-           :type  "hidden"
-           :value (or data "")}])
+  [:input {:name         param-name
+           :type         "hidden"
+           :autoComplete (or autocomplete "off")
+           :value        (or data "")}])
 
 
 (defmethod form-field :password
-  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description]}]]
+  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description autocomplete]}]]
   ^{:key displayName}
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]
@@ -57,11 +59,12 @@
      :default-value (or data "")
      :read-only     readOnly
      :fluid         true
+     :autoComplete  (or autocomplete "off")
      :on-change     (ui-callback/value #(update-fn form-id param-name %))}]])
 
 
 (defmethod form-field :int
-  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description]}]]
+  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description autocomplete]}]]
   ^{:key displayName}
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]
@@ -71,6 +74,7 @@
      :default-value (or data "")
      :read-only     readOnly
      :fluid         true
+     :autoComplete  (or autocomplete "off")
      :on-change     (ui-callback/value #(update-fn form-id param-name (utils/str->int %)))}]])
 
 
@@ -85,7 +89,7 @@
      :on-change     (ui-callback/checked #(update-fn form-id param-name %))}]])
 
 (defmethod form-field :href
-  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description] :as param}]]
+  [update-fn form-id [param-name {:keys [data displayName readOnly mandatory description autocomplete] :as param}]]
   ^{:key displayName}
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]
@@ -95,6 +99,7 @@
      :default-value (or (:href data) "")
      :read-only     readOnly
      :fluid         true
+     :autoComplete  (or autocomplete "off")
      :on-change     (ui-callback/value #(update-fn form-id param-name {:href %}))}]])
 
 
