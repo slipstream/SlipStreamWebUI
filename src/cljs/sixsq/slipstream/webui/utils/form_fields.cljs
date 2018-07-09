@@ -109,6 +109,6 @@
   [ui/FormField {:required mandatory}
    [:label displayName nbsp (help-popup description)]
    [ui/FormSelect
-    {:options   (vec (map (fn [v] {:value v, :text v}) enum))
+    {:options   (mapv (fn [v] {:value v, :text v}) enum)
      :value     data
      :on-change (ui-callback/value #(update-fn form-id param-name %))}]])

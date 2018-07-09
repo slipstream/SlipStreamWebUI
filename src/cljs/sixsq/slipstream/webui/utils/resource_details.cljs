@@ -96,7 +96,7 @@
         [hidden-params visible-params] (form-utils/ordered-params description-with-data)
         update-data-fn (partial update-data text)
         form-component-fn (partial ff/form-field update-data-fn nil)]
-    (vec (map form-component-fn (concat hidden-params visible-params)))))
+    (mapv form-component-fn (concat hidden-params visible-params))))
 
 
 (defn edit-button

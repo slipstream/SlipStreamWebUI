@@ -94,7 +94,7 @@
         messages (subscribe [::message-subs/messages])]
     (if (seq @messages)
       (vec (concat [ui/ItemGroup]
-                   (vec (map (fn [i msg] [message-item-card @locale i msg]) (range) @messages))))
+                   (mapv (fn [i msg] [message-item-card @locale i msg]) (range) @messages)))
       [ui/Header {:as "h1"} (@tr [:no-messages])])))
 
 

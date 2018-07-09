@@ -2,11 +2,9 @@
   (:require
     [cljs.pprint :refer [cl-format pprint]]
     [clojure.set :as set]
-
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi-detail.views :as cimi-detail-views]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
@@ -33,11 +31,12 @@
     [:a {:style {:cursor "pointer"} :on-click on-click} label]))
 
 
+;; FIXME: Provide better visualization of non-string values.
 (defn field-selector
   [field]
   (let [ks (map keyword (str/split field #"/"))]
     (fn [m]
-      (get-in m ks))))
+      (str (get-in m ks)))))
 
 
 (defn remove-column-fn
@@ -70,12 +69,12 @@
   (when entry
     (let [data (row-fn entry)]
       (vec (concat [ui/TableRow]
-                   (vec (map (fn [v] [ui/TableCell v]) data)))))))
+                   (mapv (fn [v] [ui/TableCell v]) data))))))
 
 
 (defn results-table-body [row-fn entries]
   (vec (concat [ui/TableBody]
-               (vec (map (partial results-table-row row-fn) entries)))))
+               (mapv (partial results-table-row row-fn) entries))))
 
 
 (defn results-table [selected-fields entries]
