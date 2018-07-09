@@ -20,7 +20,7 @@
   "Provides a single element of a form. This should provide a reasonable
    control for each defined type, but this initial implementation just provides
    either a text or password field."
-  [[param-name {:keys [data type displayName mandatory] :as param}]]
+  [[param-name {:keys [data type displayName mandatory autocomplete] :as param}]]
   (case type
     "hidden" [ui/FormField [:input {:name param-name :type "hidden" :value (or data "")}]]
     "password" [ui/FormInput {:name         param-name
@@ -28,13 +28,15 @@
                               :placeholder  displayName
                               :icon         "lock"
                               :iconPosition "left"
-                              :required     mandatory}]
+                              :required     mandatory
+                              :autoComplete (or autocomplete "off")}]
     [ui/FormInput {:name         param-name
                    :type         type
                    :placeholder  displayName
                    :icon         "user"
                    :iconPosition "left"
-                   :required     mandatory}]))
+                   :required     mandatory
+                   :autoComplete (or autocomplete "off")}]))
 
 
 (defn dropdown-method-option
