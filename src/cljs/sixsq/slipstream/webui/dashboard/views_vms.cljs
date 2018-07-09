@@ -75,13 +75,13 @@
 
           [ui/TableHeader
            (vec (concat [ui/TableRow]
-                        (vec (map (fn [label] ^{:key label} [ui/TableHeaderCell label]) headers))))]
+                        (mapv (fn [label] ^{:key label} [ui/TableHeaderCell label]) headers)))]
 
 
           (vec (concat [ui/TableBody]
-                       (vec (map (fn [{:keys [instance-id connector-href] :as vm}]
-                                   ^{:key (str connector-href "/" instance-id)}
-                                   [table-vm-row vm]) vms-data))))
+                       (mapv (fn [{:keys [instance-id connector-href] :as vm}]
+                               ^{:key (str connector-href "/" instance-id)}
+                               [table-vm-row vm]) vms-data)))
 
           [ui/TableFooter
            [ui/TableRow
@@ -94,5 +94,4 @@
                :totalPages   @total-pages
                :activePage   @page
                :onPageChange (fn [e d]
-                               (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))
-               }]]]]]]))))
+                               (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))}]]]]]]))))

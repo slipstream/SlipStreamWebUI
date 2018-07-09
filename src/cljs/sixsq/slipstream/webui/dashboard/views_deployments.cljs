@@ -195,13 +195,13 @@
 
           [ui/TableHeader
            (vec (concat [ui/TableRow]
-                        (vec (map (fn [i label] ^{:key (str i "_" label)}
-                        [ui/TableHeaderCell label]) (range) headers))))]
+                        (mapv (fn [i label] ^{:key (str i "_" label)}
+                        [ui/TableHeaderCell label]) (range) headers)))]
 
           (vec (concat [ui/TableBody]
-                       (vec (map (fn [deployment]
-                                   ^{:key (:deployment-uuid deployment)}
-                                   [table-deployment-row deployment]) deployments-data))))
+                       (mapv (fn [deployment]
+                               ^{:key (:deployment-uuid deployment)}
+                               [table-deployment-row deployment]) deployments-data)))
 
           [ui/TableFooter
            [ui/TableRow

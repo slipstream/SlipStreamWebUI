@@ -279,7 +279,7 @@
        (@tr [:reports])
        (vec
          (concat [:ul]
-                 (vec (map report-item (:externalObjects @reports)))))
+                 (mapv report-item (:externalObjects @reports))))
        [:p "Reports will be displayed as soon as available. No need to refresh."]])))
 
 

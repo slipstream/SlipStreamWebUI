@@ -40,11 +40,11 @@
   (let [[hidden-params visible-params] (ordered-params description)
         update-data-fn (partial update-data form-data-atom)
         form-component-fn (partial ff/form-field update-data-fn id)]
-    (vec (map form-component-fn (concat hidden-params visible-params)))))
+    (mapv form-component-fn (concat hidden-params visible-params))))
 
 
 (defn descriptions->options [descriptions]
-  (vec (map (fn [{:keys [id label]}] {:value id, :text (or label id)}) descriptions)))
+  (mapv (fn [{:keys [id label]}] {:value id, :text (or label id)}) descriptions))
 
 
 (defn template-selector
