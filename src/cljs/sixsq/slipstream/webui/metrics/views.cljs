@@ -21,7 +21,7 @@
         loading? (subscribe [::metrics-subs/loading?])
         loading-job-info? (subscribe [::metrics-subs/loading-job-info?])]
     (fn []
-      [ui/Menu
+      [ui/Menu {:borderless true}
        [ui/MenuItem {:name     "refresh"
                      :on-click (fn []
                                  (dispatch [::metrics-events/fetch-metrics])
@@ -168,7 +168,7 @@
 
 (defn request-statistics
   []
-  [cc/collapsible-card
+  [cc/collapsible-segment
    "request statistics"
    [ring-request-rates]
    [ring-response-rates]])
@@ -176,7 +176,7 @@
 
 (defn server-statistics
   []
-  [cc/collapsible-card
+  [cc/collapsible-segment
    "server statistics"
    [thread-plot]
    [memory-plot]])
@@ -184,7 +184,7 @@
 
 (defn job-statistics
   []
-  [cc/collapsible-card
+  [cc/collapsible-segment
    "job statistics"
    [job-numbers]
    [job-plot]])

@@ -31,6 +31,26 @@
           (vec (concat [ui/CardDescription] children)))]])))
 
 
+(defn collapsible-segment
+  [title & children]
+  (let [visible? (reagent/atom true)]
+    (fn [title & children]
+      [ui/Segment {:basic true}
+       [ui/Menu {:attached "top", :borderless true, :class "webui-section-header"}
+        [ui/MenuItem {:position "left"
+                      :header   true}
+         title]
+        [ui/MenuItem {:position "right"
+                      :on-click #(reset! visible? (not @visible?))}
+         [ui/Icon {:name (if @visible? "chevron down" "chevron up")}]]]
+       [ui/Transition {:visible       @visible?
+                       :animation     "fade"
+                       :duration      300
+                       :unmountOnHide true}
+        (vec (concat [ui/Segment {:fluid true, :attached true}]
+                     children))]])))
+
+
 (defn collapsible-card-extra
   [title & children]
   (let [visible? (reagent/atom true)]

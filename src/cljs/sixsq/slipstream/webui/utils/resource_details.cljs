@@ -250,7 +250,7 @@
 
 (defn format-group [description [group data]]
   ^{:key group}
-  [cc/collapsible-card
+  [cc/collapsible-segment
    (str group)
    [group-table-sui data description]])
 

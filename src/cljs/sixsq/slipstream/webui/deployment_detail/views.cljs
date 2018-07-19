@@ -24,7 +24,7 @@
 
 (defn section
   [title contents]
-  [cc/collapsible-card (str title) contents])
+  [cc/collapsible-segment (str title) contents])
 
 
 (def summary-keys #{:creation
@@ -100,7 +100,7 @@
                                 :style       {:max-width "100%"}}
                       (vec (concat [ui/TableBody]
                                    (map tuple-to-row summary-info)))]]
-        [cc/collapsible-card (@tr [:summary]) contents]))))
+        [cc/collapsible-segment (@tr [:summary]) contents]))))
 
 
 (defn terminate-summary
@@ -174,7 +174,7 @@
             parameter-group (get parameters-kv (or @selected-section "ss"))
             parameter-table (node-parameter-table parameter-group)
             contents (vec (concat [:div] [[parameters-dropdown selected-section]] [parameter-table]))]
-        [cc/collapsible-card (@tr [:parameters]) contents]))))
+        [cc/collapsible-segment (@tr [:parameters]) contents]))))
 
 
 (defn report-item
@@ -258,7 +258,7 @@
                 :event     [::deployment-detail-events/fetch-events]}])
     (fn []
       (let [events (-> @events-collection :events events-table-info)]
-        [cc/collapsible-card
+        [cc/collapsible-segment
          (@tr [:events])
          [events-table events]
          [gantt]]))))
@@ -275,7 +275,7 @@
                 :frequency 30000
                 :event     [::deployment-detail-events/fetch-reports]}])
     (fn []
-      [cc/collapsible-card
+      [cc/collapsible-segment
        (@tr [:reports])
        (vec
          (concat [:ul]
