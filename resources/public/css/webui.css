@@ -153,3 +153,7 @@
 .webui-success {
     background-color: lightgreen !important;
 }
+
+.webui-section-header {
+    background-color: Gainsboro !important;
+}

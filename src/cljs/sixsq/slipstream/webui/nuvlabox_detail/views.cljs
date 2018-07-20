@@ -90,14 +90,14 @@
 
 (defn load
   [cpu ram disks]
-  [cc/collapsible-card
+  [cc/collapsible-segment
    [:span [ui/Icon {:name "thermometer half"}] " load"]
    [load-plot {} {:cpu cpu :ram ram :disks disks}]])
 
 
 (defn usb-devices
   [usb]
-  [cc/collapsible-card
+  [cc/collapsible-segment
    [:span [ui/Icon {:name "usb"}] " usb devices"]
    [ui/Table
     [device-row-header]
@@ -117,7 +117,7 @@
                    (str "Next heartbeat is expected " (time/ago next-check-moment) " (" next-check ").")
                    (str "Next heartbeat was expected " (time/ago next-check-moment) " (" next-check ")."))]
 
-    [cc/collapsible-card
+    [cc/collapsible-segment
      [:span [ui/Icon {:name icon}] " heartbeat"]
      [:div
       [:div msg-last]
@@ -141,7 +141,7 @@
   (let [record (subscribe [::nuvlabox-subs/record])]
     (fn []
       (when @record
-        [cc/collapsible-card
+        [cc/collapsible-segment
          [:span [ui/Icon {:name "list"}] " details"]
          (details/format-resource-data @record {})]))))
 
