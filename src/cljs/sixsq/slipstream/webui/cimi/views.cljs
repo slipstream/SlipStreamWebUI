@@ -21,7 +21,8 @@
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.forms :as forms]))
 
 
 (defn id-selector-formatter [entry]
@@ -184,13 +185,9 @@
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
-        [ui/Form {:on-key-press #(when
-                                   (and
-                                     (= (.-charCode %) 13)  ; enter charcode = 13
-                                     (some? @selected-id))
-                                   ; blur active element in form to get last value in query-params
-                                   (-> js/document .-activeElement .blur)
-                                   (dispatch [::cimi-events/get-results]))}
+        [ui/Form {:on-key-press (partial forms/on-return-key
+                                         #(when @selected-id
+                                            (dispatch [::cimi-events/get-results])))}
          [ui/FormField
           [cloud-entry-point-title]
           [ui/Button {:circular true :compact true :size "tiny" :floated "right" :basic true :icon "info"
