@@ -8,6 +8,18 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
+(defn on-return-key
+  "Will execute the given no-arg function when the value of k is the
+   value for the return key (13). Before executing the function it will
+   blur the active element in the document, ignoring any errors."
+  [f k]
+  (when (and f (= (.-charCode k) 13))
+    (try
+      (some-> js/document .-activeElement .blur)
+      (catch js/Error _ nil))
+    (f)))
+
+
 (defn hidden?
   "Determines if the given parameter description describes a hidden field."
   [{:keys [type] :as param-desc}]

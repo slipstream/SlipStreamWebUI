@@ -2,39 +2,31 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as reagent]
-
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
-
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
-
     [sixsq.slipstream.webui.history.events :as history-events]
-
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-
     [sixsq.slipstream.webui.main.subs :as main-subs]
-
     [sixsq.slipstream.webui.panel :as panel]
-
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.forms :as forms]))
 
 
 (defn bool->int [bool]
   (if bool 1 0))
+
 
 (defn runs-control []
   (let [tr (subscribe [::i18n-subs/tr])
         query-params (subscribe [::deployment-subs/query-params])]
     (fn []
       (let [{:keys [offset limit cloud activeOnly]} @query-params]
-        [ui/Form {:on-key-press #(when (= (.-charCode %) 13)
-                                   ; blur active element in form to get last value in query-params
-                                   (-> js/document .-activeElement .blur)
-                                   (dispatch [::deployment-events/get-deployments]))}
+        [ui/Form {:on-key-press (partial forms/on-return-key
+                                         #(dispatch [::deployment-events/get-deployments]))}
          [ui/FormGroup
           [ui/FormField
            ^{:key (str "offset:" offset)}

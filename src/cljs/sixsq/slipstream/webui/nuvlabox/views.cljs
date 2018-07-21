@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.nuvlabox.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox.subs :as nuvlabox-subs]
     [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
@@ -39,11 +40,11 @@
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$last $select]} @query-params]
-        [ui/Form {:on-key-press #(when (= (.-charCode %) 13)
-                                   ; blur active element in form to get last value in query-params
-                                   (-> js/document .-activeElement .blur)
-                                   (dispatch [::nuvlabox-events/fetch-health-info])
-                                   (dispatch [::nuvlabox-events/get-results]))}
+        [ui/Form {:on-key-press
+                  (partial forms/on-return-key
+                           (fn []
+                             (dispatch [::nuvlabox-events/fetch-health-info])
+                             (dispatch [::nuvlabox-events/get-results])))}
 
          (when @filter-visible?
            [ui/FormGroup
