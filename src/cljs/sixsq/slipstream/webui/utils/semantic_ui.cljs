@@ -133,3 +133,5 @@
 (def TextArea (adapt-component "TextArea"))
 
 (def Transition (adapt-component "Transition"))
+
+(def TransitionablePortal (adapt-component "TransitionablePortal"))

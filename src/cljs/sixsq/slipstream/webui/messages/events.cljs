@@ -6,31 +6,49 @@
 
 
 (reg-event-db
-  ::show
-  (fn [db [_ message]]
-    (assoc db ::messages-spec/alert-message message)))
-
-
-(reg-event-db
   ::hide
   (fn [db _]
-    (assoc db ::messages-spec/alert-message nil)))
+    (assoc db ::messages-spec/alert-message nil
+              ::messages-spec/alert-display :none)))
 
 
 (reg-event-db
+  ::close-slider
+  (fn [{:keys [::messages-spec/alert-display] :as db} _]
+    (if (= :slider alert-display)
+      (assoc db ::messages-spec/alert-display :none)
+      db)))
+
+
+(reg-event-db
+  ::open-modal
+  (fn [db _]
+    (assoc db ::messages-spec/alert-display :modal)))
+
+
+(reg-event-db
+  ::close-modal
+  (fn [db _]
+    (assoc db ::messages-spec/alert-display :none)))
+
+
+(reg-event-fx
   ::add
-  (fn [{:keys [::messages-spec/messages] :as db} [_ message]]
+  (fn [{{:keys [::messages-spec/messages] :as db} :db :as cofx} [_ message]]
     (let [timestamped-message (assoc message :timestamp (time/now))]
-      (dispatch [::show timestamped-message])
-      (->> (cons timestamped-message messages)
-           vec
-           (assoc db ::messages-spec/messages)))))
+      (let [updated-messages (vec (cons timestamped-message messages))]
+        {:db (assoc db ::messages-spec/messages updated-messages
+                       ::messages-spec/alert-message timestamped-message
+                       ::messages-spec/alert-display :slider)
+         :dispatch-later [{:ms 2500 :dispatch [::close-slider]}]}))))
 
 
 (reg-event-db
   ::clear-all
   (fn [db _]
-    (assoc db ::messages-spec/messages [])))
+    (assoc db ::messages-spec/messages []
+              ::messages-spec/alert-message nil
+              ::messages-spec/alert-display :none)))
 
 
 (reg-event-db

@@ -21,8 +21,12 @@
 
 (s/def ::alert-message (s/nilable ::message))
 
+(s/def ::alert-display #{:none :slider :modal})
+
 (s/def ::db (s/keys :req [::messages
-                          ::alert-message]))
+                          ::alert-message
+                          ::alert-display]))
 
 (def defaults {::messages      []
-               ::alert-message nil})
+               ::alert-message nil
+               ::alert-display :none})
