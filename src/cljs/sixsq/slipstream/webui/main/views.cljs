@@ -29,44 +29,6 @@
     [taoensso.timbre :as log]))
 
 
-(defn sidebar []
-  (let [tr (subscribe [::i18n-subs/tr])
-        show? (subscribe [::main-subs/sidebar-open?])
-        nav-path (subscribe [::main-subs/nav-path])
-        is-admin? (subscribe [::authn-subs/is-admin?])
-        is-user? (subscribe [::authn-subs/is-user?])]
-    (fn []
-      (when @show?
-        (vec (concat
-               [ui/Menu {:className  "webui-sidebar"
-                         :icon       "labeled"
-                         :vertical   true
-                         :borderless true
-                         :inverted   true}]
-               [^{:key "logo"} [ui/MenuItem {:on-click #(dispatch [::history-events/navigate "welcome"])}
-                                [ui/Image {:src "/images/cubic-logo.png"}]]]
-               (for [[label-kw url icon]
-                     (vec
-                       (concat
-                         (when @is-user? [[:dashboard "dashboard" "dashboard"]
-                                          [:legacy-application "legacy-application" "sitemap"]
-                                          [:deployment "deployment" "cloud"]
-                                          [:usage "usage" "history"]])
-                         (when @is-admin?
-                           [[:application "application" "sitemap"]
-                            [:metrics "metrics" "bar chart"]
-                            [:nuvlabox "nuvlabox" "desktop"]])
-                         [[:cimi "cimi" "code"]]))
-                     :when (some? label-kw)]
-                 [ui/MenuItem {:active  (= (first @nav-path) url)
-                               :onClick (fn []
-                                          (log/info "navigate event" url)
-                                          (dispatch [::history-events/navigate url]))}
-                  [ui/Icon {:name icon}] (@tr [label-kw])])
-               [[ui/MenuItem]
-                [i18n-views/locale-dropdown]]))))))
-
-
 (defn crumb
   [index segment]
   (let [nav-fn (fn [& _] (dispatch [::main-events/trim-breadcrumb index]))]
@@ -125,10 +87,56 @@
        [messages/message-modal]])))
 
 
+(defn slidebar []
+  (let [tr (subscribe [::i18n-subs/tr])
+        show? (subscribe [::main-subs/sidebar-open?])
+        nav-path (subscribe [::main-subs/nav-path])
+        is-user? (subscribe [::authn-subs/is-user?])
+        is-admin? (subscribe [::authn-subs/is-admin?])]
+    [ui/Sidebar {:as        (ui/array-get "Menu")
+                 :className "medium thin"
+                 :vertical  true
+                 :visible   @show?
+                 :inverted  true
+                 :animation "uncover"}
+     (vec (concat
+            [ui/Menu {:icon     "labeled"
+                      :vertical true
+                      :size     "large"
+                      :compact  true
+                      :inverted true}]
+            [^{:key "logo"} [ui/MenuItem {:on-click #(dispatch [::history-events/navigate "welcome"])}
+                             [ui/Image {:src "/images/cubic-logo.png" :size "tiny" :centered true}]]]
+            (for [[label-kw url icon]
+                  (vec
+                    (concat
+                      (when @is-user? [[:dashboard "dashboard" "dashboard"]
+                                       [:legacy-application "legacy-application" "sitemap"]
+                                       [:deployment "deployment" "cloud"]
+                                       [:usage "usage" "history"]])
+                      (when @is-admin?
+                        [[:application "application" "sitemap"]
+                         [:metrics "metrics" "bar chart"]
+                         [:nuvlabox "nuvlabox" "desktop"]])
+                      [[:cimi "cimi" "code"]]))
+                  :when (some? label-kw)]
+              [ui/MenuItem {:active  (= (first @nav-path) url)
+                            :onClick (fn []
+                                       (log/info "navigate event" url)
+                                       (dispatch [::history-events/navigate url]))}
+               [ui/Icon {:name icon}] (@tr [label-kw])])
+            [[i18n-views/locale-dropdown]]))]))
+
+
 (defn app []
-  [:div.webui-wrapper
-   [sidebar]
-   [ui/Container {:className "webui-main" :fluid true}
-    [header]
-    [contents]
-    [footer]]])
+  (fn []
+    (let [show? (subscribe [::main-subs/sidebar-open?])]
+      [ui/SidebarPushable {:as    (ui/array-get "Segment")
+                           :basic true}
+       [slidebar]
+       [ui/SidebarPusher
+        [ui/Container (cond-> {:id "webui-main" :fluid true}
+                              @show? (assoc :className "sidebar-visible"))
+         [header]
+         [contents]
+         [footer]]]])))

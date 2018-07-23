@@ -273,7 +273,7 @@
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable
-         (vec (concat [ui/Container {:text true} [dimmer]]
+         (vec (concat [ui/Container {:fluid true} [dimmer]]
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]
