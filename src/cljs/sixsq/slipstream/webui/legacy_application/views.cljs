@@ -60,7 +60,7 @@
     (fn [state-atom]
       (let [label (if @more? (@tr [:less]) (@tr [:more]))
             icon-name (if @more? "caret down" "caret right")]
-        [:a {:style {:cursor "pointer"}
+        [:a {:style    {:cursor "pointer"}
              :on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
 
 
@@ -189,7 +189,7 @@
     (fn []
       (let [loading? (not @data)]
         [ui/DimmerDimmable
-         (vec (concat [:div [dimmer]]
+         (vec (concat [ui/Container {:fluid true} [dimmer]]
                       (when-not loading?
                         (if (instance? js/Error @data)
                           [[format-error @data]]

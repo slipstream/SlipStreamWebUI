@@ -7,12 +7,6 @@
 /*#app {height: 100%;
       background: #f7f7f7;}*/
 
-#webui-wrapper {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
 #webui-container {
     flex: 1;
 }
@@ -51,44 +45,32 @@
     height: "15ex";
 }
 
-
-/*
-  This wraps the entire page.  There are two columns on the page.
-  The left column is the sidebar; the right column is the main
-  content.
-*/
-.webui-wrapper {
-    display: flex;
-    flex-direction: row;
-}
-
-
-/*
-  The sidebar sits in the left column. When present, it always
-  displays at its natural width.  The minimum height is the height
-  of the page to ensure that the menu goes to the bottom of the
-  page.
-*/
-.webui-sidebar {
-    display: flex;
-    flex: 0;
-    min-height: 100vh;
-    margin: 0 0 !important;
-    border-radius: unset !important;
-}
-
-
 /*
   The main content sits in the right column. The minimum height is
   the page height to force the footer to the bottom of the page.
   There are three elements in this column: the header, the content,
   and the footer.  These are arranged vertically.
 */
-.webui-main {
+
+#webui-main {
     display: flex !important; /* will be block without !important */
     min-height: 100vh;
     flex-direction: column;
     background-color: #f5f5f5 !important;
+    margin-left: 0!important;
+}
+
+#webui-main.sidebar-visible {
+    max-width: calc(100% - 120px) !important;
+}
+
+.ui.visible[class*="medium thin"].left.sidebar~.pusher {
+   -webkit-transform: translate3d(60px,0,0);
+   transform: translate3d(120px,0,0);
+}
+
+.ui[class*="medium thin"].left.sidebar, .ui[class*="medium thin"].right.sidebar {
+   width: 120px;
 }
 
 
