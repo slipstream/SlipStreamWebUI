@@ -82,7 +82,7 @@
                  [cljsjs/codemirror]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
-                 [cljsjs/semantic-ui-react]
+                 [cljsjs/semantic-ui-react "0.82.0-0"]
                  [cljsjs/moment]
                  [cljsjs/react-datepicker]
                  [funcool/promesa]
