@@ -7,8 +7,11 @@
     cljsjs.semantic-ui-react
     [reagent.core :as r]))
 
+(defn array-get [tag]
+  (aget js/semanticUIReact tag))
+
 (defn adapt-component [tag]
-  (r/adapt-react-class (aget js/semanticUIReact tag)))
+  (r/adapt-react-class (array-get tag)))
 
 (def Accordion (adapt-component "Accordion"))
 (def AccordionTitle (adapt-component "AccordionTitle"))
