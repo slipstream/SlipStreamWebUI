@@ -12,24 +12,6 @@
     [sixsq.slipstream.webui.utils.time :as time]))
 
 
-(defn bell-menu
-  "Provides a messages menu icon that will bring up the list of recent
-   messages. If there are no messages, the item will be disabled. If there are
-   messages, then a label will show the number of them."
-  []
-  (let [session (subscribe [::authn-subs/session])
-        messages (subscribe [::message-subs/messages])]
-    (fn []
-      (when @session
-        (let [n (count @messages)]
-          [ui/MenuItem {:disabled (zero? n)
-                        :fitted   "horizontally"
-                        :on-click #(dispatch [::history-events/navigate "messages"])}
-           [ui/Label {:size "large"}
-            [ui/Icon {:name "bell"}]
-            (str n)]])))))
-
-
 (defn type->icon-name
   [type]
   (case type
@@ -141,3 +123,32 @@
   [ui/Container {:text true}
    [message-list-as-list]])
 
+(defn bell-menu
+  "Provides a messages menu icon that will bring up the list of recent
+   messages. If there are no messages, the item will be disabled. If there are
+   messages, then a label will show the number of them."
+  []
+  (let [session (subscribe [::authn-subs/session])
+        messages (subscribe [::message-subs/messages])]
+    (fn []
+      (when @session
+        (let [n (count @messages)]
+          [ui/MenuItem {:disabled (zero? n)
+                        :fitted   "horizontally"
+                        ;:on-click #(dispatch [::history-events/navigate "messages"])
+                        }
+           [ui/Popup {:style {:max-height "70%"
+                              :max-width "40%"
+                              :overflow "hidden"}
+                      :on      "click"
+                      :position "bottom right"
+                      :trigger (reagent/as-element [ui/Label {:as "a"}
+                                                    [ui/Icon {:name "bell outline"}]
+                                                    (str n)])}
+            [ui/PopupHeader "pop up header"
+             [ui/Button {:floated "right"} "Clear"]
+             ]
+            [ui/PopupContent {:style {:max-height "400px" :overflow-y "auto"}}
+             [message-list-as-list]]
+            ]]
+          )))))

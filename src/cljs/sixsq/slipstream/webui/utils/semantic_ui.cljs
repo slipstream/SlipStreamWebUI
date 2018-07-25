@@ -105,6 +105,8 @@
 (def Pagination (r/adapt-react-class (aget js/semanticUIReact "Pagination")))
 
 (def Popup (adapt-component "Popup"))
+(def PopupHeader (adapt-component "PopupHeader"))
+(def PopupContent (adapt-component "PopupContent"))
 (def Progress (adapt-component "Progress"))
 
 (def Rail (adapt-component "Rail"))
