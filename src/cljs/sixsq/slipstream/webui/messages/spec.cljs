@@ -23,10 +23,14 @@
 
 (s/def ::alert-display #{:none :slider :modal})
 
+(s/def ::popup-open? boolean?)
+
 (s/def ::db (s/keys :req [::messages
                           ::alert-message
-                          ::alert-display]))
+                          ::alert-display
+                          ::popup-open?]))
 
 (def defaults {::messages      []
                ::alert-message nil
-               ::alert-display :none})
+               ::alert-display :none
+               ::popup-open?   false})

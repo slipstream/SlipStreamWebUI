@@ -48,6 +48,17 @@
 (def DropdownItem (adapt-component "DropdownItem"))
 (def DropdownMenu (adapt-component "DropdownMenu"))
 
+(def Feed (adapt-component "Feed"))
+(def FeedContent (adapt-component "FeedContent"))
+(def FeedDate (adapt-component "FeedDate"))
+(def FeedEvent (adapt-component "FeedEvent"))
+(def FeedExtra (adapt-component "FeedExtra"))
+(def FeedLabel (adapt-component "FeedLabel"))
+(def FeedLike (adapt-component "FeedLike"))
+(def FeedMeta (adapt-component "FeedMeta"))
+(def FeedSummary (adapt-component "FeedSummary"))
+(def FeedUser (adapt-component "FeedUser"))
+
 (def Form (adapt-component "Form"))
 (def FormButton (adapt-component "FormButton"))
 (def FormDropdown (adapt-component "FormDropdown"))

@@ -9,7 +9,8 @@
   ::hide
   (fn [db _]
     (assoc db ::messages-spec/alert-message nil
-              ::messages-spec/alert-display :none)))
+              ::messages-spec/alert-display :none
+              ::messages-spec/popup-open? false)))
 
 
 (reg-event-db
@@ -23,13 +24,15 @@
 (reg-event-db
   ::open-modal
   (fn [db _]
-    (assoc db ::messages-spec/alert-display :modal)))
+    (assoc db ::messages-spec/alert-display :modal
+              ::messages-spec/popup-open? false)))
 
 
 (reg-event-db
   ::close-modal
   (fn [db _]
-    (assoc db ::messages-spec/alert-display :none)))
+    (assoc db ::messages-spec/alert-display :none
+              ::messages-spec/popup-open? false)))
 
 
 (reg-event-fx
@@ -40,7 +43,17 @@
         {:db (assoc db ::messages-spec/messages updated-messages
                        ::messages-spec/alert-message timestamped-message
                        ::messages-spec/alert-display :slider)
-         :dispatch-later [{:ms 2500 :dispatch [::close-slider]}]}))))
+         :dispatch-later [{:ms 3000 :dispatch [::close-slider]}]}))))
+
+
+(reg-event-db
+  ::show
+  (fn [{:keys [::messages-spec/messages] :as db} [_ timestamped-message]]
+    (if timestamped-message
+      (assoc db ::messages-spec/alert-message timestamped-message
+                ::messages-spec/alert-display :modal
+                ::messages-spec/popup-open? false)
+      db)))
 
 
 (reg-event-db
@@ -48,11 +61,19 @@
   (fn [db _]
     (assoc db ::messages-spec/messages []
               ::messages-spec/alert-message nil
-              ::messages-spec/alert-display :none)))
+              ::messages-spec/alert-display :none
+              ::messages-spec/popup-open? false)))
 
 
 (reg-event-db
-  ::remove
-  (fn [{:keys [::messages-spec/messages] :as db} [_ index]]
-    (->> (vec (concat (subvec messages 0 index) (subvec messages (inc index))))
-         (assoc db ::messages-spec/messages))))
+  ::open-popup
+  (fn [{:keys [::messages-spec/messages] :as db} _]
+    (cond-> db
+            (seq messages) (assoc ::messages-spec/popup-open? true))))
+
+
+(reg-event-db
+  ::close-popup
+  (fn [{:keys [::messages-spec/messages] :as db} _]
+    (cond-> db
+            (seq messages) (assoc ::messages-spec/popup-open? false))))

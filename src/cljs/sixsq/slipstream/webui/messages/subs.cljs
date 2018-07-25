@@ -17,3 +17,8 @@
 (reg-sub
   ::alert-display
   ::messages-spec/alert-display)
+
+
+(reg-sub
+  ::popup-open?
+  ::messages-spec/popup-open?)

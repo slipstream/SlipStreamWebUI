@@ -3,11 +3,9 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.messages.events :as message-events]
     [sixsq.slipstream.webui.messages.subs :as message-subs]
-    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.time :as time]))
 
@@ -19,6 +17,15 @@
     :info "info circle"
     :success "check circle"
     "warning circle"))
+
+
+(defn type->message-type
+  [type]
+  (case type
+    :error {:error true}
+    :info {:info true}
+    :success {:success true}
+    {:info true}))
 
 
 (defn message-detail-modal
@@ -50,10 +57,10 @@
                                    :duration  500})
               top-right {:position "fixed", :top "0", :right "0", :zIndex 1000}]
           [ui/TransitionablePortal {:transition transition, :open open?}
-           [ui/Message {:size       "mini"
-                        :success    true
-                        :style      top-right
-                        :on-dismiss #(dispatch [::message-events/hide])}
+           [ui/Message (merge (type->message-type type)
+                              {:size       "mini"
+                               :style      top-right
+                               :on-dismiss #(dispatch [::message-events/hide])})
             [ui/MessageHeader [ui/Icon {:name icon-name}] header "\u2001\u00a0"]
             [:a {:on-click #(dispatch [::message-events/open-modal])} (@tr [:more-info])]]])))))
 
@@ -76,79 +83,60 @@
               [:pre content]])])))))
 
 
-(defn message-item
-  [locale index {:keys [type header content timestamp]}]
-  (let [visible? (reagent/atom false)]
-    (fn [locale index {:keys [type header content timestamp]}]
-      (let [icon-name (type->icon-name type)]
-        [ui/ListItem {:on-click #(reset! visible? (not @visible?))}
-         [ui/ListIcon {:name icon-name, :size "large"}]
-         [ui/ListContent
-          [ui/Button {:floated  "right"
-                      :size     "tiny"
-                      :icon     "close"
-                      :on-click (fn [e]
-                                  (when e
-                                    (.stopPropagation e true))
-                                  (dispatch [::message-events/remove index]))}]
-          [ui/ListHeader header]
-          [ui/ListDescription (time/ago timestamp locale)]]
-
-         [ui/Modal
-          {:close-icon true
-           :open       @visible?
-           :on-close   #(reset! visible? false)}
-          [ui/ModalHeader
-           [ui/Icon {:name icon-name}]
-           header]
-          (when content
-            [ui/ModalContent {:scrolling true}
-             [:pre content]])]]))))
+(defn feed-item
+  [locale {:keys [type header timestamp] :as message}]
+  (let [icon-name (type->icon-name type)]
+    [ui/ListItem
+     [ui/ListIcon {:name           icon-name
+                   :size           "large"
+                   :vertical-align "middle"}]
+     [ui/ListContent
+      [ui/ListHeader {:as "a", :on-click #(dispatch [::message-events/show message])}
+       header]
+      [ui/ListDescription (time/ago timestamp locale)]]]))
 
 
-(defn message-list-as-list
+(defn message-feed
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        locale (subscribe [::i18n-subs/locale])
+  (let [locale (subscribe [::i18n-subs/locale])
         messages (subscribe [::message-subs/messages])]
-    (if (seq @messages)
-      (vec (concat [ui/ListSA {:selection     true
-                               :verticalAlign "middle"}]
-                   (mapv (fn [i msg] [message-item @locale i msg]) (range) @messages)))
-      [ui/Header {:as "h1"} (@tr [:no-messages])])))
+    (when (seq @messages)
+      (vec (concat [ui/ListSA {:divided false, :relaxed true}]
+                   (mapv (partial feed-item @locale) @messages))))))
 
-
-(defmethod panel/render :messages
-  [path]
-  [ui/Container {:text true}
-   [message-list-as-list]])
 
 (defn bell-menu
   "Provides a messages menu icon that will bring up the list of recent
    messages. If there are no messages, the item will be disabled. If there are
    messages, then a label will show the number of them."
   []
-  (let [session (subscribe [::authn-subs/session])
-        messages (subscribe [::message-subs/messages])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        session (subscribe [::authn-subs/session])
+        messages (subscribe [::message-subs/messages])
+        popup-open? (subscribe [::message-subs/popup-open?])]
     (fn []
       (when @session
         (let [n (count @messages)]
           [ui/MenuItem {:disabled (zero? n)
-                        :fitted   "horizontally"
-                        ;:on-click #(dispatch [::history-events/navigate "messages"])
-                        }
-           [ui/Popup {:style {:max-height "70%"
-                              :max-width "40%"
-                              :overflow "hidden"}
-                      :on      "click"
+                        :fitted   "horizontally"}
+           [ui/Popup {:on       "click"
                       :position "bottom right"
-                      :trigger (reagent/as-element [ui/Label {:as "a"}
-                                                    [ui/Icon {:name "bell outline"}]
-                                                    (str n)])}
-            [ui/PopupHeader "pop up header"
-             [ui/Button {:floated "right"} "Clear"]
-             ]
-            [ui/PopupContent {:style {:max-height "400px" :overflow-y "auto"}}
-             [message-list-as-list]]
-            ]]
-          )))))
+                      :open     @popup-open?
+                      :on-open  #(dispatch [::message-events/open-popup])
+                      :on-close #(dispatch [::message-events/close-popup])
+                      :trigger  (reagent/as-element [ui/Label {:as "a"}
+                                                     [ui/Icon {:name "bell outline"}]
+                                                     (str n)])}
+            [ui/PopupHeader (@tr [:notifications])]
+            [ui/PopupContent
+             [ui/Divider]]
+            [ui/PopupContent {:style {:max-height "40ex" :overflow-y "auto"}}
+             [message-feed]]
+            [ui/PopupContent
+             [ui/Divider]
+             [ui/Button {:fluid    true
+                         :negative true
+                         :compact  true
+                         :size     "mini"
+                         :on-click #(dispatch [::message-events/clear-all])}
+              (@tr [:clear])]]]])))))
