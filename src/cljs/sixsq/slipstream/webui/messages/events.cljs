@@ -38,12 +38,22 @@
 (reg-event-fx
   ::add
   (fn [{{:keys [::messages-spec/messages] :as db} :db :as cofx} [_ message]]
-    (let [timestamped-message (assoc message :timestamp (time/now))]
+    (let [timestamped-message (assoc message :timestamp (time/now)
+                                             :uuid (random-uuid))]
       (let [updated-messages (vec (cons timestamped-message messages))]
         {:db (assoc db ::messages-spec/messages updated-messages
                        ::messages-spec/alert-message timestamped-message
                        ::messages-spec/alert-display :slider)
          :dispatch-later [{:ms 3000 :dispatch [::close-slider]}]}))))
+
+
+(reg-event-db
+  ::remove
+  (fn [{:keys [::messages-spec/messages] :as db} [_ {:keys [uuid] :as timestamped-message}]]
+    (let [trimmed-messages (vec (remove (fn [m] (= uuid (:uuid m))) messages))]
+      (assoc db ::messages-spec/messages trimmed-messages
+                ::messages-spec/alert-message nil
+                ::messages-spec/alert-display :none))))
 
 
 (reg-event-db

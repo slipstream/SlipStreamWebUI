@@ -12,10 +12,13 @@
 
 (s/def :message/timestamp any?)
 
+(s/def :message/uuid string?)
+
 (s/def ::message (only-keys :req-un [:message/header
                                      :message/content
                                      :message/type
-                                     :message/timestamp]))
+                                     :message/timestamp
+                                     :message/uuid]))
 
 (s/def ::messages (s/coll-of ::message))
 
