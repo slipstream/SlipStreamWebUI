@@ -177,8 +177,10 @@
                 (dispatch [::authn-events/set-form-id nil])
                 (dispatch [::authn-events/open-modal other-modal]))]
         (case modal-kw
-          :login [:span (@tr [:no-account?]) " " [:a {:on-click f} (str (@tr [:signup-link]))]]
-          :signup [:span (@tr [:already-registered?]) " " [:a {:on-click f} (str (@tr [:login-link]))]])))))
+          :login [:span (@tr [:no-account?]) " "
+                  [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:signup-link]))]]
+          :signup [:span (@tr [:already-registered?]) " "
+                   [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:login-link]))]])))))
 
 
 (defn authn-modal
