@@ -27,6 +27,7 @@
 (def Card (adapt-component "Card"))
 (def CardContent (adapt-component "CardContent"))
 (def CardDescription (adapt-component "CardDescription"))
+(def CardGroup (adapt-component "CardGroup"))
 (def CardHeader (adapt-component "CardHeader"))
 (def CardMeta (adapt-component "CardMeta"))
 
@@ -88,6 +89,7 @@
 (def Input (adapt-component "Input"))
 
 (def Header (adapt-component "Header"))
+(def HeaderContent (adapt-component "HeaderContent"))
 
 (def Label (adapt-component "Label"))
 (def LabelDetail (adapt-component "LabelDetail"))

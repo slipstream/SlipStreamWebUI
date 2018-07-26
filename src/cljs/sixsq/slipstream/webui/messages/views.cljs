@@ -18,6 +18,14 @@
     :success "check circle"
     "warning circle"))
 
+(defn type->color
+  [type]
+  (case type
+    :error "red"
+    :info "blue"
+    :success "green"
+    "yellow"))
+
 
 (defn type->message-type
   [type]
@@ -55,7 +63,7 @@
               open? (boolean (and @alert-message (= :slider @alert-display)))
               transition (clj->js {:animation "slide left"
                                    :duration  500})
-              top-right {:position "fixed", :top "0", :right "0", :zIndex 1000}]
+              top-right {:position "fixed", :top "30px", :right "5px", :zIndex 1000}]
           [ui/TransitionablePortal {:transition transition, :open open?}
            [ui/Message (merge (type->message-type type)
                               {:size       "mini"
@@ -92,14 +100,17 @@
 (defn feed-item
   [locale {:keys [type header timestamp] :as message}]
   (let [icon-name (type->icon-name type)]
-    [ui/ListItem
-     [ui/ListIcon {:name           icon-name
-                   :size           "large"
-                   :vertical-align "middle"}]
-     [ui/ListContent
-      [ui/ListHeader {:as "a", :on-click #(dispatch [::message-events/show message])}
-       header]
-      [ui/ListDescription (time/ago timestamp locale)]]]))
+    [ui/Card {:link     true
+              :on-click #(dispatch [::message-events/show message])
+              :color    (type->color type)
+              :style {:margin "0.5em"}}
+     [ui/CardContent
+      [ui/Header {:as "h5"}
+       [ui/Icon {:name  icon-name
+                 :size  "mini"
+                 :color (type->color type)}]
+       [ui/HeaderContent header]]
+      [ui/CardMeta (time/ago timestamp locale)]]]))
 
 
 (defn message-feed
@@ -107,12 +118,12 @@
   (let [locale (subscribe [::i18n-subs/locale])
         messages (subscribe [::message-subs/messages])]
     (when (seq @messages)
-      (vec (concat [ui/ListSA {:divided false
-                               :relaxed true
-                               :style   {:height       "100%"
-                                         :max-height   "40ex"
-                                         :overflow-y   "auto"
-                                         :margin-right "1ex"}}]
+      (vec (concat [ui/CardGroup {
+                                  :doubling true
+                                  :centered true
+                                  :style    {:height       "100%"
+                                             :max-height   "40ex"
+                                             :overflow-y   "auto"}}]
                    (mapv (partial feed-item @locale) @messages))))))
 
 
@@ -127,23 +138,23 @@
         popup-open? (subscribe [::message-subs/popup-open?])]
     (when @session
       (let [n (count @messages)]
-        [ui/MenuItem {:disabled (zero? n)
-                      :fitted   "horizontally"}
-         [ui/Popup {:on       "click"
-                    :position "bottom right"
-                    :open     @popup-open?
-                    :on-open  #(dispatch [::message-events/open-popup])
-                    :on-close #(dispatch [::message-events/close-popup])
-                    :trigger  (reagent/as-element [ui/Label {:as "a"}
-                                                   [ui/Icon {:name "bell outline"}]
-                                                   (str n)])}
-          [ui/PopupHeader (@tr [:notifications])]
-          [ui/PopupContent [ui/Divider]]
-          [ui/PopupContent [message-feed]]
-          [ui/PopupContent
-           [ui/Divider]
-           [ui/Button {:fluid    true
-                       :negative true
-                       :compact  true
-                       :on-click #(dispatch [::message-events/clear-all])}
-            (@tr [:clear])]]]]))))
+        [ui/Popup {:on       "click"
+                   :position "bottom right"
+                   :open     @popup-open?
+                   :on-open  #(dispatch [::message-events/open-popup])
+                   :on-close #(dispatch [::message-events/close-popup])
+                   :trigger  (reagent/as-element
+                               [ui/MenuItem {:disabled (zero? n)}
+                                [ui/Icon {:name "bell" :fitted true}]
+                                [ui/Label (cond-> {:size  "tiny"}
+                                                  (pos-int? n) (assoc :color "blue")) (str n)]])}
+         [ui/PopupHeader (@tr [:notifications])]
+         [ui/PopupContent [ui/Divider]]
+         [ui/PopupContent [message-feed]]
+         [ui/PopupContent
+          [ui/Divider]
+          [ui/Button {:fluid    true
+                      :negative true
+                      :compact  true
+                      :on-click #(dispatch [::message-events/clear-all])}
+           (@tr [:clear-all])]]]))))

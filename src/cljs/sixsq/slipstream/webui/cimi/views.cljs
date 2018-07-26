@@ -22,7 +22,8 @@
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.forms :as forms]))
+    [sixsq.slipstream.webui.utils.forms :as forms]
+    [taoensso.timbre :as log]))
 
 
 (defn id-selector-formatter [entry]
@@ -276,31 +277,32 @@
         selections (reagent/atom (set @selected-fields))
         show? (reagent/atom false)]
     (fn []
-      [ui/MenuItem {:name     "select-fields"
-                    :disabled (nil? @selected-id)
-                    :on-click (fn []
-                                (reset! selections (set @selected-fields))
-                                (reset! show? true))}
-       [ui/Icon {:name "columns"}]
-       (@tr [:columns])
-       [ui/Modal
-        {:closeIcon true
-         :open      @show?
-         :on-close  #(reset! show? false)}
-        [ui/ModalHeader (@tr [:fields])]
-        [ui/ModalContent
-         {:scrolling true}
-         (format-field-list available-fields selections)]
-        [ui/ModalActions
-         [ui/Button
-          {:on-click #(reset! show? false)}
-          (@tr [:cancel])]
-         [ui/Button
-          {:primary  true
-           :on-click (fn []
-                       (reset! show? false)
-                       (dispatch [::cimi-events/set-selected-fields @selections]))}
-          (@tr [:update])]]]])))
+      [ui/Modal
+       {:closeIcon true
+        :open      @show?
+        :on-close  #(reset! show? false)
+        :trigger   (reagent/as-element
+                     [ui/MenuItem {:name     "select-fields"
+                                   :disabled (nil? @selected-id)
+                                   :on-click (fn []
+                                               (reset! selections (set @selected-fields))
+                                               (reset! show? true))}
+                      [ui/Icon {:name "columns"}]
+                      (@tr [:columns])])}
+       [ui/ModalHeader (@tr [:fields])]
+       [ui/ModalContent
+        {:scrolling true}
+        (format-field-list available-fields selections)]
+       [ui/ModalActions
+        [ui/Button
+         {:on-click #(reset! show? false)}
+         (@tr [:cancel])]
+        [ui/Button
+         {:primary  true
+          :on-click (fn []
+                      (reset! show? false)
+                      (dispatch [::cimi-events/set-selected-fields @selections]))}
+         (@tr [:update])]]])))
 
 
 (defn resource-add-form
