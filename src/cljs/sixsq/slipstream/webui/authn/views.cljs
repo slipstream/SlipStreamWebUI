@@ -93,8 +93,12 @@
 
 
 (defn authn-method-group-option
-  [[group _]]
-  {:text group, :value group})
+  [[group methods]]
+  (let [{:keys [icon]} (first methods)
+        option-label (r/as-element [:span [ui/Icon {:name icon}] group])]
+    {:text    option-label
+     :value   group
+     :content option-label}))
 
 
 (defn authn-method-dropdown
@@ -125,14 +129,14 @@
 
 (defn authn-form-container
   "Container that holds all of the authentication (login or sign up) forms."
-  [collection-kw failed-kw group-fn method-form-fn]
+  [collection-kw failed-kw method-form-fn]
   (let [template-href (cimi-utils/template-href collection-kw)
         templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])
         selected-method-group (subscribe [::authn-subs/selected-method-group])]
-    (fn [collection-kw failed-kw classifier-fn group-form-fn]
-      (let [authn-method-groups (u/grouped-authn-methods @templates classifier-fn)
+    (fn [collection-kw failed-kw group-form-fn]
+      (let [authn-method-groups (u/grouped-authn-methods @templates)
             selected-authn-method-group (some->> authn-method-groups
                                                  (filter #(-> % first (= @selected-method-group)))
                                                  first)]
@@ -152,12 +156,12 @@
 
 (defn login-form-container
   []
-  [authn-form-container :session :login-failed u/internal-or-api-key login-method-form])
+  [authn-form-container :session :login-failed login-method-form])
 
 
 (defn signup-form-container
   []
-  [authn-form-container :user :signup-failed u/self-registration signup-method-form])
+  [authn-form-container :user :signup-failed signup-method-form])
 
 
 (defn switch-panel-link
@@ -173,8 +177,10 @@
                 (dispatch [::authn-events/set-form-id nil])
                 (dispatch [::authn-events/open-modal other-modal]))]
         (case modal-kw
-          :login [:span (@tr [:no-account?]) " " [:a {:on-click f} (str (@tr [:signup-link]))]]
-          :signup [:span (@tr [:already-registered?]) " " [:a {:on-click f} (str (@tr [:login-link]))]])))))
+          :login [:span (@tr [:no-account?]) " "
+                  [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:signup-link]))]]
+          :signup [:span (@tr [:already-registered?]) " "
+                   [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:login-link]))]])))))
 
 
 (defn authn-modal

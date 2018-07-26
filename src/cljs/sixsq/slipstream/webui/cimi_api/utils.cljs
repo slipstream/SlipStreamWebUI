@@ -47,11 +47,14 @@
 
 
 (defn prepare-template
-  [{:keys [id name group method description operations] :as tpl}]
+  [{:keys [id name method description group hidden icon order] :as tpl}]
   [(keyword id) {:id             id
                  :label          name
-                 :group          group
                  :method         method
+                 :group          group
+                 :hidden         hidden
+                 :icon           icon
+                 :order          order
                  :default-values (remove-common-attrs tpl)
                  :description    description}])
 

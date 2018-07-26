@@ -7,44 +7,14 @@
   (some-> session :roles (str/split #"\s+") set (contains? role)))
 
 
-(defn method-comparator
-  "Compares two login method types. The value 'internal' will always compare
-   as less than anything other than itself."
-  [x y]
-  (cond
-    (= x y) 0
-    (= "internal" x) -1
-    (= "internal" y) 1
-    (< x y) -1
-    :else 1))
-
-
-(defn sort-value [[tag [{:keys [method]}]]]
-  (if (= "internal" method)
-    "internal"
-    (or tag method)))
-
-
 (defn order-and-group
-  "Sorts the methods by ID and then groups them (true/false) on whether it is
-   an internal method or not."
+  "Sorts the methods by ID, then the order attribute, and then groups them on
+   the group or method attribute."
   [methods]
   (->> methods
        (sort-by :id)
-       (group-by #(or (:group %) (:method %)))
-       (sort-by sort-value method-comparator)))
-
-
-(defn internal-or-api-key
-  [[_ methods]]
-  (let [authn-method (:method (first methods))]
-    (#{"internal" "api-key"} authn-method)))
-
-
-(defn self-registration
-  [[_ methods]]
-  (let [authn-method (:method (first methods))]
-    (#{"self-registration"} authn-method)))
+       (sort-by #(or (:order %) 0))
+       (group-by #(or (:group %) (:method %)))))
 
 
 (defn hidden? [{:keys [type] :as param-desc}]
@@ -90,8 +60,5 @@
   "Takes a set of raw downloaded templates, groups and orders them by the
    :group (or :method) value. Returns a vector of tuples [group-key
    authn-methods]."
-  [templates classifier-fn]
-  (let [method-groups (-> templates :templates vals order-and-group)
-        internals (filter classifier-fn method-groups)
-        externals (remove classifier-fn method-groups)]
-    (vec (concat internals externals))))
+  [templates]
+  (->> templates :templates vals (remove :hidden) order-and-group vec))
