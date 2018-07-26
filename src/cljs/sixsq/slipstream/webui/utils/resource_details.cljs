@@ -48,22 +48,22 @@
                         (on-cancel))]
 
         [ui/Modal
-         (cond-> {:open      (boolean @show?)
-                  :closeIcon true
-                  :on-close  #(reset! show? false)
-                  :trigger   (r/as-element
-                               [ui/MenuItem {:name     label
-                                             :on-click #(reset! show? true)}
-                                (when icon
-                                  [ui/Icon {:name icon}])
-                                label]
-                               #_[ui/Button
-                                  {:primary  true
-                                   :on-click #(reset! show? true)}
-                                  label])}
-                 scrolling? (assoc :scrolling true))
+         {:open      (boolean @show?)
+          :closeIcon true
+          :on-close  #(reset! show? false)
+          :trigger   (r/as-element
+                       [ui/MenuItem {:name     label
+                                     :on-click #(reset! show? true)}
+                        (when icon
+                          [ui/Icon {:name icon}])
+                        label]
+                       #_[ui/Button
+                          {:primary  true
+                           :on-click #(reset! show? true)}
+                          label])}
          [ui/ModalHeader title-text]
-         [ui/ModalContent body]
+         [ui/ModalContent (cond-> {}
+                            scrolling? (assoc :scrolling true)) body]
          [ui/ModalActions
           [action-buttons
            label

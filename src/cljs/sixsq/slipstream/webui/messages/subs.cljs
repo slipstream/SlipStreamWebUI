@@ -12,3 +12,13 @@
 (reg-sub
   ::alert-message
   ::messages-spec/alert-message)
+
+
+(reg-sub
+  ::alert-display
+  ::messages-spec/alert-display)
+
+
+(reg-sub
+  ::popup-open?
+  ::messages-spec/popup-open?)

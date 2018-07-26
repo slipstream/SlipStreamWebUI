@@ -12,17 +12,28 @@
 
 (s/def :message/timestamp any?)
 
+(s/def :message/uuid string?)
+
 (s/def ::message (only-keys :req-un [:message/header
                                      :message/content
                                      :message/type
-                                     :message/timestamp]))
+                                     :message/timestamp
+                                     :message/uuid]))
 
 (s/def ::messages (s/coll-of ::message))
 
 (s/def ::alert-message (s/nilable ::message))
 
+(s/def ::alert-display #{:none :slider :modal})
+
+(s/def ::popup-open? boolean?)
+
 (s/def ::db (s/keys :req [::messages
-                          ::alert-message]))
+                          ::alert-message
+                          ::alert-display
+                          ::popup-open?]))
 
 (def defaults {::messages      []
-               ::alert-message nil})
+               ::alert-message nil
+               ::alert-display :none
+               ::popup-open?   false})

@@ -84,7 +84,8 @@
          [ui/MenuItem {:fitted true}
           [authn-views/authn-menu]]]]
 
-       [messages/message-modal]])))
+       [messages/alert-slider]
+       [messages/alert-modal]])))
 
 
 (defn slidebar []

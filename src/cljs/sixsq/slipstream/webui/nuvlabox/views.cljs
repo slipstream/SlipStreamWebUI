@@ -172,9 +172,10 @@
             data (some->> @results
                           :nuvlaboxRecords
                           (map #(select-keys % #{:id :macAddress :state :name})))]
-        (vec (concat [ui/Table
-                      (format-nb-header)]
-                     (mapv (partial format-nb-row healthy?) data)))))))
+        [ui/Table
+         (format-nb-header)
+         (vec (concat [ui/TableBody]
+                      (mapv (partial format-nb-row healthy?) data)))]))))
 
 
 (defn nb-info

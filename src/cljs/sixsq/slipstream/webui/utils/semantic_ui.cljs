@@ -27,6 +27,7 @@
 (def Card (adapt-component "Card"))
 (def CardContent (adapt-component "CardContent"))
 (def CardDescription (adapt-component "CardDescription"))
+(def CardGroup (adapt-component "CardGroup"))
 (def CardHeader (adapt-component "CardHeader"))
 (def CardMeta (adapt-component "CardMeta"))
 
@@ -47,6 +48,17 @@
 (def DropdownDivider (adapt-component "DropdownDivider"))
 (def DropdownItem (adapt-component "DropdownItem"))
 (def DropdownMenu (adapt-component "DropdownMenu"))
+
+(def Feed (adapt-component "Feed"))
+(def FeedContent (adapt-component "FeedContent"))
+(def FeedDate (adapt-component "FeedDate"))
+(def FeedEvent (adapt-component "FeedEvent"))
+(def FeedExtra (adapt-component "FeedExtra"))
+(def FeedLabel (adapt-component "FeedLabel"))
+(def FeedLike (adapt-component "FeedLike"))
+(def FeedMeta (adapt-component "FeedMeta"))
+(def FeedSummary (adapt-component "FeedSummary"))
+(def FeedUser (adapt-component "FeedUser"))
 
 (def Form (adapt-component "Form"))
 (def FormButton (adapt-component "FormButton"))
@@ -77,6 +89,7 @@
 (def Input (adapt-component "Input"))
 
 (def Header (adapt-component "Header"))
+(def HeaderContent (adapt-component "HeaderContent"))
 
 (def Label (adapt-component "Label"))
 (def LabelDetail (adapt-component "LabelDetail"))
@@ -105,6 +118,8 @@
 (def Pagination (r/adapt-react-class (aget js/semanticUIReact "Pagination")))
 
 (def Popup (adapt-component "Popup"))
+(def PopupHeader (adapt-component "PopupHeader"))
+(def PopupContent (adapt-component "PopupContent"))
 (def Progress (adapt-component "Progress"))
 
 (def Rail (adapt-component "Rail"))
@@ -136,3 +151,5 @@
 (def TextArea (adapt-component "TextArea"))
 
 (def Transition (adapt-component "Transition"))
+
+(def TransitionablePortal (adapt-component "TransitionablePortal"))
