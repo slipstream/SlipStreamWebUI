@@ -47,7 +47,7 @@
                        :animation     "fade"
                        :duration      300
                        :unmountOnHide true}
-        (vec (concat [ui/Segment {:fluid true, :attached true}]
+        (vec (concat [ui/Segment {:attached true}]
                      children))]])))
 
 
