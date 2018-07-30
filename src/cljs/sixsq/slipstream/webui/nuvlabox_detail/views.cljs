@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.resource-details :as details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [clojure.string :as str]))
 
 
 (defn controls-detail
@@ -124,6 +125,37 @@
       [:div msg-next]]]))
 
 
+(defn select-metadata
+  [data]
+  (let [metadata-keys #{:id :resourceURI :name :description :created :updated}]
+    (select-keys data metadata-keys)))
+
+
+(defn metadata-row
+  [[k v]]
+  ^{:key k}
+  [ui/TableRow [ui/TableCell {:collapsing true} k] [ui/TableCell v]])
+
+
+(defn nb-metadata
+  []
+  (let [record (subscribe [::nuvlabox-subs/record])]
+    (fn []
+      (let [{:keys [id name description acl] :as data} @record
+            rows (->> data
+                      select-metadata
+                      (map metadata-row)
+                      vec)]
+        [cc/metadata {:title       (or name id)
+                      :subtitle    (-> (or id "unknown/unknown")
+                                       (str/split #"/")
+                                       second)
+                      :description description
+                      :icon        "computer"
+                      :acl         acl}
+         rows]))))
+
+
 (defn state-table
   []
   (let [detail (subscribe [::nuvlabox-subs/state])]
@@ -138,12 +170,57 @@
 
 (defn record-info
   []
-  (let [record (subscribe [::nuvlabox-subs/record])]
+  (let [record (subscribe [::nuvlabox-subs/record])
+        metadata-keys #{:id :resourceURI
+                        :name :description
+                        :created :updated
+                        :acl :operations}]
     (fn []
       (when @record
-        [cc/collapsible-segment
-         [:span [ui/Icon {:name "list"}] " details"]
-         (details/format-resource-data @record {})]))))
+        (let [data (into {} (remove (fn [[k v]] (metadata-keys k)) @record))]
+          (first (details/format-resource-data data {})))))))
+
+
+(defn acl-test
+  []
+  [ui/Table {:text-align "center", :collapsing true, :celled true, :unstackable true}
+   [ui/TableHeader
+    [ui/TableRow
+     [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "principal"]
+     [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "type"]
+     [ui/TableHeaderCell {:colSpan 2, :text-align "center", :collapsing true} "metadata"]
+     [ui/TableHeaderCell {:colSpan 2, :text-align "center", :collapsing true} "attributes"]
+     [ui/TableHeaderCell {:colSpan 2, :text-align "center", :collapsing true} "ACL"]
+     [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "delete"]]
+    [ui/TableRow
+     [ui/TableHeaderCell {:collapsing true} "view"]
+     [ui/TableHeaderCell {:collapsing true} "modify"]
+     [ui/TableHeaderCell {:collapsing true} "view"]
+     [ui/TableHeaderCell {:collapsing true} "modify"]
+     [ui/TableHeaderCell {:collapsing true} "view"]
+     [ui/TableHeaderCell {:collapsing true} "modify"]]]
+   [ui/TableBody
+    [ui/TableRow
+     [ui/TableCell {:collapsing true} "some-owner"]
+     [ui/TableCell {:collapsing true} "ROLE"]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]]
+    [ui/TableRow
+     [ui/TableCell {:collapsing true} "someone"]
+     [ui/TableCell {:collapsing true}"USER"]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} "\u0020"]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} "\u0020"]
+     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
+     [ui/TableCell {:collapsing true} "\u0020"]
+     [ui/TableCell {:collapsing true} "\u0020"]]
+    ]])
 
 
 (defn nb-detail
@@ -155,5 +232,7 @@
         (dispatch [::nuvlabox-events/fetch-detail]))
       [ui/Container {:fluid true}
        [controls-detail]
+       [nb-metadata]
        [state-table]
-       [record-info]])))
+       [record-info]
+       [acl-test]])))

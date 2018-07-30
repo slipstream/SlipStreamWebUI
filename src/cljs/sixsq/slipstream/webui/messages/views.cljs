@@ -18,14 +18,6 @@
     :success "check circle"
     "warning circle"))
 
-(defn type->color
-  [type]
-  (case type
-    :error "red"
-    :info "blue"
-    :success "green"
-    "yellow"))
-
 
 (defn type->message-type
   [type]
@@ -99,18 +91,15 @@
 
 (defn feed-item
   [locale {:keys [type header timestamp] :as message}]
-  (let [icon-name (type->icon-name type)]
-    [ui/Card {:link     true
-              :on-click #(dispatch [::message-events/show message])
-              :color    (type->color type)
-              :style {:margin "0.5em"}}
-     [ui/CardContent
-      [ui/Header {:as "h5"}
-       [ui/Icon {:name  icon-name
-                 :size  "mini"
-                 :color (type->color type)}]
-       [ui/HeaderContent header]]
-      [ui/CardMeta (time/ago timestamp locale)]]]))
+  (let [icon-name (type->icon-name type)
+        message-options (type->message-type type)]
+    [ui/ListItem {:on-click #(dispatch [::message-events/show message])}
+     [ui/Message message-options
+      [ui/MessageHeader
+       [ui/Icon {:name icon-name}]
+       header]
+      [ui/MessageContent
+       (time/ago timestamp locale)]]]))
 
 
 (defn message-feed
@@ -118,12 +107,10 @@
   (let [locale (subscribe [::i18n-subs/locale])
         messages (subscribe [::message-subs/messages])]
     (when (seq @messages)
-      (vec (concat [ui/CardGroup {
-                                  :doubling true
-                                  :centered true
-                                  :style    {:height       "100%"
-                                             :max-height   "40ex"
-                                             :overflow-y   "auto"}}]
+      (vec (concat [ui/ListSA {:selection true
+                               :style     {:height     "100%"
+                                           :max-height "40ex"
+                                           :overflow-y "auto"}}]
                    (mapv (partial feed-item @locale) @messages))))))
 
 
@@ -137,17 +124,18 @@
         messages (subscribe [::message-subs/messages])
         popup-open? (subscribe [::message-subs/popup-open?])]
     (when @session
-      (let [n (count @messages)]
+      (let [n (count @messages)
+            disabled? (zero? n)]
         [ui/Popup {:on       "click"
                    :position "bottom right"
                    :open     @popup-open?
                    :on-open  #(dispatch [::message-events/open-popup])
                    :on-close #(dispatch [::message-events/close-popup])
                    :trigger  (reagent/as-element
-                               [ui/MenuItem {:disabled (zero? n)}
-                                [ui/Icon {:name "bell" :fitted true}]
-                                [ui/Label (cond-> {:size  "tiny"}
-                                                  (pos-int? n) (assoc :color "blue")) (str n)]])}
+                               [ui/MenuItem {:disabled disabled?}
+                                [ui/Button {:primary true, :disabled disabled?}
+                                 [ui/Icon {:name (if disabled? "bell slash" "bell")}]
+                                 (str n)]])}
          [ui/PopupHeader (@tr [:notifications])]
          [ui/PopupContent [ui/Divider]]
          [ui/PopupContent [message-feed]]

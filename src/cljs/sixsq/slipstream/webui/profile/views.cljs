@@ -11,7 +11,8 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.values :as values]))
+    [sixsq.slipstream.webui.utils.values :as values]
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn tuple-to-row [[v1 v2]]
@@ -43,11 +44,7 @@
 
 (defn group-table-sui
   [group-data]
-  [ui/Table {:compact     true
-             :definition  true
-             :single-line true
-             :padded      false
-             :style       {:max-width "100%"}}
+  [ui/Table style/definition
    (vec (concat [ui/TableBody]
                 (->> group-data
                      (map data-to-tuple)

@@ -15,7 +15,8 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn ^:export set-runUUID [uuid]
@@ -93,11 +94,7 @@
             summary-info (-> (select-keys (:run @resource) summary-keys)
                              (assoc :uuid @cached-resource-id)
                              (assoc :module module))
-            contents [ui/Table {:compact     true
-                                :definition  true
-                                :single-line true
-                                :padded      false
-                                :style       {:max-width "100%"}}
+            contents [ui/Table style/definition
                       (vec (concat [ui/TableBody]
                                    (map tuple-to-row summary-info)))]]
         [cc/collapsible-card (@tr [:summary]) contents]))))
@@ -110,11 +107,7 @@
       (let [module (module-name @resource)
             summary-info (-> (select-keys (:run @resource) terminate-summary-keys)
                              (assoc :module module))]
-        [ui/Table {:compact     true
-                   :definition  true
-                   :single-line true
-                   :padded      false
-                   :style       {:max-width "100%"}}
+        [ui/Table style/definition
          (vec (concat [ui/TableBody]
                       (map tuple-to-row summary-info)))]))))
 
@@ -130,11 +123,7 @@
 
 (defn node-parameter-table
   [params]
-  [ui/Table {:compact     true
-             :definition  true
-             :single-line true
-             :padded      false
-             :style       {:max-width "100%"}}
+  [ui/Table style/definition
    (vec (concat [ui/TableBody]
                 (map tuple-to-row params)))])
 
@@ -219,11 +208,7 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [events]
       [:div {:class-name "webui-x-autoscroll"}
-       [ui/Table {:compact     true
-                  :definition  false
-                  :single-line true
-                  :padded      false
-                  :style       {:max-width "100%"}}
+       [ui/Table style/definition
         [ui/TableHeader
          [ui/TableRow
           [ui/TableHeaderCell [:span (@tr [:event])]]

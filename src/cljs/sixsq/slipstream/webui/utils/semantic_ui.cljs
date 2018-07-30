@@ -109,6 +109,9 @@
 
 (def Message (adapt-component "Message"))
 (def MessageHeader (adapt-component "MessageHeader"))
+(def MessageContent (adapt-component "MessageContent"))
+(def MessageList (adapt-component "MessageList"))
+(def MessageItem (adapt-component "MessageItem"))
 
 (def Modal (adapt-component "Modal"))
 (def ModalActions (adapt-component "ModalActions"))

@@ -220,86 +220,63 @@
   [authn-modal "modal-signup-id" :signup signup-form-container])
 
 
-(defn login-menu
-  "This menu provides a login button and a dropdown with more options (like
-   sign up). The login and sign up actions bring up modal dialogs."
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        template-href (cimi-utils/template-href :user)
-        user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
-    (fn []
-      [:div
-       [ui/ButtonGroup {:primary true, :size "tiny"}
-        [ui/Button {:on-click #(dispatch [::authn-events/open-modal :login])}
-         [ui/Icon {:name "sign in"}] (@tr [:login])]
-        [ui/Dropdown {:inline    true
-                      :button    true
-                      :pointing  "top right"
-                      :className "icon"}
-         (vec
-           (concat
-             [ui/DropdownMenu]
-             (when
-               (get-in @user-templates [:templates (keyword (str template-href "/self-registration"))])
-               [[ui/DropdownItem {:icon     "signup"
-                                  :text     (@tr [:signup])
-                                  :on-click #(dispatch [::authn-events/open-modal :signup])}]
-                [ui/DropdownDivider]])
-             [[ui/DropdownItem {:icon   "book"
-                                :text   (@tr [:documentation])
-                                :href   "http://ssdocs.sixsq.com/"
-                                :target "_blank"}]
-              [ui/DropdownItem {:icon   "info circle"
-                                :text   (@tr [:knowledge-base])
-                                :href   "http://support.sixsq.com/solution/categories"
-                                :target "_blank"}]
-              [ui/DropdownItem {:icon "mail"
-                                :text (@tr [:support])
-                                :href (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"
-                                           "question%20%2D%20Not%20logged%20in")}]]))]]
-       [modal-login]
-       [modal-signup]])))
-
-
-(defn user-menu
-  "Provides the user dropdown menu providing access to the user profile and an
-   action to logout."
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        user (subscribe [::authn-subs/user])
-        profile-fn #(history-utils/navigate "profile")
-        sign-out-fn (fn []
-                      (dispatch [::authn-events/logout])
-                      (dispatch [::history-events/navigate "welcome"]))]
-    (fn []
-      [ui/Dropdown {:item            true
-                    :simple          false
-                    :icon            nil
-                    :close-on-change true
-                    :trigger         (r/as-element [:span [ui/Icon {:name "user circle"}]
-                                                    (utils/truncate @user)])}
-       [ui/DropdownMenu
-        [ui/DropdownItem
-         {:key      "profile"
-          :text     (@tr [:profile])
-          :icon     "user"
-          :on-click profile-fn}]
-        [ui/DropdownItem
-         {:key      "sign-out"
-          :text     (@tr [:logout])
-          :icon     "sign out"
-          :on-click sign-out-fn}]]])))
-
-
 (defn authn-menu
   "Provides either a login or user dropdown depending on whether the user has
    an active session. The login button will bring up a modal dialog."
   []
-  (let [user (subscribe [::authn-subs/user])]
-    (fn []
-      (if @user
-        [user-menu]
-        [login-menu]))))
+  (let [tr (subscribe [::i18n-subs/tr])
+        user (subscribe [::authn-subs/user])
+        template-href (cimi-utils/template-href :user)
+        user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
+    (let [profile-fn #(history-utils/navigate "profile")
+          sign-out-fn (fn []
+                        (dispatch [::authn-events/logout])
+                        (dispatch [::history-events/navigate "welcome"]))
+          login-fn #(dispatch [::authn-events/open-modal :login])
+          logged-in? (boolean @user)
+          sign-up-ok? (get-in @user-templates [:templates (keyword (str template-href "/self-registration"))])]
+
+      [ui/ButtonGroup {:primary true}
+       [ui/Button {:on-click (if logged-in? profile-fn login-fn)}
+        [ui/Icon {:name (if logged-in? "user" "sign in")}]
+        (if logged-in? (utils/truncate @user) (@tr [:login]))]
+       [ui/Dropdown {:inline    true
+                     :button    true
+                     :pointing  "top right"
+                     :className "icon"}
+        (vec
+          (concat
+            [ui/DropdownMenu]
+
+            (when logged-in?
+              [[ui/DropdownItem
+                {:key      "sign-out"
+                 :text     (@tr [:logout])
+                 :icon     "sign out"
+                 :on-click sign-out-fn}]])
+
+            (when (and sign-up-ok? (not logged-in?))
+              [[ui/DropdownItem {:icon     "signup"
+                                 :text     (@tr [:signup])
+                                 :on-click #(dispatch [::authn-events/open-modal :signup])}]])
+
+            (when (or logged-in? sign-up-ok?)
+              [[ui/DropdownDivider]])
+
+            [[ui/DropdownItem {:icon   "book"
+                               :text   (@tr [:documentation])
+                               :href   "http://ssdocs.sixsq.com/"
+                               :target "_blank"}]
+             [ui/DropdownItem {:icon   "info circle"
+                               :text   (@tr [:knowledge-base])
+                               :href   "http://support.sixsq.com/solution/categories"
+                               :target "_blank"}]
+             [ui/DropdownItem {:icon "mail"
+                               :text (@tr [:support])
+                               :href (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"
+                                          "question%20%2D%20Not%20logged%20in")}]]))]
+       [modal-login]
+       [modal-signup]])))
 
 
 (defn ^:export open-authn-modal []

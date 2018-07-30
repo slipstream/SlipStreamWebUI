@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn category-icon
@@ -44,11 +45,7 @@
 (defn group-table-sui
   [group-data]
   (let [data (sort-by first group-data)]
-    [ui/Table
-     {:compact    true
-      :definition true
-      :padded     false
-      :style      {:max-width "100%"}}
+    [ui/Table style/definition
      (vec (concat [ui/TableBody]
                   (map tuple-to-row (map (juxt (comp name first) (comp str second)) data))))]))
 
