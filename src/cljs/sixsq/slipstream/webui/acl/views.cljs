@@ -4,7 +4,7 @@
 
 (defn acl-test
   []
-  [ui/Table {:text-align "center", :collapsing true, :celled true, :unstackable true}
+  [ui/Table {:text-align "center", :collapsing true, :celled true, :unstackable false}
    [ui/TableHeader
     [ui/TableRow
      [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "principal"]
