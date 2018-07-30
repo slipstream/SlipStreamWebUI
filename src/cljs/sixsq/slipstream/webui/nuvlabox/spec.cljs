@@ -57,7 +57,7 @@
                                               :$select      nil
                                               :$aggregation nil}
 
-               ::filter-visible?             true
+               ::filter-visible?             false
                ::collection                  nil
                ::state-selector              "all"})
 

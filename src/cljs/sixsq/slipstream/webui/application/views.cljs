@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
@@ -51,56 +52,32 @@
    [ui/TableCell (str v2)]])
 
 
-(defn group-table-sui
-  [group-data]
-  (let [data (sort-by first group-data)]
-    [ui/Table
-     {:compact    true
-      :definition true
-      :padded     false
-      :style      {:max-width "100%"}}
-     (vec (concat [ui/TableBody]
-                  (map tuple-to-row (map (juxt (comp name first) (comp str second)) data))))]))
+(defn preprocess-metadata
+  [{:keys [name path description logo type acl] :as module-meta}]
+  {:title       name
+   :subtitle    path
+   :description description
+   :logo        logo
+   :icon        (meta-category-icon type)
+   :acl         acl})
 
 
-(defn more-or-less
-  [state-atom]
-  (let [tr (subscribe [::i18n-subs/tr])
-        more? state-atom]
-    (fn [state-atom]
-      (let [label (if @more? (@tr [:less]) (@tr [:more]))
-            icon-name (if @more? "caret down" "caret right")]
-        [:a {:style    {:cursor "pointer"}
-             :on-click #(reset! more? (not @more?))} [ui/Icon {:name icon-name}] label]))))
+(defn metadata-rows
+  [module-meta]
+  (->> (dissoc module-meta :versions :children :acl :operations)
+       (map (juxt (comp name first) (comp str second)))
+       (map tuple-to-row)))
 
 
 (defn format-meta
-  [{:keys [name path version description logo type] :as module-meta}]
-  (let [more? (reagent/atom false)]
-    (fn [{:keys [name path version description logo type] :as module-meta}]
-      (let [data (sort-by first (dissoc module-meta :versions :children :acl :operations))]
-        (when (pos? (count data))
-          [ui/Card {:fluid true}
-           [ui/CardContent
-            (when logo
-              [ui/Image {:floated "right"
-                         :size    :tiny
-                         :src     (:href logo)}])
-            [ui/CardHeader
-             [ui/Icon {:name (meta-category-icon type)}]
-             (cond-> name
-                     (not (str/blank? path)) (str " (" path ")"))]
-            (when description
-              [ui/CardMeta
-               [:p description]])
-            [ui/CardDescription
-             [more-or-less more?]
-             (when @more?
-               [group-table-sui data])]]])))))
+  [module-meta]
+  (let [metadata (preprocess-metadata module-meta)
+        rows (metadata-rows module-meta)]
+    [cc/metadata metadata rows]))
 
 
 (defn error-text [tr error]
-  (if-let [{:keys [status body reason]} (ex-data error)]
+  (if-let [{:keys [status reason]} (ex-data error)]
     (str (or (@tr [reason]) (name reason)) " (" status ")")
     (str error)))
 
@@ -136,15 +113,12 @@
 
 (defn format-module-children
   [module-children]
-  (let [tr (subscribe [::i18n-subs/tr])]
-    (fn [module-children]
-      (when (pos? (count module-children))
-        [cc/collapsible-card
-         (@tr [:modules])
-         (vec (concat [ui/ListSA {:divided true
-                                  :relaxed true
-                                  :selection true}]
-                      (map format-module module-children)))]))))
+  (when (pos? (count module-children))
+    [ui/Segment style/basic
+     (vec (concat [ui/ListSA {:divided   true
+                              :relaxed   true
+                              :selection true}]
+                  (map format-module module-children)))]))
 
 
 (defn parameter-table-row
@@ -161,9 +135,9 @@
     (fn [title-kw parameters]
       (when parameters
         (let [rows (mapv (juxt :parameter :description :value) parameters)]
-          [cc/collapsible-card
+          [cc/collapsible-segment
            (@tr [title-kw])
-           [ui/Table {:definition true}
+           [ui/Table style/definition
             (vec (concat [ui/TableBody] (map parameter-table-row rows)))]])))))
 
 
@@ -212,7 +186,7 @@
       (when targets
         (let [selected (keyword @selected-target)
               target-value (get targets selected)]
-          [cc/collapsible-card
+          [cc/collapsible-segment
            [:span [target-dropdown selected-target] "target"]
            [ui/Segment
             (if (= :packages selected)
@@ -247,18 +221,18 @@
 (defn render-node
   [{:keys [node multiplicity component parameterMappings] :as content}]
   (let [label (name node)]
-    [cc/collapsible-card
+    [cc/collapsible-segment
      [:span label]
-     [ui/Table {:definition true}
+     [ui/Table style/definition
       [ui/TableBody
        [ui/TableRow
-        [ui/TableCell {:collapsing true}  "component"]
+        [ui/TableCell {:collapsing true} "component"]
         [ui/TableCell (format-component-link label (:href component))]]
        [ui/TableRow
-        [ui/TableCell {:collapsing true}  "multiplicity"]
+        [ui/TableCell {:collapsing true} "multiplicity"]
         [ui/TableCell multiplicity]]
        [ui/TableRow
-        [ui/TableCell {:collapsing true}  "parameterMappings"]
+        [ui/TableCell {:collapsing true} "parameterMappings"]
         [ui/TableCell (render-parameter-mappings parameterMappings)]]]]]))
 
 

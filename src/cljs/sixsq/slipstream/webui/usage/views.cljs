@@ -11,7 +11,14 @@
     [sixsq.slipstream.webui.usage.subs :as usage-subs]
     [sixsq.slipstream.webui.usage.utils :as u]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]))
+
+
+(def vms-label "VMs [h]")
+(def cpus-label "CPUs [h]")
+(def ram-label "RAM [GB\u00b7h]")
+(def disk-label "DISK [GB\u00b7h]")
 
 
 (defn date-range-menu-item
@@ -157,12 +164,11 @@
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::usage-subs/filter-visible?])]
     [:div
-     [ui/Menu {:attached   "top"
-               :borderless true}
-      [ui/MenuItem {:name     "search"
+     [ui/Menu {:attached "top", :borderless true}
+      [ui/MenuItem {:name     "refresh"
                     :on-click #(dispatch [::usage-events/fetch-meterings])}
-       [ui/Icon {:name "search"}]
-       (@tr [:search])]
+       [ui/Icon {:name "refresh"}]
+       (@tr [:refresh])]
       [filter-button]]
      (when @filter-visible?
        [ui/Segment {:attached "bottom"}
@@ -196,26 +202,26 @@
   (let [results (subscribe [::usage-subs/results])]
     (fn []
       (let [res-all-clouds (:all-clouds @results)]
-        [ui/Segment {:padded false :basic true :textAlign "center" :style {:margin 0 :padding 0}}
+        [ui/Segment style/evenly
          [ui/Statistic {:size "tiny"}
           [ui/StatisticValue "ALL"]
           [ui/StatisticLabel "CLOUDS"]]
          [ui/Statistic {:size "tiny"}
           [ui/StatisticValue (value-in-statistic (:vms res-all-clouds))
            [ui/Icon {:name "server"}]]
-          [ui/StatisticLabel "VMs"]]
+          [ui/StatisticLabel vms-label]]
          [ui/Statistic {:size "tiny"}
           [ui/StatisticValue (value-in-statistic (:vcpu res-all-clouds))
            [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
-          [ui/StatisticLabel "CPU"]]
+          [ui/StatisticLabel cpus-label]]
          [ui/Statistic {:size "tiny"}
           [ui/StatisticValue (value-in-statistic (to-GB-from-MB (:ram res-all-clouds)))
            [ui/Icon {:size "small" :name "grid layout"}]]
-          [ui/StatisticLabel "RAM"]]
+          [ui/StatisticLabel ram-label]]
          [ui/Statistic {:size "tiny"}
           [ui/StatisticValue (value-in-statistic (to-GB-from-MB (:disk res-all-clouds)))
            [ui/Icon {:size "small" :name "database"}]]
-          [ui/StatisticLabel {} "Disk"]]]))))
+          [ui/StatisticLabel {} disk-label]]]))))
 
 
 (defn results-table-row
@@ -233,21 +239,21 @@
   (let [results (subscribe [::usage-subs/results])]
     (fn []
       [ui/Segment {:padded false :style {:margin 0 :padding 0} :basic true}
-       [ui/Table {:striped true :fixed true}
+       [ui/Table {:selectable true, :fixed true, :compact "very"}
         [ui/TableHeader
          [ui/TableRow
           [ui/TableHeaderCell "Cloud"]
-          [ui/TableHeaderCell {:textAlign "right"} "VMs [h]"]
-          [ui/TableHeaderCell {:textAlign "right"} "CPUs [h]"]
-          [ui/TableHeaderCell {:textAlign "right"} "RAM [GB\u00b7h]"]
-          [ui/TableHeaderCell {:textAlign "right"} "DISK [GB\u00b7h]"]]]
+          [ui/TableHeaderCell {:textAlign "right"} vms-label]
+          [ui/TableHeaderCell {:textAlign "right"} cpus-label]
+          [ui/TableHeaderCell {:textAlign "right"} ram-label]
+          [ui/TableHeaderCell {:textAlign "right"} disk-label]]]
         [ui/TableBody
          (map results-table-row (sort-by first @results))]]])))
 
 
 (defn search-result []
   (let [loading? (subscribe [::usage-subs/loading?])]
-    [ui/Segment {:basic true, :loading @loading?}
+    [ui/Segment (merge style/basic {:loading @loading?})
      [statistics-all-cloud]
      [table-results-clouds]]))
 

@@ -1,7 +1,9 @@
 (ns sixsq.slipstream.webui.nuvlabox-detail.views
   (:require
     [cljs.pprint :refer [cl-format]]
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.acl.views :as acl]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.nuvlabox-detail.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox-detail.subs :as nuvlabox-subs]
@@ -124,6 +126,37 @@
       [:div msg-next]]]))
 
 
+(defn select-metadata
+  [data]
+  (let [metadata-keys #{:id :resourceURI :name :description :created :updated}]
+    (select-keys data metadata-keys)))
+
+
+(defn metadata-row
+  [[k v]]
+  ^{:key k}
+  [ui/TableRow [ui/TableCell {:collapsing true} k] [ui/TableCell v]])
+
+
+(defn nb-metadata
+  []
+  (let [record (subscribe [::nuvlabox-subs/record])]
+    (fn []
+      (let [{:keys [id name description acl] :as data} @record
+            rows (->> data
+                      select-metadata
+                      (map metadata-row)
+                      vec)]
+        [cc/metadata {:title       (or name id)
+                      :subtitle    (-> (or id "unknown/unknown")
+                                       (str/split #"/")
+                                       second)
+                      :description description
+                      :icon        "computer"
+                      :acl         acl}
+         rows]))))
+
+
 (defn state-table
   []
   (let [detail (subscribe [::nuvlabox-subs/state])]
@@ -138,12 +171,15 @@
 
 (defn record-info
   []
-  (let [record (subscribe [::nuvlabox-subs/record])]
+  (let [record (subscribe [::nuvlabox-subs/record])
+        metadata-keys #{:id :resourceURI
+                        :name :description
+                        :created :updated
+                        :acl :operations}]
     (fn []
       (when @record
-        [cc/collapsible-segment
-         [:span [ui/Icon {:name "list"}] " details"]
-         (details/format-resource-data @record {})]))))
+        (let [data (into {} (remove (fn [[k v]] (metadata-keys k)) @record))]
+          (first (details/format-resource-data data {})))))))
 
 
 (defn nb-detail
@@ -155,5 +191,7 @@
         (dispatch [::nuvlabox-events/fetch-detail]))
       [ui/Container {:fluid true}
        [controls-detail]
+       [nb-metadata]
        [state-table]
-       [record-info]])))
+       [record-info]
+       [acl/acl-test]])))

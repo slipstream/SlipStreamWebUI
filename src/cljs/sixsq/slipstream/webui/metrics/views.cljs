@@ -12,7 +12,8 @@
     [sixsq.slipstream.webui.plot.plot :as plot]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
 
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn controls
@@ -126,7 +127,8 @@
   []
   (let [job-info (subscribe [::metrics-subs/job-info])]
     (fn []
-      [plot/plot job-stats-vega-spec {:values (:states @job-info)} :style {:float :left}])))
+      [ui/Segment style/basic
+       [plot/plot job-stats-vega-spec {:values (:states @job-info)} :style {:float :left}]])))
 
 
 (defn success-rate
@@ -157,7 +159,7 @@
                                                          (map (juxt :key :doc_count))
                                                          (into {}))
             rate (success-rate SUCCESS FAILED)]
-        [:div
+        [ui/Segment style/evenly
          [statistic "running" RUNNING]
          [statistic "queued" QUEUED]
          [statistic "success rate" rate]

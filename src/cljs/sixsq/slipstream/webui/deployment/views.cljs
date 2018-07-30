@@ -11,9 +11,10 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.forms :as forms]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn bool->int [bool]
@@ -139,7 +140,7 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [entries]
       [ui/Table
-       {:compact     true
+       {:compact     "very"
         :single-line true
         :padded      false}
        [ui/TableHeader
@@ -162,29 +163,28 @@
   (let [tr (subscribe [::i18n-subs/tr])
         loading? (subscribe [::deployment-subs/loading?])
         deployments (subscribe [::deployment-subs/deployments])]
-    (fn []
-      [:div {:class-name "webui-x-autoscroll"}
-       (when-not @loading?
-         (when-let [{:keys [runs]} @deployments]
-           (let [{:keys [count totalCount]} runs]
-             [ui/MenuItem
-              [ui/Statistic {:size :mini}
-               [ui/StatisticValue (str count "/" totalCount)]
-               [ui/StatisticLabel (@tr [:results])]]])))
-       (when-not @loading?
-         (when-let [{:keys [runs]} @deployments]
-           (let [{:keys [item]} runs]
-             [vertical-data-table item])))])))
+    [ui/Segment (merge style/basic
+                       {:class-name "webui-x-autoscroll"
+                        :loading    @loading?})
+
+     (when-let [{:keys [runs]} @deployments]
+       (let [{:keys [count totalCount]} runs]
+         [ui/MenuItem
+          [ui/Statistic {:size "tiny"}
+           [ui/StatisticValue (str count "/" totalCount)]
+           [ui/StatisticLabel (@tr [:results])]]]))
+
+     (when-let [{:keys [runs]} @deployments]
+       (let [{:keys [item]} runs]
+         [vertical-data-table item]))]))
 
 
 (defn deployments
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Container {:fluid true}
-     [menu-bar]
-     [cc/collapsible-card
-      (@tr [:results])
-      [runs-display]]]))
+  [ui/Container {:fluid true}
+   [menu-bar]
+   [ui/Segment style/basic
+    [runs-display]]])
 
 
 (defn deployment-resource
@@ -201,7 +201,7 @@
                        1 [[deployments]]
                        2 [[deployment-detail-views/deployment-detail]]
                        [[deployments]])]
-        (vec (concat [:div] children))))))
+        (vec (concat [ui/Segment style/basic] children))))))
 
 
 (defmethod panel/render :deployment

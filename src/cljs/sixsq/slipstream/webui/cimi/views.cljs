@@ -18,11 +18,12 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.forms :as forms]
     [taoensso.timbre :as log]))
 
 
@@ -85,7 +86,7 @@
       [:div {:class-name "webui-x-autoscroll"}
        [ui/Table
         {:collapsing  true
-         :compact     true
+         :compact     "very"
          :unstackable true
          :single-line true
          :padded      false}
@@ -135,12 +136,12 @@
                        (sort second)
                        (map statistic)
                        vec)]
-        (vec (concat [ui/StatisticGroup {:size :mini}] [[results-statistic]] stats))))))
+        [ui/Segment style/basic
+         (vec (concat [ui/StatisticGroup {:size "tiny"}] [[results-statistic]] stats))]))))
 
 
 (defn results-display []
-  (let [tr (subscribe [::i18n-subs/tr])
-        collection (subscribe [::cimi-subs/collection])
+  (let [collection (subscribe [::cimi-subs/collection])
         collection-name (subscribe [::cimi-subs/collection-name])
         selected-fields (subscribe [::cimi-subs/selected-fields])
         cep (subscribe [::cimi-subs/cloud-entry-point])]
@@ -148,13 +149,13 @@
       (let [{:keys [collection-key]} @cep
             resource-collection-key (get collection-key @collection-name)
             results @collection]
-        [cc/collapsible-card (@tr [:results])
-         (if (instance? js/Error results)
-           [:pre (with-out-str (pprint (ex-data results)))]
-           (let [entries (get results resource-collection-key [])]
-             [:div
-              [aggregations-table]
-              [results-table @selected-fields entries]]))]))))
+        (if (instance? js/Error results)
+          [ui/Segment style/basic
+           [:pre (with-out-str (pprint (ex-data results)))]]
+          (let [entries (get results resource-collection-key [])]
+            [ui/Segment style/basic
+             [aggregations-table]
+             [results-table @selected-fields entries]]))))))
 
 
 (defn cloud-entry-point-title
@@ -416,7 +417,7 @@
                                        status (str " (" status ")"))
                       :message message
                       :type    :error})]))
-      [:div
+      [ui/Segment style/basic
        [resource-add-form]
        [ui/Menu {:attached   "top"
                  :borderless true}
@@ -445,7 +446,7 @@
                           [results-display]]
                        3 [[cimi-detail-views/cimi-detail]]
                        [[menu-bar]])]
-        (vec (concat [:div] children))))))
+        (vec (concat [ui/Segment style/basic] children))))))
 
 
 (defmethod panel/render :cimi

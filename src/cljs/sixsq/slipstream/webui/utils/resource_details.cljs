@@ -20,6 +20,7 @@
 
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as comp]
     [sixsq.slipstream.webui.utils.values :as values]))
 
@@ -56,11 +57,7 @@
                                      :on-click #(reset! show? true)}
                         (when icon
                           [ui/Icon {:name icon}])
-                        label]
-                       #_[ui/Button
-                          {:primary  true
-                           :on-click #(reset! show? true)}
-                          label])}
+                        label])}
          [ui/ModalHeader title-text]
          [ui/ModalContent (cond-> {}
                             scrolling? (assoc :scrolling true)) body]
@@ -237,11 +234,7 @@
 (defn group-table-sui
   [group-data {:keys [params-desc] :as description}]
   (let [data (sort-by first group-data)]
-    [ui/Table {:compact     true
-               :definition  true
-               :single-line true
-               :padded      false
-               :style       {:max-width "100%"}}
+    [ui/Table style/definition
      (vec (concat [ui/TableBody]
                   (->> data
                        (map (data-to-tuple-fn params-desc))
@@ -287,7 +280,7 @@
 (defn resource-detail
   "Provides a generic visualization of a CIMI resource document."
   [refresh-button title {:keys [name id operations] :as data} baseURI description]
-  [:div
+  [ui/Segment style/basic
    (vec (concat [ui/Menu {:borderless true}]
                 (format-operations refresh-button data baseURI description)))
    (format-resource-data data description)])
