@@ -29,6 +29,7 @@ evenly
 definition
   {:compact     "very"
    :definition  true
+
    :single-line true
    :padded      false
    :style       {:max-width "100%"}})

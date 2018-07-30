@@ -20,9 +20,9 @@
 
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as comp]
-    [sixsq.slipstream.webui.utils.values :as values]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.values :as values]))
 
 
 (defn action-buttons

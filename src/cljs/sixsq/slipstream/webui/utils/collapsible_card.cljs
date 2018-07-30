@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.webui.utils.collapsible-card
   (:require
-    [reagent.core :as reagent]
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [reagent.core :as reagent]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.utils.style :as style]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn more-or-less

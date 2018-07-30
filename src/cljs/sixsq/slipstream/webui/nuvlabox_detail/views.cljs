@@ -1,7 +1,9 @@
 (ns sixsq.slipstream.webui.nuvlabox-detail.views
   (:require
     [cljs.pprint :refer [cl-format]]
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.acl.views :as acl]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.nuvlabox-detail.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox-detail.subs :as nuvlabox-subs]
@@ -10,8 +12,7 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.resource-details :as details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn controls-detail
@@ -181,48 +182,6 @@
           (first (details/format-resource-data data {})))))))
 
 
-(defn acl-test
-  []
-  [ui/Table {:text-align "center", :collapsing true, :celled true, :unstackable true}
-   [ui/TableHeader
-    [ui/TableRow
-     [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "principal"]
-     [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "type"]
-     [ui/TableHeaderCell {:colSpan 2, :text-align "center", :collapsing true} "metadata"]
-     [ui/TableHeaderCell {:colSpan 2, :text-align "center", :collapsing true} "attributes"]
-     [ui/TableHeaderCell {:colSpan 2, :text-align "center", :collapsing true} "ACL"]
-     [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "delete"]]
-    [ui/TableRow
-     [ui/TableHeaderCell {:collapsing true} "view"]
-     [ui/TableHeaderCell {:collapsing true} "modify"]
-     [ui/TableHeaderCell {:collapsing true} "view"]
-     [ui/TableHeaderCell {:collapsing true} "modify"]
-     [ui/TableHeaderCell {:collapsing true} "view"]
-     [ui/TableHeaderCell {:collapsing true} "modify"]]]
-   [ui/TableBody
-    [ui/TableRow
-     [ui/TableCell {:collapsing true} "some-owner"]
-     [ui/TableCell {:collapsing true} "ROLE"]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]]
-    [ui/TableRow
-     [ui/TableCell {:collapsing true} "someone"]
-     [ui/TableCell {:collapsing true}"USER"]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} "\u0020"]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} "\u0020"]
-     [ui/TableCell {:collapsing true} [ui/Icon {:name "check"}]]
-     [ui/TableCell {:collapsing true} "\u0020"]
-     [ui/TableCell {:collapsing true} "\u0020"]]
-    ]])
-
-
 (defn nb-detail
   []
   (let [detail (subscribe [::nuvlabox-subs/state])
@@ -235,4 +194,4 @@
        [nb-metadata]
        [state-table]
        [record-info]
-       [acl-test]])))
+       [acl/acl-test]])))

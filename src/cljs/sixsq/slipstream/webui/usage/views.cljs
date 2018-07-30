@@ -11,8 +11,8 @@
     [sixsq.slipstream.webui.usage.subs :as usage-subs]
     [sixsq.slipstream.webui.usage.utils :as u]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (def vms-label "VMs [h]")
@@ -164,12 +164,11 @@
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::usage-subs/filter-visible?])]
     [:div
-     [ui/Menu {:attached   "top"
-               :borderless true}
-      [ui/MenuItem {:name     "search"
+     [ui/Menu {:attached "top", :borderless true}
+      [ui/MenuItem {:name     "refresh"
                     :on-click #(dispatch [::usage-events/fetch-meterings])}
-       [ui/Icon {:name "search"}]
-       (@tr [:search])]
+       [ui/Icon {:name "refresh"}]
+       (@tr [:refresh])]
       [filter-button]]
      (when @filter-visible?
        [ui/Segment {:attached "bottom"}
@@ -240,7 +239,7 @@
   (let [results (subscribe [::usage-subs/results])]
     (fn []
       [ui/Segment {:padded false :style {:margin 0 :padding 0} :basic true}
-       [ui/Table {:striped true, :fixed true, :compact "very"}
+       [ui/Table {:selectable true, :fixed true, :compact "very"}
         [ui/TableHeader
          [ui/TableRow
           [ui/TableHeaderCell "Cloud"]

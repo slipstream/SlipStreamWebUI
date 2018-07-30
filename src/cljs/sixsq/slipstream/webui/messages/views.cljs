@@ -126,7 +126,8 @@
     (when @session
       (let [n (count @messages)
             disabled? (zero? n)]
-        [ui/Popup {:on       "click"
+        [ui/Popup {:flowing  true
+                   :on       "click"
                    :position "bottom right"
                    :open     @popup-open?
                    :on-open  #(dispatch [::message-events/open-popup])

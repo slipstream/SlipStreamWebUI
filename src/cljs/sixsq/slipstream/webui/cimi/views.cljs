@@ -18,13 +18,13 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.forms :as forms]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [taoensso.timbre :as log]))
 
 
 (defn id-selector-formatter [entry]
