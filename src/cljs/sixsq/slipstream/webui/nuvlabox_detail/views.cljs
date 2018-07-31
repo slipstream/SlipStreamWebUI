@@ -3,7 +3,6 @@
     [cljs.pprint :refer [cl-format]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.acl.views :as acl]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.nuvlabox-detail.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox-detail.subs :as nuvlabox-subs]
@@ -193,5 +192,4 @@
        [controls-detail]
        [nb-metadata]
        [state-table]
-       [record-info]
-       [acl/acl-test]])))
+       [record-info]])))
