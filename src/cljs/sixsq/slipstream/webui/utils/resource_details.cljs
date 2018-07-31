@@ -2,22 +2,17 @@
   (:require
     [cljs.pprint :refer [pprint]]
     [cljsjs.codemirror]
-
     [cljsjs.codemirror.mode.clojure]
-
     [cljsjs.codemirror.mode.javascript]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
-
+    [sixsq.slipstream.webui.acl.views :as acl]
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
     [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
-
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.style :as style]
@@ -248,15 +243,6 @@
    [group-table-sui data description]])
 
 
-(defn reformat-acl [{{:keys [owner rules] :as acl} :acl :as data}]
-  (let [own ["acl:owner" (str (:principal owner) " (" (:type owner) ")")]
-        rul (map (fn [{:keys [principal type right]} i]
-                   [(str "acl:rule-" i)
-                    (str principal " (" type ") = " right)]) rules (range))
-        entries (concat [own] rul)]
-    (into {} (concat (seq (dissoc data :acl)) entries))))
-
-
 (defn group-comparator [x y]
   (let [group-order (zipmap ["common" "properties" "attributes" :others "operations" "acl"] (range))
         x-index (get group-order x)
@@ -269,18 +255,18 @@
       x-index (< x-index o-index))))
 
 
-(defn format-resource-data [data description]
+(defn format-resource-data [{:keys [acl] :as data} description]
   (let [groups (into (sorted-map-by group-comparator)
-                     (group-by attr-ns (-> data
-                                           reformat-acl
-                                           (dissoc :operations))))]
-    (doall (map (partial format-group description) groups))))
+                     (group-by attr-ns (dissoc data :acl :operations)))]
+    (conj (mapv (partial format-group description) groups)
+          (acl/acl-segment acl))))
 
 
 (defn resource-detail
   "Provides a generic visualization of a CIMI resource document."
   [refresh-button title {:keys [name id operations] :as data} baseURI description]
-  [ui/Segment style/basic
-   (vec (concat [ui/Menu {:borderless true}]
-                (format-operations refresh-button data baseURI description)))
-   (format-resource-data data description)])
+  (vec (concat
+         [ui/Segment style/basic
+          (vec (concat [ui/Menu {:borderless true}]
+                       (format-operations refresh-button data baseURI description)))]
+         (format-resource-data data description))))

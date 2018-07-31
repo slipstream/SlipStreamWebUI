@@ -25,11 +25,24 @@ evenly
 ;; common styles for Tables
 ;;
 
-(def ^{:doc "Style for very compact, single-line definition table."}
-definition
+(def ^{:doc "Common styles for single-line tables."}
+single-line
   {:compact     "very"
-   :definition  true
-
    :single-line true
    :padded      false
    :style       {:max-width "100%"}})
+
+
+(def ^{:doc "Style for very compact, single-line definition table."}
+definition
+  (merge single-line
+         {:definition true}))
+
+
+(def ^{:doc "Style for very compact, single-line ACL table."}
+acl
+  (merge single-line
+         {:collapsing true
+          :celled true
+          :text-align "center"
+          :unstackable true}))
