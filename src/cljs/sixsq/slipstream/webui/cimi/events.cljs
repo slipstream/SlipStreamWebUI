@@ -1,7 +1,6 @@
 (ns sixsq.slipstream.webui.cimi.events
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
-
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi.effects :as cimi-fx]
@@ -104,13 +103,21 @@
     (let [resource-type (-> cloud-entry-point
                             :collection-key
                             (get collection-name))]
-      {:db                  (assoc db ::cimi-spec/loading? true
-                                      ::cimi-spec/aggregations nil
-                                      ::cimi-spec/collection nil)
-       ::cimi-api-fx/search [client
-                             resource-type
-                             (general-utils/prepare-params query-params)
-                             #(dispatch [::set-results resource-type %])]})))
+      (if resource-type
+        {:db                  (assoc db ::cimi-spec/loading? true
+                                        ::cimi-spec/aggregations nil
+                                        ::cimi-spec/collection nil)
+         ::cimi-api-fx/search [client
+                               resource-type
+                               (general-utils/prepare-params query-params)
+                               #(dispatch [::set-results resource-type %])]}
+        (let [msg-map {:header  (cond-> (str "invalid resource type: " collection-name))
+                       :content (str "The resource type '" collection-name "' is not valid. "
+                                     "Please choose another resource type.")
+                       :type    :error}]
+          (dispatch [::messages-events/add msg-map])
+          db)))))
+
 
 (reg-event-fx
   ::create-resource
