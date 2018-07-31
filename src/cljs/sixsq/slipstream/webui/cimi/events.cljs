@@ -74,8 +74,17 @@
 
 (reg-event-db
   ::set-collection-name
-  (fn [db [_ collection-name]]
-    (assoc db ::cimi-spec/collection-name collection-name)))
+  (fn [{:keys [::cimi-spec/cloud-entry-point] :as db} [_ collection-name]]
+    (if (or (empty? collection-name) (-> cloud-entry-point
+                                         :collection-key
+                                         (get collection-name)))
+      (assoc db ::cimi-spec/collection-name collection-name)
+      (let [msg-map {:header  (cond-> (str "invalid resource type: " collection-name))
+                     :content (str "The resource type '" collection-name "' is not valid. "
+                                   "Please choose another resource type.")
+                     :type    :error}]
+        (dispatch [::messages-events/add msg-map])
+        db))))
 
 
 (reg-event-db
@@ -103,20 +112,13 @@
     (let [resource-type (-> cloud-entry-point
                             :collection-key
                             (get collection-name))]
-      (if resource-type
-        {:db                  (assoc db ::cimi-spec/loading? true
-                                        ::cimi-spec/aggregations nil
-                                        ::cimi-spec/collection nil)
-         ::cimi-api-fx/search [client
-                               resource-type
-                               (general-utils/prepare-params query-params)
-                               #(dispatch [::set-results resource-type %])]}
-        (let [msg-map {:header  (cond-> (str "invalid resource type: " collection-name))
-                       :content (str "The resource type '" collection-name "' is not valid. "
-                                     "Please choose another resource type.")
-                       :type    :error}]
-          (dispatch [::messages-events/add msg-map])
-          db)))))
+      {:db                  (assoc db ::cimi-spec/loading? true
+                                      ::cimi-spec/aggregations nil
+                                      ::cimi-spec/collection nil)
+       ::cimi-api-fx/search [client
+                             resource-type
+                             (general-utils/prepare-params query-params)
+                             #(dispatch [::set-results resource-type %])]})))
 
 
 (reg-event-fx

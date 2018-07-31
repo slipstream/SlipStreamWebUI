@@ -175,6 +175,12 @@
          {:value       @selected-id
           :placeholder (@tr [:resource-type])
           :scrolling   true
+          :search      true
+          :selection   true
+          ;:labeled     true
+          ;:button true
+          ;:className "icon"
+          ;:icon "code"
           :options     options
           :on-change   (ui-callback/value callback)}]))))
 
@@ -190,10 +196,16 @@
         [ui/Form {:on-key-press (partial forms/on-return-key
                                          #(when @selected-id
                                             (dispatch [::cimi-events/get-results])))}
-         [ui/FormField
-          [cloud-entry-point-title]
-          [ui/Button {:circular true :compact true :size "tiny" :floated "right" :basic true :icon "info"
-                      :href     "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]]
+         [ui/Button {
+                     ;:circular true
+                     :floated "right"
+                     :size "tiny" :basic true :icon "info"
+                     :href     "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
+         [ui/FormGroup
+          [ui/FormField
+           [cloud-entry-point-title]]
+          #_[ui/FormField
+           ]]
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
