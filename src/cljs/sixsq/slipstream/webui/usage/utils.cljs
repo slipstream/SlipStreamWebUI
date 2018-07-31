@@ -9,6 +9,14 @@
     [sixsq.slipstream.webui.utils.time :as time]))
 
 
+(def vms-unit "VMs [h]")
+(def cpus-unit "CPUs [h]")
+(def ram-unit "RAM [GB·h]")
+(def disk-unit "DISK [GB·h]")
+(def price-unit "PRICE [€]")
+
+(def all-credentials "all-credentials")
+
 (defn same-date?
   "Returns true if the two dates represent the same time to within 1 minute,
    otherwise false. If either argument is nil, false is returned."
@@ -30,29 +38,53 @@
   (date-range 30 1))
 
 
-(defn fetch-metering [resolve client date-after date-before user connector]
+(defn to-hour [v]
+  (/ v 60))
+
+
+(defn to-GB-from-MB [v]
+  (/ v 1024))
+
+
+(defn fetch-metering [resolve client date-after date-before user credential]
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-user-str (when user (str "acl/rules/principal='" user "'"))
-          filter-connectors (when-not (= connector "all-clouds") (str "connector/href='" connector "'"))
-          filter-str (str/join " and " (remove nil? [filter-created-str filter-user-str filter-connectors]))
+          filter-credentials (when-not (= credential all-credentials) (str "credentials/href='" credential "'"))
+          filter-str (str/join " and " (remove nil? [filter-created-str filter-user-str filter-credentials]))
           request-opts {"$last"        0
                         "$filter"      filter-str
                         "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
-                                            "sum:serviceOffer/resource:disk")}
+                                            "sum:serviceOffer/resource:disk, sum:price")}
           response (<! (cimi/search client "meterings" request-opts))]
       (resolve
-        [(keyword connector) {:vms  (get response :count 0)
-                              :vcpu (get-in response [:aggregations :sum:serviceOffer/resource:vcpu :value] 0)
-                              :ram  (get-in response [:aggregations :sum:serviceOffer/resource:ram :value] 0)
-                              :disk (get-in response [:aggregations :sum:serviceOffer/resource:disk :value] 0)}]))))
+        [credential {:vms   {:unit  vms-unit
+                             :value (-> response (get :count 0) to-hour)}
+                     :cpus  {:unit  cpus-unit
+                             :value (-> response
+                                        (get-in [:aggregations :sum:serviceOffer/resource:vcpu :value] 0)
+                                        to-hour)}
+                     :ram   {:unit  ram-unit
+                             :value (-> response
+                                        (get-in [:aggregations :sum:serviceOffer/resource:ram :value] 0)
+                                        to-GB-from-MB
+                                        to-hour)}
+                     :disk  {:unit  disk-unit
+                             :value (-> response
+                                        (get-in [:aggregations :sum:serviceOffer/resource:disk :value] 0)
+                                        to-GB-from-MB
+                                        to-hour)}
+                     :price {:unit  price-unit
+                             :value (-> response (get-in [:aggregations :sum:price :value] 0)
+                                        to-hour)}}]))))
+
 
 (defn fetch-meterings [client
                        date-after
                        date-before
                        user
-                       connectors
+                       credentials
                        callback]
   (let [p (p/all (map #(p/promise (fn [resolve _]
-                                    (fetch-metering resolve client date-after date-before user %))) connectors))]
+                                    (fetch-metering resolve client date-after date-before user %))) credentials))]
     (p/then p #(->> % (into {}) callback))))

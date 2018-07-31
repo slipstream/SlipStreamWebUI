@@ -6,12 +6,10 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
-    [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.webui.client.subs :as client-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 (defn extract-deployments-data [deployment-resp]
   (let [deployments (get-in deployment-resp [:runs :item] [])]
@@ -145,11 +143,8 @@
                     [ui/Icon
                      (if (contains? @deleted deployment-uuid)
                        {:name "trash outline"}
-                       {:name    "remove" :negative true :link true
-                        :onClick #(dispatch
-                                    [::dashboard-events/delete-deployment-modal deployment])})]
-
-                    ])]]
+                       {:name    "remove" :link true
+                        :onClick #(dispatch [::dashboard-events/delete-deployment-modal deployment])})]])]]
         (if aborted
           [ui/Popup {:trigger  (r/as-element row)
                      :inverted true

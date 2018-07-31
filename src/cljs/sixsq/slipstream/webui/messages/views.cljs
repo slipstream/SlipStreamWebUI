@@ -86,7 +86,7 @@
 
          [ui/ModalActions
           [ui/Button {:on-click hide-fn} (@tr [:close])]
-          [ui/Button {:negative :true, :on-click remove-fn} (@tr [:clear])]]]))))
+          [ui/Button {:negative true, :on-click remove-fn} (@tr [:clear])]]]))))
 
 
 (defn feed-item

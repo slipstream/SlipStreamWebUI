@@ -1,4 +1,3 @@
-
 (ns sixsq.slipstream.webui.usage.spec
   (:require-macros [sixsq.slipstream.webui.utils.spec :refer [only-keys]])
   (:require
@@ -12,15 +11,15 @@
 
 (s/def ::results any?)
 
-(s/def ::loading-connectors-list? boolean?)
-
-(s/def ::connectors-list vector?)
-
 (s/def ::users-list vector?)
 
-(s/def ::loading-users-list? boolean?)
+(s/def ::credentials-list any?)
 
-(s/def ::selected-connectors vector?)
+(s/def ::loading-credentials-list? boolean?)
+
+(s/def ::selected-credentials vector?)
+
+(s/def ::loading-users-list? boolean?)
 
 (s/def ::selected-user (s/nilable string?))
 
@@ -31,23 +30,21 @@
 (s/def ::db (s/keys :req [::loading?
                           ::filter-visible?
                           ::results
-                          ::loading-connectors-list?
-                          ::connectors-list
-                          ::selected-connectors
                           ::loading-users-list?
+                          ::credentials-list
+                          ::loading-credentials-list?
                           ::users-list
                           ::selected-user
                           ::date-range
                           ::is-admin?]))
 
-(def defaults {::loading?                 false
-               ::filter-visible?          false
-               ::results                  nil
-               ::loading-connectors-list? true
-               ::connectors-list          []
-               ::selected-connectors      []
-               ::loading-users-list?      true
-               ::users-list               []
-               ::selected-user            nil
-               ::date-range               (u/default-date-range)
-               ::is-admin?                false})
+(def defaults {::loading?                  false
+               ::filter-visible?           false
+               ::results                   nil
+               ::loading-users-list?       true
+               ::users-list                []
+               ::credentials-list          []
+               ::loading-credentials-list? true
+               ::selected-user             nil
+               ::date-range                (u/default-date-range)
+               ::is-admin?                 false})

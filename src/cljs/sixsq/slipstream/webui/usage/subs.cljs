@@ -16,16 +16,16 @@
   ::usage-spec/results)
 
 (reg-sub
-  ::loading-connectors-list?
-  ::usage-spec/loading-connectors-list?)
-
-(reg-sub
-  ::connectors-list
-  ::usage-spec/connectors-list)
-
-(reg-sub
   ::loading-users-list?
-  ::usage-spec/loading-connectors-list?)
+  ::usage-spec/loading-users-list?)
+
+(reg-sub
+  ::credentials-list
+  ::usage-spec/credentials-list)
+
+(reg-sub
+  ::loading-credentials-list?
+  ::usage-spec/loading-credentials-list?)
 
 (reg-sub
   ::users-list

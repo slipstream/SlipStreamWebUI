@@ -5,35 +5,8 @@
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.usage.effects :as usage-fx]
-    [sixsq.slipstream.webui.usage.spec :as usage-spec]))
-
-
-(reg-event-db
-  ::set-connectors-list
-  (fn [db [_ {:keys [connectors] :as response}]]
-    (-> db
-        (assoc ::usage-spec/connectors-list (map :id connectors))
-        (assoc ::usage-spec/loading-connectors-list? false))))
-
-
-(reg-event-db
-  ::set-selected-connectors
-  (fn [db [_ connectors]]
-    (assoc db ::usage-spec/selected-connectors connectors)))
-
-
-(reg-event-fx
-  ::get-connectors-list
-  (fn [{{:keys [::client-spec/client
-                ::cimi-spec/cloud-entry-point] :as db} :db} _]
-    (let [resource-type (-> cloud-entry-point
-                            :collection-key
-                            (get "connector"))]
-      {::cimi-api-fx/search [client
-                             resource-type
-                             {:$orderby "id"
-                              :$select  "id"}
-                             #(dispatch [::set-connectors-list %])]})))
+    [sixsq.slipstream.webui.usage.spec :as usage-spec]
+    [sixsq.slipstream.webui.usage.utils :as u]))
 
 
 (reg-event-fx
@@ -58,16 +31,59 @@
           (assoc ::usage-spec/loading-users-list? false)))))
 
 
+(defn get-credentials-list-cofx
+  [client user]
+  (let [filter-str (cond-> "type^='cloud-cred-'"
+                           user (str " and (acl/owner/principal = '" user "' or acl/rules/principal = '" user "')"))]
+
+    {::cimi-api-fx/search [client
+                           :credentials
+                           {:$select "id,name,description,connector"
+                            :$filter filter-str}
+                           #(dispatch [::set-credentials-list %])]}))
+
+
+(reg-event-fx
+  ::get-credentials-list
+  (fn [{{:keys [::client-spec/client
+                ::usage-spec/selected-user] :as db} :db} _]
+    (get-credentials-list-cofx client selected-user)))
+
+
 (reg-event-db
+  ::set-credentials-list
+  (fn [db [_ response]]
+    (let [credentials (get response :credentials [])
+          map_id_cred (->> credentials
+                           (map #(vector (:id %) %))
+                           (into {}))]
+      (-> db
+          (assoc ::usage-spec/credentials-list map_id_cred)
+          (assoc ::usage-spec/loading-credentials-list? false)))))
+
+
+(reg-event-db
+  ::set-selected-credentials
+  (fn [db [_ credentials]]
+    (assoc db ::usage-spec/selected-credentials credentials)))
+
+
+(reg-event-fx
   ::set-user
-  (fn [db [_ user]]
-    (assoc db ::usage-spec/selected-user user)))
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ user]]
+    (merge {:db (-> db
+                    (assoc ::usage-spec/selected-user user)
+                    (assoc ::usage-spec/loading-credentials-list? true))}
+           (get-credentials-list-cofx client user))))
 
 
-(reg-event-db
+(reg-event-fx
   ::clear-user
-  (fn [db [_ user]]
-    (assoc db ::usage-spec/selected-user nil)))
+  (fn [{{:keys [::client-spec/client] :as db} :db} _]
+    (merge {:db (-> db
+                    (assoc ::usage-spec/selected-user nil)
+                    (assoc ::usage-spec/loading-credentials-list? true))}
+           (get-credentials-list-cofx client nil))))
 
 
 (reg-event-db
@@ -88,17 +104,17 @@
   ::fetch-meterings
   (fn [{{:keys [::client-spec/client
                 ::usage-spec/date-range
-                ::usage-spec/selected-connectors
-                ::usage-spec/connectors-list
+                ::usage-spec/selected-credentials
+                ::usage-spec/credentials-list
                 ::usage-spec/selected-user] :as db} :db}]
     {:db                        (assoc db ::usage-spec/loading? true)
      ::usage-fx/fetch-meterings [client
                                  (-> date-range first .clone .utc .format)
                                  (-> date-range second .clone .utc .format)
                                  selected-user
-                                 (conj (if (empty? selected-connectors)
-                                         connectors-list
-                                         selected-connectors) "all-clouds")
+                                 (conj (if (empty? selected-credentials)
+                                         (keys credentials-list)
+                                         selected-credentials) u/all-credentials)
                                  #(dispatch [::set-results %])]}))
 
 
