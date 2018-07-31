@@ -6,60 +6,43 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.usage.effects :as usage-fx]
     [sixsq.slipstream.webui.usage.spec :as usage-spec]
-    [sixsq.slipstream.webui.usage.utils :as u]))
+    [sixsq.slipstream.webui.usage.utils :as u]
+    [clojure.string :as str]
+    [taoensso.timbre :as log]))
 
 
-(reg-event-fx
-  ::get-users-list
-  (fn [{{:keys [::client-spec/client
-                ::cimi-spec/cloud-entry-point] :as db} :db} _]
-    (let [resource-type (-> cloud-entry-point
-                            :collection-key
-                            (get "user"))]
-      {::cimi-api-fx/search [client
-                             resource-type
-                             {:$select "id"}
-                             #(dispatch [::set-users-list %])]})))
-
-
-(reg-event-db
-  ::set-users-list
-  (fn [db [_ response]]
-    (let [users (map :id (get response :users []))]
-      (-> db
-          (assoc ::usage-spec/users-list users)
-          (assoc ::usage-spec/loading-users-list? false)))))
-
-
-(defn get-credentials-list-cofx
-  [client user]
-  (let [filter-str (cond-> "type^='cloud-cred-'"
-                           user (str " and (acl/owner/principal = '" user "' or acl/rules/principal = '" user "')"))]
-
+(defn get-credentials-map-cofx
+  [client selected-users-roles]
+  (let [users-roles-filter (->>
+                             selected-users-roles
+                             (map #(str "acl/owner/principal = '" % "' or acl/rules/principal = '" % "'"))
+                             (str/join " or "))
+        filter-str (cond-> "type^='cloud-cred-'"
+                           (not-empty selected-users-roles) (str " and (" users-roles-filter ")"))]
     {::cimi-api-fx/search [client
                            :credentials
                            {:$select "id,name,description,connector"
                             :$filter filter-str}
-                           #(dispatch [::set-credentials-list %])]}))
+                           #(dispatch [::set-credentials-map %])]}))
 
 
 (reg-event-fx
-  ::get-credentials-list
+  ::get-credentials-map
   (fn [{{:keys [::client-spec/client
-                ::usage-spec/selected-user] :as db} :db} _]
-    (get-credentials-list-cofx client selected-user)))
+                ::usage-spec/selected-users-roles] :as db} :db} _]
+    (get-credentials-map-cofx client selected-users-roles)))
 
 
 (reg-event-db
-  ::set-credentials-list
+  ::set-credentials-map
   (fn [db [_ response]]
     (let [credentials (get response :credentials [])
           map_id_cred (->> credentials
                            (map #(vector (:id %) %))
                            (into {}))]
       (-> db
-          (assoc ::usage-spec/credentials-list map_id_cred)
-          (assoc ::usage-spec/loading-credentials-list? false)))))
+          (assoc ::usage-spec/credentials-map map_id_cred)
+          (assoc ::usage-spec/loading-credentials-map? false)))))
 
 
 (reg-event-db
@@ -69,21 +52,22 @@
 
 
 (reg-event-fx
-  ::set-user
-  (fn [{{:keys [::client-spec/client] :as db} :db} [_ user]]
+  ::set-users-roles
+  (fn [{{:keys [::client-spec/client
+                ::usage-spec/selected-users-roles] :as db} :db} [_ user]]
     (merge {:db (-> db
-                    (assoc ::usage-spec/selected-user user)
-                    (assoc ::usage-spec/loading-credentials-list? true))}
-           (get-credentials-list-cofx client user))))
+                    (assoc ::usage-spec/selected-users-roles user)
+                    (assoc ::usage-spec/loading-credentials-map? true))}
+           (get-credentials-map-cofx client user))))
 
 
 (reg-event-fx
   ::clear-user
   (fn [{{:keys [::client-spec/client] :as db} :db} _]
     (merge {:db (-> db
-                    (assoc ::usage-spec/selected-user nil)
-                    (assoc ::usage-spec/loading-credentials-list? true))}
-           (get-credentials-list-cofx client nil))))
+                    (assoc ::usage-spec/selected-users-roles nil)
+                    (assoc ::usage-spec/loading-credentials-map? true))}
+           (get-credentials-map-cofx client nil))))
 
 
 (reg-event-db
@@ -105,15 +89,13 @@
   (fn [{{:keys [::client-spec/client
                 ::usage-spec/date-range
                 ::usage-spec/selected-credentials
-                ::usage-spec/credentials-list
-                ::usage-spec/selected-user] :as db} :db}]
+                ::usage-spec/credentials-map] :as db} :db}]
     {:db                        (assoc db ::usage-spec/loading? true)
      ::usage-fx/fetch-meterings [client
                                  (-> date-range first .clone .utc .format)
                                  (-> date-range second .clone .utc .format)
-                                 selected-user
                                  (conj (if (empty? selected-credentials)
-                                         (keys credentials-list)
+                                         (keys credentials-map)
                                          selected-credentials) u/all-credentials)
                                  #(dispatch [::set-results %])]}))
 

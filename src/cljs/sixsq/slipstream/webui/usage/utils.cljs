@@ -6,7 +6,8 @@
     [clojure.string :as str]
     [promesa.core :as p]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [taoensso.timbre :as log]))
 
 
 (def vms-unit "VMs [h]")
@@ -32,10 +33,14 @@
   [(time/days-before start) (.endOf (time/days-before end) "day")])
 
 
-(defn default-date-range
-  "Provides the default date range."
-  []
-  (date-range 30 1))
+(def date-range-entries
+  {"today"        (date-range 0 0)
+   "yesterday"    (date-range 1 1)
+   "last-7-days"  (date-range 7 1)
+   "last-30-days" (date-range 30 1)
+   "custom"       (date-range 30 1)})
+
+(def default-date-range "last-30-days")
 
 
 (defn to-hour [v]
@@ -46,12 +51,13 @@
   (/ v 1024))
 
 
-(defn fetch-metering [resolve client date-after date-before user credential]
+(defn fetch-metering [resolve client date-after date-before credential credentials]
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
-          filter-user-str (when user (str "acl/rules/principal='" user "'"))
-          filter-credentials (when-not (= credential all-credentials) (str "credentials/href='" credential "'"))
-          filter-str (str/join " and " (remove nil? [filter-created-str filter-user-str filter-credentials]))
+          filter-credentials (if (= credential all-credentials)
+                               (str/join " or " (map #(str "credentials/href='" % "'") credentials))
+                               (str "credentials/href='" credential "'"))
+          filter-str (str filter-created-str "and (" filter-credentials ")")
           request-opts {"$last"        0
                         "$filter"      filter-str
                         "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
@@ -82,9 +88,8 @@
 (defn fetch-meterings [client
                        date-after
                        date-before
-                       user
                        credentials
                        callback]
   (let [p (p/all (map #(p/promise (fn [resolve _]
-                                    (fetch-metering resolve client date-after date-before user %))) credentials))]
+                                    (fetch-metering resolve client date-after date-before % credentials))) credentials))]
     (p/then p #(->> % (into {}) callback))))

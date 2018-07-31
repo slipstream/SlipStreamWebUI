@@ -11,17 +11,13 @@
 
 (s/def ::results any?)
 
-(s/def ::users-list vector?)
-
-(s/def ::credentials-list any?)
-
-(s/def ::loading-credentials-list? boolean?)
+(s/def ::credentials-map any?)
 
 (s/def ::selected-credentials vector?)
 
-(s/def ::loading-users-list? boolean?)
+(s/def ::selected-users-roles (s/nilable string?))
 
-(s/def ::selected-user (s/nilable string?))
+(s/def ::loading-credentials-map? boolean?)
 
 (s/def ::date-range (s/tuple any? any?))
 
@@ -30,21 +26,19 @@
 (s/def ::db (s/keys :req [::loading?
                           ::filter-visible?
                           ::results
-                          ::loading-users-list?
-                          ::credentials-list
-                          ::loading-credentials-list?
-                          ::users-list
-                          ::selected-user
+                          ::credentials-map
+                          ::selected-credentials
+                          ::loading-credentials-map?
+                          ::selected-users-roles
                           ::date-range
                           ::is-admin?]))
 
-(def defaults {::loading?                  false
-               ::filter-visible?           false
-               ::results                   nil
-               ::loading-users-list?       true
-               ::users-list                []
-               ::credentials-list          []
-               ::loading-credentials-list? true
-               ::selected-user             nil
-               ::date-range                (u/default-date-range)
-               ::is-admin?                 false})
+(def defaults {::loading?                 false
+               ::filter-visible?          false
+               ::results                  nil
+               ::credentials-map          {}
+               ::selected-credentials     []
+               ::loading-credentials-map? true
+               ::selected-users-roles     nil
+               ::date-range               (get u/date-range-entries u/default-date-range)
+               ::is-admin?                false})

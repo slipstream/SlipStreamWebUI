@@ -11,7 +11,13 @@
 basic
   {:basic  true
    :padded false
-   :style  {:padding 0}})
+   :style  {:padding 0
+            :margin  0}})
+
+
+(def ^{:doc "Options for a Segment with horizontal scroll."}
+autoscroll-x
+  (update-in basic [:style :overflow-x] (constantly "auto")))
 
 
 (def ^{:doc "Options for a Segment with evenly spaced content."}
@@ -42,7 +48,7 @@ definition
 (def ^{:doc "Style for very compact, single-line ACL table."}
 acl
   (merge single-line
-         {:collapsing true
-          :celled true
-          :text-align "center"
+         {:collapsing  true
+          :celled      true
+          :text-align  "center"
           :unstackable true}))
