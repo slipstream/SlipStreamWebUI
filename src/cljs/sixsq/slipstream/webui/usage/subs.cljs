@@ -16,24 +16,20 @@
   ::usage-spec/results)
 
 (reg-sub
-  ::loading-connectors-list?
-  ::usage-spec/loading-connectors-list?)
+  ::credentials-map
+  ::usage-spec/credentials-map)
 
 (reg-sub
-  ::connectors-list
-  ::usage-spec/connectors-list)
+  ::selected-credentials
+  ::usage-spec/selected-credentials)
 
 (reg-sub
-  ::loading-users-list?
-  ::usage-spec/loading-connectors-list?)
+  ::loading-credentials-map?
+  ::usage-spec/loading-credentials-map?)
 
 (reg-sub
-  ::users-list
-  ::usage-spec/users-list)
-
-(reg-sub
-  ::selected-user
-  ::usage-spec/selected-user)
+  ::selected-users-roles
+  ::usage-spec/selected-users-roles)
 
 (reg-sub
   ::date-range

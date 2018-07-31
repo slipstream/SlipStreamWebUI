@@ -90,6 +90,7 @@
 
 (def Header (adapt-component "Header"))
 (def HeaderContent (adapt-component "HeaderContent"))
+(def HeaderSubheader (adapt-component "HeaderSubheader"))
 
 (def Label (adapt-component "Label"))
 (def LabelDetail (adapt-component "LabelDetail"))

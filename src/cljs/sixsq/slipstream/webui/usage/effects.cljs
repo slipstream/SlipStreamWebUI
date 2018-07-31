@@ -12,12 +12,10 @@
   (fn [[client
         date-after
         date-before
-        user
-        connectors
+        credentials
         callback]]
     (usage-utils/fetch-meterings client
                                  date-after
                                  date-before
-                                 user
-                                 connectors
+                                 credentials
                                  callback)))
