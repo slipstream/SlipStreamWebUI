@@ -4,28 +4,22 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
-
     [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
-
     [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.style :as style]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn ^:export set-runUUID [uuid]
   (dispatch [::deployment-detail-events/set-runUUID uuid]))
-
-
-(defn section
-  [title contents]
-  [cc/collapsible-card (str title) contents])
 
 
 (def summary-keys #{:creation
@@ -84,20 +78,34 @@
                           :overflow      "hidden"}} (format-parameter-value key value)]])
 
 
-(defn summary-section
+(defn category-icon
+  [category]
+  (case category
+    "Project" "folder"
+    "Deployment" "sitemap"
+    "Image" "microchip"
+    "question circle"))
+
+
+(defn metadata-section
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
+  (let [cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
         resource (subscribe [::deployment-detail-subs/resource])]
     (fn []
       (let [module (module-name @resource)
+            short-name (second (re-matches #"^.*/(.*)$" (str (or module "TITLE"))))
+            state (-> @resource :run :state)
             summary-info (-> (select-keys (:run @resource) summary-keys)
                              (assoc :uuid @cached-resource-id)
                              (assoc :module module))
-            contents [ui/Table style/definition
-                      (vec (concat [ui/TableBody]
-                                   (map tuple-to-row summary-info)))]]
-        [cc/collapsible-card (@tr [:summary]) contents]))))
+            icon (-> summary-info :category category-icon)
+            rows (map tuple-to-row summary-info)]
+        [cc/metadata
+         {:title       short-name
+          :subtitle    state
+          :description (:startTime summary-info)
+          :icon        icon}
+         rows]))))
 
 
 (defn terminate-summary
@@ -124,8 +132,7 @@
 (defn node-parameter-table
   [params]
   [ui/Table style/definition
-   (vec (concat [ui/TableBody]
-                (map tuple-to-row params)))])
+   (vec (concat [ui/TableBody] (map tuple-to-row params)))])
 
 
 (defn grouped-parameters
@@ -140,17 +147,12 @@
 (defn parameters-dropdown
   [selected-section]
   (let [resource (subscribe [::deployment-detail-subs/resource])]
-    (fn [selected-section]
-      (let [parameter-groups (sort (keys (grouped-parameters @resource)))
-            selection (if (contains? parameter-groups (set @selected-section))
-                        @selected-section
-                        "ss")]
-        [ui/Dropdown
-         {:options       (map #(identity {:key %, :text %, :value %}) parameter-groups)
-          :selection     true
-          :default-value "ss"
-          :onChange      #(let [id (-> (js->clj %2 :keywordize-keys true) :value)]
-                            (reset! selected-section id))}]))))
+    (let [parameter-groups (sort (keys (grouped-parameters @resource)))]
+      [ui/Dropdown
+       {:options       (map #(identity {:key %, :text %, :value %}) parameter-groups)
+        :selection     true
+        :default-value "ss"
+        :on-change     (ui-callback/value #(reset! selected-section %))}])))
 
 
 (defn parameters-section
@@ -163,7 +165,7 @@
             parameter-group (get parameters-kv (or @selected-section "ss"))
             parameter-table (node-parameter-table parameter-group)
             contents (vec (concat [:div] [[parameters-dropdown selected-section]] [parameter-table]))]
-        [cc/collapsible-card (@tr [:parameters]) contents]))))
+        [cc/collapsible-segment (@tr [:parameters]) contents]))))
 
 
 (defn report-item
@@ -207,8 +209,8 @@
   [events]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [events]
-      [:div {:class-name "webui-x-autoscroll"}
-       [ui/Table style/definition
+      [ui/Segment style/autoscroll-x
+       [ui/Table style/single-line
         [ui/TableHeader
          [ui/TableRow
           [ui/TableHeaderCell [:span (@tr [:event])]]
@@ -243,7 +245,7 @@
                 :event     [::deployment-detail-events/fetch-events]}])
     (fn []
       (let [events (-> @events-collection :events events-table-info)]
-        [cc/collapsible-card
+        [cc/collapsible-segment
          (@tr [:events])
          [events-table events]
          [gantt]]))))
@@ -260,12 +262,11 @@
                 :frequency 30000
                 :event     [::deployment-detail-events/fetch-reports]}])
     (fn []
-      [cc/collapsible-card
+      [cc/collapsible-segment
        (@tr [:reports])
-       (vec
-         (concat [:ul]
-                 (mapv report-item (:externalObjects @reports))))
-       [:p "Reports will be displayed as soon as available. No need to refresh."]])))
+       (if (seq @reports)
+         (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
+         [:p "Reports will be displayed as soon as available. No need to refresh."])])))
 
 
 (defn refresh-button
@@ -316,45 +317,38 @@
         (when (and link (= "Ready" state))
           [ui/MenuItem
            {:name     "open"
+            :position "right"
             :on-click #(dispatch [::deployment-detail-events/open-link link])}
            [ui/Icon {:name "external"}]
-           link])))))
-
-
-(defn title
-  []
-  (let [resource (subscribe [::deployment-detail-subs/resource])]
-    (fn []
-      (let [module (module-name @resource)
-            short-name (second (re-matches #"^.*/(.*)$" (str (or module "TITLE"))))
-            state (-> @resource :run :state)]
-        [:h1 (str short-name " (" state ")")]))))
+           (general/truncate link)])))))
 
 
 (defn menu
   []
-  [ui/Menu
+  [ui/Menu {:borderless true}
    [refresh-button]
-   [service-link-button]
-   [terminate-button]])
+   [terminate-button]
+   [service-link-button]])
+
 
 (defn deployment-detail
   []
   (let [runUUID (subscribe [::deployment-detail-subs/runUUID])
         cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
-        resource (subscribe [::deployment-detail-subs/resource])
-        correct-resource? (and @runUUID (= @runUUID @cached-resource-id))]
+        resource (subscribe [::deployment-detail-subs/resource])]
     (fn []
-      (when-not correct-resource?
-        (dispatch [::deployment-detail-events/get-deployment @runUUID]))
+      (let [correct-resource? (and @runUUID (= @runUUID @cached-resource-id))]
 
-      (vec
-        (concat
-          [ui/Container {:fluid true}]
-          [[menu]
-           [title]]
-          (when (and @runUUID @resource #_correct-resource?) ;; FIXME: Don't show information for a different resource.
-            [[summary-section]
-             [parameters-section]
-             [events-section]
-             [reports-section]]))))))
+        (when-not correct-resource?
+          (dispatch [::deployment-detail-events/get-deployment @runUUID]))
+
+        (vec
+          (concat
+            [ui/Container {:fluid   true
+                           :loading (not correct-resource?)}
+             [menu]]
+            (when (and @runUUID @resource correct-resource?) ;; FIXME: Don't show information for a different resource.
+              [[metadata-section]
+               [parameters-section]
+               [events-section]
+               [reports-section]])))))))

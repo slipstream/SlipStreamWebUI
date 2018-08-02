@@ -55,5 +55,4 @@ acl
          {:celled      true
           :text-align  "center"
           :unstackable true
-          :style {:max-width "100%"}}
-         ))
+          :style {:max-width "100%"}}))

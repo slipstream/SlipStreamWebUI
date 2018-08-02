@@ -35,9 +35,9 @@
 
 
 (defn action-button-icon
-  [label icon title-text body on-confirm on-cancel & [scrolling?]]
+  [label icon title-text body on-confirm on-cancel & [scrolling? position]]
   (let [show? (r/atom false)]
-    (fn [label icon title-text body on-confirm on-cancel & [scrolling?]]
+    (fn [label icon title-text body on-confirm on-cancel & [scrolling? position]]
       (let [action-fn (fn []
                         (reset! show? false)
                         (on-confirm))
@@ -50,8 +50,8 @@
           :closeIcon true
           :on-close  #(reset! show? false)
           :trigger   (r/as-element
-                       [ui/MenuItem {:name     label
-                                     :on-click #(reset! show? true)}
+                       [ui/MenuItem (cond-> {:name label, :on-click #(reset! show? true)}
+                                            position (assoc :position position))
                         (when icon
                           [ui/Icon {:name icon}])
                         label])}

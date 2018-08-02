@@ -1,5 +1,6 @@
 (ns sixsq.slipstream.webui.profile.views
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [subscribe]]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
@@ -7,11 +8,10 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.table :as table]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.values :as values]
-    [sixsq.slipstream.webui.utils.style :as style]
-    [clojure.string :as str]
-    [sixsq.slipstream.webui.utils.table :as table]
     [taoensso.timbre :as log]))
 
 
