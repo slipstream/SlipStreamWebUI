@@ -203,9 +203,7 @@
                      :href    "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
          [ui/FormGroup
           [ui/FormField
-           [cloud-entry-point-title]]
-          #_[ui/FormField
-             ]]
+           [cloud-entry-point-title]]]
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
