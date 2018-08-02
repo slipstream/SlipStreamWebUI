@@ -43,7 +43,8 @@
          (table/definition-table "tags" "properties"))))
 
 
-(defn metadata
+(defn
+  metadata
   [{:keys [title subtitle description logo icon updated acl properties] :as module-meta} rows]
   (let [more? (reagent/atom false)]
     (fn [{:keys [title subtitle description logo icon updated acl properties] :as module-meta} rows]

@@ -111,15 +111,18 @@
             (for [[label-kw url icon]
                   (vec
                     (concat
-                      (when @is-user? [[:dashboard "dashboard" "dashboard"]
-                                       [:legacy-application "legacy-application" "sitemap"]
-                                       [:deployment "deployment" "cloud"]
+                      (when @is-user? [[:deployment "deployment" "cloud"]
+                                       [:application "application" "sitemap"]
                                        [:usage "usage" "history"]])
                       (when @is-admin?
-                        [[:application "application" "sitemap"]
-                         [:metrics "metrics" "bar chart"]
+                        [[:metrics "metrics" "bar chart"]
                          [:nuvlabox "nuvlabox" "desktop"]])
-                      [[:cimi "cimi" "code"]]))
+
+                      [[:cimi "cimi" "code"]]
+
+                      #_(when @is-user? [[:dashboard "dashboard" "dashboard"]
+                                       [:legacy-application "legacy-application" "sitemap"]])))
+
                   :when (some? label-kw)]
               [ui/MenuItem {:active  (= (first @nav-path) url)
                             :onClick (fn []
