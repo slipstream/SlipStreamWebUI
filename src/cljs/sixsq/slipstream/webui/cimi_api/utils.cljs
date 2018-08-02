@@ -4,22 +4,30 @@
   (:require
     [camel-snake-kebab.core :as csk]
     [cljs.core.async :refer [<! >! chan]]
+    [clojure.set :as set]
     [clojure.walk :as walk]
     [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.client.impl.utils.http-async :as http]
-    [sixsq.slipstream.client.impl.utils.json :as json]
-    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [taoensso.timbre :as log]))
 
 
-(def ^:const common-attrs #{:id :created :updated :resourceURI :properties :acl :operations})
+(def ^:const common-attrs #{:id :resourceURI
+                            :created :updated
+                            :name :description
+                            :properties
+                            :operations :acl})
+
+
+(defn select-common-attrs
+  [resource]
+  (select-keys resource common-attrs))
 
 
 (defn remove-common-attrs
-  "Remove the CIMI common attributes from the given map."
-  [m]
-  (into {} (remove #(common-attrs (first %)) m)))
+  [resource]
+  (->> common-attrs
+       (set/difference (set (keys resource)))
+       (select-keys resource)))
 
 
 (defn sanitize-params [params]

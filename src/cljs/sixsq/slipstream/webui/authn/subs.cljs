@@ -22,6 +22,11 @@
 
 
 (reg-sub
+  ::current-user-params
+  ::authn-spec/current-user-params)
+
+
+(reg-sub
   ::is-admin?
   :<- [::session]
   (fn [session _]

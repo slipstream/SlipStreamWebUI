@@ -3,6 +3,7 @@
     [cljs.pprint :refer [cl-format]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.nuvlabox-detail.events :as nuvlabox-events]
     [sixsq.slipstream.webui.nuvlabox-detail.subs :as nuvlabox-subs]
@@ -141,7 +142,7 @@
   []
   (let [record (subscribe [::nuvlabox-subs/record])]
     (fn []
-      (let [{:keys [id name description acl] :as data} @record
+      (let [{:keys [id name description updated acl] :as data} @record
             rows (->> data
                       select-metadata
                       (map metadata-row)
@@ -152,6 +153,7 @@
                                        second)
                       :description description
                       :icon        "computer"
+                      :updated     updated
                       :acl         acl}
          rows]))))
 
@@ -170,15 +172,9 @@
 
 (defn record-info
   []
-  (let [record (subscribe [::nuvlabox-subs/record])
-        metadata-keys #{:id :resourceURI
-                        :name :description
-                        :created :updated
-                        :acl :operations}]
-    (fn []
-      (when @record
-        (let [data (into {} (remove (fn [[k v]] (metadata-keys k)) @record))]
-          (first (details/format-resource-data data {})))))))
+  (let [record (subscribe [::nuvlabox-subs/record])]
+    (when @record
+      (details/group-table-sui (cimi-api-utils/remove-common-attrs @record) nil))))
 
 
 (defn nb-detail

@@ -9,8 +9,7 @@
     [sixsq.slipstream.client.api.authn :as authn]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.metrics :as metrics]
-    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]))
 
 
 (reg-fx
@@ -83,6 +82,19 @@
   (fn [[client callback]]
     (go
       (callback (<! (cimi-api-utils/get-current-session client))))))
+
+
+(reg-fx
+  ::current-user-params
+  (fn [[client username callback]]
+    (go
+      (when (and client username)
+        (let [filter (str "acl/owner/principal='" username "'")]
+          (callback (-> (<! (cimi/search client
+                                         :userParam
+                                         (cimi-api-utils/sanitize-params {:$filter filter})))
+                        :userParam
+                        first)))))))
 
 
 (reg-fx

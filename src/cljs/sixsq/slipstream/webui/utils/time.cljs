@@ -89,3 +89,8 @@
    (days-before n default-locale))
   ([n locale]
    (-> (now locale) (.startOf "date") (.add (- n) "days"))))
+
+
+(defn time-value
+  [iso8601]
+  (str (-> iso8601 parse-iso8601 ago) " (" iso8601 ")"))

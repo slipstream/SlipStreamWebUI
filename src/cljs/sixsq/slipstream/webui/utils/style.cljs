@@ -6,13 +6,11 @@
 
 
 (def ^{:doc "Options for a Segment with no padding or special visual style.
-             Can be used in place of a raw [:div].
-             "}
+             Can be used in place of a raw [:div]."}
 basic
   {:basic  true
    :padded false
-   :style  {:padding 0
-            :margin  0}})
+   :style  {:padding 0}})
 
 
 (def ^{:doc "Options for a Segment with horizontal scroll."}
@@ -39,6 +37,12 @@ single-line
    :style       {:max-width "100%"}})
 
 
+(def ^{:doc "Common styles for single-line, selectable tables."}
+selectable
+  (merge single-line {:selectable true
+                      :unstackable true}))
+
+
 (def ^{:doc "Style for very compact, single-line definition table."}
 definition
   (merge single-line
@@ -48,7 +52,8 @@ definition
 (def ^{:doc "Style for very compact, single-line ACL table."}
 acl
   (merge single-line
-         {:collapsing  true
-          :celled      true
+         {:celled      true
           :text-align  "center"
-          :unstackable true}))
+          :unstackable true
+          :style {:max-width "100%"}}
+         ))

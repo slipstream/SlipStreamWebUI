@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.utils.values
   "General functions for rendering values."
   (:require
+    [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.history.events :as history-events]))
 
@@ -20,6 +21,15 @@
    (str href)])
 
 
+(defn as-link
+  "Renders a link to the CIMI detail page associated with the href. Ignores
+   other values of the map (if any)."
+  [href & [label]]
+  [:a {:on-click #(dispatch [::history-events/navigate (str "cimi/" href)])
+       :style    {:cursor "pointer"}}
+   (or label href)])
+
+
 (defn href-coll?
   [value]
   (and (coll? value)
@@ -36,4 +46,6 @@
   (cond
     (href-coll? value) (as-href-coll value)
     (href? value) (as-href value)
+    (vector? value) value
+    (map? value) (with-out-str (pprint value))
     :else (str value)))

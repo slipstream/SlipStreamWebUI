@@ -19,6 +19,14 @@
 
 (s/def ::loading-credentials-map? boolean?)
 
+(s/def ::column (s/nilable keyword?))
+
+(s/def ::direction #{:ascending :descending})
+
+(s/def ::sort (s/keys :req-un {::column ::direction}))
+
+(s/def ::users-roles-list (s/coll-of string? :kind vector?))
+
 (s/def ::date-range (s/tuple any? any?))
 
 (s/def ::is-admin? boolean?)
@@ -29,7 +37,9 @@
                           ::credentials-map
                           ::selected-credentials
                           ::loading-credentials-map?
+                          ::sort
                           ::selected-users-roles
+                          ::users-roles-list
                           ::date-range
                           ::is-admin?]))
 
@@ -39,6 +49,8 @@
                ::credentials-map          {}
                ::selected-credentials     []
                ::loading-credentials-map? true
+               ::sort                     {:column :price, :direction :descending}
                ::selected-users-roles     nil
+               ::users-roles-list         []
                ::date-range               (get u/date-range-entries u/default-date-range)
                ::is-admin?                false})
