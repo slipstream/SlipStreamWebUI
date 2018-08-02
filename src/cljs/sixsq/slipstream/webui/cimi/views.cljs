@@ -199,13 +199,13 @@
          [ui/Button {
                      ;:circular true
                      :floated "right"
-                     :size "tiny" :basic true :icon "info"
-                     :href     "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
+                     :size    "tiny" :basic true :icon "info"
+                     :href    "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
          [ui/FormGroup
           [ui/FormField
            [cloud-entry-point-title]]
           #_[ui/FormField
-           ]]
+             ]]
          (when @filter-visible?
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
@@ -343,6 +343,7 @@
                {:size       "large"
                 :scrollable true
                 :closeIcon  true
+                :onClose    #(dispatch [::cimi-events/hide-add-modal])
                 :open       @show?}
                [ui/ModalContent
                 [editor/json-editor text]]
