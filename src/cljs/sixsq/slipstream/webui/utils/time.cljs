@@ -10,14 +10,6 @@
 (def ^:private iso8601-format (.-ISO_8601 js/moment))
 
 
-(defn n-decimal-places
-  ([decimal-string]
-   (n-decimal-places decimal-string 2))
-  ([decimal-string n]
-   (let [[left right] (str/split decimal-string #"\.")]
-     (str left "." (str/join (take n (concat right (repeat "0"))))))))
-
-
 (defn now
   ([]
    (now default-locale))
@@ -72,16 +64,27 @@
    (or (some-> expiry-iso8601 (parse-iso8601) .clone (.locale locale) (.toNow true))
        (invalid locale))))
 
-
-(defn delta-minutes
-  "Returns the difference in the given date-time instances in minutes (with 2
-   decimal places)."
+(defn delta-duration
   ([start]
-   (delta-minutes start (now)))
+   (delta-duration start (now)))
   ([start end]
    (let [start-moment (parse-iso8601 start)
          end-moment (parse-iso8601 end)]
-     (n-decimal-places (.diff end-moment start-moment "minutes" true)))))
+     (.duration js/moment (.diff end-moment start-moment true)))))
+
+(defn delta-minutes
+  "Returns the difference in the given date-time instances in minutes."
+  ([start]
+   (delta-minutes start (now)))
+  ([start end]
+   (.asMinutes (delta-duration start end))))
+
+(defn delta-milliseconds
+  "Returns the difference in the given date-time instances in milliseconds."
+  ([start]
+   (delta-milliseconds start (now)))
+  ([start end]
+   (.asMilliseconds (delta-duration start end))))
 
 
 (defn days-before

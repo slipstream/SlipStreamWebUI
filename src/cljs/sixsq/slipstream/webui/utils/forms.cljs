@@ -16,7 +16,7 @@
   (when (and f (= (.-charCode k) 13))
     (try
       (some-> js/document .-activeElement .blur)
-      (catch js/Error _ nil))
+      (catch :default _ nil))
     (f)))
 
 

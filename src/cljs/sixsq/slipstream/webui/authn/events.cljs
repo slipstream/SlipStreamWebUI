@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.authn.events
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
+    [sixsq.slipstream.webui.authn.effects :as authn-fx]
     [sixsq.slipstream.webui.authn.spec :as authn-spec]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
@@ -26,7 +27,8 @@
 
               session
               (assoc ::cimi-api-fx/current-user-params
-                     [client username #(dispatch [::set-current-user-params %])])))))
+                     [client username #(dispatch [::set-current-user-params %])]
+                     ::authn-fx/automatic-logout-at-session-expiry [session])))))
 
 
 (reg-event-db

@@ -15,7 +15,7 @@
         (if (or status message resource-id)
           document
           {:message (with-out-str (cljs.pprint/pprint document))}))
-      (catch js/Error _
+      (catch :default _
         {:message json-str}))
     {:message (with-out-str (cljs.pprint/pprint json-str))}))
 

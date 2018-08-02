@@ -357,7 +357,7 @@
                               (try
                                 (let [data (general/json->edn @text)]
                                   (dispatch [::cimi-events/create-resource data]))
-                                (catch js/Error e
+                                (catch :default e
                                   (dispatch [::messages-events/add
                                              {:header  "invalid JSON document"
                                               :message (str "invalid JSON:\n\n" e)

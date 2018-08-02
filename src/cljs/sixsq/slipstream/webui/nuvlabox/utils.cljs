@@ -24,13 +24,10 @@
 
 (defn percentage
   [used capacity]
-  (try
-    (-> used
-        (/ capacity)
-        (* 100)
-        int)
-    (catch js/Error _
-      0)))
+  (-> used
+      (/ capacity)
+      (* 100)
+      int))
 
 
 (defn mb->gb

@@ -131,7 +131,7 @@
        (fn []
          (try
            (action-fn (general/json->edn @text))
-           (catch js/Error e
+           (catch :default e
              (action-fn e))))
        (constantly nil)
        true])))
