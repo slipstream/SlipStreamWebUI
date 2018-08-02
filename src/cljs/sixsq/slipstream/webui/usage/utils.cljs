@@ -18,12 +18,6 @@
 
 (def all-credentials "all-credentials")
 
-(defn same-date?
-  "Returns true if the two dates represent the same time to within 1 minute,
-   otherwise false. If either argument is nil, false is returned."
-  [d1 d2]
-  (boolean (and d1 d2 (zero? (int (time/delta-minutes d1 d2))))))
-
 
 (defn date-range
   "Provides a tuple that represents the start/end of a range of days relative
