@@ -66,7 +66,7 @@
 
 (defn delta-duration
   ([start]
-   (delta-time start (now)))
+   (delta-duration start (now)))
   ([start end]
    (let [start-moment (parse-iso8601 start)
          end-moment (parse-iso8601 end)]
