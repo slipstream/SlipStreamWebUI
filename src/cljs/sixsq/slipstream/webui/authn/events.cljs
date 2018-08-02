@@ -4,7 +4,8 @@
     [sixsq.slipstream.webui.authn.spec :as authn-spec]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.history.effects :as history-fx]))
+    [sixsq.slipstream.webui.history.effects :as history-fx]
+    [sixsq.slipstream.webui.authn.effects :as authn-fx]))
 
 
 (reg-event-fx
@@ -20,6 +21,7 @@
     (let [redirect-uri (::authn-spec/redirect-uri db)
           client (::client-spec/client db)]
       (cond-> {:db (assoc db ::authn-spec/session session)}
+<<<<<<< HEAD
 
               (and session redirect-uri)
               (assoc ::history-fx/navigate-js-location [redirect-uri])
@@ -33,6 +35,10 @@
   ::set-current-user-params
   (fn [db [_ user]]
     (assoc db ::authn-spec/current-user-params user)))
+=======
+              (and session redirect-uri) (assoc ::history-fx/navigate-js-location [redirect-uri])
+              session (assoc ::authn-fx/automatic-logout-at-session-expiry [session])))))
+>>>>>>> 680cfc7... automatic logout at session expiry and minors
 
 
 (reg-event-fx
