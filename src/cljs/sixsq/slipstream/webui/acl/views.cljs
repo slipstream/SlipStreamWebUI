@@ -2,8 +2,8 @@
   (:require
     [sixsq.slipstream.webui.acl.utils :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.table :as table]))
 
 
 (defn checked
@@ -14,39 +14,33 @@
 (defn acl-row
   [[[_ type principal] rights :as row-data]]
   [ui/TableRow
-   [ui/TableCell {:collapsing true} principal]
+   [ui/TableCell {:collapsing true, :text-align "left"} principal]
    [ui/TableCell {:collapsing true} type]
-   [ui/TableCell {:collapsing true} (checked (rights "VIEW"))]
-   [ui/TableCell {:collapsing true} (checked (rights "MODIFY"))]
-   [ui/TableCell {:collapsing true} (checked (rights "ALL"))]])
+   [ui/TableCell (checked (rights "VIEW"))]
+   [ui/TableCell (checked (rights "MODIFY"))]
+   [ui/TableCell (checked (rights "ALL"))]])
 
 
 (defn acl-table
   [acl]
-  (let [row-data (utils/acl-by-principal acl)
-        rows (map acl-row row-data)]
-    [ui/Table style/acl
-     [ui/TableHeader
-      [ui/TableRow
-       [ui/TableHeaderCell {:collapsing true} "principal"]
-       [ui/TableHeaderCell {:collapsing true} "type"]
-       [ui/TableHeaderCell {:collapsing true} "view"]
-       [ui/TableHeaderCell {:collapsing true} "modify"]
-       [ui/TableHeaderCell {:collapsing true} "all"]]]
-     (vec (concat [ui/TableBody] rows))]))
-
-
-(defn acl-segment
-  [acl]
-  ^{:key "acl"}
-  [cc/collapsible-segment
-   "acl"
-   (acl-table acl)])
+  (when acl
+    (let [row-data (utils/acl-by-principal acl)
+          rows (map acl-row row-data)]
+      [table/wrapped-table "shield" "permissions"
+       [ui/Table style/acl
+        [ui/TableHeader
+         [ui/TableRow
+          [ui/TableHeaderCell {:collapsing true, :text-align "left"} "principal"]
+          [ui/TableHeaderCell {:collapsing true} "type"]
+          [ui/TableHeaderCell "view"]
+          [ui/TableHeaderCell "modify"]
+          [ui/TableHeaderCell "all"]]]
+        (vec (concat [ui/TableBody] rows))]])))
 
 
 (defn acl-test
   []
-  [ui/Table {:text-align "center", :collapsing true, :celled true, :unstackable false}
+  [ui/Table {:text-align "center", :collapsing true, :celled true, :unstackable true, :structured true}
    [ui/TableHeader
     [ui/TableRow
      [ui/TableHeaderCell {:rowSpan 2, :vertical-align "bottom", :collapsing true} "principal"]

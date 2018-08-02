@@ -3,7 +3,6 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail-spec]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.client.spec :as client-spec]

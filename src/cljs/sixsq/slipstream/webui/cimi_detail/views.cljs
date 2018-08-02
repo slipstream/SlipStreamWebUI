@@ -2,7 +2,6 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
     [sixsq.slipstream.webui.cimi-detail.subs :as cimi-detail-subs]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
@@ -47,5 +46,8 @@
           (dispatch [::cimi-detail-events/get (path->resource-id @path)]))
 
         ;; render the (possibly empty) detail
-        [details/resource-detail [refresh-button] resource-id
-         (when (and (not @loading?) correct-resource?) @resource) (:baseURI @cep) @description]))))
+        [details/resource-detail
+         [refresh-button]
+         (when (and (not @loading?) correct-resource?) @resource)
+         (:baseURI @cep)
+         @description]))))

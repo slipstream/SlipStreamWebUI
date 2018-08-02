@@ -16,18 +16,32 @@
 
 (reg-event-fx
   ::set-session
-  (fn [{:keys [db]} [_ session]]
-    (let [redirect-uri (::authn-spec/redirect-uri db)]
+  (fn [{:keys [db]} [_ {:keys [username] :as session}]]
+    (let [redirect-uri (::authn-spec/redirect-uri db)
+          client (::client-spec/client db)]
       (cond-> {:db (assoc db ::authn-spec/session session)}
+
               (and session redirect-uri)
-              (assoc ::history-fx/navigate-js-location [redirect-uri])))))
+              (assoc ::history-fx/navigate-js-location [redirect-uri])
+
+              session
+              (assoc ::cimi-api-fx/current-user-params
+                     [client username #(dispatch [::set-current-user-params %])])))))
+
+
+(reg-event-db
+  ::set-current-user-params
+  (fn [db [_ user]]
+    (assoc db ::authn-spec/current-user-params user)))
 
 
 (reg-event-fx
   ::logout
   (fn [cofx _]
     (when-let [client (-> cofx :db ::client-spec/client)]
-      {::cimi-api-fx/logout [client #(dispatch [::set-session nil])]})))
+      {::cimi-api-fx/logout [client (fn []
+                                      (dispatch [::set-session nil])
+                                      (dispatch [::set-current-user-params nil]))]})))
 
 
 (reg-event-db

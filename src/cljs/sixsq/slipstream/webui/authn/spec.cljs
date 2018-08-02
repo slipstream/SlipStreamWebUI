@@ -11,6 +11,8 @@
 
 (s/def ::session (s/nilable any?))
 
+(s/def ::current-user-params (s/nilable any?))
+
 (s/def ::error-message (s/nilable string?))
 
 (s/def ::redirect-uri (s/nilable string?))
@@ -22,6 +24,7 @@
 (s/def ::db (s/keys :req [::open-modal
                           ::selected-method-group
                           ::session
+                          ::current-user-params
                           ::error-message
                           ::redirect-uri
                           ::server-redirect-uri
@@ -31,6 +34,7 @@
   {::open-modal            nil
    ::selected-method-group nil
    ::session               nil
+   ::current-user-params   nil
    ::error-message         nil
    ::redirect-uri          nil
    ::server-redirect-uri   (str @config/path-prefix "/profile")

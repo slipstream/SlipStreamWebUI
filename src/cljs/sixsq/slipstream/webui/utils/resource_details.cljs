@@ -6,7 +6,7 @@
     [cljsjs.codemirror.mode.javascript]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
-    [sixsq.slipstream.webui.acl.views :as acl]
+    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
     [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -16,6 +16,8 @@
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.table :as table]
+    [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as comp]
     [sixsq.slipstream.webui.utils.values :as values]))
 
@@ -55,7 +57,7 @@
                         label])}
          [ui/ModalHeader title-text]
          [ui/ModalContent (cond-> {}
-                            scrolling? (assoc :scrolling true)) body]
+                                  scrolling? (assoc :scrolling true)) body]
          [ui/ModalActions
           [action-buttons
            label
@@ -161,6 +163,7 @@
          "download" "cloud download"
          "upload" "cloud upload"
          "describe" "info"
+         "ready" "check"
          nil)
        (@tr [:execute-action] [label])
        [:p (@tr [:execute-action-msg] [label (:id data)])]
@@ -188,18 +191,36 @@
     (vec (concat [refresh-button] (map (partial operation-button data description) ops)))))
 
 
-(defn attr-ns
-  "Extracts the attribute namespace for the given key-value pair.
-   Returns 'attributes' if there is no explicit namespace."
-  [[k _]]
-  (let [prefix (second (re-matches #"(?:([^:]*):)?(.*)" (name k)))]
-    (cond
-      prefix prefix
-      (#{:id :resourceURI :created :updated :name :description} k) "common"
-      (= k :acl) "acl"
-      (= k :operations) "operations"
-      (= k :properties) "properties"
-      :else "attributes")))
+(defn metadata-row
+  [k v]
+  (let [value (cond
+                (vector? v) v
+                (map? v) (with-out-str (pprint v))
+                :else (str v))]
+    [ui/TableRow
+     [ui/TableCell {:collapsing true} (str k)]
+     [ui/TableCell value]]))
+
+
+(defn detail-header
+  [{:keys [id resourceURI created updated
+           name description properties acl] :as data}]
+  (when data
+    [cc/metadata
+     {:title       (or name id)
+      :subtitle    (when name id)
+      :description description
+      :icon        "file"
+      :updated     updated
+      :acl         acl
+      :properties  properties}
+     (cond-> []
+             id (conj (metadata-row "id" id))
+             resourceURI (conj (metadata-row "resourceURI" resourceURI))
+             name (conj (metadata-row "name" name))
+             description (conj (metadata-row "description" description))
+             created (conj (metadata-row "created" (time/time-value created)))
+             updated (conj (metadata-row "updated" (time/time-value updated))))]))
 
 
 (defn strip-attr-ns
@@ -229,44 +250,22 @@
 (defn group-table-sui
   [group-data {:keys [params-desc] :as description}]
   (let [data (sort-by first group-data)]
-    [ui/Table style/definition
-     (vec (concat [ui/TableBody]
-                  (->> data
-                       (map (data-to-tuple-fn params-desc))
-                       (map tuple-to-row))))]))
+    (table/definition-table (->> data
+                                 (map (data-to-tuple-fn params-desc))
+                                 (map tuple-to-row)))))
 
 
-(defn format-group [description [group data]]
-  ^{:key group}
-  [cc/collapsible-segment
-   (str group)
-   [group-table-sui data description]])
-
-
-(defn group-comparator [x y]
-  (let [group-order (zipmap ["common" "properties" "attributes" :others "operations" "acl"] (range))
-        x-index (get group-order x)
-        y-index (get group-order y)
-        o-index (get group-order :others)]
-    (cond
-      (and x-index y-index) (< x-index y-index)
-      (and (nil? x-index) (nil? y-index)) (neg? (compare x y))
-      y-index (< o-index y-index)
-      x-index (< x-index o-index))))
-
-
-(defn format-resource-data [{:keys [acl] :as data} description]
-  (let [groups (into (sorted-map-by group-comparator)
-                     (group-by attr-ns (dissoc data :acl :operations)))]
-    (conj (mapv (partial format-group description) groups)
-          (acl/acl-segment acl))))
+(defn detail-menu
+  [refresh-button data baseURI description]
+  (vec (concat [ui/Menu {:borderless true}]
+               (format-operations refresh-button data baseURI description))))
 
 
 (defn resource-detail
   "Provides a generic visualization of a CIMI resource document."
-  [refresh-button title {:keys [name id operations] :as data} baseURI description]
+  [refresh-button data baseURI description]
   (vec (concat
          [ui/Segment style/basic
-          (vec (concat [ui/Menu {:borderless true}]
-                       (format-operations refresh-button data baseURI description)))]
-         (format-resource-data data description))))
+          (detail-menu refresh-button data baseURI description)
+          (detail-header data)
+          (group-table-sui (cimi-api-utils/remove-common-attrs data) description)])))

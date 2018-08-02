@@ -3,9 +3,12 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
+    [sixsq.slipstream.webui.acl.views :as acl]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.table :as table]
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn more-or-less
@@ -21,10 +24,29 @@
          label]))))
 
 
+(defn definition-row
+  ([[k v]]
+   (definition-row k v))
+  ([k v]
+   [ui/TableRow
+    [ui/TableCell {:collapsing true} k]
+    [ui/TableCell v]]))
+
+
+(defn properties-table
+  [properties]
+  (when (seq properties)
+    (->> properties
+         (map (fn [[k v]] [(str k) (str v)]))
+         (sort-by first)
+         (map definition-row)
+         (table/definition-table "tags" "properties"))))
+
+
 (defn metadata
-  [{:keys [title subtitle description logo icon acl] :as module-meta} rows]
+  [{:keys [title subtitle description logo icon updated acl properties] :as module-meta} rows]
   (let [more? (reagent/atom false)]
-    (fn [{:keys [title subtitle description logo icon acl] :as module-meta} rows]
+    (fn [{:keys [title subtitle description logo icon updated acl properties] :as module-meta} rows]
       [ui/Card {:fluid true}
        [ui/CardContent
         (when logo
@@ -33,15 +55,16 @@
          [ui/Icon {:name icon}]
          (cond-> title
                  (not (str/blank? subtitle)) (str " (" subtitle ")"))]
-        (when description
-          [ui/CardMeta
-           [:p description]])
+        [ui/CardMeta
+         (when description [:p description])
+         (when updated [:p (-> updated time/parse-iso8601 time/ago)])]
         [ui/CardDescription
-         [more-or-less more?]
-         (when (and @more? (seq rows))
-           [ui/Table style/definition
-            (vec (concat [ui/TableBody] rows))])]]])))
-
+         (when (or (seq rows) (seq properties) acl)
+           [more-or-less more?])
+         (when @more?
+           [table/definition-table rows])
+         (when @more? [properties-table properties])
+         (when @more? [acl/acl-table acl])]]])))
 
 
 (defn title-card
