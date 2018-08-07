@@ -251,22 +251,28 @@
          [gantt]]))))
 
 
+(defn reports-list
+  []
+  (let [reports (subscribe [::deployment-detail-subs/reports])
+        runUUID (subscribe [::deployment-detail-subs/runUUID])]
+    (when-not (str/blank? @runUUID)
+      (dispatch [::main-events/action-interval
+                 {:action    :start
+                  :id        :deployment-detail-reports
+                  :frequency 30000
+                  :event     [::deployment-detail-events/fetch-reports]}]))
+    (if (seq @reports)
+      (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
+      [:p "Reports will be displayed as soon as available. No need to refresh."])))
+
+
 (defn reports-section
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        reports (subscribe [::deployment-detail-subs/reports])]
-    (dispatch [::deployment-detail-events/fetch-reports])
-    (dispatch [::main-events/action-interval
-               {:action    :start
-                :id        :deployment-detail-reports
-                :frequency 30000
-                :event     [::deployment-detail-events/fetch-reports]}])
+  (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [cc/collapsible-segment
        (@tr [:reports])
-       (if (seq @reports)
-         (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
-         [:p "Reports will be displayed as soon as available. No need to refresh."])])))
+       [reports-list]])))
 
 
 (defn refresh-button
