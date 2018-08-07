@@ -29,6 +29,8 @@
 
 (s/def ::date-range (s/tuple any? any?))
 
+(s/def ::billable-only? boolean?)
+
 (s/def ::is-admin? boolean?)
 
 (s/def ::db (s/keys :req [::loading?
@@ -41,6 +43,7 @@
                           ::selected-users-roles
                           ::users-roles-list
                           ::date-range
+                          ::billable-only?
                           ::is-admin?]))
 
 (def defaults {::loading?                 false
@@ -53,4 +56,5 @@
                ::selected-users-roles     nil
                ::users-roles-list         []
                ::date-range               (get u/date-range-entries u/default-date-range)
+               ::billable-only?           true
                ::is-admin?                false})

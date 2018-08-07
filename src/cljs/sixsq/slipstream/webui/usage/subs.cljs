@@ -52,3 +52,8 @@
 (reg-sub
   ::date-range
   ::usage-spec/date-range)
+
+
+(reg-sub
+  ::billable-only?
+  ::usage-spec/billable-only?)

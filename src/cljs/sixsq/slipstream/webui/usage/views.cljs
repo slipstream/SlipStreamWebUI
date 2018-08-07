@@ -247,6 +247,7 @@
         tr (subscribe [::i18n-subs/tr])
         date-range (subscribe [::usage-subs/date-range])
         locale (subscribe [::i18n-subs/locale])
+        billable-only? (subscribe [::usage-subs/billable-only?])
         range-initial-val u/default-date-range
         range-dropdown (reagent/atom range-initial-val)]
     (fn []
@@ -293,6 +294,11 @@
                            :max-date     (time/now)
                            :selects-end  true
                            :on-change    #(dispatch [::usage-events/set-date-range [date-after (.endOf % "day")]])}]]]
+         [ui/FormGroup
+          [ui/Checkbox {:slider true
+                        :checked @billable-only?
+                        :label (@tr [:billable-only?])
+                        :on-change #(dispatch [::usage-events/toggle-billable-only?])}]]
          [ui/FormGroup {:widths "equal"}
           (when @is-admin?
             [search-users-roles-dropdown])

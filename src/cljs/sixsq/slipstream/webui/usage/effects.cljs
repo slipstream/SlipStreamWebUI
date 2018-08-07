@@ -13,9 +13,11 @@
         date-after
         date-before
         credentials
+        billable-only?
         callback]]
     (usage-utils/fetch-meterings client
                                  date-after
                                  date-before
                                  credentials
+                                 billable-only?
                                  callback)))
