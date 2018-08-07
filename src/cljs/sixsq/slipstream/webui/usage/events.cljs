@@ -3,7 +3,6 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.usage.effects :as usage-fx]
     [sixsq.slipstream.webui.usage.spec :as usage-spec]
@@ -100,7 +99,8 @@
   (fn [{{:keys [::client-spec/client
                 ::usage-spec/date-range
                 ::usage-spec/selected-credentials
-                ::usage-spec/credentials-map] :as db} :db}]
+                ::usage-spec/credentials-map
+                ::usage-spec/billable-only?] :as db} :db}]
     {:db                        (assoc db ::usage-spec/loading? true)
      ::usage-fx/fetch-meterings [client
                                  (-> date-range first .clone .utc .format)
@@ -108,6 +108,7 @@
                                  (conj (if (empty? selected-credentials)
                                          (keys credentials-map)
                                          selected-credentials) u/all-credentials)
+                                 billable-only?
                                  #(dispatch [::set-results %])]}))
 
 
@@ -128,5 +129,11 @@
                           :descending)]
       (assoc db ::usage-spec/sort {:column    new-column
                                    :direction new-direction}))))
+
+
+(reg-event-db
+  ::toggle-billable-only?
+  (fn [{:keys [::usage-spec/billable-only?] :as db} _]
+    (assoc db ::usage-spec/billable-only? (not billable-only?))))
 
 

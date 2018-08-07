@@ -45,13 +45,15 @@
   (/ v 1024))
 
 
-(defn fetch-metering [resolve client date-after date-before credential credentials]
+(defn fetch-metering [resolve client date-after date-before credential credentials billable-only?]
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-credentials (if (= credential all-credentials)
                                (str/join " or " (map #(str "credentials/href='" % "'") credentials))
                                (str "credentials/href='" credential "'"))
-          filter-str (str filter-created-str "and (" filter-credentials ")")
+          billable-filter "(state=\"running\" or state=\"Running\" or state=\"stopping\" or state=\"Error\" or state=\"Pending\" or state=\"pending\" or state=\"Boot\" or state=\"Unknown\" or state=\"shutting-down\" or state=\"Rebooting\")"
+          filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
+                             billable-only? (str " and " billable-filter))
           request-opts {"$last"        0
                         "$filter"      filter-str
                         "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
@@ -83,7 +85,8 @@
                        date-after
                        date-before
                        credentials
+                       billable-only?
                        callback]
   (let [p (p/all (map #(p/promise (fn [resolve _]
-                                    (fetch-metering resolve client date-after date-before % credentials))) credentials))]
+                                    (fetch-metering resolve client date-after date-before % credentials billable-only?))) credentials))]
     (p/then p #(->> % (into {}) callback))))
