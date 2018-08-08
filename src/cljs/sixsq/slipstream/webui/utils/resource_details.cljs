@@ -235,7 +235,9 @@
    [ui/TableCell {:collapsing true} (or display-name (str key)) ff/nbsp [ff/help-popup helper]]
    [ui/TableCell {:style {:max-width     "80ex"             ;; FIXME: need to get this from parent container
                           :text-overflow "ellipsis"
-                          :overflow      "hidden"}} (values/format-value value)]])
+                          :overflow      "hidden"}} (if (vector? value)
+                                                      (values/format-collection value)
+                                                      (values/format-value value))]])
 
 
 (defn data-to-tuple-fn
