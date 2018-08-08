@@ -83,7 +83,11 @@
                      :content (str "The resource type '" collection-name "' is not valid. "
                                    "Please choose another resource type.")
                      :type    :error}]
-        (dispatch [::messages-events/add msg-map])
+
+        ;; only send error message when the cloud-entry-point is actually set, otherwise
+        ;; we don't yet know if this is a valid resource or not
+        (when cloud-entry-point
+          (dispatch [::messages-events/add msg-map]))
         db))))
 
 
