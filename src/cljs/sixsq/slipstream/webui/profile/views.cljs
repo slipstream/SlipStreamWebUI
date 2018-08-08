@@ -25,16 +25,9 @@
   (juxt (comp name first) (comp values/format-value second)))
 
 
-(defn format-role
-  [role]
-  ^{:key role}
-  [ui/ListItem role])
-
-
 (defn format-roles
   [{:keys [roles] :as m}]
-  (assoc m :roles (vec (concat [ui/ListSA]
-                               (map format-role (sort (str/split roles #"\s+")))))))
+  (assoc m :roles (values/format-collection (sort (str/split roles #"\s+")))))
 
 
 (defn username-as-link
@@ -57,10 +50,8 @@
 
 (defn format-ssh-keys
   [{:keys [sshPublicKey] :as data}]
-  (let [keys (str/split sshPublicKey #"[\n\r]+")
-        items (map (fn [i] [ui/ListItem i]) keys)
-        lst (vec (concat [ui/ListSA] items))]
-    (assoc data :sshPublicKey lst)))
+  (let [keys (str/split sshPublicKey #"[\n\r]+")]
+    (assoc data :sshPublicKey (values/format-collection keys))))
 
 
 (defn process-session-data
