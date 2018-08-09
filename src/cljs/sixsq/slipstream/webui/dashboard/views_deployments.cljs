@@ -57,7 +57,7 @@
                          [ui/TableRow [ui/TableCell "State:"] [ui/TableCell state]]
                          [ui/TableRow
                           [ui/TableCell "Service URL:"]
-                          [ui/TableCell [:a {:href service-url :target "_blank"} service-url]]]
+                          [ui/TableCell [:a {:href service-url, :target "_blank", :rel "noreferrer"} service-url]]]
                          [ui/TableRow [ui/TableCell "State:"] [ui/TableCell state]]
                          [ui/TableRow [ui/TableCell "Clouds:"] [ui/TableCell clouds]]
                          [ui/TableRow [ui/TableCell "Abort:"] [ui/TableCell abort]]
@@ -112,7 +112,7 @@
                  [ui/TableCell {:collapsing true :style {:max-width     "200px"
                                                          :overflow      "hidden"
                                                          :text-overflow "ellipsis"}}
-                  [:a {:href service-url :target "_blank"}
+                  [:a {:href service-url, :target "_blank", :rel "noreferrer"}
                    (when (seq service-url) [ui/Icon {:name "external"}])
                    service-url]]
 
