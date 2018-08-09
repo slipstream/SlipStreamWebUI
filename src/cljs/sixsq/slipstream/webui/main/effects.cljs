@@ -42,4 +42,4 @@
 (reg-fx
   ::open-new-window
   (fn [[url]]
-    (.open js/window url "_blank")))
+    (.open js/window url "_blank" "noreferrer")))

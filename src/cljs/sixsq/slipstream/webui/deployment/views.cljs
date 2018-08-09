@@ -101,9 +101,7 @@
   [url status]
   [:span
    (if (and (= status "Ready") (not (str/blank? url)))
-     [:a
-      {:href   url
-       :target "_blank"}
+     [:a {:href url, :target "_blank", :rel "noreferrer"}
       [:i {:class (str "zmdi zmdi-hc-fw-rc zmdi-mail-reply")}]]
      "\u00a0")])
 

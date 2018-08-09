@@ -265,12 +265,14 @@
 
             [[ui/DropdownItem {:icon   "book"
                                :text   (@tr [:documentation])
-                               :href   "http://ssdocs.sixsq.com/"
-                               :target "_blank"}]
+                               :href   "https://ssdocs.sixsq.com/"
+                               :target "_blank"
+                               :rel    "noreferrer"}]
              [ui/DropdownItem {:icon   "info circle"
                                :text   (@tr [:knowledge-base])
-                               :href   "http://support.sixsq.com/solution/categories"
-                               :target "_blank"}]
+                               :href   "https://support.sixsq.com/solution/categories"
+                               :target "_blank"
+                               :rel    "noreferrer"}]
              [ui/DropdownItem {:icon "mail"
                                :text (@tr [:support])
                                :href (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"

@@ -196,11 +196,11 @@
         [ui/Form {:on-key-press (partial forms/on-return-key
                                          #(when @selected-id
                                             (dispatch [::cimi-events/get-results])))}
-         [ui/Button {
-                     ;:circular true
-                     :floated "right"
+         [ui/Button {:floated "right"
                      :size    "tiny" :basic true :icon "info"
-                     :href    "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
+                     :href    "https://ssapi.sixsq.com/#resource-selection"
+                     :target  "_blank"
+                     :rel     "noreferrer"}]
          [ui/FormGroup
           [ui/FormField
            [cloud-entry-point-title]]]
