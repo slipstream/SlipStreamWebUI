@@ -265,11 +265,11 @@
 
             [[ui/DropdownItem {:icon   "book"
                                :text   (@tr [:documentation])
-                               :href   "http://ssdocs.sixsq.com/"
+                               :href   "https://ssdocs.sixsq.com/"
                                :target "_blank"}]
              [ui/DropdownItem {:icon   "info circle"
                                :text   (@tr [:knowledge-base])
-                               :href   "http://support.sixsq.com/solution/categories"
+                               :href   "https://support.sixsq.com/solution/categories"
                                :target "_blank"}]
              [ui/DropdownItem {:icon "mail"
                                :text (@tr [:support])

@@ -200,7 +200,7 @@
                      ;:circular true
                      :floated "right"
                      :size    "tiny" :basic true :icon "info"
-                     :href    "http://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
+                     :href    "https://ssapi.sixsq.com/#resource-selection" :target "_blank"}]
          [ui/FormGroup
           [ui/FormField
            [cloud-entry-point-title]]]
