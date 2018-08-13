@@ -9,9 +9,24 @@
 
 
 (reg-event-db
+  ::set-device
+  (fn [db [_ device]]
+    (log/error "setting device:" device)
+    (cond-> (assoc db ::main-spec/device device)
+            (not (#{:mobile :table} device)) (assoc ::main-spec/sidebar-open? true))))
+
+
+(reg-event-db
+  ::close-sidebar
+  (fn [db _]
+    (assoc db ::main-spec/sidebar-open? false)))
+
+
+(reg-event-db
   ::toggle-sidebar
   (fn [{:keys [::main-spec/sidebar-open?] :as db} _]
     (update db ::main-spec/sidebar-open? not sidebar-open?)))
+
 
 (reg-event-fx
   ::visible

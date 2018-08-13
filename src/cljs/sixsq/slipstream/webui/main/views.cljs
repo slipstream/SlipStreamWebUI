@@ -24,6 +24,7 @@
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.usage.views]
     [sixsq.slipstream.webui.utils.general :as utils]
+    [sixsq.slipstream.webui.utils.responsive :as responsive]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.welcome.views]
     [taoensso.timbre :as log]))
@@ -92,6 +93,7 @@
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::main-subs/sidebar-open?])
         nav-path (subscribe [::main-subs/nav-path])
+        device (subscribe [::main-subs/device])
         is-user? (subscribe [::authn-subs/is-user?])
         is-admin? (subscribe [::authn-subs/is-admin?])]
     [ui/Sidebar {:as        (ui/array-get "Menu")
@@ -121,12 +123,14 @@
                       [[:cimi "cimi" "code"]]
 
                       #_(when @is-user? [[:dashboard "dashboard" "dashboard"]
-                                       [:legacy-application "legacy-application" "sitemap"]])))
+                                         [:legacy-application "legacy-application" "sitemap"]])))
 
                   :when (some? label-kw)]
               [ui/MenuItem {:active  (= (first @nav-path) url)
                             :onClick (fn []
                                        (log/info "navigate event" url)
+                                       (when (#{:mobile :tablet} @device)
+                                         (dispatch [::main-events/close-sidebar]))
                                        (dispatch [::history-events/navigate url]))}
                [ui/Icon {:name icon}] (@tr [label-kw])])
             [[i18n-views/locale-dropdown]]))]))
@@ -135,12 +139,15 @@
 (defn app []
   (fn []
     (let [show? (subscribe [::main-subs/sidebar-open?])]
-      [ui/SidebarPushable {:as    (ui/array-get "Segment")
-                           :basic true}
-       [slidebar]
-       [ui/SidebarPusher
-        [ui/Container (cond-> {:id "webui-main" :fluid true}
-                              @show? (assoc :className "sidebar-visible"))
-         [header]
-         [contents]
-         [footer]]]])))
+      [ui/Responsive {:as            "div"
+                      :fire-on-mount true
+                      :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
+       [ui/SidebarPushable {:as    (ui/array-get "Segment")
+                            :basic true}
+        [slidebar]
+        [ui/SidebarPusher
+         [ui/Container (cond-> {:id "webui-main" :fluid true}
+                               @show? (assoc :className "sidebar-visible"))
+          [header]
+          [contents]
+          [footer]]]]])))
