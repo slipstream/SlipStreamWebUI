@@ -5,6 +5,11 @@
 
 
 (reg-sub
+  ::device
+  ::main-spec/device)
+
+
+(reg-sub
   ::sidebar-open?
   ::main-spec/sidebar-open?)
 

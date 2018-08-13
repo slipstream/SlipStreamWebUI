@@ -129,6 +129,8 @@
 (def Rail (adapt-component "Rail"))
 (def Ref (adapt-component "Ref"))
 
+(def Responsive (adapt-component "Responsive"))
+
 (def Segment (adapt-component "Segment"))
 (def SegmentGroup (adapt-component "SegmentGroup"))
 
