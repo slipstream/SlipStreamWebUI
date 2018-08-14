@@ -2,22 +2,18 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.application.views]
-    [sixsq.slipstream.webui.authn.subs :as authn-subs]
-
-    ;; all panel views must be included to define panel rendering method
     [sixsq.slipstream.webui.authn.views :as authn-views]
-    [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.deployment.views]
-    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.legacy-application.views]
     [sixsq.slipstream.webui.legal.views]
     [sixsq.slipstream.webui.main.events :as main-events]
-
     [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.main.views-sidebar :as sidebar]
     [sixsq.slipstream.webui.messages.views :as messages]
     [sixsq.slipstream.webui.metrics.views]
     [sixsq.slipstream.webui.nuvlabox.views]
@@ -28,7 +24,7 @@
     [sixsq.slipstream.webui.utils.responsive :as responsive]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.welcome.views]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn crumb
@@ -38,13 +34,37 @@
                                            (utils/truncate (str segment))]]))
 
 
-(defn breadcrumbs []
+(defn breadcrumbs-links []
   (let [path (subscribe [::main-subs/nav-path])]
-    (fn []
-      (vec (concat [ui/Breadcrumb {:size :large}]
-                   (vec (->> @path
-                             (map crumb (range))
-                             (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))))
+    (vec (concat [ui/Breadcrumb {:size :large}]
+                 (->> @path
+                      (map crumb (range))
+                      (interpose [ui/BreadcrumbDivider {:icon "chevron right"}]))))))
+
+
+(defn breadcrumb-option
+  [index segment]
+  {:key   segment
+   :value index
+   :text  (utils/truncate segment 8)})
+
+
+(defn breadcrumbs-dropdown []
+  (let [path (subscribe [::main-subs/nav-path])]
+    (let [options (map breadcrumb-option (range) @path)
+          selected (-> options last :value)]
+      [ui/Dropdown
+       {:inline    true
+        :value     selected
+        :on-change (ui-callback/value #(dispatch [::main-events/trim-breadcrumb %]))
+        :options   options}])))
+
+
+(defn breadcrumbs []
+  (let [device (subscribe [::main-subs/device])]
+    (if (#{:mobile} @device)
+      [breadcrumbs-dropdown]
+      [breadcrumbs-links])))
 
 
 (defn footer
@@ -56,85 +76,39 @@
      [:div.webui-footer-right
       [:span
        [ui/Icon {:name "balance"}]
-       [:a {:style    {:cursor "pointer"}
-            :on-click #(dispatch [::history-events/navigate "legal"])}
-        (@tr [:legal])]]]]))
+       [history/link "legal" (@tr [:legal])]]]]))
 
 
 (defn contents
   []
   (let [resource-path (subscribe [::main-subs/nav-path])]
     (fn []
-      [ui/Container {:class-name "webui-content", :fluid true}
+      [ui/Container {:as         "main"
+                     :class-name "webui-content"
+                     :fluid      true}
        (panel/render @resource-path)])))
 
 
 (defn header
   []
-  (let [show? (subscribe [::main-subs/sidebar-open?])]
-    (fn []
-      [:div
-       [ui/Menu {:className  "webui-header"
-                 :borderless true}
-        [ui/MenuItem {:link     true
-                      :on-click #(dispatch [::main-events/toggle-sidebar])}
-         [ui/Icon {:name (if @show? "bars" "bars")}]]       ;; FIXME: Find a better close icon.  Can't look like "back" button.
-        [ui/MenuItem [breadcrumbs]]
+  [:header
+   [ui/Menu {:className  "webui-header"
+             :borderless true}
 
-        [ui/MenuMenu {:position "right"}
-         [messages/bell-menu]
-         [ui/MenuItem {:fitted true}
-          [authn-views/authn-menu]]]]
+    [ui/MenuItem {:aria-label "toggle sidebar"
+                  :link       true
+                  :on-click   #(dispatch [::main-events/toggle-sidebar])}
+     [ui/Icon {:name "bars"}]]
 
-       [messages/alert-slider]
-       [messages/alert-modal]])))
+    [ui/MenuItem [breadcrumbs]]
 
+    [ui/MenuMenu {:position "right"}
+     [messages/bell-menu]
+     [ui/MenuItem {:fitted true}
+      [authn-views/authn-menu]]]]
 
-(defn slidebar []
-  (let [tr (subscribe [::i18n-subs/tr])
-        show? (subscribe [::main-subs/sidebar-open?])
-        nav-path (subscribe [::main-subs/nav-path])
-        device (subscribe [::main-subs/device])
-        is-user? (subscribe [::authn-subs/is-user?])
-        is-admin? (subscribe [::authn-subs/is-admin?])]
-    [ui/Sidebar {:as        (ui/array-get "Menu")
-                 :className "medium thin"
-                 :vertical  true
-                 :visible   @show?
-                 :inverted  true
-                 :animation "uncover"}
-     (vec (concat
-            [ui/Menu {:icon     "labeled"
-                      :vertical true
-                      :size     "large"
-                      :compact  true
-                      :inverted true}]
-            [^{:key "logo"} [ui/MenuItem {:on-click #(dispatch [::history-events/navigate "welcome"])}
-                             [ui/Image {:src "/images/cubic-logo.png" :size "tiny" :centered true}]]]
-            (for [[label-kw url icon]
-                  (vec
-                    (concat
-                      (when @is-user? [[:deployment "deployment" "cloud"]
-                                       [:application "application" "sitemap"]
-                                       [:usage "usage" "history"]])
-                      (when @is-admin?
-                        [[:metrics "metrics" "bar chart"]
-                         [:nuvlabox "nuvlabox" "desktop"]])
-
-                      [[:cimi "cimi" "code"]]
-
-                      #_(when @is-user? [[:dashboard "dashboard" "dashboard"]
-                                         [:legacy-application "legacy-application" "sitemap"]])))
-
-                  :when (some? label-kw)]
-              [ui/MenuItem {:active  (= (first @nav-path) url)
-                            :onClick (fn []
-                                       (log/info "navigate event" url)
-                                       (when (#{:mobile :tablet} @device)
-                                         (dispatch [::main-events/close-sidebar]))
-                                       (dispatch [::history-events/navigate url]))}
-               [ui/Icon {:name icon}] (@tr [label-kw])])
-            [[i18n-views/locale-dropdown]]))]))
+   [messages/alert-slider]
+   [messages/alert-modal]])
 
 
 (defn app []
@@ -147,7 +121,7 @@
                         :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
          [ui/SidebarPushable {:as    (ui/array-get "Segment")
                               :basic true}
-          [slidebar]
+          [sidebar/menu]
           [ui/SidebarPusher
            [ui/Container (cond-> {:id "webui-main" :fluid true}
                                  @show? (assoc :className "sidebar-visible"))

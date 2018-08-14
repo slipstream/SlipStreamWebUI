@@ -3,7 +3,7 @@
   (:require
     [clojure.pprint :refer [pprint]]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
@@ -17,18 +17,13 @@
   "Renders a link to the CIMI detail page associated with the href. Ignores
    other values of the map (if any)."
   [{:keys [href]}]
-  [:a {:on-click #(dispatch [::history-events/navigate (str "cimi/" href)])
-       :style    {:cursor "pointer"}}
-   (str href)])
+  [history/link (str "cimi/" href) (str href)])
 
 
 (defn as-link
-  "Renders a link to the CIMI detail page associated with the href. Ignores
-   other values of the map (if any)."
+  "Renders a link to the CIMI detail page associated with the href."
   [href & [label]]
-  [:a {:on-click #(dispatch [::history-events/navigate (str "cimi/" href)])
-       :style    {:cursor "pointer"}}
-   (or label href)])
+  [history/link (str "cimi/" href) (or label href)])
 
 
 (defn href-coll?

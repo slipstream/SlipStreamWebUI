@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
@@ -115,9 +116,8 @@
 
 (defn format-uuid
   [uuid]
-  (let [tag (.substring uuid 0 8)
-        on-click #(dispatch [::history-events/navigate (str "deployment/" uuid)])]
-    [:a {:style {:cursor "pointer"} :on-click on-click} tag]))
+  (let [tag (.substring uuid 0 8)]
+    [history/link (str "deployment/" uuid) tag]))
 
 
 (defn row-fn [entry]

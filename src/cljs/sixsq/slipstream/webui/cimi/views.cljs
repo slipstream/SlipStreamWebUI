@@ -12,26 +12,24 @@
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn id-selector-formatter [entry]
   (let [v (:id entry)
-        label (second (str/split v #"/"))
-        on-click #(dispatch [::history-events/navigate (str "cimi/" v)])]
-    [:a {:style {:cursor "pointer"} :on-click on-click} label]))
+        label (second (str/split v #"/"))]
+    [history/link (str "cimi/" v) label]))
 
 
 ;; FIXME: Provide better visualization of non-string values.

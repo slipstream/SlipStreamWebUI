@@ -6,7 +6,7 @@
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.editor.editor :as editor]
-    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]
@@ -196,8 +196,7 @@
 
 (defn format-component-link
   [label href]
-  (let [on-click #(dispatch [::history-events/navigate (str "cimi/" href)])]
-    [:a {:style {:cursor "pointer"} :on-click on-click} label]))
+  [history/link (str "cimi/" href) label])
 
 
 (defn render-parameter-mapping

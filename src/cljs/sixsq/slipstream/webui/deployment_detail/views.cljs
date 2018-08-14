@@ -7,7 +7,7 @@
     [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
     [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
-    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
@@ -56,8 +56,7 @@
 
 (defn format-module-link
   [module]
-  (let [f #(dispatch [::history-events/navigate (str "application/" module)])]
-    [:a {:on-click f} module]))
+  [history/link (str "application/" module) module])
 
 
 (defn format-parameter-value
@@ -192,7 +191,7 @@
 (defn format-event-id
   [id]
   (let [tag (second (re-matches #"^.*/([^-]+).*$" id))]
-    [:a {:on-click #(dispatch [::history-events/navigate (str "cimi/" id)])} tag]))
+    [history/link (str "cimi/" id) tag]))
 
 
 (defn event-map-to-row
