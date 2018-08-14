@@ -7,6 +7,7 @@
     ;; all panel views must be included to define panel rendering method
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.cimi.views]
+    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.history.events :as history-events]
@@ -138,16 +139,19 @@
 
 (defn app []
   (fn []
-    (let [show? (subscribe [::main-subs/sidebar-open?])]
-      [ui/Responsive {:as            "div"
-                      :fire-on-mount true
-                      :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
-       [ui/SidebarPushable {:as    (ui/array-get "Segment")
-                            :basic true}
-        [slidebar]
-        [ui/SidebarPusher
-         [ui/Container (cond-> {:id "webui-main" :fluid true}
-                               @show? (assoc :className "sidebar-visible"))
-          [header]
-          [contents]
-          [footer]]]]])))
+    (let [show? (subscribe [::main-subs/sidebar-open?])
+          cep (subscribe [::cimi-subs/cloud-entry-point])]
+      (if @cep
+        [ui/Responsive {:as            "div"
+                        :fire-on-mount true
+                        :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
+         [ui/SidebarPushable {:as    (ui/array-get "Segment")
+                              :basic true}
+          [slidebar]
+          [ui/SidebarPusher
+           [ui/Container (cond-> {:id "webui-main" :fluid true}
+                                 @show? (assoc :className "sidebar-visible"))
+            [header]
+            [contents]
+            [footer]]]]]
+        [ui/Container [ui/Loader {:active true :size "massive"}]]))))

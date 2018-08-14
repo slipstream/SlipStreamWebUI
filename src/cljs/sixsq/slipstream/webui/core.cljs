@@ -62,14 +62,16 @@
 
 
 (defn ^:export init []
-  (routes/routes)
-  (visibility-watcher)
-  (dnd-utils/disable-browser-dnd)
+  (dev-setup)
   (dispatch-sync [::db-events/initialize-db])
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
-  (dispatch-sync [::history-events/initialize @config/path-prefix])
-  (dispatch-sync [::authn-events/initialize])
   (dispatch-sync [::cimi-events/get-cloud-entry-point])
-  (log/info "finished initialization")
-  (dev-setup)
-  (mount-root))
+  (dispatch-sync [::authn-events/initialize])
+  (visibility-watcher)
+  (dnd-utils/disable-browser-dnd)
+  (routes/routes)
+  (dispatch [::history-events/initialize @config/path-prefix])
+  (mount-root)
+  (log/info "finished initialization"))
+
+
