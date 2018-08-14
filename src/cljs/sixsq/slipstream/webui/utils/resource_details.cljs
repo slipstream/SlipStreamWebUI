@@ -164,6 +164,8 @@
          "upload" "cloud upload"
          "describe" "info"
          "ready" "check"
+         "start" "play"
+         "stop" "stop"
          nil)
        (@tr [:execute-action] [label])
        [:p (@tr [:execute-action-msg] [label (:id data)])]

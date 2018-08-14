@@ -140,7 +140,8 @@
       [ui/Table
        {:compact     "very"
         :single-line true
-        :padded      false}
+        :padded      false
+        :unstackable true}
        [ui/TableHeader
         [ui/TableRow
          [ui/TableHeaderCell (@tr [:id])]
