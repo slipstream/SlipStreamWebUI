@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [taoensso.timbre :as log]))
 
 
@@ -28,11 +29,11 @@
         nav-path (subscribe [::main-subs/nav-path])]
 
     ^{:key (name label-kw)}
-    [ui/MenuItem {:aria-label (@tr [label-kw])
-                  :active     (= (first @nav-path) url)
-                  :on-click   #(navigate url)}
-     [ui/Icon {:name icon}]
-     (@tr [label-kw])]))
+    [uix/MenuItemWithIcon
+     {:name      (@tr [label-kw])
+      :icon-name icon
+      :active    (= (first @nav-path) url)
+      :on-click  #(navigate url)}]))
 
 
 (defn logo-item
@@ -41,7 +42,8 @@
     ^{:key "welcome"}
     [ui/MenuItem {:aria-label (@tr [:welcome])
                   :on-click   #(navigate "welcome")}
-     [ui/Image {:src      "/images/cubic-logo.png"
+     [ui/Image {:alt      "logo"
+                :src      "/images/cubic-logo.png"
                 :size     "tiny"
                 :centered true}]]))
 

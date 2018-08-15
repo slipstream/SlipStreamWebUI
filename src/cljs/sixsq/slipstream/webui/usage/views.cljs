@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.usage.utils :as u]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
@@ -295,9 +296,9 @@
                            :selects-end  true
                            :on-change    #(dispatch [::usage-events/set-date-range [date-after (.endOf % "day")]])}]]]
          [ui/FormGroup
-          [ui/Checkbox {:slider true
-                        :checked @billable-only?
-                        :label (@tr [:billable-only?])
+          [ui/Checkbox {:slider    true
+                        :checked   @billable-only?
+                        :label     (@tr [:billable-only?])
                         :on-change #(dispatch [::usage-events/toggle-billable-only?])}]]
          [ui/FormGroup {:widths "equal"}
           (when @is-admin?
@@ -311,13 +312,14 @@
         filter-visible? (subscribe [::usage-subs/filter-visible?])]
     (fn []
       [ui/MenuMenu {:position "right"}
-       [ui/MenuItem {:name     "filter"
-                     :on-click #(dispatch [::usage-events/toggle-filter])}
+       [ui/MenuItem {:aria-label (@tr [:filter])
+                     :name       (@tr [:filter])
+                     :on-click   #(dispatch [::usage-events/toggle-filter])}
         [ui/IconGroup
          [ui/Icon {:name "filter"}]
          [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
                    :corner true}]]
-        (str "\u00a0" (@tr [:filter]))]])))
+        (@tr [:filter])]])))
 
 
 (defn control-bar []
@@ -328,18 +330,19 @@
     (fn []
       [:div
        [ui/Menu {:attached "top", :borderless true}
-        [ui/MenuItem {:name     "refresh"
-                      :on-click #(dispatch [::usage-events/fetch-meterings])}
-         [ui/Icon {:name "refresh"}]
-         (@tr [:refresh])]
+        [uix/MenuItemWithIcon
+         {:name      (@tr [:refresh])
+          :icon-name "refresh"
+          :on-click  #(dispatch [::usage-events/fetch-meterings])}]
         (when @results
-          [ui/MenuItem {:as       :a
-                        :download "data.json"
-                        :href     (->> (general/edn->json @results)
-                                       (.encodeURIComponent js/window)
-                                       (str "data:text/plain;charset=utf-8,"))}
-           [ui/Icon {:name "download"}]
-           (@tr [:download])])
+          [uix/MenuItemWithIcon
+           {:name      (@tr [:download])
+            :icon-name "download"
+            :as        :a
+            :download  "data.json"
+            :href      (->> (general/edn->json @results)
+                            (.encodeURIComponent js/window)
+                            (str "data:text/plain;charset=utf-8,"))}])
         [filter-button]]
        (when @filter-visible?
          [ui/Segment {:attached "bottom"}

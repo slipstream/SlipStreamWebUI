@@ -5,6 +5,7 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
@@ -95,13 +96,13 @@
                          templates]]
                        (template-form form-data selected-description)))]
          [ui/ModalActions
-          [ui/Button
-           {:on-click on-cancel}
-           (@tr [:cancel])]
-          [ui/Button
-           {:primary  true
-            :on-click #(on-submit @form-data)}
-           (@tr [:create])]]]))))
+          [uix/Button
+           {:text     (@tr [:cancel])
+            :on-click on-cancel}]
+          [uix/Button
+           {:text     (@tr [:create])
+            :primary  true
+            :on-click #(on-submit @form-data)}]]]))))
 
 
 (defn form-container-inner-modal-single
@@ -118,13 +119,13 @@
         (vec (concat [ui/Form]
                      (template-form form-data template)))]
        [ui/ModalActions
-        [ui/Button
-         {:on-click on-cancel}
-         (@tr [:cancel])]
-        [ui/Button
-         {:primary  true
-          :on-click #(on-submit @form-data)}
-         (@tr [:create])]]])))
+        [uix/Button
+         {:text     (@tr [:cancel])
+          :on-click on-cancel}]
+        [uix/Button
+         {:text     (@tr [:create])
+          :primary  true
+          :on-click #(on-submit @form-data)}]]])))
 ;;
 ;; public component
 ;;

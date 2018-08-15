@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.resource-details :as details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.time :as time]))
 
 
@@ -21,11 +22,11 @@
         loading? (subscribe [::nuvlabox-subs/loading?])]
     (fn []
       [ui/Menu
-       [ui/MenuItem {:name     "refresh"
-                     :on-click #(dispatch [::nuvlabox-events/fetch-detail])}
-        [ui/Icon {:name    "refresh"
-                  :loading @loading?}]
-        (@tr [:refresh])]])))
+       [uix/MenuItemWithIcon
+        {:name      (@tr [:refresh])
+         :icon-name "refresh"
+         :loading?  @loading?
+         :on-click  #(dispatch [::nuvlabox-events/fetch-detail])}]])))
 
 
 (defn hw-id

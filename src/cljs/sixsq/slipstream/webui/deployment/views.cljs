@@ -14,6 +14,7 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
@@ -79,19 +80,20 @@
       [:div
        [ui/Menu {:attached   (if @filter-visible? "top" false)
                  :borderless true}
-        [ui/MenuItem {:name     "refresh"
-                      :on-click #(dispatch [::deployment-events/get-deployments])}
-         [ui/Icon {:name    "refresh"
-                   :loading @loading?}]
-         (@tr [:refresh])]
+        [uix/MenuItemWithIcon
+         {:name      (@tr [:refresh])
+          :icon-name "refresh"
+          :loading?  @loading?
+          :on-click  #(dispatch [::deployment-events/get-deployments])}]
         [ui/MenuMenu {:position "right"}
-         [ui/MenuItem {:name     "filter"
-                       :on-click #(dispatch [::deployment-events/toggle-filter])}
+         [ui/MenuItem {:aria-label (@tr [:filter])
+                       :name       (@tr [:filter])
+                       :on-click   #(dispatch [::deployment-events/toggle-filter])}
           [ui/IconGroup
            [ui/Icon {:name "filter"}]
            [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
                      :corner true}]]
-          (str "\u00a0" (@tr [:filter]))]]]
+          (@tr [:filter])]]]
 
        (when @filter-visible?
          [ui/Segment {:attached "bottom"}

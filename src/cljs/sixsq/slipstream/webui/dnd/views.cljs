@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [taoensso.timbre :as log]))
 
 
@@ -30,9 +31,9 @@
     (fn [file-handler]
       [:span
        ^{:key (str (str id "-button"))}
-       [ui/Button {:on-click #(some-> (.getElementById js/document id)
-                                      .click)}
-        (@tr [:select-file])]
+       [uix/Button {:text     (@tr [:select-file])
+                    :on-click #(some-> (.getElementById js/document id)
+                                       .click)}]
        ^{:key id}
        [:input {:id        id
                 :hidden    true
@@ -46,8 +47,9 @@
   (let [tr (subscribe [::i18n-subs/tr])
         inside? (reagent/atom false)]
     (fn [file-handler]
-      [ui/Button
-       {:primary       @inside?
+      [uix/Button
+       {:text          (@tr [:drop-file])
+        :primary       @inside?
 
         :on-drag-enter (fn [evt _] (dnd-utils/prevent-default evt) (reset! inside? true))
         :on-drag-leave (fn [evt _] (dnd-utils/prevent-default evt) (reset! inside? false))
@@ -57,5 +59,4 @@
                          (when-let [file (-> evt .-dataTransfer .-files (aget 0))]
                            (when file-handler
                              (file-handler file)))
-                         (reset! inside? false))}
-       (@tr [:drop-file])])))
+                         (reset! inside? false))}])))

@@ -14,6 +14,7 @@
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
@@ -280,11 +281,11 @@
         loading? (subscribe [::deployment-detail-subs/loading?])
         runUUID (subscribe [::deployment-detail-subs/runUUID])]
     (fn []
-      [ui/MenuItem {:name     "refresh"
-                    :on-click #(dispatch [::deployment-detail-events/get-deployment @runUUID])}
-       [ui/Icon {:name    "refresh"
-                 :loading @loading?}]
-       (@tr [:refresh])])))
+      [uix/MenuItemWithIcon
+       {:name      (@tr [:refresh])
+        :icon-name "refresh"
+        :loading?  @loading?
+        :on-click  #(dispatch [::deployment-detail-events/get-deployment @runUUID])}])))
 
 
 ;; FIXME: Remove duplicated function.
@@ -320,12 +321,11 @@
             state (second (first (filter #(= "ss:state" (first %)) global-params)))
             link (second (first (filter #(= "ss:url.service" (first %)) global-params)))]
         (when (and link (= "Ready" state))
-          [ui/MenuItem
-           {:name     "open"
-            :position "right"
-            :on-click #(dispatch [::deployment-detail-events/open-link link])}
-           [ui/Icon {:name "external"}]
-           (general/truncate link)])))))
+          [uix/MenuItemWithIcon
+           {:name      (general/truncate link)
+            :icon-name "external"
+            :position  "right"
+            :on-click  #(dispatch [::deployment-detail-events/open-link link])}])))))
 
 
 (defn menu

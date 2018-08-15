@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.messages.events :as message-events]
     [sixsq.slipstream.webui.messages.subs :as message-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.time :as time]))
 
 
@@ -85,8 +86,8 @@
           (when content [:pre content])]
 
          [ui/ModalActions
-          [ui/Button {:on-click hide-fn} (@tr [:close])]
-          [ui/Button {:negative true, :on-click remove-fn} (@tr [:clear])]]]))))
+          [uix/Button {:text (@tr [:close]), :on-click hide-fn}]
+          [uix/Button {:text (@tr [:clear]), :negative true, :on-click remove-fn}]]]))))
 
 
 (defn feed-item
@@ -134,7 +135,7 @@
                    :on-close #(dispatch [::message-events/close-popup])
                    :trigger  (reagent/as-element
                                [ui/MenuItem {:disabled disabled?}
-                                [ui/Button {:primary true, :disabled disabled?}
+                                [ui/Button {:aria-label "notifications", :primary true, :disabled disabled?}
                                  [ui/Icon {:name (if disabled? "bell slash" "bell")}]
                                  (str n)]])}
          [ui/PopupHeader (@tr [:notifications])]
@@ -142,8 +143,8 @@
          [ui/PopupContent [message-feed]]
          [ui/PopupContent
           [ui/Divider]
-          [ui/Button {:fluid    true
-                      :negative true
-                      :compact  true
-                      :on-click #(dispatch [::message-events/clear-all])}
-           (@tr [:clear-all])]]]))))
+          [uix/Button {:text     (@tr [:clear-all])
+                       :fluid    true
+                       :negative true
+                       :compact  true
+                       :on-click #(dispatch [::message-events/clear-all])}]]]))))

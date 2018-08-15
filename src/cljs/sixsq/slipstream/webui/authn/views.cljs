@@ -12,6 +12,7 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [taoensso.timbre :as log]))
 
@@ -204,12 +205,13 @@
 
        [ui/ModalActions
         [switch-panel-link modal-kw]
-        [ui/Button {:positive true
-                    :disabled (nil? @form-id)
-                    :on-click #(some->> @form-id
-                                        (.getElementById js/document)
-                                        (.submit))}
-         (@tr [modal-kw])]]])))
+        [uix/Button
+         {:text     (@tr [modal-kw])
+          :positive true
+          :disabled (nil? @form-id)
+          :on-click #(some->> @form-id
+                              (.getElementById js/document)
+                              (.submit))}]]])))
 
 
 (defn modal-login []
@@ -237,7 +239,8 @@
           sign-up-ok? (get-in @user-templates [:templates (keyword (str template-href "/self-registration"))])]
 
       [ui/ButtonGroup {:primary true}
-       [ui/Button {:on-click (if logged-in? profile-fn login-fn)}
+       [ui/Button {:aria-label (if logged-in? "profile" "login")
+                   :on-click (if logged-in? profile-fn login-fn)}
         [ui/Icon {:name (if logged-in? "user" "sign in")}]
         (if logged-in? (utils/truncate @user) (@tr [:login]))]
        [ui/Dropdown {:inline    true
@@ -263,20 +266,23 @@
             (when (or logged-in? sign-up-ok?)
               [[ui/DropdownDivider]])
 
-            [[ui/DropdownItem {:icon   "book"
-                               :text   (@tr [:documentation])
-                               :href   "https://ssdocs.sixsq.com/"
-                               :target "_blank"
-                               :rel    "noreferrer"}]
-             [ui/DropdownItem {:icon   "info circle"
-                               :text   (@tr [:knowledge-base])
-                               :href   "https://support.sixsq.com/solution/categories"
-                               :target "_blank"
-                               :rel    "noreferrer"}]
-             [ui/DropdownItem {:icon "mail"
-                               :text (@tr [:support])
-                               :href (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"
-                                          "question%20%2D%20Not%20logged%20in")}]]))]
+            [[ui/DropdownItem {:aria-label (@tr [:documentation])
+                               :icon       "book"
+                               :text       (@tr [:documentation])
+                               :href       "https://ssdocs.sixsq.com/"
+                               :target     "_blank"
+                               :rel        "noreferrer"}]
+             [ui/DropdownItem {:aria-label (@tr [:knowledge-base])
+                               :icon       "info circle"
+                               :text       (@tr [:knowledge-base])
+                               :href       "https://support.sixsq.com/solution/categories"
+                               :target     "_blank"
+                               :rel        "noreferrer"}]
+             [ui/DropdownItem {:aria-label (@tr [:support])
+                               :icon       "mail"
+                               :text       (@tr [:support])
+                               :href       (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"
+                                                "question%20%2D%20Not%20logged%20in")}]]))]
        [modal-login]
        [modal-signup]])))
 

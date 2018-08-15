@@ -13,6 +13,7 @@
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
 
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]))
 
 
@@ -23,13 +24,13 @@
         loading-job-info? (subscribe [::metrics-subs/loading-job-info?])]
     (fn []
       [ui/Menu {:borderless true}
-       [ui/MenuItem {:name     "refresh"
-                     :on-click (fn []
-                                 (dispatch [::metrics-events/fetch-metrics])
-                                 (dispatch [::metrics-events/fetch-job-info]))}
-        [ui/Icon {:name    "refresh"
-                  :loading (or @loading? @loading-job-info?)}]
-        (@tr [:refresh])]])))
+       [uix/MenuItemWithIcon
+        {:name      (@tr [:refresh])
+         :icon-name "refresh"
+         :loading?  (or @loading? @loading-job-info?)
+         :on-click  (fn []
+                      (dispatch [::metrics-events/fetch-metrics])
+                      (dispatch [::metrics-events/fetch-job-info]))}]])))
 
 
 (def thread-vega-spec

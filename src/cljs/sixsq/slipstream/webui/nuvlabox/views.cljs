@@ -15,6 +15,7 @@
     [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
@@ -87,14 +88,14 @@
   (let [tr (subscribe [::i18n-subs/tr])
         loading? (subscribe [::nuvlabox-subs/loading?])]
     (fn []
-      [ui/MenuItem {:name     "search"
-                    :disabled false #_(nil? @selected-id)
-                    :on-click (fn []
-                                (dispatch [::nuvlabox-events/fetch-health-info])
-                                (dispatch [::nuvlabox-events/get-results]))}
-       [ui/Icon {:name    "refresh"
-                 :loading @loading?}]
-       (@tr [:refresh])])))
+      [uix/MenuItemWithIcon
+       {:name      "search"
+        :icon-name "refresh"
+        :loading?  @loading?
+        :disabled  false #_(nil? @selected-id)
+        :on-click  (fn []
+                     (dispatch [::nuvlabox-events/fetch-health-info])
+                     (dispatch [::nuvlabox-events/get-results]))}])))
 
 
 (defn filter-button

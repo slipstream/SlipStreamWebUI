@@ -22,6 +22,7 @@
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
@@ -175,10 +176,6 @@
           :scrolling   true
           :search      true
           :selection   true
-          ;:labeled     true
-          ;:button true
-          ;:className "icon"
-          ;:icon "code"
           :options     options
           :on-change   (ui-callback/value callback)}]))))
 
@@ -191,14 +188,18 @@
     (fn []
       ;; reset visible values of parameters
       (let [{:keys [$first $last $filter $select $aggregation $orderby]} @query-params]
-        [ui/Form {:on-key-press (partial forms/on-return-key
+        [ui/Form {:aria-label   "filter parameters"
+                  :on-key-press (partial forms/on-return-key
                                          #(when @selected-id
                                             (dispatch [::cimi-events/get-results])))}
-         [ui/Button {:floated "right"
-                     :size    "tiny" :basic true :icon "info"
-                     :href    "https://ssapi.sixsq.com/#resource-selection"
-                     :target  "_blank"
-                     :rel     "noreferrer"}]
+         [ui/Button {:aria-label "filter parameter documentation"
+                     :floated    "right"
+                     :size       "tiny"
+                     :basic      true
+                     :icon       "info"
+                     :href       "https://ssapi.sixsq.com/#resource-selection"
+                     :target     "_blank"
+                     :rel        "noreferrer"}]
          [ui/FormGroup
           [ui/FormField
            [cloud-entry-point-title]]]
@@ -208,7 +209,8 @@
              ; the key below is a workaround react issue with controlled input cursor position,
              ; this will force to re-render defaultValue on change of the value
              ^{:key (str "first:" $first)}
-             [ui/Input {:type         "number"
+             [ui/Input {:aria-label   (@tr [:first])
+                        :type         "number"
                         :min          0
                         :label        (@tr [:first])
                         :defaultValue $first
@@ -216,7 +218,8 @@
 
             [ui/FormField
              ^{:key (str "last:" $last)}
-             [ui/Input {:type         "number"
+             [ui/Input {:aria-label   (@tr [:last])
+                        :type         "number"
                         :min          0
                         :label        (@tr [:last])
                         :defaultValue $last
@@ -224,7 +227,8 @@
 
             [ui/FormField
              ^{:key (str "select:" $select)}
-             [ui/Input {:type         "text"
+             [ui/Input {:aria-label   (@tr [:select])
+                        :type         "text"
                         :label        (@tr [:select])
                         :defaultValue $select
                         :placeholder  "e.g. id, endpoint, ..."
@@ -234,7 +238,8 @@
            [ui/FormGroup {:widths "equal"}
             [ui/FormField
              ^{:key (str "orderby:" $orderby)}
-             [ui/Input {:type         "text"
+             [ui/Input {:aria-label   (@tr [:order])
+                        :type         "text"
                         :label        (@tr [:order])
                         :defaultValue $orderby
                         :placeholder  "e.g. created:desc, ..."
@@ -242,7 +247,8 @@
 
             [ui/FormField
              ^{:key (str "aggregation:" $aggregation)}
-             [ui/Input {:type         "text"
+             [ui/Input {:aria-label   (@tr [:aggregation])
+                        :type         "text"
                         :label        (@tr [:aggregation])
                         :defaultValue $aggregation
                         :placeholder  "e.g. min:resource:vcpu, ..."
@@ -253,7 +259,8 @@
             [ui/FormField
              ^{:key (str "filter:" $filter)}
              [ui/Input
-              {:type         "text"
+              {:aria-label   (@tr [:filter])
+               :type         "text"
                :label        (@tr [:filter])
                :defaultValue $filter
                :placeholder  "e.g. connector/href^='exoscale-' and resource:type='VM' and resource:ram>=8096"
@@ -291,27 +298,27 @@
         :open      @show?
         :on-close  #(reset! show? false)
         :trigger   (reagent/as-element
-                     [ui/MenuItem {:name     "select-fields"
-                                   :disabled (nil? @selected-id)
-                                   :on-click (fn []
-                                               (reset! selections (set @selected-fields))
-                                               (reset! show? true))}
-                      [ui/Icon {:name "columns"}]
-                      (@tr [:columns])])}
+                     [uix/MenuItemWithIcon
+                      {:name      (@tr [:columns])
+                       :icon-name "columns"
+                       :disabled  (nil? @selected-id)
+                       :on-click  (fn []
+                                    (reset! selections (set @selected-fields))
+                                    (reset! show? true))}])}
        [ui/ModalHeader (@tr [:fields])]
        [ui/ModalContent
         {:scrolling true}
         (format-field-list available-fields selections)]
        [ui/ModalActions
-        [ui/Button
-         {:on-click #(reset! show? false)}
-         (@tr [:cancel])]
-        [ui/Button
-         {:primary  true
+        [uix/Button
+         {:text     (@tr [:cancel])
+          :on-click #(reset! show? false)}]
+        [uix/Button
+         {:text     (@tr [:update])
+          :primary  true
           :on-click (fn []
                       (reset! show? false)
-                      (dispatch [::cimi-events/set-selected-fields @selections]))}
-         (@tr [:update])]]])))
+                      (dispatch [::cimi-events/set-selected-fields @selections]))}]]])))
 
 
 (defn resource-add-form
@@ -344,12 +351,13 @@
                [ui/ModalContent
                 [editor/json-editor text]]
                [ui/ModalActions
-                [ui/Button
-                 {:on-click (fn []
-                              (dispatch [::cimi-events/hide-add-modal]))}
-                 (@tr [:cancel])]
-                [ui/Button
-                 {:primary  true
+                [uix/Button
+                 {:text     (@tr [:cancel])
+                  :on-click (fn []
+                              (dispatch [::cimi-events/hide-add-modal]))}]
+                [uix/Button
+                 {:text     (@tr [:create])
+                  :primary  true
                   :on-click (fn []
                               (try
                                 (let [data (general/json->edn @text)]
@@ -360,8 +368,7 @@
                                               :message (str "invalid JSON:\n\n" e)
                                               :type    :error}]))
                                 (finally
-                                  (dispatch [::cimi-events/hide-add-modal]))))}
-                 (@tr [:create])]]])))))))
+                                  (dispatch [::cimi-events/hide-add-modal]))))}]]])))))))
 
 
 (defn can-add?
@@ -378,9 +385,10 @@
         loading? (subscribe [::cimi-subs/loading?])
         selected-id (subscribe [::cimi-subs/collection-name])]
     (fn []
-      [ui/MenuItem {:name     "search"
-                    :disabled (nil? @selected-id)
-                    :on-click #(dispatch [::cimi-events/get-results])}
+      [ui/MenuItem {:aria-label (@tr [:search])
+                    :name       (@tr [:search])
+                    :disabled   (nil? @selected-id)
+                    :on-click   #(dispatch [::cimi-events/get-results])}
        (if @loading?
          [ui/Icon {:name    "refresh"
                    :loading @loading?}]
@@ -394,10 +402,10 @@
         search-results (subscribe [::cimi-subs/collection])]
     (fn []
       (when (can-add? (:operations @search-results))
-        [ui/MenuItem {:name     "add"
-                      :on-click #(dispatch [::cimi-events/show-add-modal])}
-         [ui/Icon {:name "add"}]
-         (@tr [:add])]))))
+        [uix/MenuItemWithIcon
+         {:name      (@tr [:add])
+          :icon-name "add"
+          :on-click  #(dispatch [::cimi-events/show-add-modal])}]))))
 
 
 (defn filter-button
@@ -406,8 +414,9 @@
         filter-visible? (subscribe [::cimi-subs/filter-visible?])]
     (fn []
       [ui/MenuMenu {:position "right"}
-       [ui/MenuItem {:name     "filter"
-                     :on-click #(dispatch [::cimi-events/toggle-filter])}
+       [ui/MenuItem {:aria-label (@tr [:filter])
+                     :name       (@tr [:filter])
+                     :on-click   #(dispatch [::cimi-events/toggle-filter])}
         [ui/IconGroup
          [ui/Icon {:name "filter"}]
          [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")

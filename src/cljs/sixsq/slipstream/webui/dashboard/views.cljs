@@ -19,6 +19,7 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [taoensso.timbre :as log]))
 
 
@@ -65,11 +66,11 @@
     (fn []
       [ui/Container {:fluid true}
        [ui/Menu {:borderless true}
-        [ui/MenuItem {:name "refresh"
-                      :on-click #(dispatch [::dashboard-events/get-statistics])}
-         [ui/Icon {:name "refresh"
-                   :loading @loading?}]
-         (@tr [:refresh])]]
+        [uix/MenuItemWithIcon
+         {:name     (@tr [:refresh])
+          :icon-name "refresh"
+          :loading? @loading?
+          :on-click #(dispatch [::dashboard-events/get-statistics])}]]
        (when-not @loading?
          (let [stats (->> @statistics
                           (sort-by :order)
@@ -77,9 +78,11 @@
            [cc/collapsible-card (@tr [:statistics]) [ui/StatisticGroup {:size :tiny} stats]]))
        [vms-deployments]])))
 
+
 (defn ^:export set-cloud-filter [cloud]
   (log/debug "dispatch open-modal for authn view")
   (dispatch [::dashboard-events/set-filtered-cloud cloud]))
+
 
 (defmethod panel/render :dashboard
   [path]

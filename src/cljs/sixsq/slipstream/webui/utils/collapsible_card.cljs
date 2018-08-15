@@ -123,7 +123,8 @@
        [ui/CardContent
         [ui/CardHeader
          title
-         [ui/Button {:floated  :right
+         [ui/Button {:aria-label "toggle panel visibility"
+                     :floated  :right
                      :icon     (if @visible? "chevron down" "chevron up")
                      :on-click #(reset! visible? (not @visible?))}]]
         (when @visible?

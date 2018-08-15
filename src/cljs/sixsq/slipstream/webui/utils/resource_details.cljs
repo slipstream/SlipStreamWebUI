@@ -15,6 +15,7 @@
     [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.table :as table]
     [sixsq.slipstream.webui.utils.time :as time]
@@ -25,13 +26,13 @@
 (defn action-buttons
   [confirm-label cancel-label on-confirm on-cancel]
   [:div
-   [ui/Button
-    {:on-click on-cancel}
-    cancel-label]
-   [ui/Button
-    {:primary  true
-     :on-click on-confirm}
-    confirm-label]])
+   [uix/Button
+    {:text     cancel-label
+     :on-click on-cancel}]
+   [uix/Button
+    {:text     confirm-label
+     :primary  true
+     :on-click on-confirm}]])
 
 
 (defn action-button-icon
@@ -50,7 +51,7 @@
           :closeIcon true
           :on-close  #(reset! show? false)
           :trigger   (r/as-element
-                       [ui/MenuItem (cond-> {:name label, :on-click #(reset! show? true)}
+                       [ui/MenuItem (cond-> {:aria-label label, :name label, :on-click #(reset! show? true)}
                                             position (assoc :position position))
                         (when icon
                           [ui/Icon {:name icon}])
