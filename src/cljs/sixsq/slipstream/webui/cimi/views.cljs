@@ -171,7 +171,8 @@
                          vec)
             callback #(dispatch [::history-events/navigate (str "cimi/" %)])]
         [ui/Dropdown
-         {:value       @selected-id
+         {:aria-label  (@tr [:resource-type])
+          :value       @selected-id
           :placeholder (@tr [:resource-type])
           :scrolling   true
           :search      true
@@ -385,15 +386,10 @@
         loading? (subscribe [::cimi-subs/loading?])
         selected-id (subscribe [::cimi-subs/collection-name])]
     (fn []
-      [ui/MenuItem {:aria-label (@tr [:search])
-                    :name       (@tr [:search])
-                    :disabled   (nil? @selected-id)
-                    :on-click   #(dispatch [::cimi-events/get-results])}
-       (if @loading?
-         [ui/Icon {:name    "refresh"
-                   :loading @loading?}]
-         [ui/Icon {:name "search"}])
-       (@tr [:search])])))
+      [uix/MenuItemForSearch {:name     (@tr [:search])
+                              :loading? @loading?
+                              :disabled (nil? @selected-id)
+                              :on-click #(dispatch [::cimi-events/get-results])}])))
 
 
 (defn create-button
@@ -413,15 +409,9 @@
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::cimi-subs/filter-visible?])]
     (fn []
-      [ui/MenuMenu {:position "right"}
-       [ui/MenuItem {:aria-label (@tr [:filter])
-                     :name       (@tr [:filter])
-                     :on-click   #(dispatch [::cimi-events/toggle-filter])}
-        [ui/IconGroup
-         [ui/Icon {:name "filter"}]
-         [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
-                   :corner true}]]
-        (str "\u00a0" (@tr [:filter]))]])))
+      [uix/MenuItemForFilter {:name     (@tr [:filter])
+                              :visible? @filter-visible?
+                              :on-click #(dispatch [::cimi-events/toggle-filter])}])))
 
 
 (defn menu-bar []

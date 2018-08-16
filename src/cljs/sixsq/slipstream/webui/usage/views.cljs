@@ -311,15 +311,9 @@
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::usage-subs/filter-visible?])]
     (fn []
-      [ui/MenuMenu {:position "right"}
-       [ui/MenuItem {:aria-label (@tr [:filter])
-                     :name       (@tr [:filter])
-                     :on-click   #(dispatch [::usage-events/toggle-filter])}
-        [ui/IconGroup
-         [ui/Icon {:name "filter"}]
-         [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
-                   :corner true}]]
-        (@tr [:filter])]])))
+      [uix/MenuItemForFilter {:name     (@tr [:filter])
+                              :visible? @filter-visible?
+                              :on-click #(dispatch [::usage-events/toggle-filter])}])))
 
 
 (defn control-bar []

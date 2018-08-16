@@ -103,14 +103,9 @@
   (let [tr (subscribe [::i18n-subs/tr])
         filter-visible? (subscribe [::nuvlabox-subs/filter-visible?])]
     (fn []
-      [ui/MenuMenu {:position "right"}
-       [ui/MenuItem {:name     "filter"
-                     :on-click #(dispatch [::nuvlabox-events/toggle-filter])}
-        [ui/IconGroup
-         [ui/Icon {:name "filter"}]
-         [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
-                   :corner true}]]
-        (str "\u00a0" (@tr [:filter]))]])))
+      [uix/MenuItemForFilter {:name     (@tr [:filter])
+                              :visible? @filter-visible?
+                              :on-click #(dispatch [::nuvlabox-events/toggle-filter])}])))
 
 
 (defn menu-bar []

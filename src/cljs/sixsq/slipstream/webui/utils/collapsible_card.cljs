@@ -8,7 +8,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.table :as table]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
 
 
 (defn more-or-less
@@ -43,8 +44,7 @@
          (table/definition-table "tags" "properties"))))
 
 
-(defn
-  metadata
+(defn metadata
   [{:keys [title subtitle description logo icon updated acl properties] :as module-meta} rows]
   (let [more? (reagent/atom false)]
     (fn [{:keys [title subtitle description logo icon updated acl properties] :as module-meta} rows]
@@ -104,31 +104,12 @@
         [ui/MenuItem {:position "left"
                       :header   true}
          title]
-        [ui/MenuItem {:position "right"
-                      :on-click #(reset! visible? (not @visible?))}
-         [ui/Icon {:name (if @visible? "chevron down" "chevron up")}]]]
+        [uix/MenuItemSectionToggle {:position "right"
+                                    :visible? @visible?
+                                    :on-click #(reset! visible? (not @visible?))}]]
        [ui/Transition {:visible       @visible?
                        :animation     "fade"
                        :duration      300
                        :unmountOnHide true}
         (vec (concat [ui/Segment {:attached true}]
                      children))]])))
-
-
-(defn collapsible-card-extra
-  [title & children]
-  (let [visible? (reagent/atom true)]
-    (fn [title & children]
-      [ui/Card {:fluid true}
-       [ui/CardContent
-        [ui/CardHeader
-         title
-         [ui/Button {:aria-label "toggle panel visibility"
-                     :floated  :right
-                     :icon     (if @visible? "chevron down" "chevron up")
-                     :on-click #(reset! visible? (not @visible?))}]]
-        (when @visible?
-          (vec (concat [ui/CardDescription] (butlast children))))]
-       [ui/CardContent
-        [ui/CardDescription (last children)]]])))
-

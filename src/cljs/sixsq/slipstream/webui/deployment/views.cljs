@@ -71,6 +71,16 @@
                                                        {:activeOnly (bool->int %)}]))}]]]]))))
 
 
+(defn filter-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        filter-visible? (subscribe [::deployment-subs/filter-visible?])]
+    (fn []
+      [uix/MenuItemForFilter {:name     (@tr [:filter])
+                              :visible? @filter-visible?
+                              :on-click #(dispatch [::deployment-events/toggle-filter])}])))
+
+
 (defn menu-bar
   []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -85,15 +95,7 @@
           :icon-name "refresh"
           :loading?  @loading?
           :on-click  #(dispatch [::deployment-events/get-deployments])}]
-        [ui/MenuMenu {:position "right"}
-         [ui/MenuItem {:aria-label (@tr [:filter])
-                       :name       (@tr [:filter])
-                       :on-click   #(dispatch [::deployment-events/toggle-filter])}
-          [ui/IconGroup
-           [ui/Icon {:name "filter"}]
-           [ui/Icon {:name   (if @filter-visible? "chevron down" "chevron right")
-                     :corner true}]]
-          (@tr [:filter])]]]
+        [filter-button]]
 
        (when @filter-visible?
          [ui/Segment {:attached "bottom"}
