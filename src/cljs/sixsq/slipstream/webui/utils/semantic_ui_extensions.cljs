@@ -62,12 +62,12 @@
 
 
 (defn MenuItemSectionToggle
-  "Provides a standard menu item that is intended to toggle the visiblity of a
+  "Provides a standard menu item that is intended to toggle the visibility of a
    section. There is no textual label."
   [{:keys [visible?] :as options}]
   (let [final-opts (-> options
                        (assoc :aria-label "toggle section visibility")
-                       (dissoc visible?))
-        icon-name (if @visible? "chevron down" "chevron up")]
+                       (dissoc :visible?))
+        icon-name (if visible? "chevron down" "chevron up")]
     [ui/MenuItem final-opts
      [ui/Icon {:name icon-name}]]))
