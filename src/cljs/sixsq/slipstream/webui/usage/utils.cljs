@@ -52,8 +52,10 @@
                                (str/join " or " (map #(str "credentials/href='" % "'") credentials))
                                (str "credentials/href='" credential "'"))
           billable-filter "(state=\"running\" or state=\"Running\" or state=\"stopping\" or state=\"Error\" or state=\"Pending\" or state=\"pending\" or state=\"Boot\" or state=\"Unknown\" or state=\"shutting-down\" or state=\"Rebooting\")"
+          type-filter "(bucketName=null)"
           filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
-                             billable-only? (str " and " billable-filter))
+                             billable-only? (str " and " billable-filter)
+                             true (str " and " type-filter))
           request-opts {"$last"        0
                         "$filter"      filter-str
                         "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
