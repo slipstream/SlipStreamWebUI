@@ -29,6 +29,14 @@
    [ui/StatisticValue value]
    [ui/StatisticLabel label]])
 
+
+(defn active-index
+  [tab-name]
+  (case tab-name
+    "deployments" 0
+    "virtual-machines" 1))
+
+
 (defn vms-deployments []
   (let [selected-tab (subscribe [::dashboard-subs/selected-tab])]
     (dispatch [::main-events/action-interval {:action    :start
@@ -37,7 +45,8 @@
                                               :event     [::dashboard-events/fetch-tab-records]}])
     (fn []
       [ui/Tab
-       {:menu        {:attached true :tabular true :size "tiny"}
+       {:activeIndex (active-index @selected-tab)
+        :menu        {:attached true :tabular true :size "tiny"}
         :onTabChange (fn [e, d]
                        (let [activeTabIndex (:activeIndex (js->clj d :keywordize-keys true))
                              activeTab (case activeTabIndex
@@ -67,10 +76,10 @@
       [ui/Container {:fluid true}
        [ui/Menu {:borderless true}
         [uix/MenuItemWithIcon
-         {:name     (@tr [:refresh])
+         {:name      (@tr [:refresh])
           :icon-name "refresh"
-          :loading? @loading?
-          :on-click #(dispatch [::dashboard-events/get-statistics])}]]
+          :loading?  @loading?
+          :on-click  #(dispatch [::dashboard-events/get-statistics])}]]
        (when-not @loading?
          (let [stats (->> @statistics
                           (sort-by :order)
