@@ -142,7 +142,7 @@
                    [ui/TableCell {:collapsing true}
                     [ui/Icon
                      (if (contains? @deleted deployment-uuid)
-                       {:name "trash outline"}
+                       {:name "trash"}
                        {:name    "remove" :link true
                         :onClick #(dispatch [::dashboard-events/delete-deployment-modal deployment])})]])]]
         (if aborted
