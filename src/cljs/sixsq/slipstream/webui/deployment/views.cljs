@@ -179,7 +179,7 @@
 
      (when-let [{:keys [runs]} @deployments]
        (let [{:keys [item]} runs]
-         [vertical-data-table item]))]))
+         [vertical-data-table (if (map? item) [item] item)]))]))
 
 
 (defn deployments
