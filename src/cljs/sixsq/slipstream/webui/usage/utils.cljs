@@ -61,8 +61,6 @@
                         "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
                                             "sum:serviceOffer/resource:disk, sum:price")}
           response (<! (cimi/search client "meterings" request-opts))]
-      (log/error (with-out-str (cljs.pprint/pprint (:aggregations response))))
-      (log/error (with-out-str (cljs.pprint/pprint (-> response :aggregations :sum:price :value))))
       (resolve
         [credential {:vms   {:unit  vms-unit
                              :value (-> response (get :count 0) to-hour)}
