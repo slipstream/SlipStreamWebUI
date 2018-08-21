@@ -79,8 +79,7 @@
                                         to-GB-from-MB
                                         to-hour)}
                      :price {:unit  price-unit
-                             :value (-> response (get-in [:aggregations :sum:price :value] 0)
-                                        to-hour)}}]))))
+                             :value (get-in response [:aggregations :sum:price :value] 0)}}]))))
 
 
 (defn fetch-meterings [client
