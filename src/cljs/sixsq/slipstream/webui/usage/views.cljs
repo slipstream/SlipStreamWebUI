@@ -4,7 +4,6 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.usage.events :as usage-events]
@@ -244,8 +243,7 @@
 
 
 (defn search-header []
-  (let [is-admin? (subscribe [::authn-subs/is-admin?])
-        tr (subscribe [::i18n-subs/tr])
+  (let [tr (subscribe [::i18n-subs/tr])
         date-range (subscribe [::usage-subs/date-range])
         locale (subscribe [::i18n-subs/locale])
         billable-only? (subscribe [::usage-subs/billable-only?])
@@ -301,8 +299,7 @@
                         :label     (@tr [:billable-only?])
                         :on-change #(dispatch [::usage-events/toggle-billable-only?])}]]
          [ui/FormGroup {:widths "equal"}
-          (when @is-admin?
-            [search-users-roles-dropdown])
+          [search-users-roles-dropdown]
           [search-credentials-dropdown]]]))))
 
 
