@@ -212,8 +212,9 @@
                         #(let [{:keys [id name description connector]} %]
                            {:key     id
                             :value   id
-                            :text    id
-                            :content (reagent/as-element [ui/Header {:as "h5"} id
+                            :text    (or name id)
+                            :content (reagent/as-element [ui/Header {:as "h5"} (or name id)
+                                                          [ui/HeaderSubheader (str "id: " id)]
                                                           [ui/HeaderSubheader (str "connector: " (:href connector))]
                                                           [ui/HeaderSubheader (str "name: " name)]
                                                           [ui/HeaderSubheader (str "description: " description)]])})
