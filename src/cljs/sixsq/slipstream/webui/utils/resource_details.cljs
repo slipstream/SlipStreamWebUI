@@ -167,6 +167,7 @@
          "ready" "check"
          "start" "play"
          "stop" "stop"
+         "collect" "cog"
          nil)
        (@tr [:execute-action] [label])
        [:p (@tr [:execute-action-msg] [label (:id data)])]
