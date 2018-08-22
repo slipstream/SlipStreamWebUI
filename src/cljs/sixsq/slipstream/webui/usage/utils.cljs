@@ -76,7 +76,6 @@
                      :disk  {:unit  disk-unit
                              :value (-> response
                                         (get-in [:aggregations :sum:serviceOffer/resource:disk :value] 0)
-                                        to-GB-from-MB
                                         to-hour)}
                      :price {:unit  price-unit
                              :value (get-in response [:aggregations :sum:price :value] 0)}}]))))
