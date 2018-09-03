@@ -10,11 +10,6 @@
 
 
 (reg-sub
-  ::filter-visible?
-  ::usage-spec/filter-visible?)
-
-
-(reg-sub
   ::results
   ::usage-spec/results)
 

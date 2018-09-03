@@ -262,8 +262,3 @@
       (-> db
           (update-in [::cimi-spec/collections-templates-cache resource-type :loaded] inc)
           (assoc-in [::cimi-spec/collections-templates-cache resource-type :templates template-id-key] template)))))
-
-(reg-event-db
-  ::toggle-filter
-  (fn [{:keys [::cimi-spec/filter-visible?] :as db} _]
-    (assoc db ::cimi-spec/filter-visible? (not filter-visible?))))

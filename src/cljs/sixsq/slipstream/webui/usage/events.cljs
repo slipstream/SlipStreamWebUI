@@ -113,12 +113,6 @@
 
 
 (reg-event-db
-  ::toggle-filter
-  (fn [{:keys [::usage-spec/filter-visible?] :as db} _]
-    (assoc db ::usage-spec/filter-visible? (not filter-visible?))))
-
-
-(reg-event-db
   ::set-sort
   (fn [{:keys [::usage-spec/sort] :as db} [_ new-column]]
     (let [{:keys [:column :direction]} sort

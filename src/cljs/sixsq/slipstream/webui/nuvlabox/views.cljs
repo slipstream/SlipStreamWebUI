@@ -98,20 +98,9 @@
                      (dispatch [::nuvlabox-events/get-results]))}])))
 
 
-(defn filter-button
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::nuvlabox-subs/filter-visible?])]
-    (fn []
-      [uix/MenuItemForFilter {:name     (@tr [:filter])
-                              :visible? @filter-visible?
-                              :on-click #(dispatch [::nuvlabox-events/toggle-filter])}])))
-
-
 (defn menu-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        resources (subscribe [::nuvlabox-subs/collection])
-        filter-visible? (subscribe [::nuvlabox-subs/filter-visible?])]
+        resources (subscribe [::nuvlabox-subs/collection])]
     (fn []
       (when (instance? js/Error @resources)
         (dispatch [::messages-events/add
@@ -123,11 +112,9 @@
       [ui/Segment style/basic
        [ui/Menu {:attached   "top"
                  :borderless true}
-        [search-button]
-        [filter-button]]
-       (when @filter-visible?
-         [ui/Segment {:attached "bottom"}
-          [search-header]])])))
+        [search-button]]
+       [ui/Segment {:attached "bottom"}
+        [search-header]]])))
 
 
 (defn format-nb-header

@@ -76,12 +76,6 @@
 
 
 (reg-event-db
-  ::toggle-filter
-  (fn [{:keys [::nuvlabox-spec/filter-visible?] :as db} _]
-    (assoc db ::nuvlabox-spec/filter-visible? (not filter-visible?))))
-
-
-(reg-event-db
   ::set-state-selector
   (fn [db [_ state-selector]]
     (assoc db ::nuvlabox-spec/state-selector state-selector)))

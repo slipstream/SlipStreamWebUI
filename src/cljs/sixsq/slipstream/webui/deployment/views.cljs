@@ -71,35 +71,22 @@
                                                        {:activeOnly (bool->int %)}]))}]]]]))))
 
 
-(defn filter-button
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::deployment-subs/filter-visible?])]
-    (fn []
-      [uix/MenuItemForFilter {:name     (@tr [:filter])
-                              :visible? @filter-visible?
-                              :on-click #(dispatch [::deployment-events/toggle-filter])}])))
-
-
 (defn menu-bar
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::deployment-subs/loading?])
-        filter-visible? (subscribe [::deployment-subs/filter-visible?])]
+        loading? (subscribe [::deployment-subs/loading?])]
     (fn []
       [:div
-       [ui/Menu {:attached   (if @filter-visible? "top" false)
+       [ui/Menu {:attached   "top"
                  :borderless true}
         [uix/MenuItemWithIcon
          {:name      (@tr [:refresh])
           :icon-name "refresh"
           :loading?  @loading?
-          :on-click  #(dispatch [::deployment-events/get-deployments])}]
-        [filter-button]]
+          :on-click  #(dispatch [::deployment-events/get-deployments])}]]
 
-       (when @filter-visible?
-         [ui/Segment {:attached "bottom"}
-          [runs-control]])])))
+       [ui/Segment {:attached "bottom"}
+        [runs-control]]])))
 
 
 (defn service-url

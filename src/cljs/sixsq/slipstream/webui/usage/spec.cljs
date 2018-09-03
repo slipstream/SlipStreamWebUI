@@ -7,8 +7,6 @@
 
 (s/def ::loading? boolean?)
 
-(s/def ::filter-visible? boolean?)
-
 (s/def ::results any?)
 
 (s/def ::credentials-map any?)
@@ -34,7 +32,6 @@
 (s/def ::is-admin? boolean?)
 
 (s/def ::db (s/keys :req [::loading?
-                          ::filter-visible?
                           ::results
                           ::credentials-map
                           ::selected-credentials
@@ -47,7 +44,6 @@
                           ::is-admin?]))
 
 (def defaults {::loading?                 false
-               ::filter-visible?          true
                ::results                  nil
                ::credentials-map          {}
                ::selected-credentials     []
