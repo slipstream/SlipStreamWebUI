@@ -16,7 +16,8 @@
     [sixsq.slipstream.webui.metrics.spec :as metrics]
     [sixsq.slipstream.webui.nuvlabox-detail.spec :as nuvlabox-detail]
     [sixsq.slipstream.webui.nuvlabox.spec :as nuvlabox]
-    [sixsq.slipstream.webui.usage.spec :as usage]))
+    [sixsq.slipstream.webui.usage.spec :as usage]
+    [sixsq.slipstream.webui.quota.spec :as quota]))
 
 
 (s/def ::db (s/merge ::application/db
@@ -50,4 +51,5 @@
          messages/defaults
          nuvlabox/defaults
          nuvlabox-detail/defaults
-         usage/defaults))
+         usage/defaults
+         quota/defaults))

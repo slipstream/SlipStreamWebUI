@@ -24,7 +24,8 @@
     [sixsq.slipstream.webui.utils.responsive :as responsive]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.welcome.views]))
+    [sixsq.slipstream.webui.welcome.views]
+    [sixsq.slipstream.webui.quota.views]))
 
 
 (defn crumb

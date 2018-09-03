@@ -72,6 +72,7 @@
               @is-user? (conj [item :deployment "deployment" "cloud"])
               @is-user? (conj [item :application "application" "sitemap"])
               @is-user? (conj [item :usage "usage" "history"])
+              true (conj [item :quota "quota" "balance scale"])
               @is-admin? (conj [item :metrics "metrics" "bar chart"])
               @is-admin? (conj [item :nuvlabox "nuvlabox" "desktop"])
               true (conj [item :cimi "cimi" "code"])
