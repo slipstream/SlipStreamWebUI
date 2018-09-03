@@ -47,7 +47,7 @@
                           ::is-admin?]))
 
 (def defaults {::loading?                 false
-               ::filter-visible?          false
+               ::filter-visible?          true
                ::results                  nil
                ::credentials-map          {}
                ::selected-credentials     []

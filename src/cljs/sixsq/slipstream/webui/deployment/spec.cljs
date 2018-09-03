@@ -20,7 +20,7 @@
 (s/def ::db (s/keys :req [::loading? ::query-params ::deployments]))
 
 (def defaults {::loading?        false
-               ::filter-visible? false
+               ::filter-visible? true
                ::query-params    {:offset     ""
                                   :limit      ""
                                   :cloud      ""
