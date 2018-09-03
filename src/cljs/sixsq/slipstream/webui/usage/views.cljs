@@ -351,9 +351,17 @@
 
 (defn usage
   []
-  [ui/Container {:fluid true}
-   [control-bar]
-   [search-result]])
+  (let [results (subscribe [::usage-subs/results])
+        credentials (subscribe [::usage-subs/credentials-map])]
+
+    ;; kick off the initial download of data when the usage panel is loaded
+    ;; (and there is something to query).
+    (when (and (nil? @results) (pos? (count @credentials)))
+      (dispatch [::usage-events/fetch-meterings]))
+
+    [ui/Container {:fluid true}
+     [control-bar]
+     [search-result]]))
 
 
 (defmethod panel/render :usage
