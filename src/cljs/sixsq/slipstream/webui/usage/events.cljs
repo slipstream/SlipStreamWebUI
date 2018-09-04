@@ -87,11 +87,33 @@
 
 
 (reg-event-db
+  ::set-totals
+  (fn [db [_ totals]]
+    (assoc db ::usage-spec/totals totals)))
+
+
+(reg-event-db
   ::set-results
   (fn [db [_ results]]
     (-> db
         (assoc ::usage-spec/results results)
         (assoc ::usage-spec/loading? false))))
+
+
+(reg-event-fx
+  ::fetch-totals
+  (fn [{{:keys [::client-spec/client
+                ::usage-spec/date-range
+                ::usage-spec/selected-credentials
+                ::usage-spec/credentials-map
+                ::usage-spec/billable-only?] :as db} :db}]
+    {:db                     (assoc db ::usage-spec/totals nil)
+     ::usage-fx/fetch-totals [client
+                              (-> date-range first .clone .utc .format)
+                              (-> date-range second .clone .utc .format)
+                              (keys credentials-map)
+                              billable-only?
+                              #(dispatch [::set-totals %])]}))
 
 
 (reg-event-fx
@@ -101,13 +123,14 @@
                 ::usage-spec/selected-credentials
                 ::usage-spec/credentials-map
                 ::usage-spec/billable-only?] :as db} :db}]
-    {:db                        (assoc db ::usage-spec/loading? true)
+    {:db                        (assoc db ::usage-spec/loading? true
+                                          ::usage-spec/results nil)
      ::usage-fx/fetch-meterings [client
                                  (-> date-range first .clone .utc .format)
                                  (-> date-range second .clone .utc .format)
-                                 (conj (if (empty? selected-credentials)
-                                         (keys credentials-map)
-                                         selected-credentials) u/all-credentials)
+                                 (if (empty? selected-credentials)
+                                   (keys credentials-map)
+                                   selected-credentials)
                                  billable-only?
                                  #(dispatch [::set-results %])]}))
 
@@ -135,5 +158,3 @@
   ::toggle-billable-only?
   (fn [{:keys [::usage-spec/billable-only?] :as db} _]
     (assoc db ::usage-spec/billable-only? (not billable-only?))))
-
-
