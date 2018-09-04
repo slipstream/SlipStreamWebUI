@@ -129,28 +129,31 @@
 
 
 (defn table-results-credentials []
-  (let [results (subscribe [::usage-subs/results])
+  (let [tr (subscribe [::i18n-subs/tr])
+        results (subscribe [::usage-subs/results])
         sort (subscribe [::usage-subs/sort])
         credentials-map (subscribe [::usage-subs/credentials-map])]
     (fn []
-      [ui/Table (merge style/selectable {:text-align "right"
-                                         :celled     true
-                                         :sortable   true})
-       [ui/TableHeader
-        [ui/TableRow
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :credential), :text-align "left", :collapsing true, :on-click (column-click :credential)} "credential"]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :cloud), :text-align "left", :collapsing true,, :on-click (column-click :cloud)} "cloud"]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :vms), :on-click (column-click :vms)} u/vms-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :cpus), :on-click (column-click :cpus)} u/cpus-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :ram), :on-click (column-click :ram)} u/ram-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :disk), :on-click (column-click :disk)} u/disk-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :price), :on-click (column-click :price)} u/price-unit]]]
-       [ui/TableBody
-        (some->> @results
-                 (add-cloud-fields @credentials-map)
-                 (sort-rows @sort)
-                 (map results-table-row)
-                 doall)]])))
+      (if (pos? (count @results))
+        [ui/Table (merge style/selectable {:text-align "right"
+                                           :celled     true
+                                           :sortable   true})
+         [ui/TableHeader
+          [ui/TableRow
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :credential), :text-align "left", :collapsing true, :on-click (column-click :credential)} "credential"]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :cloud), :text-align "left", :collapsing true,, :on-click (column-click :cloud)} "cloud"]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :vms), :on-click (column-click :vms)} u/vms-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :cpus), :on-click (column-click :cpus)} u/cpus-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :ram), :on-click (column-click :ram)} u/ram-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :disk), :on-click (column-click :disk)} u/disk-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :price), :on-click (column-click :price)} u/price-unit]]]
+         [ui/TableBody
+          (some->> @results
+                   (add-cloud-fields @credentials-map)
+                   (sort-rows @sort)
+                   (map results-table-row)
+                   doall)]]
+        [ui/Header {:as "h1", :text-align "center"} (@tr [:no-data])]))))
 
 
 (defn totals []
