@@ -254,8 +254,7 @@
         range-initial-val u/default-date-range
         range-dropdown (reagent/atom range-initial-val)]
     (fn []
-      (let [[date-after date-before :as range] @date-range
-            disable-calendar (not= "custom" @range-dropdown)]
+      (let [[date-after date-before :as range] @date-range]
         [ui/Form
          [ui/FormGroup
           [ui/FormField
@@ -273,7 +272,7 @@
                                                                      :value))
                                           (dispatch [::usage-events/set-date-range
                                                      (get u/date-range-entries @range-dropdown)]))}]]
-          [ui/FormField {:disabled disable-calendar}
+          [ui/FormField
            [ui/DatePicker {:custom-input  (reagent/as-element [ui/Input {:label (@tr [:from])}])
                            :selected      date-after
                            :start-date    date-after
@@ -285,7 +284,7 @@
                            :fixed-height  true
                            :date-format   "ddd, D MMMM YYYY"
                            :on-change     #(dispatch [::usage-events/set-date-range [% date-before]])}]]
-          [ui/FormField {:disabled disable-calendar}
+          [ui/FormField
            [ui/DatePicker {:custom-input (reagent/as-element [ui/Input {:label (@tr [:to])}])
                            :selected     date-before
                            :start-date   date-after
