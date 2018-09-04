@@ -77,10 +77,3 @@
 (reg-sub
   ::loading?
   ::cimi-spec/loading?)
-
-
-(reg-sub
-  ::filter-visible?
-  ::cimi-spec/filter-visible?)
-
-

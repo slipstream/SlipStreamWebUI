@@ -305,19 +305,8 @@
           [search-credentials-dropdown]]]))))
 
 
-(defn filter-button
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])]
-    (fn []
-      [uix/MenuItemForFilter {:name     (@tr [:filter])
-                              :visible? @filter-visible?
-                              :on-click #(dispatch [::usage-events/toggle-filter])}])))
-
-
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])
         results (subscribe [::usage-subs/results])]
     (dispatch [::usage-events/get-credentials-map])
     (fn []
@@ -335,11 +324,9 @@
             :download  "data.json"
             :href      (->> (general/edn->json @results)
                             (.encodeURIComponent js/window)
-                            (str "data:text/plain;charset=utf-8,"))}])
-        [filter-button]]
-       (when @filter-visible?
-         [ui/Segment {:attached "bottom"}
-          [search-header]])])))
+                            (str "data:text/plain;charset=utf-8,"))}])]
+       [ui/Segment {:attached "bottom"}
+        [search-header]]])))
 
 
 (defn search-result []
