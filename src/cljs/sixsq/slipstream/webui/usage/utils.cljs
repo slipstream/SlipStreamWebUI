@@ -6,8 +6,7 @@
     [clojure.string :as str]
     [promesa.core :as p]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (def vms-unit "VMs [h]")
