@@ -164,31 +164,32 @@
             count-selected-creds (if (zero? real-count-selected-creds)
                                    all-creds-count
                                    real-count-selected-creds)]
-        [ui/StatisticGroup {:size "tiny", :style {:max-width "100%"}}
-         [ui/Statistic
-          [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
-           [ui/Icon {:size "small" :name "key"}]]
-          [ui/StatisticLabel "credentials"]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value vms)) "\u0020"
-           [ui/Icon {:size "small" :name "server"}]]
-          [ui/StatisticLabel u/vms-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value cpus)) "\u0020"
-           [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
-          [ui/StatisticLabel u/cpus-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value ram)) "\u0020"
-           [ui/Icon {:size "small" :name "grid layout"}]]
-          [ui/StatisticLabel u/ram-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value disk)) "\u0020"
-           [ui/Icon {:size "small" :name "database"}]]
-          [ui/StatisticLabel {} u/disk-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value price)) "\u0020"
-           [ui/Icon {:size "small" :name "euro"}]]
-          [ui/StatisticLabel {} u/price-unit]]]))))
+        (vec (concat [ui/StatisticGroup {:size "tiny", :style {:max-width "100%"}}
+                      [ui/Statistic
+                       [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
+                        [ui/Icon {:size "small" :name "key"}]]
+                       [ui/StatisticLabel "credentials"]]]
+                     (when @results
+                       [[ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value vms)) "\u0020"
+                          [ui/Icon {:size "small" :name "server"}]]
+                         [ui/StatisticLabel u/vms-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value cpus)) "\u0020"
+                          [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
+                         [ui/StatisticLabel u/cpus-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value ram)) "\u0020"
+                          [ui/Icon {:size "small" :name "grid layout"}]]
+                         [ui/StatisticLabel u/ram-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value disk)) "\u0020"
+                          [ui/Icon {:size "small" :name "database"}]]
+                         [ui/StatisticLabel {} u/disk-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value price)) "\u0020"
+                          [ui/Icon {:size "small" :name "euro"}]]
+                         [ui/StatisticLabel {} u/price-unit]]])))))))
 
 
 (defn search-credentials-dropdown []
@@ -350,9 +351,17 @@
 
 (defn usage
   []
-  [ui/Container {:fluid true}
-   [control-bar]
-   [search-result]])
+  (let [results (subscribe [::usage-subs/results])
+        credentials (subscribe [::usage-subs/credentials-map])]
+
+    ;; kick off the initial download of data when the usage panel is loaded
+    ;; (and there is something to query).
+    (when (and (nil? @results) (pos? (count @credentials)))
+      (dispatch [::usage-events/fetch-meterings]))
+
+    [ui/Container {:fluid true}
+     [control-bar]
+     [search-result]]))
 
 
 (defmethod panel/render :usage
