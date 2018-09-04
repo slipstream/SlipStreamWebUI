@@ -64,6 +64,7 @@
    (or (some-> expiry-iso8601 (parse-iso8601) .clone (.locale locale) (.toNow true))
        (invalid locale))))
 
+
 (defn delta-duration
   ([start]
    (delta-duration start (now)))
@@ -72,12 +73,14 @@
          end-moment (parse-iso8601 end)]
      (.duration js/moment (.diff end-moment start-moment true)))))
 
+
 (defn delta-minutes
   "Returns the difference in the given date-time instances in minutes."
   ([start]
    (delta-minutes start (now)))
   ([start end]
    (.asMinutes (delta-duration start end))))
+
 
 (defn delta-milliseconds
   "Returns the difference in the given date-time instances in milliseconds."
@@ -97,3 +100,13 @@
 (defn time-value
   [iso8601]
   (str (-> iso8601 parse-iso8601 ago) " (" iso8601 ")"))
+
+
+(defn range-equals
+  "Checks whether two date ranges (with the start and end times being objects
+   from Moment.js) are the same. If any of the arguments are nil, then false is
+   returned."
+  [[start1 end1] [start2 end2]]
+  (and start1 end1 start2 end2
+       (.isSame start1 start2)
+       (.isSame end1 end2)))

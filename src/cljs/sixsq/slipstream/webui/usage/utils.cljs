@@ -51,6 +51,11 @@
 (def default-date-range "last-30-days")
 
 
+(defn get-date-range-tag
+  [range]
+  (or (ffirst (filter (fn [[_ v]] (time/range-equals range v)) date-range-entries)) "custom"))
+
+
 (defn to-hour [v]
   (/ v 60))
 

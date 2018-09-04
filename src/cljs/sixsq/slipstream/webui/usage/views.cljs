@@ -254,8 +254,7 @@
         range-initial-val u/default-date-range
         range-dropdown (reagent/atom range-initial-val)]
     (fn []
-      (let [[date-after date-before :as range] @date-range
-            disable-calendar (not= "custom" @range-dropdown)]
+      (let [[date-after date-before :as range] @date-range]
         [ui/Form
          [ui/FormGroup
           [ui/FormField
@@ -266,14 +265,15 @@
                          :selection    true
                          :options      (map (fn [k] {:text  (@tr [(keyword k)])
                                                      :value k}) (keys u/date-range-entries))
-                         :defaultValue range-initial-val
+                         :value        @range-dropdown
                          :onChange     #(do
                                           (reset! range-dropdown (-> %2
                                                                      (js->clj :keywordize-keys true)
                                                                      :value))
-                                          (dispatch [::usage-events/set-date-range
-                                                     (get u/date-range-entries @range-dropdown)]))}]]
-          [ui/FormField {:disabled disable-calendar}
+                                          (when-not (= "custom" @range-dropdown)
+                                            (dispatch [::usage-events/set-date-range
+                                                       (get u/date-range-entries @range-dropdown)])))}]]
+          [ui/FormField
            [ui/DatePicker {:custom-input  (reagent/as-element [ui/Input {:label (@tr [:from])}])
                            :selected      date-after
                            :start-date    date-after
@@ -284,8 +284,12 @@
                            :locale        @locale
                            :fixed-height  true
                            :date-format   "ddd, D MMMM YYYY"
-                           :on-change     #(dispatch [::usage-events/set-date-range [% date-before]])}]]
-          [ui/FormField {:disabled disable-calendar}
+                           :on-change     (fn [date]
+                                            (let [new-range [date date-before]
+                                                  new-tag (u/get-date-range-tag new-range)]
+                                              (reset! range-dropdown new-tag)
+                                              (dispatch [::usage-events/set-date-range new-range])))}]]
+          [ui/FormField
            [ui/DatePicker {:custom-input (reagent/as-element [ui/Input {:label (@tr [:to])}])
                            :selected     date-before
                            :start-date   date-after
@@ -296,9 +300,13 @@
                            :min-date     date-after
                            :max-date     (time/now)
                            :selects-end  true
-                           :on-change    #(dispatch [::usage-events/set-date-range [date-after (.endOf % "day")]])}]]]
+                           :on-change    (fn [date]
+                                           (let [new-range [date-after (.endOf date "day")]
+                                                 new-tag (u/get-date-range-tag new-range)]
+                                             (reset! range-dropdown new-tag)
+                                             (dispatch [::usage-events/set-date-range new-range])))}]]]
          [ui/FormGroup
-          [ui/Checkbox {:toggle true
+          [ui/Checkbox {:toggle    true
                         :checked   @billable-only?
                         :label     (@tr [:billable-only?])
                         :on-change #(dispatch [::usage-events/toggle-billable-only?])}]]
@@ -344,13 +352,16 @@
 
 (defn usage
   []
-  (let [results (subscribe [::usage-subs/results])
+  (let [totals (subscribe [::usage-subs/totals])
+        results (subscribe [::usage-subs/results])
         credentials (subscribe [::usage-subs/credentials-map])]
 
     ;; kick off the initial download of data when the usage panel is loaded
     ;; (and there is something to query).
     (when (and (nil? @results) (pos? (count @credentials)))
       (dispatch [::usage-events/fetch-meterings]))
+    (when (and (nil? @totals) (pos? (count @credentials)))
+      (dispatch [::usage-events/fetch-totals]))
 
     [ui/Container {:fluid true}
      [control-bar]
