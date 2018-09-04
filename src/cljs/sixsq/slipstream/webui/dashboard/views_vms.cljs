@@ -9,9 +9,12 @@
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
 
-(defn table-vm-row [vm]
+
+(defn table-vm-row
+  [vm]
   (let [slipstream-url (subscribe [::client-subs/slipstream-url])]
     (fn [{:keys [deployment-href state ip vcpu ram disk instance-type instance-id connector-href user-href] :as vm}]
       [ui/TableRow {:error (empty? deployment-href)}
@@ -38,7 +41,9 @@
        [ui/TableCell {:style {:max-width "250px" :overflow "hidden" :text-overflow "ellipsis"}}
         [:a {:href (str @slipstream-url "/" user-href)} (str/replace user-href #"^user/" "")]]])))
 
-(defn extract-vms-data [vms-response]
+
+(defn extract-vms-data
+  [vms-response]
   (let [vms (:virtualMachines vms-response)]
     (map (fn [{:keys [ip state instanceID deployment serviceOffer connector]}]
            {:deployment-href (get deployment :href "")
@@ -52,13 +57,15 @@
             :connector-href  (get connector :href "")
             :user-href       (get-in deployment [:user :href] "")}) vms)))
 
-(defn vms-table []
+
+(defn vms-table
+  []
   (let [virtual-machines (subscribe [::dashboard-subs/virtual-machines])
         headers ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type" "Cloud Instance ID" "Cloud" "Owner"]
-        record-displayed (subscribe [::dashboard-subs/records-displayed])
         page (subscribe [::dashboard-subs/page])
         total-pages (subscribe [::dashboard-subs/total-pages])
-        loading? (subscribe [::dashboard-subs/loading-tab?])]
+        loading? (subscribe [::dashboard-subs/loading-tab?])
+        set-page #(dispatch [::dashboard-events/set-page %])]
     (fn []
       (let [vms-count (get @virtual-machines :count 0)
             vms-data (extract-vms-data @virtual-machines)]
@@ -89,9 +96,8 @@
              [ui/Label "Found" [ui/LabelDetail vms-count]]]
             [ui/TableHeaderCell {:textAlign "right"
                                  :col-span  (str (- (count headers) 3))}
-             [ui/Pagination
+             [uix/Pagination
               {:size         "tiny"
                :totalPages   @total-pages
                :activePage   @page
-               :onPageChange (fn [e d]
-                               (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))}]]]]]]))))
+               :onPageChange (ui-callback/callback :activePage set-page)}]]]]]]))))

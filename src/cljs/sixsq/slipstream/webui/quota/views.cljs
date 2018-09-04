@@ -1,26 +1,19 @@
 (ns sixsq.slipstream.webui.quota.views
-  (:require-macros
-    [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.quota.events :as quota-events]
     [sixsq.slipstream.webui.quota.subs :as quota-subs]
-    [sixsq.slipstream.webui.client.subs :as client-subs]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-    [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
-
-(defn control-bar []
+(defn control-bar
+  []
   (let [tr (subscribe [::i18n-subs/tr])]
     (dispatch [::quota-events/get-quotas])
     (fn []
@@ -29,8 +22,8 @@
         [uix/MenuItemWithIcon
          {:name      (@tr [:refresh])
           :icon-name "refresh"
-          ;:on-click  #(dispatch [::usage-events/fetch-meterings])
-          }]]])))
+          :on-click  #(dispatch [::quota-events/get-quotas])}]]])))
+
 
 (defn fancy-quota-name
   [{:keys [resource aggregation name]}]
@@ -43,6 +36,7 @@
       name)
     name))
 
+
 (defn get-color
   [quota-value limit]
   (let [progress (/ quota-value limit)]
@@ -53,74 +47,105 @@
       (< progress 0.80) "orange"
       true "red")))
 
+
 (defn quota-view [{:keys [id] :as quota}]
-  (let [quota-value (reagent/atom "-")
-        client (subscribe [::client-subs/client])
-        set-value #(reset! quota-value (get % :currentUser "-"))]
-    (go
-      (set-value (<! (cimi/operation @client id "http://sixsq.com/slipstream/1/action/collect"))))
+  (let [collect-value (reagent/atom {:currentUser "-"
+                                     :currentAll  "-"})
+        set-collect-value #(reset! collect-value %)
+        tr (subscribe [::i18n-subs/tr])]
+    (dispatch [::quota-events/collect id set-collect-value])
     (fn [{:keys [name description limit] :as quota}]
-      [ui/Popup
-       {:header   name
-        :content  description
-        :position "top center"
-        :trigger  (reagent/as-element
-                    [ui/Progress
-                     (cond-> {:value     @quota-value
-                              :size      "small"
-                              :total     limit
-                              :progress  "value"
-                              :label     (str (fancy-quota-name quota) " [" @quota-value "/" limit "]")}
-                             (number? @quota-value) (assoc :color (get-color @quota-value limit)))])}])))
+      (let [{:keys [currentUser currentAll]} @collect-value]
+        [ui/Popup
+         {:header   name
+          :content  (reagent/as-element [:p description [:br]
+                                         [:b (@tr [:current-user]) " : " currentUser] [:br]
+                                         [:b (@tr [:all-users]) " : " currentAll]])
+          :position "top center"
+          :trigger  (reagent/as-element
+                      [ui/Progress
+                       (cond-> {:value    currentAll
+                                :size     "small"
+                                :total    limit
+                                :progress "value"
+                                :label    (str (fancy-quota-name quota) " [" currentAll "/" limit "]")}
+                               (number? currentAll) (assoc :color (get-color currentAll limit)))])}]))))
+
 
 (defn quota-view-comp
   [{id :id :as quota}]
   ^{:key id} [quota-view quota])
 
-(defn credential-view [selection credential-quotas]
-  ^{:key selection}
-  (vec
-    (concat [cc/collapsible-card
-             selection]
-            (map quota-view-comp credential-quotas))))
 
-(defn page-count [record-displayed element-count]
+(defn credential-view
+  [credential-id credential-quotas]
+  (let [credential-info (reagent/atom {})
+        set-credential-info #(reset! credential-info %)]
+    (dispatch [::quota-events/get-credential-info credential-id set-credential-info])
+    (fn [credential-id credential-quotas]
+      (let [{:keys [name description]} @credential-info]
+        [ui/Card
+         [ui/CardContent
+          [ui/CardHeader (or name credential-id)]
+          [ui/CardMeta description]
+          [ui/CardDescription
+           (map quota-view-comp credential-quotas)]]]))))
+
+
+(defn credential-view-comp
+  [selection credential-quotas]
+  (let [credential-id (re-find #"credential/[\w-]*" selection)]
+    ^{:key selection}
+    [credential-view credential-id credential-quotas]))
+
+
+(defn page-count
+  [record-displayed element-count]
   (cond-> element-count
           true (quot record-displayed)
           (pos? (mod element-count record-displayed)) inc))
 
-(defn search-result []
-  (let [loading? (subscribe [::quota-subs/loading?])
+
+(defn search-result
+  []
+  (let [loading-quotas? (subscribe [::quota-subs/loading-quotas?])
         credentials-quotas-map (subscribe [::quota-subs/credentials-quotas-map])
         active-page (reagent/atom 1)
-        element-displayed 10
+        element-displayed 8
         set-page #(reset! active-page %)]
     (fn []
       (let [elements-count (count @credentials-quotas-map)
             start-slice (* (dec @active-page) element-displayed)
             end-slice (let [end (* @active-page element-displayed)]
-                        (if (> end elements-count)
-                          elements-count
-                          end))]
-        (vec (concat [ui/Segment (merge style/autoscroll-x {:loading @loading?})]
-                     (map credential-view
-                          (subvec (vec (keys @credentials-quotas-map))
-                                  start-slice
-                                  end-slice)
-                          (subvec (vec (vals @credentials-quotas-map))
-                                  start-slice
-                                  end-slice))
-                     [[ui/Pagination {:size         "tiny"
-                                      :totalPages   (page-count element-displayed elements-count)
-                                      :activePage   @active-page
-                                      :onPageChange (ui-callback/callback :activePage set-page)
-                                      }]]))))))
+                        (if (> end elements-count) elements-count end))
+            total-pages (page-count element-displayed elements-count)]
+        [:div
+         [ui/Segment {:loading @loading-quotas?
+                      :padded  true}
+          (when (not-empty @credentials-quotas-map)
+            (when (> @active-page total-pages) (set-page 1))
+            (vec
+              (concat [ui/CardGroup]
+                      (map credential-view-comp
+                           (subvec (vec (keys @credentials-quotas-map))
+                                   start-slice
+                                   end-slice)
+                           (subvec (vec (vals @credentials-quotas-map))
+                                   start-slice
+                                   end-slice)))))]
+         (when (> total-pages 1)
+           [uix/Pagination {:size         "tiny"
+                           :totalPages   total-pages
+                           :activePage   @active-page
+                           :onPageChange (ui-callback/callback :activePage set-page)}])]))))
+
 
 (defn quota
   []
   [ui/Container {:fluid true}
    [control-bar]
    [search-result]])
+
 
 (defmethod panel/render :quota
   [_]

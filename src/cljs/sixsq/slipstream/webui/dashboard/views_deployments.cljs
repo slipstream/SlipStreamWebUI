@@ -9,29 +9,39 @@
     [sixsq.slipstream.webui.client.subs :as client-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
 
-(defn extract-deployments-data [deployment-resp]
+(defn extract-deployment-data
+  [{:keys [uuid moduleResourceUri serviceUrl status startTime cloudServiceNames username
+           abort type tags activeVm]}]
+  {:deployment-uuid uuid
+   :module-uri      moduleResourceUri
+   :service-url     serviceUrl
+   :state           status
+   :start-time      startTime
+   :clouds          cloudServiceNames
+   :user            username
+   :tags            tags
+   :abort           abort
+   :type            type
+   :activeVm        activeVm})
+
+
+(defn extract-deployments-data
+  [deployment-resp]
   (let [deployments (get-in deployment-resp [:runs :item] [])]
-    (map (fn [{:keys [uuid moduleResourceUri serviceUrl status startTime cloudServiceNames username abort type
-                      tags activeVm]}]
-           {:deployment-uuid uuid
-            :module-uri      moduleResourceUri
-            :service-url     serviceUrl
-            :state           status
-            :start-time      startTime
-            :clouds          cloudServiceNames
-            :user            username
-            :tags            tags
-            :abort           abort
-            :type            type
-            :activeVm        activeVm
-            }) deployments)))
+    (map extract-deployment-data deployments)))
 
-(defn is-terminated-state? [state]
+
+(defn is-terminated-state?
+  [state]
   (#{"Finalizing" "Done" "Aborted" "Cancelled"} state))
 
-(defn terminate-confirm []
+
+(defn terminate-confirm
+  []
   (let [deployment (subscribe [::dashboard-subs/delete-deployment-modal])
         slipstream-url (subscribe [::client-subs/slipstream-url])]
     (fn []
@@ -63,15 +73,14 @@
                          [ui/TableRow [ui/TableCell "Abort:"] [ui/TableCell abort]]
                          [ui/TableRow [ui/TableCell "Tags:"] [ui/TableCell tags]]]])
           :onCancel  #(dispatch [::dashboard-events/delete-deployment-modal nil])
-          :onConfirm #(dispatch [::dashboard-events/delete-deployment deployment-uuid])
-          }]))))
+          :onConfirm #(dispatch [::dashboard-events/delete-deployment deployment-uuid])}]))))
 
 
 (defn table-deployment-row
   [deployment]
   (let [slipstream-url (subscribe [::client-subs/slipstream-url])
         deleted (subscribe [::dashboard-subs/deleted-deployments])]
-    (fn [{:keys [deployment-uuid module-uri service-url state start-time clouds user state tags abort type activeVm]
+    (fn [{:keys [deployment-uuid module-uri service-url start-time clouds user state tags abort type activeVm]
           :as   deployment}]
       (let [global-prop (if (is-terminated-state? state) {:disabled true} {})
             aborted (not-empty abort)
@@ -153,16 +162,18 @@
           row)
         ))))
 
-(defn deployments-table [cloud-filter]
+
+(defn deployments-table
+  []
   (let [deployments (subscribe [::dashboard-subs/deployments])
         headers ["" "ID" "Application / Component" "Service URL" "State" "VMs"
                  "Start Time [UTC]" "Clouds" "Tags" "User" ""]
-        record-displayed (subscribe [::dashboard-subs/records-displayed])
         page (subscribe [::dashboard-subs/page])
         total-pages (subscribe [::dashboard-subs/total-pages])
-        active-only (subscribe [::dashboard-subs/active-deployments-only])
         error-message (subscribe [::dashboard-subs/error-message-deployment])
-        loading? (subscribe [::dashboard-subs/loading-tab?])]
+        loading? (subscribe [::dashboard-subs/loading-tab?])
+        set-page #(dispatch [::dashboard-events/set-page %])
+        set-active-deployments-only #(dispatch [::dashboard-events/active-deployments-only (not %)])]
     (fn []
       (let [deployments-count (get-in @deployments [:runs :totalCount] 0)
             deployments-data (extract-deployments-data @deployments)]
@@ -175,8 +186,7 @@
                         :error     true
                         :onDismiss #(dispatch [::dashboard-events/clear-error-message-deployment])}])
          [ui/Checkbox {:slider   true :fitted true :label "Include inactive runs"
-                       :onChange #(dispatch [::dashboard-events/active-deployments-only
-                                             (not (:checked (js->clj %2 :keywordize-keys true)))])}]
+                       :onChange (ui-callback/callback :checked set-active-deployments-only)}]
 
          [ui/Table
           {:compact     "very"
@@ -204,12 +214,10 @@
              [ui/Label "Found" [ui/LabelDetail deployments-count]]]
             [ui/TableHeaderCell {:textAlign "right"
                                  :col-span  (str (- (count headers) 3))}
-             [ui/Pagination
+             [uix/Pagination
               {:size         "tiny"
                :totalPages   @total-pages
                :activePage   @page
-               :onPageChange (fn [e d]
-                               (dispatch [::dashboard-events/set-page (:activePage (js->clj d :keywordize-keys true))]))
-               }]]]]]
+               :onPageChange (ui-callback/callback :activePage set-page)}]]]]]
 
          [terminate-confirm]]))))

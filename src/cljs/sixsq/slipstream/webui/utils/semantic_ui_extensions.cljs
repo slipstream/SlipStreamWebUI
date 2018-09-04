@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.utils.semantic-ui-extensions
   (:require
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [reagent.core :as reagent]))
 
 
 (defn Button
@@ -71,3 +72,14 @@
         icon-name (if visible? "chevron down" "chevron up")]
     [ui/MenuItem final-opts
      [ui/Icon {:name icon-name}]]))
+
+
+(defn Pagination
+  "Provide pagination element with more visible icons."
+  [options]
+  [ui/Pagination
+   (merge {:firstItem {:content (reagent/as-element [ui/Icon {:name "angle double left"}]) :icon true}
+           :lastItem  {:content (reagent/as-element [ui/Icon {:name "angle double right"}]) :icon true}
+           :prevItem  {:content (reagent/as-element [ui/Icon {:name "angle left"}]) :icon true}
+           :nextItem  {:content (reagent/as-element [ui/Icon {:name "angle right"}]) :icon true}}
+          options)])

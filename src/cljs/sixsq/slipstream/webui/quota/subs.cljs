@@ -5,8 +5,9 @@
 
 
 (reg-sub
-  ::loading?
-  ::quota-spec/loading?)
+  ::loading-quotas?
+  ::quota-spec/loading-quotas?)
+
 
 (reg-sub
   ::credentials-quotas-map

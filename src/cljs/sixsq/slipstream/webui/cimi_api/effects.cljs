@@ -25,6 +25,12 @@
     (go
       (callback (<! (cimi/get client resource-id))))))
 
+(reg-fx
+  ::get2
+  (fn [[client resource-id callback options]]
+    (go
+      (callback (<! (cimi/get client resource-id options))))))
+
 
 (reg-fx
   ::search
