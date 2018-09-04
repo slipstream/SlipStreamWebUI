@@ -139,3 +139,18 @@
 .webui-section-header {
     background-color: Gainsboro !important;
 }
+
+
+/*
+ * Override the size of inputs within a search dropdown to avoid
+ * weird interaction effects where the focus passes to the dropdown
+ * rather than the search input field.
+ *
+ * This is not a perfect solution as the input field for the search
+ * will take up the entire line, even if the existing items are
+ * short.
+ */
+
+div.search.dropdown > input {
+    width: 100% !important;
+}
