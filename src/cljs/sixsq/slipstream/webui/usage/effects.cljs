@@ -8,6 +8,22 @@
 
 
 (reg-fx
+  ::fetch-totals
+  (fn [[client
+        date-after
+        date-before
+        credentials
+        billable-only?
+        callback]]
+    (go
+      (callback (<! (usage-utils/fetch-totals client
+                                              date-after
+                                              date-before
+                                              credentials
+                                              billable-only?))))))
+
+
+(reg-fx
   ::fetch-meterings
   (fn [[client
         date-after

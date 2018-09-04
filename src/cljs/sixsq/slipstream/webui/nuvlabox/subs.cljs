@@ -25,10 +25,5 @@
 
 
 (reg-sub
-  ::filter-visible?
-  ::nuvlabox-spec/filter-visible?)
-
-
-(reg-sub
   ::state-selector
   ::nuvlabox-spec/state-selector)

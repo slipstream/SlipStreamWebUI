@@ -6,8 +6,7 @@
     [clojure.string :as str]
     [promesa.core :as p]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (def vms-unit "VMs [h]")
@@ -16,7 +15,22 @@
 (def disk-unit "DISK [GB·h]")
 (def price-unit "PRICE [€]")
 
-(def all-credentials "all-credentials")
+;; hack because there isn't a useful billable? flag in the metering records
+(def billable-states ["running" "Running"
+                      "stopping" "Error"
+                      "pending" "Pending"
+                      "Boot" "Unknown"
+                      "shutting-down"
+                      "Rebooting"])
+(def billable-filter (str "(" (str/join " or " (map #(str "state=\"" % "\"") billable-states)) ")"))
+
+(def compute-aggregations (str/join ", " ["sum:serviceOffer/resource:vcpu"
+                                          "sum:serviceOffer/resource:ram"
+                                          "sum:serviceOffer/resource:disk"
+                                          "sum:price"]))
+
+;; hack to distinguish storage from compute metering records
+(def vm-filter "(bucketName=null)")
 
 
 (defn date-range
@@ -45,40 +59,54 @@
   (/ v 1024))
 
 
-(defn fetch-metering [resolve client date-after date-before credential credentials billable-only?]
+(defn extract-compute-stats
+  [response]
+  {:vms   {:unit  vms-unit
+           :value (-> response (get :count 0) to-hour)}
+   :cpus  {:unit  cpus-unit
+           :value (-> response
+                      (get-in [:aggregations :sum:serviceOffer/resource:vcpu :value] 0)
+                      to-hour)}
+   :ram   {:unit  ram-unit
+           :value (-> response
+                      (get-in [:aggregations :sum:serviceOffer/resource:ram :value] 0)
+                      to-GB-from-MB
+                      to-hour)}
+   :disk  {:unit  disk-unit
+           :value (-> response
+                      (get-in [:aggregations :sum:serviceOffer/resource:disk :value] 0)
+                      to-hour)}
+   :price {:unit  price-unit
+           :value (get-in response [:aggregations :sum:price :value] 0)}})
+
+
+(defn fetch-totals [client date-after date-before credentials billable-only?]
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
-          filter-credentials (if (= credential all-credentials)
-                               (str/join " or " (map #(str "credentials/href='" % "'") credentials))
-                               (str "credentials/href='" credential "'"))
-          billable-filter "(state=\"running\" or state=\"Running\" or state=\"stopping\" or state=\"Error\" or state=\"Pending\" or state=\"pending\" or state=\"Boot\" or state=\"Unknown\" or state=\"shutting-down\" or state=\"Rebooting\")"
-          type-filter "(bucketName=null)"
+          filter-credentials (str/join " or " (map #(str "credentials/href='" % "'") credentials))
           filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
                              billable-only? (str " and " billable-filter)
-                             true (str " and " type-filter))
+                             true (str " and " vm-filter))
           request-opts {"$last"        0
                         "$filter"      filter-str
-                        "$aggregation" (str "sum:serviceOffer/resource:vcpu, sum:serviceOffer/resource:ram, "
-                                            "sum:serviceOffer/resource:disk, sum:price")}
+                        "$aggregation" compute-aggregations}
           response (<! (cimi/search client "meterings" request-opts))]
-      (resolve
-        [credential {:vms   {:unit  vms-unit
-                             :value (-> response (get :count 0) to-hour)}
-                     :cpus  {:unit  cpus-unit
-                             :value (-> response
-                                        (get-in [:aggregations :sum:serviceOffer/resource:vcpu :value] 0)
-                                        to-hour)}
-                     :ram   {:unit  ram-unit
-                             :value (-> response
-                                        (get-in [:aggregations :sum:serviceOffer/resource:ram :value] 0)
-                                        to-GB-from-MB
-                                        to-hour)}
-                     :disk  {:unit  disk-unit
-                             :value (-> response
-                                        (get-in [:aggregations :sum:serviceOffer/resource:disk :value] 0)
-                                        to-hour)}
-                     :price {:unit  price-unit
-                             :value (get-in response [:aggregations :sum:price :value] 0)}}]))))
+      (extract-compute-stats response))))
+
+
+(defn fetch-metering [callback client date-after date-before credential billable-only?]
+  (go
+    (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
+          filter-credentials (str "credentials/href='" credential "'")
+          filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
+                             billable-only? (str " and " billable-filter)
+                             true (str " and " vm-filter))
+          request-opts {"$last"        0
+                        "$filter"      filter-str
+                        "$aggregation" compute-aggregations}
+          response (<! (cimi/search client "meterings" request-opts))]
+      (callback
+        [credential (extract-compute-stats response)]))))
 
 
 (defn fetch-meterings [client
@@ -87,6 +115,6 @@
                        credentials
                        billable-only?
                        callback]
-  (let [p (p/all (map #(p/promise (fn [resolve _]
-                                    (fetch-metering resolve client date-after date-before % credentials billable-only?))) credentials))]
+  (let [p (p/all (map #(p/promise (fn [callback _]
+                                    (fetch-metering callback client date-after date-before % billable-only?))) credentials))]
     (p/then p #(->> % (into {}) callback))))

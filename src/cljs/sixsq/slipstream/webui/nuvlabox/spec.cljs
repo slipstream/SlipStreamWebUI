@@ -28,8 +28,6 @@
                                        ::$select
                                        ::$aggregation]))
 
-(s/def ::filter-visible? boolean?)
-
 (s/def ::collection any?)
 
 (s/def ::state-selector #{"all" "new" "activated" "quarantined"})
@@ -40,7 +38,6 @@
 
                           ::query-params
 
-                          ::filter-visible?
                           ::collection
                           ::state-selector]))
 
@@ -57,7 +54,6 @@
                                               :$select      nil
                                               :$aggregation nil}
 
-               ::filter-visible?             false
                ::collection                  nil
                ::state-selector              "all"})
 

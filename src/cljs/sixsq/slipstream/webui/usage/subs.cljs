@@ -10,8 +10,8 @@
 
 
 (reg-sub
-  ::filter-visible?
-  ::usage-spec/filter-visible?)
+  ::totals
+  ::usage-spec/totals)
 
 
 (reg-sub

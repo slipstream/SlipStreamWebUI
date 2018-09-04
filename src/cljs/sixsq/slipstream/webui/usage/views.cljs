@@ -129,42 +129,45 @@
 
 
 (defn table-results-credentials []
-  (let [results (subscribe [::usage-subs/results])
+  (let [tr (subscribe [::i18n-subs/tr])
+        results (subscribe [::usage-subs/results])
         sort (subscribe [::usage-subs/sort])
         credentials-map (subscribe [::usage-subs/credentials-map])]
     (fn []
-      [ui/Table (merge style/selectable {:text-align "right"
-                                         :celled     true
-                                         :sortable   true})
-       [ui/TableHeader
-        [ui/TableRow
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :credential), :text-align "left", :collapsing true, :on-click (column-click :credential)} "credential"]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :cloud), :text-align "left", :collapsing true,, :on-click (column-click :cloud)} "cloud"]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :vms), :on-click (column-click :vms)} u/vms-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :cpus), :on-click (column-click :cpus)} u/cpus-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :ram), :on-click (column-click :ram)} u/ram-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :disk), :on-click (column-click :disk)} u/disk-unit]
-         [ui/TableHeaderCell {:sorted (sorted-value @sort :price), :on-click (column-click :price)} u/price-unit]]]
-       [ui/TableBody
-        (some->> @results
-                 (add-cloud-fields @credentials-map)
-                 (sort-rows @sort)
-                 (map results-table-row)
-                 doall)]])))
+      (if (pos? (count @results))
+        [ui/Table (merge style/selectable {:text-align "right"
+                                           :celled     true
+                                           :sortable   true})
+         [ui/TableHeader
+          [ui/TableRow
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :credential), :text-align "left", :collapsing true, :on-click (column-click :credential)} "credential"]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :cloud), :text-align "left", :collapsing true,, :on-click (column-click :cloud)} "cloud"]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :vms), :on-click (column-click :vms)} u/vms-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :cpus), :on-click (column-click :cpus)} u/cpus-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :ram), :on-click (column-click :ram)} u/ram-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :disk), :on-click (column-click :disk)} u/disk-unit]
+           [ui/TableHeaderCell {:sorted (sorted-value @sort :price), :on-click (column-click :price)} u/price-unit]]]
+         [ui/TableBody
+          (some->> @results
+                   (add-cloud-fields @credentials-map)
+                   (sort-rows @sort)
+                   (map results-table-row)
+                   doall)]]
+        [ui/Header {:as "h1", :text-align "center"} (@tr [:no-data])]))))
 
 
-(defn statistics-all-credentials []
-  (let [results (subscribe [::usage-subs/results])
+(defn totals []
+  (let [totals (subscribe [::usage-subs/totals])
         credentials-map (subscribe [::usage-subs/credentials-map])
         selected-credentials (subscribe [::usage-subs/selected-credentials])]
     (fn []
-      (let [{:keys [vms cpus ram disk price]} (get @results u/all-credentials)
+      (let [{:keys [vms cpus ram disk price]} @totals
             all-creds-count (count @credentials-map)
             real-count-selected-creds (count @selected-credentials)
             count-selected-creds (if (zero? real-count-selected-creds)
                                    all-creds-count
                                    real-count-selected-creds)]
-        [ui/StatisticGroup {:size "tiny", :style {:max-width "100%"}}
+        [ui/StatisticGroup {:size "tiny", :widths "six", :style {:max-width "100%"}}
          [ui/Statistic
           [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
            [ui/Icon {:size "small" :name "key"}]]
@@ -295,7 +298,7 @@
                            :selects-end  true
                            :on-change    #(dispatch [::usage-events/set-date-range [date-after (.endOf % "day")]])}]]]
          [ui/FormGroup
-          [ui/Checkbox {:slider    true
+          [ui/Checkbox {:toggle true
                         :checked   @billable-only?
                         :label     (@tr [:billable-only?])
                         :on-change #(dispatch [::usage-events/toggle-billable-only?])}]]
@@ -304,19 +307,9 @@
           [search-credentials-dropdown]]]))))
 
 
-(defn filter-button
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])]
-    (fn []
-      [uix/MenuItemForFilter {:name     (@tr [:filter])
-                              :visible? @filter-visible?
-                              :on-click #(dispatch [::usage-events/toggle-filter])}])))
-
-
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])
+        totals (subscribe [::usage-subs/totals])
         results (subscribe [::usage-subs/results])]
     (dispatch [::usage-events/get-credentials-map])
     (fn []
@@ -325,34 +318,43 @@
         [uix/MenuItemWithIcon
          {:name      (@tr [:refresh])
           :icon-name "refresh"
-          :on-click  #(dispatch [::usage-events/fetch-meterings])}]
+          :on-click  (fn []
+                       (dispatch [::usage-events/fetch-totals])
+                       (dispatch [::usage-events/fetch-meterings]))}]
         (when @results
           [uix/MenuItemWithIcon
            {:name      (@tr [:download])
             :icon-name "download"
             :as        :a
             :download  "data.json"
-            :href      (->> (general/edn->json @results)
+            :href      (->> (assoc @results :total @totals)
+                            general/edn->json
                             (.encodeURIComponent js/window)
-                            (str "data:text/plain;charset=utf-8,"))}])
-        [filter-button]]
-       (when @filter-visible?
-         [ui/Segment {:attached "bottom"}
-          [search-header]])])))
+                            (str "data:application/json;charset=utf-8,"))}])]
+       [ui/Segment {:attached "bottom"}
+        [search-header]]])))
 
 
 (defn search-result []
   (let [loading? (subscribe [::usage-subs/loading?])]
     [ui/Segment (merge style/autoscroll-x {:loading @loading?})
-     [statistics-all-credentials]
+     [totals]
      [table-results-credentials]]))
 
 
 (defn usage
   []
-  [ui/Container {:fluid true}
-   [control-bar]
-   [search-result]])
+  (let [results (subscribe [::usage-subs/results])
+        credentials (subscribe [::usage-subs/credentials-map])]
+
+    ;; kick off the initial download of data when the usage panel is loaded
+    ;; (and there is something to query).
+    (when (and (nil? @results) (pos? (count @credentials)))
+      (dispatch [::usage-events/fetch-meterings]))
+
+    [ui/Container {:fluid true}
+     [control-bar]
+     [search-result]]))
 
 
 (defmethod panel/render :usage
