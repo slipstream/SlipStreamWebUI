@@ -295,7 +295,7 @@
                            :selects-end  true
                            :on-change    #(dispatch [::usage-events/set-date-range [date-after (.endOf % "day")]])}]]]
          [ui/FormGroup
-          [ui/Checkbox {:slider    true
+          [ui/Checkbox {:toggle true
                         :checked   @billable-only?
                         :label     (@tr [:billable-only?])
                         :on-change #(dispatch [::usage-events/toggle-billable-only?])}]]
