@@ -183,7 +183,6 @@
 
 (defn search-header []
   (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::cimi-subs/filter-visible?])
         query-params (subscribe [::cimi-subs/query-params])
         selected-id (subscribe [::cimi-subs/collection-name])]
     (fn []
@@ -204,68 +203,65 @@
          [ui/FormGroup
           [ui/FormField
            [cloud-entry-point-title]]]
-         (when @filter-visible?
-           [ui/FormGroup {:widths "equal"}
-            [ui/FormField
-             ; the key below is a workaround react issue with controlled input cursor position,
-             ; this will force to re-render defaultValue on change of the value
-             ^{:key (str "first:" $first)}
-             [ui/Input {:aria-label   (@tr [:first])
-                        :type         "number"
-                        :min          0
-                        :label        (@tr [:first])
-                        :defaultValue $first
-                        :on-blur      (ui-callback/input ::cimi-events/set-first)}]]
+         [ui/FormGroup {:widths "equal"}
+          [ui/FormField
+           ; the key below is a workaround react issue with controlled input cursor position,
+           ; this will force to re-render defaultValue on change of the value
+           ^{:key (str "first:" $first)}
+           [ui/Input {:aria-label   (@tr [:first])
+                      :type         "number"
+                      :min          0
+                      :label        (@tr [:first])
+                      :defaultValue $first
+                      :on-blur      (ui-callback/input ::cimi-events/set-first)}]]
 
-            [ui/FormField
-             ^{:key (str "last:" $last)}
-             [ui/Input {:aria-label   (@tr [:last])
-                        :type         "number"
-                        :min          0
-                        :label        (@tr [:last])
-                        :defaultValue $last
-                        :on-blur      (ui-callback/input ::cimi-events/set-last)}]]
+          [ui/FormField
+           ^{:key (str "last:" $last)}
+           [ui/Input {:aria-label   (@tr [:last])
+                      :type         "number"
+                      :min          0
+                      :label        (@tr [:last])
+                      :defaultValue $last
+                      :on-blur      (ui-callback/input ::cimi-events/set-last)}]]
 
-            [ui/FormField
-             ^{:key (str "select:" $select)}
-             [ui/Input {:aria-label   (@tr [:select])
-                        :type         "text"
-                        :label        (@tr [:select])
-                        :defaultValue $select
-                        :placeholder  "e.g. id, endpoint, ..."
-                        :on-blur      (ui-callback/input ::cimi-events/set-select)}]]])
+          [ui/FormField
+           ^{:key (str "select:" $select)}
+           [ui/Input {:aria-label   (@tr [:select])
+                      :type         "text"
+                      :label        (@tr [:select])
+                      :defaultValue $select
+                      :placeholder  "e.g. id, endpoint, ..."
+                      :on-blur      (ui-callback/input ::cimi-events/set-select)}]]]
 
-         (when @filter-visible?
-           [ui/FormGroup {:widths "equal"}
-            [ui/FormField
-             ^{:key (str "orderby:" $orderby)}
-             [ui/Input {:aria-label   (@tr [:order])
-                        :type         "text"
-                        :label        (@tr [:order])
-                        :defaultValue $orderby
-                        :placeholder  "e.g. created:desc, ..."
-                        :on-blur      (ui-callback/input ::cimi-events/set-orderby)}]]
+         [ui/FormGroup {:widths "equal"}
+          [ui/FormField
+           ^{:key (str "orderby:" $orderby)}
+           [ui/Input {:aria-label   (@tr [:order])
+                      :type         "text"
+                      :label        (@tr [:order])
+                      :defaultValue $orderby
+                      :placeholder  "e.g. created:desc, ..."
+                      :on-blur      (ui-callback/input ::cimi-events/set-orderby)}]]
 
-            [ui/FormField
-             ^{:key (str "aggregation:" $aggregation)}
-             [ui/Input {:aria-label   (@tr [:aggregation])
-                        :type         "text"
-                        :label        (@tr [:aggregation])
-                        :defaultValue $aggregation
-                        :placeholder  "e.g. min:resource:vcpu, ..."
-                        :on-blur      (ui-callback/input ::cimi-events/set-aggregation)}]]])
+          [ui/FormField
+           ^{:key (str "aggregation:" $aggregation)}
+           [ui/Input {:aria-label   (@tr [:aggregation])
+                      :type         "text"
+                      :label        (@tr [:aggregation])
+                      :defaultValue $aggregation
+                      :placeholder  "e.g. min:resource:vcpu, ..."
+                      :on-blur      (ui-callback/input ::cimi-events/set-aggregation)}]]]
 
-         (when @filter-visible?
-           [ui/FormGroup {:widths "equal"}
-            [ui/FormField
-             ^{:key (str "filter:" $filter)}
-             [ui/Input
-              {:aria-label   (@tr [:filter])
-               :type         "text"
-               :label        (@tr [:filter])
-               :defaultValue $filter
-               :placeholder  "e.g. connector/href^='exoscale-' and resource:type='VM' and resource:ram>=8096"
-               :on-blur      (ui-callback/input ::cimi-events/set-filter)}]]])]))))
+         [ui/FormGroup {:widths "equal"}
+          [ui/FormField
+           ^{:key (str "filter:" $filter)}
+           [ui/Input
+            {:aria-label   (@tr [:filter])
+             :type         "text"
+             :label        (@tr [:filter])
+             :defaultValue $filter
+             :placeholder  "e.g. connector/href^='exoscale-' and resource:type='VM' and resource:ram>=8096"
+             :on-blur      (ui-callback/input ::cimi-events/set-filter)}]]]]))))
 
 
 (defn format-field-item [selections-atom item]
@@ -404,16 +400,6 @@
           :on-click  #(dispatch [::cimi-events/show-add-modal])}]))))
 
 
-(defn filter-button
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::cimi-subs/filter-visible?])]
-    (fn []
-      [uix/MenuItemForFilter {:name     (@tr [:filter])
-                              :visible? @filter-visible?
-                              :on-click #(dispatch [::cimi-events/toggle-filter])}])))
-
-
 (defn menu-bar []
   (let [tr (subscribe [::i18n-subs/tr])
         resources (subscribe [::cimi-subs/collection])]
@@ -432,8 +418,7 @@
         [search-button]
         [select-fields]
         (when (can-add? (:operations @resources))
-          [create-button])
-        [filter-button]]
+          [create-button])]
        [ui/Segment {:attached "bottom"}
         [search-header]]])))
 

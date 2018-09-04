@@ -10,11 +10,6 @@
 
 
 (reg-sub
-  ::filter-visible?
-  ::deployment-spec/filter-visible?)
-
-
-(reg-sub
   ::query-params
   ::deployment-spec/query-params)
 

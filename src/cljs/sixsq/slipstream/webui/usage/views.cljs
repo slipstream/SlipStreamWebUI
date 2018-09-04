@@ -304,19 +304,8 @@
           [search-credentials-dropdown]]]))))
 
 
-(defn filter-button
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])]
-    (fn []
-      [uix/MenuItemForFilter {:name     (@tr [:filter])
-                              :visible? @filter-visible?
-                              :on-click #(dispatch [::usage-events/toggle-filter])}])))
-
-
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        filter-visible? (subscribe [::usage-subs/filter-visible?])
         totals (subscribe [::usage-subs/totals])
         results (subscribe [::usage-subs/results])]
     (dispatch [::usage-events/get-credentials-map])
@@ -340,9 +329,8 @@
                             (.encodeURIComponent js/window)
                             (str "data:application/json;charset=utf-8,"))}])
         [filter-button]]
-       (when @filter-visible?
-         [ui/Segment {:attached "bottom"}
-          [search-header]])])))
+       [ui/Segment {:attached "bottom"}
+        [search-header]]])))
 
 
 (defn search-result []
@@ -354,9 +342,17 @@
 
 (defn usage
   []
-  [ui/Container {:fluid true}
-   [control-bar]
-   [search-result]])
+  (let [results (subscribe [::usage-subs/results])
+        credentials (subscribe [::usage-subs/credentials-map])]
+
+    ;; kick off the initial download of data when the usage panel is loaded
+    ;; (and there is something to query).
+    (when (and (nil? @results) (pos? (count @credentials)))
+      (dispatch [::usage-events/fetch-meterings]))
+
+    [ui/Container {:fluid true}
+     [control-bar]
+     [search-result]]))
 
 
 (defmethod panel/render :usage

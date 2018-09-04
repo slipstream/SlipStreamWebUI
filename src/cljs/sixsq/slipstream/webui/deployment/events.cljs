@@ -17,12 +17,6 @@
               ::deployment-spec/deployments deployments)))
 
 
-(reg-event-db
-  ::toggle-filter
-  (fn [{:keys [::deployment-spec/filter-visible?] :as db} _]
-    (assoc db ::deployment-spec/filter-visible? (not filter-visible?))))
-
-
 (reg-event-fx
   ::get-deployments
   (fn [{{:keys [::client-spec/client ::deployment-spec/query-params] :as db} :db} _]
