@@ -327,8 +327,7 @@
             :href      (->> (assoc @results :total @totals)
                             general/edn->json
                             (.encodeURIComponent js/window)
-                            (str "data:application/json;charset=utf-8,"))}])
-        [filter-button]]
+                            (str "data:application/json;charset=utf-8,"))}])]
        [ui/Segment {:attached "bottom"}
         [search-header]]])))
 
