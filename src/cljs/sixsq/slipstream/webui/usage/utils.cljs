@@ -6,7 +6,8 @@
     [clojure.string :as str]
     [promesa.core :as p]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [taoensso.timbre :as log]))
 
 
 (def vms-unit "VMs [h]")
@@ -49,6 +50,11 @@
    "custom"       (date-range 30 1)})
 
 (def default-date-range "last-30-days")
+
+
+(defn get-date-range-tag
+  [range]
+  (or (ffirst (filter (fn [[_ v]] (time/range-equals range v)) date-range-entries)) "custom"))
 
 
 (defn to-hour [v]
