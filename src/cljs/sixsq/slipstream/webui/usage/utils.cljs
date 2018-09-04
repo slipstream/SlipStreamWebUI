@@ -84,10 +84,9 @@
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-credentials (str/join " or " (map #(str "credentials/href='" % "'") credentials))
-          type-filter "(bucketName=null)"
           filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
                              billable-only? (str " and " billable-filter)
-                             true (str " and " type-filter))
+                             true (str " and " vm-filter))
           request-opts {"$last"        0
                         "$filter"      filter-str
                         "$aggregation" compute-aggregations}
@@ -99,10 +98,9 @@
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-credentials (str "credentials/href='" credential "'")
-          type-filter "(bucketName=null)"
           filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
                              billable-only? (str " and " billable-filter)
-                             true (str " and " type-filter))
+                             true (str " and " vm-filter))
           request-opts {"$last"        0
                         "$filter"      filter-str
                         "$aggregation" compute-aggregations}
