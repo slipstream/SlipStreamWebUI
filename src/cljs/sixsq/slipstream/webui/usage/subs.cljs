@@ -10,6 +10,11 @@
 
 
 (reg-sub
+  ::totals
+  ::usage-spec/totals)
+
+
+(reg-sub
   ::results
   ::usage-spec/results)
 

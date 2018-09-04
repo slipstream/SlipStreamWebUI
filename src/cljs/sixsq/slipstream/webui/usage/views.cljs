@@ -153,43 +153,42 @@
                  doall)]])))
 
 
-(defn statistics-all-credentials []
-  (let [results (subscribe [::usage-subs/results])
+(defn totals []
+  (let [totals (subscribe [::usage-subs/totals])
         credentials-map (subscribe [::usage-subs/credentials-map])
         selected-credentials (subscribe [::usage-subs/selected-credentials])]
     (fn []
-      (let [{:keys [vms cpus ram disk price]} (get @results u/all-credentials)
+      (let [{:keys [vms cpus ram disk price]} @totals
             all-creds-count (count @credentials-map)
             real-count-selected-creds (count @selected-credentials)
             count-selected-creds (if (zero? real-count-selected-creds)
                                    all-creds-count
                                    real-count-selected-creds)]
-        (vec (concat [ui/StatisticGroup {:size "tiny", :style {:max-width "100%"}}
-                      [ui/Statistic
-                       [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
-                        [ui/Icon {:size "small" :name "key"}]]
-                       [ui/StatisticLabel "credentials"]]]
-                     (when @results
-                       [[ui/Statistic
-                         [ui/StatisticValue (value-in-statistic (:value vms)) "\u0020"
-                          [ui/Icon {:size "small" :name "server"}]]
-                         [ui/StatisticLabel u/vms-unit]]
-                        [ui/Statistic
-                         [ui/StatisticValue (value-in-statistic (:value cpus)) "\u0020"
-                          [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
-                         [ui/StatisticLabel u/cpus-unit]]
-                        [ui/Statistic
-                         [ui/StatisticValue (value-in-statistic (:value ram)) "\u0020"
-                          [ui/Icon {:size "small" :name "grid layout"}]]
-                         [ui/StatisticLabel u/ram-unit]]
-                        [ui/Statistic
-                         [ui/StatisticValue (value-in-statistic (:value disk)) "\u0020"
-                          [ui/Icon {:size "small" :name "database"}]]
-                         [ui/StatisticLabel {} u/disk-unit]]
-                        [ui/Statistic
-                         [ui/StatisticValue (value-in-statistic (:value price)) "\u0020"
-                          [ui/Icon {:size "small" :name "euro"}]]
-                         [ui/StatisticLabel {} u/price-unit]]])))))))
+        [ui/StatisticGroup {:size "tiny", :widths "six", :style {:max-width "100%"}}
+         [ui/Statistic
+          [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
+           [ui/Icon {:size "small" :name "key"}]]
+          [ui/StatisticLabel "credentials"]]
+         [ui/Statistic
+          [ui/StatisticValue (value-in-statistic (:value vms)) "\u0020"
+           [ui/Icon {:size "small" :name "server"}]]
+          [ui/StatisticLabel u/vms-unit]]
+         [ui/Statistic
+          [ui/StatisticValue (value-in-statistic (:value cpus)) "\u0020"
+           [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
+          [ui/StatisticLabel u/cpus-unit]]
+         [ui/Statistic
+          [ui/StatisticValue (value-in-statistic (:value ram)) "\u0020"
+           [ui/Icon {:size "small" :name "grid layout"}]]
+          [ui/StatisticLabel u/ram-unit]]
+         [ui/Statistic
+          [ui/StatisticValue (value-in-statistic (:value disk)) "\u0020"
+           [ui/Icon {:size "small" :name "database"}]]
+          [ui/StatisticLabel {} u/disk-unit]]
+         [ui/Statistic
+          [ui/StatisticValue (value-in-statistic (:value price)) "\u0020"
+           [ui/Icon {:size "small" :name "euro"}]]
+          [ui/StatisticLabel {} u/price-unit]]]))))
 
 
 (defn search-credentials-dropdown []
@@ -307,6 +306,7 @@
 
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
+        totals (subscribe [::usage-subs/totals])
         results (subscribe [::usage-subs/results])]
     (dispatch [::usage-events/get-credentials-map])
     (fn []
@@ -315,16 +315,19 @@
         [uix/MenuItemWithIcon
          {:name      (@tr [:refresh])
           :icon-name "refresh"
-          :on-click  #(dispatch [::usage-events/fetch-meterings])}]
+          :on-click  (fn []
+                       (dispatch [::usage-events/fetch-totals])
+                       (dispatch [::usage-events/fetch-meterings]))}]
         (when @results
           [uix/MenuItemWithIcon
            {:name      (@tr [:download])
             :icon-name "download"
             :as        :a
             :download  "data.json"
-            :href      (->> (general/edn->json @results)
+            :href      (->> (assoc @results :total @totals)
+                            general/edn->json
                             (.encodeURIComponent js/window)
-                            (str "data:text/plain;charset=utf-8,"))}])]
+                            (str "data:application/json;charset=utf-8,"))}])]
        [ui/Segment {:attached "bottom"}
         [search-header]]])))
 
@@ -332,7 +335,7 @@
 (defn search-result []
   (let [loading? (subscribe [::usage-subs/loading?])]
     [ui/Segment (merge style/autoscroll-x {:loading @loading?})
-     [statistics-all-credentials]
+     [totals]
      [table-results-credentials]]))
 
 
