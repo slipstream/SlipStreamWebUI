@@ -174,7 +174,9 @@
                         :icon      "exclamation circle"
                         :error     true
                         :onDismiss #(dispatch [::dashboard-events/clear-error-message-deployment])}])
-         [ui/Checkbox {:slider   true :fitted true :label "Include inactive runs"
+         [ui/Checkbox {:toggle   true
+                       :fitted   true
+                       :label    "Include inactive runs"
                        :onChange #(dispatch [::dashboard-events/active-deployments-only
                                              (not (:checked (js->clj %2 :keywordize-keys true)))])}]
 

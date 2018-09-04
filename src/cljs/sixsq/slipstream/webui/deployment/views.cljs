@@ -63,7 +63,7 @@
           [ui/FormField
            ^{:key (str "activeOnly:" activeOnly)}
            [ui/Checkbox {:defaultChecked (-> activeOnly js/parseInt zero? not)
-                         :slider         true
+                         :toggle         true
                          :fitted         true
                          :label          (@tr [:active?])
                          :on-change      (ui-callback/checked
