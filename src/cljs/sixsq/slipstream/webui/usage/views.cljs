@@ -18,14 +18,6 @@
     [sixsq.slipstream.webui.utils.values :as values]))
 
 
-(defn to-hour [v]
-  (/ v 60))
-
-
-(defn to-GB-from-MB [v]
-  (/ v 1024))
-
-
 (defn format [fmt-str & v]
   (apply pprint/cl-format nil fmt-str v))
 
@@ -195,7 +187,8 @@
 
 
 (defn search-credentials-dropdown []
-  (let [credentials-map (subscribe [::usage-subs/credentials-map])
+  (let [tr (subscribe [::i18n-subs/tr])
+        credentials-map (subscribe [::usage-subs/credentials-map])
         loading-credentials-map? (subscribe [::usage-subs/loading-credentials-map?])]
     (fn []
       [ui/FormField
@@ -205,7 +198,7 @@
          :className   "icon"
          :labeled     true
          :button      true
-         :placeholder "All credentials"
+         :placeholder (@tr [:all-credentials])
          :loading     @loading-credentials-map?
          :multiple    true
          :search      true
@@ -225,12 +218,13 @@
 
 
 (defn search-users-roles-dropdown []
-  (let [selected-users-roles (subscribe [::usage-subs/selected-users-roles])
+  (let [tr (subscribe [::i18n-subs/tr])
+        selected-users-roles (subscribe [::usage-subs/selected-users-roles])
         users-roles-list (subscribe [::usage-subs/users-roles-list])]
     (fn []
       [ui/FormField
        [ui/Dropdown {:fluid          true
-                     :placeholder    "Filter by users or roles"
+                     :placeholder    (@tr [:usage-filter])
                      :search         true
                      :multiple       true
                      :icon           "users"
