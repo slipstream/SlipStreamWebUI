@@ -15,7 +15,8 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.values :as values]))
+    [sixsq.slipstream.webui.utils.values :as values]
+    [taoensso.timbre :as log]))
 
 
 (defn format [fmt-str & v]
@@ -43,20 +44,17 @@
 
 (defn credential-link
   [credential]
-  (if (= credential "all-credentials")
-    "TOTAL"
-    (->> credential truncate-credential (values/as-link credential))))
+  (->> credential truncate-credential (values/as-link credential)))
 
 
 (defn truncate-connector
   [connector]
   (-> connector (str/split #"/") second))
 
+
 (defn connector-link
   [connector]
-  (if (= connector "SELECTED")
-    "SELECTED"
-    (->> connector truncate-connector (values/as-link connector))))
+  (->> connector truncate-connector (values/as-link connector)))
 
 
 (def key-fns
@@ -159,36 +157,38 @@
             count-selected-creds (if (zero? real-count-selected-creds)
                                    all-creds-count
                                    real-count-selected-creds)]
-        [ui/StatisticGroup {:size "tiny", :widths "six", :style {:max-width "100%"}}
-         [ui/Statistic
-          [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
-           [ui/Icon {:size "small" :name "key"}]]
-          [ui/StatisticLabel "credentials"]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value vms)) "\u0020"
-           [ui/Icon {:size "small" :name "server"}]]
-          [ui/StatisticLabel u/vms-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value cpus)) "\u0020"
-           [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
-          [ui/StatisticLabel u/cpus-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value ram)) "\u0020"
-           [ui/Icon {:size "small" :name "grid layout"}]]
-          [ui/StatisticLabel u/ram-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value disk)) "\u0020"
-           [ui/Icon {:size "small" :name "database"}]]
-          [ui/StatisticLabel {} u/disk-unit]]
-         [ui/Statistic
-          [ui/StatisticValue (value-in-statistic (:value price)) "\u0020"
-           [ui/Icon {:size "small" :name "euro"}]]
-          [ui/StatisticLabel {} u/price-unit]]]))))
+        (vec (concat [ui/StatisticGroup {:size "tiny", :widths "six", :style {:max-width "100%"}}
+                      [ui/Statistic
+                       [ui/StatisticValue (str count-selected-creds "/" all-creds-count) "\u0020"
+                        [ui/Icon {:size "small" :name "key"}]]
+                       [ui/StatisticLabel "credentials"]]]
+                     (when-not (nil? @totals)
+                       [[ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value vms)) "\u0020"
+                          [ui/Icon {:size "small" :name "server"}]]
+                         [ui/StatisticLabel u/vms-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value cpus)) "\u0020"
+                          [ui/Icon {:size "small" :rotated "clockwise" :name "microchip"}]]
+                         [ui/StatisticLabel u/cpus-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value ram)) "\u0020"
+                          [ui/Icon {:size "small" :name "grid layout"}]]
+                         [ui/StatisticLabel u/ram-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value disk)) "\u0020"
+                          [ui/Icon {:size "small" :name "database"}]]
+                         [ui/StatisticLabel {} u/disk-unit]]
+                        [ui/Statistic
+                         [ui/StatisticValue (value-in-statistic (:value price)) "\u0020"
+                          [ui/Icon {:size "small" :name "euro"}]]
+                         [ui/StatisticLabel {} u/price-unit]]])))))))
 
 
 (defn search-credentials-dropdown []
   (let [tr (subscribe [::i18n-subs/tr])
         credentials-map (subscribe [::usage-subs/credentials-map])
+        selected-credentials (subscribe [::usage-subs/selected-credentials])
         loading-credentials-map? (subscribe [::usage-subs/loading-credentials-map?])]
     (fn []
       [ui/FormField
@@ -203,6 +203,7 @@
          :multiple    true
          :search      true
          :selection   true
+         :value       (clj->js @selected-credentials)
          :onChange    (ui-callback/dropdown ::usage-events/set-selected-credentials)
          :options     (map
                         #(let [{:keys [id name description connector]} %]
@@ -252,21 +253,21 @@
         [ui/Form
          [ui/FormGroup
           [ui/FormField
-           [ui/Dropdown {:labeled      true
-                         :button       true
-                         :className    "icon"
-                         :icon         "time"
-                         :selection    true
-                         :options      (map (fn [k] {:text  (@tr [(keyword k)])
-                                                     :value k}) (keys u/date-range-entries))
-                         :value        @range-dropdown
-                         :onChange     #(do
-                                          (reset! range-dropdown (-> %2
-                                                                     (js->clj :keywordize-keys true)
-                                                                     :value))
-                                          (when-not (= "custom" @range-dropdown)
-                                            (dispatch [::usage-events/set-date-range
-                                                       (get u/date-range-entries @range-dropdown)])))}]]
+           [ui/Dropdown {:labeled   true
+                         :button    true
+                         :className "icon"
+                         :icon      "time"
+                         :selection true
+                         :options   (map (fn [k] {:text  (@tr [(keyword k)])
+                                                  :value k}) (keys u/date-range-entries))
+                         :value     @range-dropdown
+                         :onChange  #(do
+                                       (reset! range-dropdown (-> %2
+                                                                  (js->clj :keywordize-keys true)
+                                                                  :value))
+                                       (when-not (= "custom" @range-dropdown)
+                                         (dispatch [::usage-events/set-date-range
+                                                    (get u/date-range-entries @range-dropdown)])))}]]
           [ui/FormField
            [ui/DatePicker {:custom-input  (reagent/as-element [ui/Input {:label (@tr [:from])}])
                            :selected      date-after
@@ -313,53 +314,47 @@
   (let [tr (subscribe [::i18n-subs/tr])
         totals (subscribe [::usage-subs/totals])
         results (subscribe [::usage-subs/results])]
-    (dispatch [::usage-events/get-credentials-map])
-    (fn []
-      [:div
-       [ui/Menu {:attached "top", :borderless true}
+
+    [:div
+     [ui/Menu {:attached "top", :borderless true}
+      [uix/MenuItemWithIcon
+       {:name      (@tr [:refresh])
+        :icon-name "refresh"
+        :on-click  (fn []
+                     (dispatch [::usage-events/fetch-data]))}]
+      (when @results
         [uix/MenuItemWithIcon
-         {:name      (@tr [:refresh])
-          :icon-name "refresh"
-          :on-click  (fn []
-                       (dispatch [::usage-events/fetch-totals])
-                       (dispatch [::usage-events/fetch-meterings]))}]
-        (when @results
-          [uix/MenuItemWithIcon
-           {:name      (@tr [:download])
-            :icon-name "download"
-            :as        :a
-            :download  "data.json"
-            :href      (->> (assoc @results :total @totals)
-                            general/edn->json
-                            (.encodeURIComponent js/window)
-                            (str "data:application/json;charset=utf-8,"))}])]
-       [ui/Segment {:attached "bottom"}
-        [search-header]]])))
+         {:name      (@tr [:download])
+          :icon-name "download"
+          :as        :a
+          :download  "data.json"
+          :href      (->> (assoc @results :total @totals)
+                          general/edn->json
+                          (.encodeURIComponent js/window)
+                          (str "data:application/json;charset=utf-8,"))}])]
+     [ui/Segment {:attached "bottom"}
+      [search-header]]]))
 
 
-(defn search-result []
-  (let [loading? (subscribe [::usage-subs/loading?])]
-    [ui/Segment (merge style/autoscroll-x {:loading @loading?})
+(defn data-segment []
+  (let [loading-totals? (subscribe [::usage-subs/loading-totals?])
+        loading-details? (subscribe [::usage-subs/loading-details?])]
+    [ui/Segment (assoc style/autoscroll-x :loading (or @loading-totals? @loading-details?))
      [totals]
      [table-results-credentials]]))
 
 
 (defn usage
   []
-  (let [totals (subscribe [::usage-subs/totals])
-        results (subscribe [::usage-subs/results])
-        credentials (subscribe [::usage-subs/credentials-map])]
 
-    ;; kick off the initial download of data when the usage panel is loaded
-    ;; (and there is something to query).
-    (when (and (nil? @results) (pos? (count @credentials)))
-      (dispatch [::usage-events/fetch-meterings]))
-    (when (and (nil? @totals) (pos? (count @credentials)))
-      (dispatch [::usage-events/fetch-totals]))
+  ;; force the data to load when the usage panel is mounted
+  (log/error "dispatch initial load of usage")
+  (dispatch [::usage-events/initialize])
 
+  (fn []
     [ui/Container {:fluid true}
      [control-bar]
-     [search-result]]))
+     [data-segment]]))
 
 
 (defmethod panel/render :usage

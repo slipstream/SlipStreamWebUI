@@ -89,7 +89,7 @@
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-credentials (str/join " or " (map #(str "credentials/href='" % "'") credentials))
-          filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
+          filter-str (cond-> (str filter-created-str " and (" filter-credentials ")")
                              billable-only? (str " and " billable-filter)
                              true (str " and " vm-filter))
           request-opts {:$last        0
