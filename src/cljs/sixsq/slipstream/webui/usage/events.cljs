@@ -41,28 +41,31 @@
   ::initialize
   (fn [{{:keys [::client-spec/client
                 ::usage-spec/selected-users-roles] :as db} :db} _]
-    (let [db-update (assoc db ::usage-spec/loading-credentials-map? true
-                              ::usage-spec/loading-totals? false
-                              ::usage-spec/loading-details? false
-                              ::usage-spec/credentials-map nil
-                              ::usage-spec/selected-credentials nil
-                              ::usage-spec/totals nil
-                              ::usage-spec/results nil)]
-      (merge {:db db-update}
-             (get-credentials-map-cofx client selected-users-roles
-                                       #(do
-                                          (dispatch [::set-credentials-map %])
-                                          (dispatch [::fetch-data])))))))
+    (let [callback (fn [creds]
+                     (dispatch [::set-credentials-map creds])
+                     (dispatch [::fetch-data-with-creds creds]))]
+      (merge {:db (assoc db ::usage-spec/loading-credentials-map? true
+                            ::usage-spec/loading-totals? false
+                            ::usage-spec/loading-details? false
+                            ::usage-spec/credentials-map nil
+                            ::usage-spec/selected-credentials nil
+                            ::usage-spec/totals nil
+                            ::usage-spec/results nil)}
+             (get-credentials-map-cofx-for-callback callback client selected-users-roles)))))
+
+
+(defn response->credentials-map
+  [response]
+  (->> (get response :credentials [])
+       (map #(vector (:id %) %))
+       (into {})))
 
 
 (reg-event-db
   ::set-credentials-map
   (fn [db [_ response]]
-    (let [credentials (get response :credentials [])
-          map_id_cred (->> credentials
-                           (map #(vector (:id %) %))
-                           (into {}))]
-      (assoc db ::usage-spec/credentials-map map_id_cred
+    (let [credentials-map (response->credentials-map response)]
+      (assoc db ::usage-spec/credentials-map credentials-map
                 ::usage-spec/loading-credentials-map? false
                 ::usage-spec/totals nil
                 ::usage-spec/results nil))))
@@ -136,9 +139,9 @@
       (let [start (-> date-range first .clone .utc .format)
             end (-> date-range second .clone .utc .format)
 
-            creds (vec (take 10 (if (empty? selected-credentials)
-                                  (keys credentials-map)
-                                  selected-credentials)))]
+            creds (if (empty? selected-credentials)
+                    (keys credentials-map)
+                    selected-credentials)]
         {:db                        (assoc db ::usage-spec/loading-totals? true
                                               ::usage-spec/loading-details? true
                                               ::usage-spec/totals nil
@@ -157,6 +160,39 @@
                                      creds
                                      billable-only?
                                      #(dispatch [::set-results %])]}))))
+
+
+(reg-event-fx
+  ::fetch-data-with-creds
+  (fn [{{:keys [::client-spec/client
+                ::usage-spec/date-range
+                ::usage-spec/billable-only?] :as db} :db} [_ response]]
+    (let [credentials-map (response->credentials-map response)
+
+          start (-> date-range first .clone .utc .format)
+          end (-> date-range second .clone .utc .format)
+
+          creds (keys credentials-map)]
+
+      {:db                        (assoc db ::usage-spec/initialized? true
+                                            ::usage-spec/loading-totals? true
+                                            ::usage-spec/loading-details? true
+                                            ::usage-spec/totals nil
+                                            ::usage-spec/results nil)
+
+       ::usage-fx/fetch-totals    [client
+                                   start
+                                   end
+                                   creds
+                                   billable-only?
+                                   #(dispatch [::set-totals %])]
+
+       ::usage-fx/fetch-meterings [client
+                                   start
+                                   end
+                                   creds
+                                   billable-only?
+                                   #(dispatch [::set-results %])]})))
 
 
 (reg-event-db

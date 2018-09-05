@@ -5,6 +5,11 @@
 
 
 (reg-sub
+  ::initialized?
+  ::usage-spec/initialized?)
+
+
+(reg-sub
   ::loading-totals?
   ::usage-spec/loading-totals?)
 

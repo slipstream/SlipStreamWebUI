@@ -15,8 +15,7 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.values :as values]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.values :as values]))
 
 
 (defn format [fmt-str & v]
@@ -203,7 +202,7 @@
          :multiple    true
          :search      true
          :selection   true
-         :value       (clj->js @selected-credentials)
+         :value       (clj->js (or @selected-credentials []))
          :onChange    (ui-callback/dropdown ::usage-events/set-selected-credentials)
          :options     (map
                         #(let [{:keys [id name description connector]} %]
@@ -346,15 +345,17 @@
 
 (defn usage
   []
+  (let [initialized? (subscribe [::usage-subs/initialized?])]
 
-  ;; force the data to load when the usage panel is mounted
-  (log/error "dispatch initial load of usage")
-  (dispatch [::usage-events/initialize])
+    ;; force the initialization of the credentials and data only the
+    ;; first time that the usage page is mounted
+    (when-not @initialized?
+      (dispatch [::usage-events/initialize]))
 
-  (fn []
-    [ui/Container {:fluid true}
-     [control-bar]
-     [data-segment]]))
+    (fn []
+      [ui/Container {:fluid true}
+       [control-bar]
+       [data-segment]])))
 
 
 (defmethod panel/render :usage
