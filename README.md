@@ -2,9 +2,11 @@
 
 An application that provides a graphical interface to cloud management
 services that use the CIMI interface.  The tortured acronym comes from
-"Cimi resoUrces via a Browser InterfaCe". It is an early **prototype**
-but feedback (as GitHub issues) on the UI, source code, and underlying
-technologies is welcome.
+"Cimi resoUrces via a Browser InterfaCe".
+
+It is an alpha-level **prototype**, but in regular use by the
+developers.  Feedback (as GitHub issues) on the UI, source code, and
+underlying technologies is welcome.
 
 ## Frameworks and Libraries
 
@@ -26,7 +28,7 @@ Frameworks:
 
 Widgets:
 
- * [Semantic UI](https://react.semantic-ui.com/introduction):
+ * [Semantic UI React](https://react.semantic-ui.com/introduction):
    React integration for Semantic UI.
 
 
@@ -38,12 +40,22 @@ The essentials for using the development environment are below.
 
 To test the code on a SlipStream server (e.g. https://nuv.la/) running
 on a different machine, you'll need to start a browser with the XSS
-protections disabled.  For Chrome on macOS, this can be done with:
+protections disabled.
+
+For **Chrome** on MacOS, this can be done with:
 
 ```
 $ open /Applications/Google\ Chrome.app \
        --args --disable-web-security --user-data-dir
 ```
+
+For **Safari**, first enable the "Develop" menu.  Open the Safari
+preferences, click the "Advanced" tab, and then activate the "Show
+Develop menu in menu bar" option.  Once the "Develop" menu is visible,
+choose the "Disable Cross-Origin Restrictions" option.
+
+There may be **FireFox** plugins that will allow you to disable the
+CORS protections.  Easier solution is to use Chrome or Safari.
 
 ### Development
 The development environment requires [`lein`](https://leiningen.org).
@@ -56,7 +68,8 @@ doing the following:
      ```
      $ lein dev
      ```
- * You will get automatically a REPL, with Fighweel controls:
+
+ * You will get automatically a REPL, with Figwheel controls:
 
      ```
      dev:cljs.user=>
@@ -108,13 +121,14 @@ SlipStream, but annoying otherwise.
 
 The SlipStream WebUI can be run as an
 [electron](https://electronjs.org/) application.  This support is
-experimental and feedback is welcome. It has only been tested on Mac
-OS and there are numerous things that do not work correctly, notably
-those related to links between pages.
+experimental and feedback is welcome. It has only been tested on MacOS
+and there are numerous things that do not work correctly, notably the
+login workflows do not work well because they rely on automatic
+redirects.
 
 To compile the SlipStream WebUI electron application, you must have
 [`nodejs`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/)
-installed on your machine. On Mac OS, these can be installed with
+installed on your machine. On MacOS, these can be installed with
 [`homebrew`](https://brew.sh/).
 
 The configuration is based on the
@@ -174,7 +188,4 @@ $ electron-installer-dmg \
 ```
 
 This will generate the file `CUBIC.dmg` which can then be used to
-install the application as usual on Mac OS.
-
-
-
+install the application as usual on MacOS.
