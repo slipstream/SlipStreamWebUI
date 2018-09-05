@@ -27,9 +27,9 @@
             deployments-uuid (map #(str "deployment/href=\"run/" (:uuid %) "\"") deployments-list)
             filter-str (str/join " or " deployments-uuid)
             vm-aggregation-params (general-utils/prepare-params
-                                    {"$last"        0
-                                     "$aggregation" "terms:deployment/href"
-                                     "$filter"      filter-str})
+                                    {:$last        0
+                                     :$aggregation "terms:deployment/href"
+                                     :$filter      filter-str})
             active-vms (if (not-empty deployments-list)
                          (<! (cimi/search client "virtualMachines" vm-aggregation-params)) {})
             active-vms-per-deployment (->> (get-in active-vms [:aggregations :terms:deployment/href :buckets] [])

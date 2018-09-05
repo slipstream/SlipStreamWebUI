@@ -5,9 +5,13 @@
     [sixsq.slipstream.webui.usage.utils :as u]))
 
 
-(s/def ::loading? boolean?)
+(s/def ::initialized? boolean?)
+
+(s/def ::loading-totals? boolean?)
 
 (s/def ::totals any?)
+
+(s/def ::loading-details? boolean?)
 
 (s/def ::results any?)
 
@@ -33,7 +37,9 @@
 
 (s/def ::is-admin? boolean?)
 
-(s/def ::db (s/keys :req [::loading?
+(s/def ::db (s/keys :req [::initialized?
+                          ::loading-totals?
+                          ::loading-details?
                           ::totals
                           ::results
                           ::credentials-map
@@ -46,7 +52,9 @@
                           ::billable-only?
                           ::is-admin?]))
 
-(def defaults {::loading?                 false
+(def defaults {::initialized?             false
+               ::loading-totals?          false
+               ::loading-details?         false
                ::totals                   nil
                ::results                  nil
                ::credentials-map          {}

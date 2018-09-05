@@ -10,12 +10,15 @@
 basic
   {:basic  true
    :padded false
-   :style  {:padding 0}})
+   :style  {:padding-top    "inherit"
+            :padding-bottom "inherit"
+            :padding-left   0
+            :padding-right  0}})
 
 
 (def ^{:doc "Options for a Segment with horizontal scroll."}
 autoscroll-x
-  (update-in basic [:style :overflow-x] (constantly "auto")))
+  (assoc-in basic [:style :overflow-x] "auto"))
 
 
 (def ^{:doc "Options for a Segment with evenly spaced content."}
@@ -39,7 +42,7 @@ single-line
 
 (def ^{:doc "Common styles for single-line, selectable tables."}
 selectable
-  (merge single-line {:selectable true
+  (merge single-line {:selectable  true
                       :unstackable true}))
 
 
@@ -55,4 +58,4 @@ acl
          {:celled      true
           :text-align  "center"
           :unstackable true
-          :style {:max-width "100%"}}))
+          :style       {:max-width "100%"}}))

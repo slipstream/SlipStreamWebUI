@@ -5,13 +5,23 @@
 
 
 (reg-sub
-  ::loading?
-  ::usage-spec/loading?)
+  ::initialized?
+  ::usage-spec/initialized?)
+
+
+(reg-sub
+  ::loading-totals?
+  ::usage-spec/loading-totals?)
 
 
 (reg-sub
   ::totals
   ::usage-spec/totals)
+
+
+(reg-sub
+  ::loading-details?
+  ::usage-spec/loading-details?)
 
 
 (reg-sub

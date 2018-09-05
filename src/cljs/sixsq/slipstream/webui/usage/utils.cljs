@@ -89,12 +89,12 @@
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-credentials (str/join " or " (map #(str "credentials/href='" % "'") credentials))
-          filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
+          filter-str (cond-> (str filter-created-str " and (" filter-credentials ")")
                              billable-only? (str " and " billable-filter)
                              true (str " and " vm-filter))
-          request-opts {"$last"        0
-                        "$filter"      filter-str
-                        "$aggregation" compute-aggregations}
+          request-opts {:$last        0
+                        :$filter      filter-str
+                        :$aggregation compute-aggregations}
           response (<! (cimi/search client "meterings" request-opts))]
       (extract-compute-stats response))))
 
@@ -103,12 +103,12 @@
   (go
     (let [filter-created-str (str "snapshot-time>'" date-after "' and snapshot-time<'" date-before "'")
           filter-credentials (str "credentials/href='" credential "'")
-          filter-str (cond-> (str filter-created-str "and (" filter-credentials ")")
+          filter-str (cond-> (str filter-created-str " and (" filter-credentials ")")
                              billable-only? (str " and " billable-filter)
                              true (str " and " vm-filter))
-          request-opts {"$last"        0
-                        "$filter"      filter-str
-                        "$aggregation" compute-aggregations}
+          request-opts {:$last        0
+                        :$filter      filter-str
+                        :$aggregation compute-aggregations}
           response (<! (cimi/search client "meterings" request-opts))]
       (callback
         [credential (extract-compute-stats response)]))))
