@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
     [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.about.views]
     [sixsq.slipstream.webui.application.views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
@@ -74,6 +75,8 @@
     [:footer.webui-footer
      [:div.webui-footer-left
       [:span "© 2018, SixSq Sàrl"]]
+     [:div.webui-footer-centre
+      [:span#release-version (str "v")]]
      [:div.webui-footer-right
       [:span
        [ui/Icon {:name "balance"}]
