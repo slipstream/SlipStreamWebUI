@@ -117,7 +117,7 @@
         :welcome-detail      "Complete solution to manage your multi-cloud to edge continuum"
 				:welcome-dashboard-desc  "One glance to understand at once all that matters"
 				:welcome-quota-desc       "View and control consumption on all credentials"
-				:welcome-usage-desc       "Understand paste and historical usage"
+				:welcome-usage-desc       "Understand past and historical usage"
 				:welcome-appstore-desc    "Browse apps, components and images published and shared"
 				:welcome-deployment-desc  "See and control all your apps, across all clouds and edge"
 				:welcome-application-desc "Manage apps, components and images. Collaborate, share and explore one-click deployable applications"
