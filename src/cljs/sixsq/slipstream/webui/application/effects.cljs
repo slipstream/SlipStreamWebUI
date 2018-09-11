@@ -35,3 +35,14 @@
             module-data (assoc module :children children)]
 
         (callback module-data)))))
+
+
+(reg-fx
+  ::create-module
+  (fn [[client path data callback]]
+    (go
+      (log/error path data)
+      (let [{:keys [status] :as response} (<! (cimi/add client "modules" data))]
+        (log/error (with-out-str (cljs.pprint/pprint response)))
+        (when (= 201 status)
+          (callback response))))))
