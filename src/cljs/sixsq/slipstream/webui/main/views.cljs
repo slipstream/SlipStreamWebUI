@@ -1,12 +1,14 @@
 (ns sixsq.slipstream.webui.main.views
   (:require
     [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.about.views]
     [sixsq.slipstream.webui.application.views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.deployment.views]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.legacy-application.views]
@@ -19,13 +21,13 @@
     [sixsq.slipstream.webui.nuvlabox.views]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.profile.views]
+    [sixsq.slipstream.webui.quota.views]
     [sixsq.slipstream.webui.usage.views]
     [sixsq.slipstream.webui.utils.general :as utils]
     [sixsq.slipstream.webui.utils.responsive :as responsive]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.welcome.views]
-    [sixsq.slipstream.webui.quota.views]))
+    [sixsq.slipstream.webui.welcome.views]))
 
 
 (defn crumb
@@ -74,6 +76,11 @@
     [:footer.webui-footer
      [:div.webui-footer-left
       [:span "© 2018, SixSq Sàrl"]]
+     [:div.webui-footer-centre
+      [:a {:on-click #(dispatch
+                        [::history-events/navigate "about"])
+           :style    {:cursor "pointer"}}
+       [:span#release-version (str "v")]]]
      [:div.webui-footer-right
       [:span
        [ui/Icon {:name "balance"}]
