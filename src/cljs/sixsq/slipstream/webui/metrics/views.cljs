@@ -14,7 +14,8 @@
 
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [taoensso.timbre :as log]))
 
 
 (defn controls
@@ -132,6 +133,31 @@
        [plot/plot job-stats-vega-spec {:values (:states @job-info)} :style {:float :left}]])))
 
 
+(defn job-chartjs
+  []
+  (let [job-info (subscribe [::metrics-subs/job-info])]
+    (let [sorted-data (->> @job-info
+                           :states
+                           (map (juxt :key :doc_count))
+                           (sort-by first))
+          chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv first sorted-data)
+                                  :datasets [{:label           "job states"
+                                              :data            (mapv second sorted-data)
+                                              :backgroundColor ["rgba(255, 99, 132, 0.2)"
+                                                                "rgba(54, 162, 235, 0.2)"
+                                                                "rgba(255, 206, 86, 0.2)"
+                                                                "rgba(75, 192, 192, 0.2)"
+                                                                "rgba(153, 102, 255, 0.2)"]}]}
+                        :options {:legend {:display false}
+                                  :scales {:xAxes [{:type "linear"}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
+      (log/error (with-out-str (cljs.pprint/pprint @job-info)))
+      [ui/Card
+       [ui/CardContent
+        [plot/chartjs-plot chartjs-data]]])))
+
+
 (defn success-rate
   [success failed]
   (let [success (or success 0)
@@ -190,7 +216,15 @@
   [cc/collapsible-segment
    "job statistics"
    [job-numbers]
-   [job-plot]])
+   [job-plot]
+   [job-chartjs]])
+
+
+(defn example-plot
+  []
+  [cc/collapsible-segment
+   "example-plot"
+   [plot/chartjs-plot plot/example-plot-data]])
 
 
 (defn metrics-info
@@ -206,7 +240,8 @@
        [controls]
        [request-statistics]
        [server-statistics]
-       [job-statistics]])))
+       [job-statistics]
+       [example-plot]])))
 
 
 (defmethod panel/render :metrics

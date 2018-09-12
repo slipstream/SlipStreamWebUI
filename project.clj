@@ -88,7 +88,8 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/vega-embed]]
+                 [cljsjs/vega-embed]
+                 [cljsjs/chartjs "2.7.0-0"]]
 
   :source-paths ["src/clj" "src/cljs"]
 
