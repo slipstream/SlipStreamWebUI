@@ -78,8 +78,9 @@
       [:span "© 2018, SixSq Sàrl"]]
      [:div.webui-footer-centre
       [:a {:on-click #(dispatch
-                       [::history-events/navigate "about"])}
-          [:span#release-version (str "v")]]]
+                        [::history-events/navigate "about"])
+           :style    {:cursor "pointer"}}
+       [:span#release-version (str "v")]]]
      [:div.webui-footer-right
       [:span
        [ui/Icon {:name "balance"}]
