@@ -30,12 +30,28 @@
     (assoc db ::spec/add-modal-visible? false)))
 
 
+(reg-event-db
+  ::open-deploy-modal
+  (fn [db _]
+    (assoc db ::spec/deploy-modal-visible? true)))
+
+
+(reg-event-db
+  ::close-deploy-modal
+  (fn [db _]
+    (assoc db ::spec/deploy-modal-visible? false)))
+
+
 (defn fixup-image-data
-  [{:keys [type connector image-id] :as data}]
+  [{:keys [type connector image-id author os networkType loginUser] :as data}]
   (if (= "IMAGE" type)
     (-> data
-        (dissoc :connector :image-id)
-        (assoc-in [:content :imageIDs] {(keyword connector) image-id}))
+        (dissoc :connector :image-id :author :os :networkType :loginUser)
+        (assoc-in [:content :imageIDs] {(keyword connector) image-id})
+        (assoc-in [:content :author] author)
+        (assoc-in [:content :os] os)
+        (assoc-in [:content :networkType] networkType)
+        (assoc-in [:content :loginUser] loginUser))
     data))
 
 

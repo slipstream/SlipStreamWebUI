@@ -32,3 +32,8 @@
 (reg-sub
   ::active-tab
   ::application-spec/active-tab)
+
+
+(reg-sub
+  ::deploy-modal-visible?
+  ::application-spec/deploy-modal-visible?)

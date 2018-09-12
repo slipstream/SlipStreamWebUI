@@ -40,13 +40,24 @@
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
         module (subscribe [::application-subs/module])]
-    (let [disabled? (not= "PROJECT" (:type @module))]
+    (let [add-disabled? (not= "PROJECT" (:type @module))
+          deploy-disabled? (= "PROJECT" (:type @module))]
       [ui/Menu {:borderless true}
        [uix/MenuItemWithIcon
         {:name      (@tr [:add])
          :icon-name "add"
-         :disabled  disabled?
-         :on-click  #(dispatch [::application-events/open-add-modal])}]])))
+         :disabled  add-disabled?
+         :on-click  #(dispatch [::application-events/open-add-modal])}]
+       [uix/MenuItemWithIcon
+        {:name      (@tr [:deploy])
+         :icon-name "play"
+         :disabled  deploy-disabled?
+         :on-click  #(dispatch [::application-events/open-deploy-modal])}]])))
+
+
+(defn form-input-callback
+  [path]
+  (ui-callback/value #(dispatch [::application-events/update-add-data path %])))
 
 
 (defn project-pane
@@ -57,30 +68,50 @@
        [ui/Form {:id "add-project"}
         [ui/FormInput {:label     "name"
                        :value     (or name "")
-                       :on-change (ui-callback/value #(dispatch [::application-events/update-add-data [:project :name] %]))}]
+                       :on-change (form-input-callback [:project :name])}]
         [ui/FormInput {:label     "description"
                        :value     (or description "")
-                       :on-change (ui-callback/value #(dispatch [::application-events/update-add-data [:project :description] %]))}]]])))
+                       :on-change (form-input-callback [:project :description])}]]])))
 
 
 (defn image-pane
   []
   (let [add-data (subscribe [::application-subs/add-data])]
-    (let [{{:keys [name description connector image-id] :as image-data} :image} @add-data]
+    (let [{{:keys [name
+                   description
+                   connector
+                   image-id
+                   author
+                   loginUser
+                   networkType
+                   os] :as image-data} :image} @add-data]
       [ui/TabPane
        [ui/Form {:id "add-image"}
         [ui/FormInput {:label     "name"
                        :value     (or name "")
-                       :on-change (ui-callback/value #(dispatch [::application-events/update-add-data [:image :name] %]))}]
+                       :on-change (form-input-callback [:image :name])}]
         [ui/FormInput {:label     "description"
                        :value     (or description "")
-                       :on-change (ui-callback/value #(dispatch [::application-events/update-add-data [:image :description] %]))}]
+                       :on-change (form-input-callback [:image :description])}]
         [ui/FormInput {:label     "connector"
                        :value     (or connector "")
-                       :on-change (ui-callback/value #(dispatch [::application-events/update-add-data [:image :connector] %]))}]
+                       :on-change (form-input-callback [:image :connector])}]
         [ui/FormInput {:label     "image ID"
                        :value     (or image-id "")
-                       :on-change (ui-callback/value #(dispatch [::application-events/update-add-data [:image :image-id] %]))}]]])))
+                       :on-change (form-input-callback [:image :image-id])}]
+        [ui/FormInput {:label     "author"
+                       :value     (or author "")
+                       :on-change (form-input-callback [:image :author])}]
+        [ui/FormInput {:label     "loginUser"
+                       :value     (or loginUser "")
+                       :on-change (form-input-callback [:image :loginUser])}]
+        [ui/FormInput {:label     "networkType"
+                       :value     (or networkType "")
+                       :on-change (form-input-callback [:image :networkType])}]
+        [ui/FormInput {:label     "os"
+                       :value     (or os "")
+                       :on-change (form-input-callback [:image :os])}]
+        ]])))
 
 
 (defn component-pane
@@ -133,15 +164,15 @@
                  :close-icon true
                  :on-close   hide-fn}
 
-       [ui/ModalHeader [ui/Icon {:name "add"}] (@tr [:add]) "\u2001\u00a0"]
+       [ui/ModalHeader [ui/Icon {:name "add"}] (@tr [:add])]
 
        [ui/ModalContent {:scrolling true}
         [ui/Header {:as "h3"} (utils/nav-path->module-path @nav-path)]
         [ui/Tab
          {:panes         [(pane tr :project project-pane)
                           (pane tr :image image-pane)
-                          (pane tr :component component-pane)
-                          (pane tr :application application-pane)]
+                          #_(pane tr :component component-pane)
+                          #_(pane tr :application application-pane)]
           :on-tab-change (ui-callback/callback :activeIndex
                                                (fn [index]
                                                  (let [kw (index->kw index)]
@@ -149,8 +180,42 @@
                                                    (dispatch [::application-events/set-active-tab kw]))))}]]
 
        [ui/ModalActions
-        [uix/Button {:text (@tr [:close]), :on-click hide-fn}]
+        [uix/Button {:text (@tr [:cancel]), :on-click hide-fn}]
         [uix/Button {:text (@tr [:add]), :positive true, :on-click #(do (hide-fn) (submit-fn))}]]])))
+
+
+(defn deployment-template-list
+  []
+  [:span "DEPLOYMENT TEMPLATE LIST"])
+
+
+(defn deployment-template-details
+  []
+  [:span "DEPLOYMENT TEMPLATE DETAILS"])
+
+
+(defn deploy-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        visible? (subscribe [::application-subs/deploy-modal-visible?])
+        nav-path (subscribe [::main-subs/nav-path])]
+    (let [hide-fn #(dispatch [::application-events/close-deploy-modal])
+          submit-fn identity]                               ;; FIXME: provide implementation
+      [ui/Modal {:open       @visible?
+                 :close-icon true
+                 :on-close   hide-fn}
+
+       [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (utils/nav-path->module-path @nav-path)]
+
+       [ui/ModalContent {:scrolling true}
+        [ui/Segment {:loading false}
+         [deployment-template-list]]
+        [ui/Segment
+         [deployment-template-details]]]
+
+       [ui/ModalActions
+        [uix/Button {:text (@tr [:cancel]), :on-click hide-fn}]
+        [uix/Button {:text (@tr [:deploy]), :positive true, :on-click #(do (hide-fn) (submit-fn))}]]])))
 
 
 (defn format-module [{:keys [type name description] :as module}]
@@ -349,6 +414,7 @@
       (vec (concat [ui/Container {:fluid true}
                     [control-bar]
                     [add-modal]
+                    [deploy-modal]
                     [format-error @data]]
                    (when (and @data (not (instance? js/Error @data)))
                      (let [{:keys [children content]} @data

@@ -15,16 +15,20 @@
 
 (s/def ::add-data (s/nilable map?))
 
+(s/def ::deploy-modal-visible? boolean?)
+
 (s/def ::db (s/keys :req [::completed?
                           ::module-id
                           ::module
                           ::add-modal-visible?
                           ::active-tab
-                          ::add-data]))
+                          ::add-data
+                          ::deploy-modal-visible?]))
 
-(def defaults {::completed?         true
-               ::module-id          nil
-               ::module             nil
-               ::add-modal-visible? false
-               ::active-tab         :project
-               ::add-data           nil})
+(def defaults {::completed?            true
+               ::module-id             nil
+               ::module                nil
+               ::add-modal-visible?    false
+               ::active-tab            :project
+               ::add-data              nil
+               ::deploy-modal-visible? false})
