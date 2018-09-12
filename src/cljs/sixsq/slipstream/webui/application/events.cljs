@@ -12,9 +12,9 @@
 
 (reg-event-db
   ::set-module
-  (fn [db [_ module-id module]]
+  (fn [db [_ module-path module]]
     (assoc db ::spec/completed? true
-              ::spec/module-id module-id
+              ::spec/module-path module-path
               ::spec/module module)))
 
 
@@ -30,10 +30,18 @@
     (assoc db ::spec/add-modal-visible? false)))
 
 
-(reg-event-db
+(reg-event-fx
   ::open-deploy-modal
-  (fn [db _]
-    (assoc db ::spec/deploy-modal-visible? true)))
+  (fn [{{:keys [::client-spec/client
+                ::main-spec/nav-path
+                ::spec/add-data
+                ::spec/active-tab
+                ::spec/module] :as db} :db} _]
+    (when (and client (:id module))
+      {:db                                       (assoc db ::spec/deployment-templates nil
+                                                           ::spec/loading-deployment-templates? true
+                                                           ::spec/deploy-modal-visible? true)
+       ::application-fx/get-deployment-templates [client (:id module) #(dispatch [::set-deployment-templates %])]})))
 
 
 (reg-event-db
@@ -79,7 +87,7 @@
     (when client
       (let [path (utils/nav-path->module-path nav-path)]
         {:db                         (assoc db ::spec/completed? false
-                                               ::spec/module-id nil
+                                               ::spec/module-path nil
                                                ::spec/module nil)
          ::application-fx/get-module [client path #(dispatch [::set-module path %])]}))))
 
@@ -94,3 +102,35 @@
   ::set-active-tab
   (fn [db [_ active-tab]]
     (assoc db ::spec/active-tab active-tab)))
+
+
+(reg-event-db
+  ::set-selected-deployment-template
+  (fn [{:keys [::spec/deployment-templates] :as db} [_ template-id]]
+    (->> deployment-templates
+         (filter #(= template-id (:id %)))
+         first
+         (assoc db ::spec/selected-deployment-template))))
+
+
+(reg-event-db
+  ::set-deployment-templates
+  (fn [db [_ deployment-templates]]
+    (assoc db ::spec/deployment-templates deployment-templates
+              ::spec/loading-deployment-templates? false)))
+
+
+(reg-event-fx
+  ::create-deployment-template
+  (fn [{{:keys [::client-spec/client ::spec/module]} :db :as cofx} _]
+    (when (and client (:id module))
+      (assoc cofx ::application-fx/create-deployment-template
+                  [client (:id module) #(dispatch [::open-deploy-modal])])))) ;; FIXME: Should be better way to do this.
+
+
+(reg-event-fx
+  ::deploy
+  (fn [{{:keys [::client-spec/client ::spec/selected-deployment-template]} :db :as cofx} _]
+    (when (and client (:id selected-deployment-template))
+      (assoc cofx ::application-fx/deploy
+                  [client (:id selected-deployment-template) #(dispatch [::history-evts/navigate (str "cimi/" %)])]))))

@@ -17,7 +17,8 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn category-icon
@@ -184,23 +185,60 @@
         [uix/Button {:text (@tr [:add]), :positive true, :on-click #(do (hide-fn) (submit-fn))}]]])))
 
 
+(defn deployment-template-list-item
+  [{:keys [id name description created] :as tpl}]
+  (let [selected-deployment-template (subscribe [::application-subs/selected-deployment-template])]
+    ^{:key id}
+    (let [{selected-id :id} @selected-deployment-template
+          icon-name (if (= id selected-id) "check circle outline" "circle outline")]
+      [ui/ListItem {:on-click #(dispatch [::application-events/set-selected-deployment-template id])}
+       [ui/ListIcon {:name icon-name, :size "large", :vertical-align "middle"}]
+       [ui/ListContent
+        [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
+        (or description "")]])))
+
+
+(defn new-deployment-template-list-item
+  []
+  ^{:key "new-deployment-template-list-item"}
+  [ui/ListItem {:on-click #(dispatch [::application-events/create-deployment-template])}
+   [ui/ListIcon {:name "plus", :size "large", :vertical-align "middle"}]
+   [ui/ListContent
+    [ui/ListHeader "New Deployment Template"]
+    "Create a new deployment template for this module."]])
+
+
 (defn deployment-template-list
   []
-  [:span "DEPLOYMENT TEMPLATE LIST"])
+  (let [deployment-templates (subscribe [::application-subs/deployment-templates])]
+    (vec (concat [ui/ListSA {:divided   true
+                             :relaxed   true
+                             :selection true}
+                  [new-deployment-template-list-item]]
+                 (mapv deployment-template-list-item @deployment-templates)))))
 
 
 (defn deployment-template-details
   []
-  [:span "DEPLOYMENT TEMPLATE DETAILS"])
+  (let [template (subscribe [::application-subs/selected-deployment-template])
+        text (reagent/atom (utils/edn->json (or @template {})))]
+    (fn []
+      (let [json-str (utils/edn->json (or @template {}))]
+        (reset! text json-str)
+        [:pre @text]
+
+        ;; FIXME: Correct problem where the editor doesn't see external changes to the text.
+        #_[editor/json-editor text]))))
 
 
 (defn deploy-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::application-subs/deploy-modal-visible?])
-        nav-path (subscribe [::main-subs/nav-path])]
+        nav-path (subscribe [::main-subs/nav-path])
+        loading? (subscribe [::application-subs/loading-deployment-templates?])]
     (let [hide-fn #(dispatch [::application-events/close-deploy-modal])
-          submit-fn identity]                               ;; FIXME: provide implementation
+          submit-fn #(dispatch [::application-events/deploy])]
       [ui/Modal {:open       @visible?
                  :close-icon true
                  :on-close   hide-fn}
@@ -208,7 +246,7 @@
        [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (utils/nav-path->module-path @nav-path)]
 
        [ui/ModalContent {:scrolling true}
-        [ui/Segment {:loading false}
+        [ui/Segment {:loading @loading?}
          [deployment-template-list]]
         [ui/Segment
          [deployment-template-details]]]
