@@ -2,7 +2,6 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
-
     [sixsq.slipstream.webui.i18n.events :as i18n-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.i18n.utils :as utils]

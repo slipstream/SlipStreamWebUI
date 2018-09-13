@@ -4,7 +4,6 @@
     [re-frame.core :refer [clear-subscription-cache! dispatch dispatch-sync]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.authn.events :as authn-events]
-
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.client.events :as client-events]

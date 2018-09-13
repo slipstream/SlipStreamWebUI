@@ -1,6 +1,5 @@
 (ns sixsq.slipstream.webui.editor.editor
   (:require
-    [cljs.spec.alpha :as s]
     [cljsjs.codemirror]
     [cljsjs.codemirror.mode.javascript]
     [re-frame.core :refer [subscribe]]

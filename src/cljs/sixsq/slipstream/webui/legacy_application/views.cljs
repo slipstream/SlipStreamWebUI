@@ -4,7 +4,6 @@
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.legacy-application.events :as application-events]
-
     [sixsq.slipstream.webui.legacy-application.subs :as application-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.panel :as panel]

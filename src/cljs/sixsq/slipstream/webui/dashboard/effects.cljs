@@ -7,8 +7,7 @@
     [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.api.runs :as runs]
-    [sixsq.slipstream.webui.utils.general :as general-utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.general :as general-utils]))
 
 (reg-fx
   ::get-virtual-machines
