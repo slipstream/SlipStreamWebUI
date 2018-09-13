@@ -15,14 +15,7 @@
 (def disk-unit "DISK [GB·h]")
 (def price-unit "PRICE [€]")
 
-;; hack because there isn't a useful billable? flag in the metering records
-(def billable-states ["running" "Running"
-                      "stopping" "Error"
-                      "pending" "Pending"
-                      "Boot" "Unknown"
-                      "shutting-down"
-                      "Rebooting"])
-(def billable-filter (str "(" (str/join " or " (map #(str "state=\"" % "\"") billable-states)) ")"))
+(def ^:const billable-filter "billable='true'")
 
 (def compute-aggregations (str/join ", " ["sum:serviceOffer/resource:vcpu"
                                           "sum:serviceOffer/resource:ram"
