@@ -3,11 +3,11 @@
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.quota.events :as quota-events]
     [sixsq.slipstream.webui.quota.subs :as quota-subs]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 

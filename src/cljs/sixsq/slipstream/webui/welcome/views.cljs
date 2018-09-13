@@ -4,10 +4,10 @@
 
     [re-frame.core :refer [dispatch subscribe]]
 
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
-    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 (defn card [name desc icon target-resource]

@@ -9,8 +9,8 @@
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn table-vm-row
