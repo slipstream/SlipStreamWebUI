@@ -26,7 +26,11 @@
        :reagent-render
                      (fn [plot-data]
                        ;; FIXME: Must mutate the data directly via the chart instance.
-                       (some-> @chartjs-instance .update)
+                       #_(some-> @chartjs-instance .update)
+                       (some-> @chartjs-instance .destroy)
+                       (when-let [ctx (.getElementById js/document plot-id)]
+                         (let [instance (js/Chart. ctx (clj->js plot-data))]
+                           (reset! chartjs-instance instance)))
                        [:div {:class "chartjs-container"
                               :style {:position "relative", :width "100%", :height "100%"}}
                         [:canvas {:id plot-id}]])
