@@ -4,7 +4,6 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
-    [sixsq.slipstream.webui.deployment-detail.gantt :as gantt]
     [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.history.views :as history]
@@ -222,17 +221,6 @@
                      (map event-map-to-row events)))]])))
 
 
-(defn gantt
-  []
-  (let [events-collection (subscribe [::deployment-detail-subs/events])]
-    (fn []
-      (let [data (-> @events-collection
-                     :events
-                     events-table-info
-                     gantt/events-to-gantt)]
-        [gantt/gantt-plot data]))))
-
-
 (defn events-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -247,8 +235,7 @@
       (let [events (-> @events-collection :events events-table-info)]
         [cc/collapsible-segment
          (@tr [:events])
-         [events-table events]
-         [gantt]]))))
+         [events-table events]]))))
 
 
 (defn reports-list

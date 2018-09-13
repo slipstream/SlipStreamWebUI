@@ -44,7 +44,7 @@
 (defn ram-stats
   [{:keys [capacity used] :as ram}]
   (let [percent (percentage used capacity)]
-    {:label      "RAM"
+    {:label      (str "RAM (" (mb->gb capacity) " GB)")
      :percentage percent
      :value      (str percent "% - " (mb->gb capacity) " GB")}))
 
@@ -52,7 +52,7 @@
 (defn disk-stats
   [[partition {:keys [capacity used] :as disk}]]
   (let [percent (percentage used capacity)]
-    {:label      (str (str/lower-case (name partition)) " partition")
+    {:label      (str (str/lower-case (name partition)) " partition (" (mb->gb capacity) " GB)")
      :percentage percent
      :value      (str percent "% - " (mb->gb capacity) " GB")}))
 
