@@ -7,8 +7,8 @@
 
 
 ;; setup global defaults
-(set! (.-defaultColor (.-global (.-defaults js/Chart))) "rgba(160, 82, 45, 0.5)")
-(set! (.-backgroundColor (.-rectangle (.-elements (.-global (.-defaults js/Chart))))) "rgba(160, 82, 45, 0.5)")
+(set! (.-defaultColor (.-global (.-defaults js/Chart))) "rgba(30, 144, 255, 0.75)")
+(set! (.-backgroundColor (.-rectangle (.-elements (.-global (.-defaults js/Chart))))) "rgba(30, 144, 255, 0.75)")
 (set! (.-display (.-legend (.-global (.-defaults js/Chart)))) false)
 
 
