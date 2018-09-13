@@ -15,7 +15,7 @@
 (def disk-unit "DISK [GB·h]")
 (def price-unit "PRICE [€]")
 
-(def ^:const billable-filter "billable='true'")
+(def ^:const billable-filter "billable=true")
 
 (def compute-aggregations (str/join ", " ["sum:serviceOffer/resource:vcpu"
                                           "sum:serviceOffer/resource:ram"
