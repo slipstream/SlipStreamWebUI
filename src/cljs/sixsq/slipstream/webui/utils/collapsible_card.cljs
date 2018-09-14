@@ -6,10 +6,10 @@
     [sixsq.slipstream.webui.acl.views :as acl]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.table :as table]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn more-or-less

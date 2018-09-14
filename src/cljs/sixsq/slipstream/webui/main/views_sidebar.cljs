@@ -4,12 +4,10 @@
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
 
 
 (defn navigate
@@ -17,7 +15,6 @@
    forces the sidebar to close."
   [url]
   (let [device (subscribe [::main-subs/device])]
-    (log/info "sidebar navigate:" url)
     (when (#{:mobile :tablet} @device)
       (dispatch [::main-events/close-sidebar]))
     (dispatch [::history-events/navigate url])))
@@ -26,14 +23,17 @@
 (defn item
   [label-kw url icon]
   (let [tr (subscribe [::i18n-subs/tr])
-        nav-path (subscribe [::main-subs/nav-path])]
+        nav-path (subscribe [::main-subs/nav-path])
+        is-user? (subscribe [::authn-subs/is-user?])]
 
     ^{:key (name label-kw)}
     [uix/MenuItemWithIcon
      {:name      (@tr [label-kw])
       :icon-name icon
       :active    (= (first @nav-path) url)
-      :on-click  #(navigate url)}]))
+      :on-click  (fn []
+                   (when @is-user?
+                     (navigate url)))}]))
 
 
 (defn logo-item
@@ -53,7 +53,6 @@
    application."
   []
   (let [show? (subscribe [::main-subs/sidebar-open?])
-        is-user? (subscribe [::authn-subs/is-user?])
         is-admin? (subscribe [::authn-subs/is-admin?])]
 
     [ui/Sidebar {:as        (ui/array-get "Menu")
@@ -63,17 +62,17 @@
                  :visible   @show?
                  :animation "uncover"}
      [:nav {:aria-label "sidebar"}
-      (cond-> [ui/Menu {:icon     "labeled"
-                        :size     "large"
-                        :vertical true
-                        :compact  true
-                        :inverted true}]
-              true (conj [logo-item])
-              @is-user? (conj [item :deployment "deployment" "cloud"])
-              @is-user? (conj [item :application "application" "sitemap"])
-              @is-user? (conj [item :usage "usage" "history"])
-              @is-user? (conj [item :quota "quota" "balance scale"])
-              @is-admin? (conj [item :metrics "metrics" "bar chart"])
-              @is-admin? (conj [item :nuvlabox "nuvlabox" "desktop"])
-              true (conj [item :cimi "cimi" "code"])
-              true (conj [i18n-views/locale-dropdown]))]]))
+      [ui/Menu {:icon     "labeled"
+                :size     "large"
+                :vertical true
+                :compact  true
+                :inverted true}
+       [logo-item]
+       [item :dashboard "dashboard" "dashboard"]
+       [item :quota "quota" "balance scale"]
+       [item :usage "usage" "history"]
+       [item :deployment "deployment" "cloud"]
+       [item :application "application" "sitemap"]
+       (when @is-admin? [item :nuvlabox-ctrl "nuvlabox" "desktop"])
+       (when @is-admin? [item :metrics "metrics" "bar chart"])
+       [item :cimi "cimi" "code"]]]]))

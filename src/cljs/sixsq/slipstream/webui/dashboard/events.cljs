@@ -2,15 +2,12 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
-
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.dashboard.effects :as dashboard-fx]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard-spec]
     [sixsq.slipstream.webui.main.effects :as main-fx]
-    [sixsq.slipstream.webui.utils.general :as general-utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.general :as general-utils]))
 
 
 (def stat-info {:count                          {:label "VMs", :order 0}

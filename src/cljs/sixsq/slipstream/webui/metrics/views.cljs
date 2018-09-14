@@ -1,17 +1,13 @@
 (ns sixsq.slipstream.webui.metrics.views
   (:require
     [cljs.pprint :refer [cl-format]]
-
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-
+    [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.metrics.events :as metrics-events]
     [sixsq.slipstream.webui.metrics.subs :as metrics-subs]
     [sixsq.slipstream.webui.panel :as panel]
-
     [sixsq.slipstream.webui.plot.plot :as plot]
-    [sixsq.slipstream.webui.utils.collapsible-card :as cc]
-
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]))
@@ -33,103 +29,64 @@
                       (dispatch [::metrics-events/fetch-job-info]))}]])))
 
 
-(def thread-vega-spec
-  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
-   :description "jvm threads"
-   :mark        :bar
-   :encoding    {:x {:field :threads
-                     :type  "quantitative"}
-                 :y {:field :state
-                     :type  "ordinal"
-                     :sort  {:field :threads
-                             :op    "mean"}}}})
-
-(defn thread-plot
+(defn jvm-thread-chartjs
   []
   (let [jvm-threads (subscribe [::metrics-subs/jvm-threads])]
-    (fn []
-      [plot/plot thread-vega-spec {:values @jvm-threads}])))
+    (let [chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv :state @jvm-threads)
+                                  :datasets [{:data (mapv :threads @jvm-threads)}]}
+                        :options {:scales {:xAxes [{:type "linear"}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
+
+      [ui/Card
+       [ui/CardContent
+        [ui/CardHeader "JVM Thread State Counts"]
+        [plot/chartjs-plot chartjs-data]]])))
 
 
-(def memory-vega-spec
-  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
-   :description "jvm memory usage"
-   :mark        :bar
-   :encoding    {:x {:field :memory
-                     :type  "quantitative"}
-                 :y {:field :type
-                     :type  "ordinal"
-                     :sort  nil}}})
-
-(defn memory-plot
+(defn jvm-memory-chartjs
   []
   (let [jvm-memory (subscribe [::metrics-subs/jvm-memory])]
-    (fn []
-      [plot/plot memory-vega-spec {:values @jvm-memory}])))
+    (let [chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv :type @jvm-memory)
+                                  :datasets [{:data (mapv #(/ % 1000000000.) (mapv :memory @jvm-memory))}]}
+                        :options {:scales {:xAxes [{:type "linear"}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
+
+      [ui/Card
+       [ui/CardContent
+        [ui/CardHeader "JVM Memory (GB)"]
+        [plot/chartjs-plot chartjs-data]]])))
 
 
-(def requests-vega-spec
-  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
-   :description "ring request rates"
-   :mark        :bar
-   :encoding    {:x {:field :rate
-                     :type  "quantitative"}
-                 :y {:field :requests
-                     :type  "ordinal"
-                     :sort  nil}}})
-
-
-(defn ring-request-rates
+(defn request-rates-chartjs
   []
   (let [rates (subscribe [::metrics-subs/ring-request-rates])]
-    (fn []
-      [plot/plot requests-vega-spec {:values @rates}])))
+    (let [chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv :requests @rates)
+                                  :datasets [{:data            (mapv :rate @rates)}]}
+                        :options {:scales {:xAxes [{:type "linear"}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
+
+      [ui/Card
+       [ui/CardContent
+        [ui/CardHeader "Request Rates (request/s)"]
+        [plot/chartjs-plot chartjs-data]]])))
 
 
-(def responses-vega-spec
-  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
-   :description "ring response rates"
-   :mark        :bar
-   :encoding    {:x {:field :rate
-                     :type  "quantitative"}
-                 :y {:field :responses
-                     :type  "ordinal"
-                     :sort  nil}}})
-
-
-(defn ring-response-rates
+(defn response-rates-chartjs
   []
   (let [rates (subscribe [::metrics-subs/ring-response-rates])]
-    (fn []
-      [plot/plot responses-vega-spec {:values @rates} :style {:float :right}])))
+    (let [chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv :responses @rates)
+                                  :datasets [{:data            (mapv :rate @rates)}]}
+                        :options {:scales {:xAxes [{:type "linear"}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
 
-
-(def job-stats-vega-spec
-  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
-   :description "job statistics"
-   :layer       [{:mark     :bar
-                  :encoding {:x {:field :doc_count
-                                 :type  "quantitative"}
-                             :y {:field :key
-                                 :type  "ordinal"}}}
-                 {:mark     {:type     :text
-                             :align    :left
-                             :baseline :middle
-                             :dx       3}
-                  :encoding {:text {:field :doc_count
-                                    :type  "quantitative"}
-                             :x    {:field :doc_count
-                                    :type  "quantitative"}
-                             :y    {:field :key
-                                    :type  "ordinal"}}}]})
-
-
-(defn job-plot
-  []
-  (let [job-info (subscribe [::metrics-subs/job-info])]
-    (fn []
-      [ui/Segment style/basic
-       [plot/plot job-stats-vega-spec {:values (:states @job-info)} :style {:float :left}]])))
+      [ui/Card
+       [ui/CardContent
+        [ui/CardHeader "Response Rates (response/s)"]
+        [plot/chartjs-plot chartjs-data]]])))
 
 
 (defn success-rate
@@ -169,34 +126,31 @@
          [statistic "blocked" blocked]]))))
 
 
-(defn request-statistics
+(defn job-chartjs
   []
-  [cc/collapsible-segment
-   "request statistics"
-   [ring-request-rates]
-   [ring-response-rates]])
+  (let [job-info (subscribe [::metrics-subs/job-info])]
+    (let [sorted-data (->> @job-info
+                           :states
+                           (map (juxt :key :doc_count))
+                           (sort-by first))
+          chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv first sorted-data)
+                                  :datasets [{:data            (mapv second sorted-data)}]}
+                        :options {:scales {:xAxes [{:type "linear"}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
 
-
-(defn server-statistics
-  []
-  [cc/collapsible-segment
-   "server statistics"
-   [thread-plot]
-   [memory-plot]])
-
-
-(defn job-statistics
-  []
-  [cc/collapsible-segment
-   "job statistics"
-   [job-numbers]
-   [job-plot]])
+      [ui/Card
+       [ui/CardContent
+        [ui/CardHeader "Job States"]
+        [job-numbers]
+        [plot/chartjs-plot chartjs-data]]])))
 
 
 (defn metrics-info
   []
   (let [raw-metrics (subscribe [::metrics-subs/raw-metrics])
-        job-info (subscribe [::metrics-subs/job-info])]
+        job-info (subscribe [::metrics-subs/job-info])
+        device (subscribe [::main-subs/device])]
     (fn []
       (when (nil? @raw-metrics)
         (dispatch [::metrics-events/fetch-metrics]))
@@ -204,9 +158,12 @@
         (dispatch [::metrics-events/fetch-job-info]))
       [ui/Container {:fluid true}
        [controls]
-       [request-statistics]
-       [server-statistics]
-       [job-statistics]])))
+       [ui/CardGroup {:doubling true, :items-per-row (if (= :wide-screen @device) 3 2)}
+        [request-rates-chartjs]
+        [response-rates-chartjs]
+        [jvm-thread-chartjs]
+        [jvm-memory-chartjs]
+        [job-chartjs]]])))
 
 
 (defmethod panel/render :metrics

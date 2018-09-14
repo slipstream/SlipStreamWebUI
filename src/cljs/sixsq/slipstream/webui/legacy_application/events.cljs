@@ -2,11 +2,8 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [reg-event-db reg-event-fx]]
-    [sixsq.slipstream.client.async :as async-client]
-
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.legacy-application.effects :as application-fx]
-
     [sixsq.slipstream.webui.legacy-application.spec :as spec]
     [sixsq.slipstream.webui.main.spec :as main-spec]))
 

@@ -58,44 +58,29 @@
    [ui/TableCell description]])
 
 
-(def load-stats-vega-spec
-  {:$schema     "https://vega.github.io/schema/vega-lite/v2.0.json"
-   :description "machine load"
-   :layer       [{:mark     :bar
-                  :encoding {:x {:field :percentage
-                                 :type  "quantitative"
-                                 :axis  {:ticks false
-                                         :title " "}
-                                 :scale {:domain [0, 100]}}
-                             :y {:field :label
-                                 :type  "ordinal"
-                                 :axis  {:ticks false
-                                         :title " "}
-                                 :sort  nil}}}
-                 {:mark     {:type     :text
-                             :align    :left
-                             :baseline :middle
-                             :dx       3}
-                  :encoding {:text {:field :value
-                                    :type  "ordinal"}
-                             :x    {:field :percentage
-                                    :type  "quantitative"}
-                             :y    {:field :label
-                                    :type  "ordinal"}}}]})
-
-
-(defn load-plot
+(defn load-chartjs
   [_ load]
   (let [load-stats (u/load-statistics load)]
-    [plot/plot load-stats-vega-spec {:values load-stats} :style {:float :left}]))
+    (let [chartjs-data {:type    "horizontalBar"
+                        :data    {:labels   (mapv :label load-stats)
+                                  :datasets [{:data (mapv :percentage load-stats)}]}
+                        :options {:scales {:xAxes [{:type  "linear"
+                                                    :ticks {:beginAtZero true
+                                                            :max         100}}]
+                                           :yAxes [{:gridLines {:display false}}]}}}]
 
+      [ui/CardGroup {:doubling true, :items-per-row 2}
+       [ui/Card
+        [ui/CardContent
+         [ui/CardHeader "Load Percentages"]
+         [plot/chartjs-plot chartjs-data]]]])))
 
 
 (defn load
   [cpu ram disks]
   [cc/collapsible-segment
    [:span [ui/Icon {:name "thermometer half"}] " load"]
-   [load-plot {} {:cpu cpu :ram ram :disks disks}]])
+   [load-chartjs {} {:cpu cpu :ram ram :disks disks}]])
 
 
 (defn usb-devices

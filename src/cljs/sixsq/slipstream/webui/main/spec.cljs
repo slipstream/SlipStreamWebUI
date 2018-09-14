@@ -21,5 +21,5 @@
 (def defaults {::device           :computer
                ::sidebar-open?    false
                ::visible?         true
-               ::nav-path         ["cimi"]
+               ::nav-path         ["welcome"]
                ::nav-query-params {}})
