@@ -1,4 +1,4 @@
-(def +version+ "3.59")
+(def +version+ "3.60-SNAPSHOT")
 
 (def package-json-template
   "
@@ -14,7 +14,7 @@
   }
   ")
 
-(defproject com.sixsq.slipstream/SlipStreamWebUI "3.59"
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.60-SNAPSHOT"
 
   :description "Web Browser User Interface"
 
