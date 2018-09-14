@@ -1,9 +1,6 @@
 (ns sixsq.slipstream.webui.cimi.effects
   (:require
-    [re-frame.core :refer [dispatch reg-fx]]
-    [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [taoensso.timbre :as log]))
+    [re-frame.core :refer [dispatch reg-fx]]))
 
 
 

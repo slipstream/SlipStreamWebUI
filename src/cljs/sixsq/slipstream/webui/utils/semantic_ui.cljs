@@ -13,9 +13,9 @@
 (defn adapt-component [tag]
   (r/adapt-react-class (array-get tag)))
 
-(def Accordion (adapt-component "Accordion"))
-(def AccordionTitle (adapt-component "AccordionTitle"))
-(def AccordionContent (adapt-component "AccordionContent"))
+;;(def Accordion (adapt-component "Accordion"))
+;;(def AccordionTitle (adapt-component "AccordionTitle"))
+;;(def AccordionContent (adapt-component "AccordionContent"))
 
 (def Breadcrumb (adapt-component "Breadcrumb"))
 (def BreadcrumbDivider (adapt-component "BreadcrumbDivider"))
@@ -49,19 +49,19 @@
 (def DropdownItem (adapt-component "DropdownItem"))
 (def DropdownMenu (adapt-component "DropdownMenu"))
 
-(def Feed (adapt-component "Feed"))
-(def FeedContent (adapt-component "FeedContent"))
-(def FeedDate (adapt-component "FeedDate"))
-(def FeedEvent (adapt-component "FeedEvent"))
-(def FeedExtra (adapt-component "FeedExtra"))
-(def FeedLabel (adapt-component "FeedLabel"))
-(def FeedLike (adapt-component "FeedLike"))
-(def FeedMeta (adapt-component "FeedMeta"))
-(def FeedSummary (adapt-component "FeedSummary"))
-(def FeedUser (adapt-component "FeedUser"))
+;;(def Feed (adapt-component "Feed"))
+;;(def FeedContent (adapt-component "FeedContent"))
+;;(def FeedDate (adapt-component "FeedDate"))
+;;(def FeedEvent (adapt-component "FeedEvent"))
+;;(def FeedExtra (adapt-component "FeedExtra"))
+;;(def FeedLabel (adapt-component "FeedLabel"))
+;;(def FeedLike (adapt-component "FeedLike"))
+;;(def FeedMeta (adapt-component "FeedMeta"))
+;;(def FeedSummary (adapt-component "FeedSummary"))
+;;(def FeedUser (adapt-component "FeedUser"))
 
 (def Form (adapt-component "Form"))
-(def FormButton (adapt-component "FormButton"))
+;;(def FormButton (adapt-component "FormButton"))
 (def FormDropdown (adapt-component "FormDropdown"))
 (def FormField (adapt-component "FormField"))
 (def FormGroup (adapt-component "FormGroup"))
@@ -69,27 +69,27 @@
 (def FormSelect (adapt-component "FormSelect"))
 
 (def Grid (adapt-component "Grid"))
-(def GridColumn (adapt-component "GridColumn"))
-(def GridRow (adapt-component "GridRow"))
+;;(def GridColumn (adapt-component "GridColumn"))
+;;(def GridRow (adapt-component "GridRow"))
 
 (def Icon (adapt-component "Icon"))
 (def IconGroup (adapt-component "IconGroup"))
 
-(def Item (adapt-component "Item"))
-(def ItemContent (adapt-component "ItemContent"))
-(def ItemDescription (adapt-component "ItemDescription"))
-(def ItemExtra (adapt-component "ItemExtra"))
-(def ItemGroup (adapt-component "ItemGroup"))
-(def ItemHeader (adapt-component "ItemHeader"))
-(def ItemImage (adapt-component "ItemImage"))
-(def ItemMeta (adapt-component "ItemMeta"))
+;;(def Item (adapt-component "Item"))
+;;(def ItemContent (adapt-component "ItemContent"))
+;;(def ItemDescription (adapt-component "ItemDescription"))
+;;(def ItemExtra (adapt-component "ItemExtra"))
+;;(def ItemGroup (adapt-component "ItemGroup"))
+;;(def ItemHeader (adapt-component "ItemHeader"))
+;;(def ItemImage (adapt-component "ItemImage"))
+;;(def ItemMeta (adapt-component "ItemMeta"))
 
 (def Image (adapt-component "Image"))
 
 (def Input (adapt-component "Input"))
 
 (def Header (adapt-component "Header"))
-(def HeaderContent (adapt-component "HeaderContent"))
+;;(def HeaderContent (adapt-component "HeaderContent"))
 (def HeaderSubheader (adapt-component "HeaderSubheader"))
 
 (def Label (adapt-component "Label"))
@@ -111,8 +111,8 @@
 (def Message (adapt-component "Message"))
 (def MessageHeader (adapt-component "MessageHeader"))
 (def MessageContent (adapt-component "MessageContent"))
-(def MessageList (adapt-component "MessageList"))
-(def MessageItem (adapt-component "MessageItem"))
+;;(def MessageList (adapt-component "MessageList"))
+;;(def MessageItem (adapt-component "MessageItem"))
 
 (def Modal (adapt-component "Modal"))
 (def ModalActions (adapt-component "ModalActions"))
@@ -126,13 +126,13 @@
 (def PopupContent (adapt-component "PopupContent"))
 (def Progress (adapt-component "Progress"))
 
-(def Rail (adapt-component "Rail"))
-(def Ref (adapt-component "Ref"))
+;;(def Rail (adapt-component "Rail"))
+;;(def Ref (adapt-component "Ref"))
 
 (def Responsive (adapt-component "Responsive"))
 
 (def Segment (adapt-component "Segment"))
-(def SegmentGroup (adapt-component "SegmentGroup"))
+;;(def SegmentGroup (adapt-component "SegmentGroup"))
 
 (def Sidebar (adapt-component "Sidebar"))
 (def SidebarPushable (adapt-component "SidebarPushable"))

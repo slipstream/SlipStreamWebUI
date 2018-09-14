@@ -5,8 +5,7 @@
     [cljs.core.async :refer [<!]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-fx]]
-    [sixsq.slipstream.client.api.cimi :as cimi]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.client.api.cimi :as cimi]))
 
 
 (reg-fx

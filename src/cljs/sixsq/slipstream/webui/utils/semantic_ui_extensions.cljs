@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.utils.semantic-ui-extensions
   (:require
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [reagent.core :as reagent]))
+    [reagent.core :as reagent]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn Button

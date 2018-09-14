@@ -11,8 +11,7 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.table :as table]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.values :as values]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.values :as values]))
 
 
 (defn tuple-to-row [[v1 v2]]
