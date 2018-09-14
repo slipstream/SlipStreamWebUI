@@ -5,6 +5,7 @@
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
+    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -17,8 +18,8 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [taoensso.timbre :as log]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]))
 
 
 (defn category-icon
@@ -38,22 +39,37 @@
     (category-icon category)))
 
 
+(defn refresh-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [uix/MenuItemWithIcon
+       {:name      (@tr [:refresh])
+        :icon-name "refresh"
+        :loading?  false                                    ;; FIXME: Add loading flag for module.
+        :on-click  #(dispatch [::application-events/get-module])}])))
+
+
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        module (subscribe [::application-subs/module])]
+        module (subscribe [::application-subs/module])
+        cep (subscribe [::cimi-subs/cloud-entry-point])]
     (let [add-disabled? (not= "PROJECT" (:type @module))
           deploy-disabled? (= "PROJECT" (:type @module))]
-      [ui/Menu {:borderless true}
-       [uix/MenuItemWithIcon
-        {:name      (@tr [:add])
-         :icon-name "add"
-         :disabled  add-disabled?
-         :on-click  #(dispatch [::application-events/open-add-modal])}]
-       [uix/MenuItemWithIcon
-        {:name      (@tr [:deploy])
-         :icon-name "play"
-         :disabled  deploy-disabled?
-         :on-click  #(dispatch [::application-events/open-deploy-modal])}]])))
+      (vec (concat [ui/Menu {:borderless true}]
+
+                   (resource-details/format-operations [refresh-button] @module (:baseURI @cep) {})
+
+                   [[uix/MenuItemWithIcon
+                     {:name      (@tr [:deploy])
+                      :icon-name "play"
+                      :disabled  deploy-disabled?
+                      :on-click  #(dispatch [::application-events/open-deploy-modal])}]
+                    [uix/MenuItemWithIcon
+                     {:name      (@tr [:add])
+                      :icon-name "add"
+                      :disabled  add-disabled?
+                      :on-click  #(dispatch [::application-events/open-add-modal])}]])))))
 
 
 (defn form-input-callback
@@ -177,7 +193,6 @@
           :on-tab-change (ui-callback/callback :activeIndex
                                                (fn [index]
                                                  (let [kw (index->kw index)]
-                                                   (log/error "ACTIVE TAB: " index kw)
                                                    (dispatch [::application-events/set-active-tab kw]))))}]]
 
        [ui/ModalActions
