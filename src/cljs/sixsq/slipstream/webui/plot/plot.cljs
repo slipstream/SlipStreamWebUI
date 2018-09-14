@@ -17,6 +17,9 @@
 (-> chartjs-global .-elements .-rectangle .-borderWidth (set! 2))
 (-> chartjs-global .-legend .-display (set! false))
 
+;; All animation turned off.  See comment below about plot updates.
+(-> chartjs-global .-animation (set! false))
+
 
 (defn chartjs-plot-inner
   [plot-data]
@@ -26,9 +29,9 @@
                         (some-> @chartjs-instance .destroy))
         new-chart (fn [plot-data]
                     (destroy-chart)
-                    (when-let [ctx (.getElementById js/document plot-id)]
-                      (let [instance (js/Chart. ctx (clj->js plot-data))]
-                        (reset! chartjs-instance instance))))]
+                    (reset! chartjs-instance
+                            (some-> (.getElementById js/document plot-id)
+                                    (js/Chart. (clj->js plot-data)))))]
     (reagent/create-class
       {:display-name "chartjs-plot"
        :component-did-mount
@@ -38,10 +41,14 @@
                      (fn [plot-data]
 
                        ;; This is a brutal way of updating data.  It recreates the chart
-                       ;; instance each time the data changes.  A better approach would
-                       ;; be to update the data directly in the existing chart instance.
-                       ;; Each value must be updated individually.  The rendering is then
-                       ;; done with the (.update) function.
+                       ;; instance each time the data changes.  The plot animation is
+                       ;; turned off globally to make the transitions between the plots
+                       ;; less disturbing.
+                       ;;
+                       ;; The correct solution is to mutate the chart object data directly.
+                       ;; However, all my attempts to do this from clojurescript have
+                       ;; not worked.  The data is correctly updated, but the .update
+                       ;; function doesn't actually update the plot visualization.
                        (new-chart plot-data)
 
                        [:div {:class "chartjs-container"

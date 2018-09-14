@@ -3,6 +3,7 @@
     [cljs.pprint :refer [cl-format]]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.metrics.events :as metrics-events]
     [sixsq.slipstream.webui.metrics.subs :as metrics-subs]
     [sixsq.slipstream.webui.panel :as panel]
@@ -148,7 +149,8 @@
 (defn metrics-info
   []
   (let [raw-metrics (subscribe [::metrics-subs/raw-metrics])
-        job-info (subscribe [::metrics-subs/job-info])]
+        job-info (subscribe [::metrics-subs/job-info])
+        device (subscribe [::main-subs/device])]
     (fn []
       (when (nil? @raw-metrics)
         (dispatch [::metrics-events/fetch-metrics]))
@@ -156,7 +158,7 @@
         (dispatch [::metrics-events/fetch-job-info]))
       [ui/Container {:fluid true}
        [controls]
-       [ui/CardGroup {:doubling true, :items-per-row 2}
+       [ui/CardGroup {:doubling true, :items-per-row (if (= :wide-screen @device) 3 2)}
         [request-rates-chartjs]
         [response-rates-chartjs]
         [jvm-thread-chartjs]
