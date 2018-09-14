@@ -22,7 +22,7 @@
                     :upward          true
                     :item            true
                     :icon            nil
-                    :pointing        "top left"
+                    :pointing        "top right"
                     :trigger         (r/as-element [:span [ui/Icon {:name "globe"}] @locale])}
        (vec (concat [ui/DropdownMenu]
                     (map locale-dropdown-item (utils/locale-choices))))])))

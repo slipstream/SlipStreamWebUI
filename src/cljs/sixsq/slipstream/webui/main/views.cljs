@@ -9,10 +9,8 @@
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.history.events :as history-events]
-    [sixsq.slipstream.webui.history.views :as history]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.i18n.views :as i18n-views]
     [sixsq.slipstream.webui.legacy-application.views]
-    [sixsq.slipstream.webui.legal.views]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.main.views-sidebar :as sidebar]
@@ -72,19 +70,16 @@
 
 (defn footer
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
-    [:footer.webui-footer
-     [:div.webui-footer-left
-      [:span "© 2018, SixSq Sàrl"]]
-     [:div.webui-footer-centre
-      [:a {:on-click #(dispatch
-                        [::history-events/navigate "about"])
-           :style    {:cursor "pointer"}}
-       [:span#release-version (str "v")]]]
-     [:div.webui-footer-right
-      [:span
-       [ui/Icon {:name "balance"}]
-       [history/link "legal" (@tr [:legal])]]]]))
+  [:footer.webui-footer
+   [:div.webui-footer-left
+    [:span "© 2018, SixSq Sàrl"]]
+   [:div.webui-footer-centre
+    [:a {:on-click #(dispatch
+                      [::history-events/navigate "about"])
+         :style    {:cursor "pointer"}}
+     [:span#release-version (str "v")]]]
+   [:div.webui-footer-right
+    [i18n-views/locale-dropdown]]])
 
 
 (defn contents
