@@ -83,19 +83,21 @@
                                              (dispatch [::nuvlabox-events/get-results])))}]]]]))))
 
 
+(defn refresh-record-state []
+  (dispatch [::nuvlabox-events/fetch-health-info])
+  (dispatch [::nuvlabox-events/get-results]))
+
 (defn search-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
         loading? (subscribe [::nuvlabox-subs/loading?])]
     (fn []
       [uix/MenuItemWithIcon
-       {:name      "search"
+       {:name      (@tr [:refresh])
         :icon-name "refresh"
         :loading?  @loading?
         :disabled  false #_(nil? @selected-id)
-        :on-click  (fn []
-                     (dispatch [::nuvlabox-events/fetch-health-info])
-                     (dispatch [::nuvlabox-events/get-results]))}])))
+        :on-click  refresh-record-state}])))
 
 
 (defn menu-bar []
@@ -141,7 +143,8 @@
         on-click (fn []
                    (dispatch [::nuvlabox-detail-events/clear-detail])
                    (dispatch [::history-events/navigate (str "nuvlabox/" uuid)]))]
-    [ui/TableRow {:on-click on-click}
+    [ui/TableRow {:on-click on-click
+                  :style    {:cursor "pointer"}}
      [ui/TableCell {:collapsing true} (health-icon (get healthy? id))]
      [ui/TableCell {:collapsing true} [:a {:on-click on-click} macAddress]]
      [ui/TableCell {:collapsing true} state]
@@ -183,4 +186,5 @@
 
 (defmethod panel/render :nuvlabox
   [path]
+  (refresh-record-state)
   [nb-info])
