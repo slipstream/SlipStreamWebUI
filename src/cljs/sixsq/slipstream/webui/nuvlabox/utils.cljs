@@ -8,12 +8,13 @@
 
 (def default-params {:$first 1, :$last 20})
 
+(def floating-time-tolerance "-10s")
 
-(def stale-nb-machines (assoc default-params :$filter "nextCheck < 'now'"
+(def stale-nb-machines (assoc default-params :$filter (str "nextCheck < 'now" floating-time-tolerance "'")
                                              :$select "nuvlabox"))
 
 
-(def active-nb-machines (assoc default-params :$filter "nextCheck >= 'now'"
+(def active-nb-machines (assoc default-params :$filter (str "nextCheck >= 'now" floating-time-tolerance "'")
                                               :$select "nuvlabox"))
 
 
