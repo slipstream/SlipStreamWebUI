@@ -14,7 +14,6 @@
   ::set-health-info
   (fn [db [_ state-info]]
     (assoc db
-      ::nuvlabox-spec/loading? false
       ::nuvlabox-spec/health-info state-info)))
 
 
@@ -22,8 +21,7 @@
   ::fetch-health-info
   (fn [{:keys [db]} _]
     (if-let [client (::client-spec/client db)]
-      {:db                             (assoc db ::nuvlabox-spec/loading? true)
-       ::nuvlabox-fx/fetch-health-info [client #(dispatch [::set-health-info %])]}
+      {::nuvlabox-fx/fetch-health-info [client #(dispatch [::set-health-info %])]}
       {:db db})))
 
 
