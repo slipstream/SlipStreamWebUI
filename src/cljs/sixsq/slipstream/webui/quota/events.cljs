@@ -40,6 +40,6 @@
 (reg-event-fx
   ::get-credential-info
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ id callback]]
-    {::cimi-api-fx/get2 [client
-                         (str id "?$select=name,description")
-                         callback]}))
+    {::cimi-api-fx/get [client
+                        (str id "?$select=name,description")
+                        callback]}))
