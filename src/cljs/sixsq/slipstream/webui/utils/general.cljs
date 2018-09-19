@@ -112,3 +112,15 @@
 
   ([n]
    (str/join "" (repeatedly n rand-alphanum))))
+
+
+;;
+;; paging utils
+;;
+
+
+(defn total-pages
+  [total-elements elements-per-page]
+  (cond-> total-elements
+          true (quot elements-per-page)
+          (pos? (mod total-elements elements-per-page)) inc))

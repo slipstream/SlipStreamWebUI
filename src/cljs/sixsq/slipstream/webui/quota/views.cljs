@@ -9,7 +9,8 @@
     [sixsq.slipstream.webui.quota.subs :as quota-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.general :as general-utils]))
 
 
 (defn control-bar
@@ -99,26 +100,19 @@
     [credential-view credential-id credential-quotas]))
 
 
-(defn page-count
-  [record-displayed element-count]
-  (cond-> element-count
-          true (quot record-displayed)
-          (pos? (mod element-count record-displayed)) inc))
-
-
 (defn search-result
   []
   (let [loading-quotas? (subscribe [::quota-subs/loading-quotas?])
         credentials-quotas-map (subscribe [::quota-subs/credentials-quotas-map])
         active-page (reagent/atom 1)
-        element-displayed 8
+        elements-per-page 8
         set-page #(reset! active-page %)]
     (fn []
-      (let [elements-count (count @credentials-quotas-map)
-            start-slice (* (dec @active-page) element-displayed)
-            end-slice (let [end (* @active-page element-displayed)]
-                        (if (> end elements-count) elements-count end))
-            total-pages (page-count element-displayed elements-count)]
+      (let [total-elements (count @credentials-quotas-map)
+            start-slice (* (dec @active-page) elements-per-page)
+            end-slice (let [end (* @active-page elements-per-page)]
+                        (if (> end total-elements) total-elements end))
+            total-pages (general-utils/total-pages total-elements elements-per-page)]
         [:div
          [ui/Segment {:loading @loading-quotas?
                       :padded  true}
@@ -135,9 +129,9 @@
                                    end-slice)))))]
          (when (> total-pages 1)
            [uix/Pagination {:size         "tiny"
-                           :totalPages   total-pages
-                           :activePage   @active-page
-                           :onPageChange (ui-callback/callback :activePage set-page)}])]))))
+                            :totalPages   total-pages
+                            :activePage   @active-page
+                            :onPageChange (ui-callback/callback :activePage set-page)}])]))))
 
 
 (defn quota

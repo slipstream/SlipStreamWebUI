@@ -6,7 +6,7 @@
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]))
 
 
-(def default-params {:$first 1, :$last 20})
+(def default-params {:$first 1, :$last 10000})
 
 (def floating-time-tolerance "-10s")
 
