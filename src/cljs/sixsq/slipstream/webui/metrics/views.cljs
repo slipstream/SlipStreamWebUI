@@ -64,7 +64,7 @@
   (let [rates (subscribe [::metrics-subs/ring-request-rates])]
     (let [chartjs-data {:type    "horizontalBar"
                         :data    {:labels   (mapv :requests @rates)
-                                  :datasets [{:data            (mapv :rate @rates)}]}
+                                  :datasets [{:data (mapv :rate @rates)}]}
                         :options {:scales {:xAxes [{:type "linear"}]
                                            :yAxes [{:gridLines {:display false}}]}}}]
 
@@ -79,7 +79,7 @@
   (let [rates (subscribe [::metrics-subs/ring-response-rates])]
     (let [chartjs-data {:type    "horizontalBar"
                         :data    {:labels   (mapv :responses @rates)
-                                  :datasets [{:data            (mapv :rate @rates)}]}
+                                  :datasets [{:data (mapv :rate @rates)}]}
                         :options {:scales {:xAxes [{:type "linear"}]
                                            :yAxes [{:gridLines {:display false}}]}}}]
 
@@ -135,7 +135,7 @@
                            (sort-by first))
           chartjs-data {:type    "horizontalBar"
                         :data    {:labels   (mapv first sorted-data)
-                                  :datasets [{:data            (mapv second sorted-data)}]}
+                                  :datasets [{:data (mapv second sorted-data)}]}
                         :options {:scales {:xAxes [{:type "linear"}]
                                            :yAxes [{:gridLines {:display false}}]}}}]
 
