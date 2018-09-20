@@ -36,7 +36,7 @@
                         [:canvas {:id plot-id}]])
        :component-did-update
                      (fn [comp]
-                       (let [plot-data (first (rest (reagent/argv comp)))]
+                       (let [plot-data (second (reagent/argv comp))]
                          (when-let [labels (clj->js (get-in plot-data [:data :labels]))]
                            (set! (.. @chartjs-instance -data -labels) labels))
                          (doseq [[i dataset] (map-indexed vector (get-in plot-data [:data :datasets]))]
