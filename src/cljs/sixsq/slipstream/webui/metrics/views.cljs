@@ -64,7 +64,7 @@
   (let [rates (subscribe [::metrics-subs/ring-request-rates])]
     (let [chartjs-data {:type    "horizontalBar"
                         :data    {:labels   (mapv :requests @rates)
-                                  :datasets [{:data            (mapv :rate @rates)}]}
+                                  :datasets [{:data (mapv :rate @rates)}]}
                         :options {:scales {:xAxes [{:type "linear"}]
                                            :yAxes [{:gridLines {:display false}}]}}}]
 
@@ -79,7 +79,7 @@
   (let [rates (subscribe [::metrics-subs/ring-response-rates])]
     (let [chartjs-data {:type    "horizontalBar"
                         :data    {:labels   (mapv :responses @rates)
-                                  :datasets [{:data            (mapv :rate @rates)}]}
+                                  :datasets [{:data (mapv :rate @rates)}]}
                         :options {:scales {:xAxes [{:type "linear"}]
                                            :yAxes [{:gridLines {:display false}}]}}}]
 
@@ -135,7 +135,7 @@
                            (sort-by first))
           chartjs-data {:type    "horizontalBar"
                         :data    {:labels   (mapv first sorted-data)
-                                  :datasets [{:data            (mapv second sorted-data)}]}
+                                  :datasets [{:data (mapv second sorted-data)}]}
                         :options {:scales {:xAxes [{:type "linear"}]
                                            :yAxes [{:gridLines {:display false}}]}}}]
 
@@ -148,13 +148,15 @@
 
 (defn metrics-info
   []
-  (let [raw-metrics (subscribe [::metrics-subs/raw-metrics])
+  (let [loading? (subscribe [::metrics-subs/loading?])
+        raw-metrics (subscribe [::metrics-subs/raw-metrics])
+        loading-job-info? (subscribe [::metrics-subs/loading-job-info?])
         job-info (subscribe [::metrics-subs/job-info])
         device (subscribe [::main-subs/device])]
     (fn []
-      (when (nil? @raw-metrics)
+      (when (and (nil? @raw-metrics) (not @loading?))
         (dispatch [::metrics-events/fetch-metrics]))
-      (when (nil? @job-info)
+      (when (and (nil? @job-info) (not @loading-job-info?))
         (dispatch [::metrics-events/fetch-job-info]))
       [ui/Container {:fluid true}
        [controls]
