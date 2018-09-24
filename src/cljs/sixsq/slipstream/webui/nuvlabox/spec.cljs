@@ -13,47 +13,32 @@
                                       ::active-count
                                       ::healthy?]))
 
+(s/def ::nuvlabox-records any?)
 
-(s/def ::$first nat-int?)
-(s/def ::$last nat-int?)
-(s/def ::$filter (s/nilable string?))
-(s/def ::$orderby (s/nilable string?))
-(s/def ::$select (s/nilable string?))
-(s/def ::$aggregation (s/nilable string?))
-
-(s/def ::query-params (s/keys :req-un [::$first
-                                       ::$last
-                                       ::$filter
-                                       ::$orderby
-                                       ::$select
-                                       ::$aggregation]))
-
-(s/def ::collection any?)
+(s/def ::page int?)
+(s/def ::elements-per-page int?)
+(s/def ::total-elements int?)
 
 (s/def ::state-selector #{"all" "new" "activated" "quarantined"})
 
 
 (s/def ::db (s/keys :req [::loading?
                           ::health-info
-
-                          ::query-params
-
-                          ::collection
+                          ::nuvlabox-records
+                          ::page
+                          ::elements-per-page
+                          ::total-elements
                           ::state-selector]))
 
 
-(def defaults {::loading?                    false
-               ::health-info                 {:stale-count  0
-                                              :active-count 0
-                                              :healthy?     {}}
+(def defaults {::loading?          false
+               ::health-info       {:stale-count  0
+                                    :active-count 0
+                                    :healthy?     {}}
 
-               ::query-params                {:$first       0
-                                              :$last        20
-                                              :$filter      nil
-                                              :$orderby     nil
-                                              :$select      nil
-                                              :$aggregation nil}
-
-               ::collection                  nil
-               ::state-selector              "all"})
+               ::nuvlabox-records  nil
+               ::page              1
+               ::elements-per-page 10
+               ::total-elements    0
+               ::state-selector    "all"})
 

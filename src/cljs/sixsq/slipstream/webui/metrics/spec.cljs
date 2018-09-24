@@ -31,7 +31,7 @@
 
 (s/def ::blocked nat-int?)
 
-(s/def ::job-info (s/keys :req-un [::old ::stale ::blocked ::states]))
+(s/def ::job-info (s/nilable (s/keys :req-un [::old ::stale ::blocked ::states])))
 
 
 (s/def ::db (s/keys :req [::loading?
@@ -39,7 +39,9 @@
                           ::jvm-threads
                           ::jvm-memory
                           ::ring-request-rates
-                          ::ring-response-rates]))
+                          ::ring-response-rates
+                          ::loading-job-info?
+                          ::job-info]))
 
 
 (def defaults {::loading?            false
@@ -49,7 +51,4 @@
                ::ring-request-rates  nil
                ::ring-response-rates nil
                ::loading-job-info?   false
-               ::job-info            {:old     0
-                                      :stale   0
-                                      :blocked 0
-                                      :states  []}})
+               ::job-info            nil})

@@ -45,7 +45,7 @@
       ;[card :appstore :welcome-appstore-desc "certificate" "appstore"]
       [card :deployment :welcome-deployment-desc "cloud" "deployment"]
       [card :application :welcome-application-desc "sitemap" "application"]
-      (when @is-admin? [card :nuvlabox-ctrl :welcome-nuvlabox-desc "desktop" "nuvlabox"])
+      [card :nuvlabox-ctrl :welcome-nuvlabox-desc "desktop" "nuvlabox"]
       (when @is-admin? [card :metrics :welcome-metrics-desc "bar chart" "metrics"])
       [card :cimi :welcome-cimi-desc "code" "cimi"]
       ]]))

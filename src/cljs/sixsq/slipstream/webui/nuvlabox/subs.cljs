@@ -20,10 +20,19 @@
 
 
 (reg-sub
-  ::collection
-  ::nuvlabox-spec/collection)
+  ::nuvlabox-records
+  ::nuvlabox-spec/nuvlabox-records)
 
 
 (reg-sub
   ::state-selector
   ::nuvlabox-spec/state-selector)
+
+(reg-sub
+  ::elements-per-page
+  ::nuvlabox-spec/elements-per-page)
+
+
+(reg-sub
+  ::page
+  ::nuvlabox-spec/page)
