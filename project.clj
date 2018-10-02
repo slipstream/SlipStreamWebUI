@@ -1,4 +1,4 @@
-(def +version+ "3.60-SNAPSHOT")
+(def +version+ "3.61-SNAPSHOT")
 
 (def package-json-template
   "
@@ -14,7 +14,7 @@
   }
   ")
 
-(defproject com.sixsq.slipstream/SlipStreamWebUI "3.60-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.61-SNAPSHOT"
 
   :description "Web Browser User Interface"
 
@@ -88,7 +88,7 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/chartjs "2.7.0-0"]]
+                 [cljsjs/react-chartjs-2 "2.7.0-0"]]
 
   :source-paths ["src/clj" "src/cljs"]
 

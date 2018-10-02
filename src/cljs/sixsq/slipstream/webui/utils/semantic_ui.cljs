@@ -5,49 +5,51 @@
   (:require                                                 ;[soda-ash.core :as sa]
     [cljsjs.react-datepicker]
     cljsjs.semantic-ui-react
-    [reagent.core :as r]))
+    [reagent.core :as reagent]))
 
-(defn array-get [tag]
+(defn array-get-semantic
+  [tag]
   (aget js/semanticUIReact tag))
 
-(defn adapt-component [tag]
-  (r/adapt-react-class (array-get tag)))
+(defn adapt-semantic-component [tag]
+  (reagent/adapt-react-class
+    (array-get-semantic tag)))
 
 ;;(def Accordion (adapt-component "Accordion"))
 ;;(def AccordionTitle (adapt-component "AccordionTitle"))
 ;;(def AccordionContent (adapt-component "AccordionContent"))
 
-(def Breadcrumb (adapt-component "Breadcrumb"))
-(def BreadcrumbDivider (adapt-component "BreadcrumbDivider"))
-(def BreadcrumbSection (adapt-component "BreadcrumbSection"))
+(def Breadcrumb (adapt-semantic-component "Breadcrumb"))
+(def BreadcrumbDivider (adapt-semantic-component "BreadcrumbDivider"))
+(def BreadcrumbSection (adapt-semantic-component "BreadcrumbSection"))
 
-(def Button (adapt-component "Button"))
-(def ButtonGroup (adapt-component "ButtonGroup"))
+(def Button (adapt-semantic-component "Button"))
+(def ButtonGroup (adapt-semantic-component "ButtonGroup"))
 
-(def Card (adapt-component "Card"))
-(def CardContent (adapt-component "CardContent"))
-(def CardDescription (adapt-component "CardDescription"))
-(def CardGroup (adapt-component "CardGroup"))
-(def CardHeader (adapt-component "CardHeader"))
-(def CardMeta (adapt-component "CardMeta"))
+(def Card (adapt-semantic-component "Card"))
+(def CardContent (adapt-semantic-component "CardContent"))
+(def CardDescription (adapt-semantic-component "CardDescription"))
+(def CardGroup (adapt-semantic-component "CardGroup"))
+(def CardHeader (adapt-semantic-component "CardHeader"))
+(def CardMeta (adapt-semantic-component "CardMeta"))
 
-(def Checkbox (adapt-component "Checkbox"))
+(def Checkbox (adapt-semantic-component "Checkbox"))
 
-(def Confirm (adapt-component "Confirm"))
+(def Confirm (adapt-semantic-component "Confirm"))
 
-(def Container (adapt-component "Container"))
+(def Container (adapt-semantic-component "Container"))
 
-(def DatePicker (r/adapt-react-class js/DatePicker))
+(def DatePicker (reagent/adapt-react-class js/DatePicker))
 
-(def Dimmer (adapt-component "Dimmer"))
-(def DimmerDimmable (adapt-component "DimmerDimmable"))
+(def Dimmer (adapt-semantic-component "Dimmer"))
+(def DimmerDimmable (adapt-semantic-component "DimmerDimmable"))
 
-(def Divider (adapt-component "Divider"))
+(def Divider (adapt-semantic-component "Divider"))
 
-(def Dropdown (adapt-component "Dropdown"))
-(def DropdownDivider (adapt-component "DropdownDivider"))
-(def DropdownItem (adapt-component "DropdownItem"))
-(def DropdownMenu (adapt-component "DropdownMenu"))
+(def Dropdown (adapt-semantic-component "Dropdown"))
+(def DropdownDivider (adapt-semantic-component "DropdownDivider"))
+(def DropdownItem (adapt-semantic-component "DropdownItem"))
+(def DropdownMenu (adapt-semantic-component "DropdownMenu"))
 
 ;;(def Feed (adapt-component "Feed"))
 ;;(def FeedContent (adapt-component "FeedContent"))
@@ -60,20 +62,20 @@
 ;;(def FeedSummary (adapt-component "FeedSummary"))
 ;;(def FeedUser (adapt-component "FeedUser"))
 
-(def Form (adapt-component "Form"))
+(def Form (adapt-semantic-component "Form"))
 ;;(def FormButton (adapt-component "FormButton"))
-(def FormDropdown (adapt-component "FormDropdown"))
-(def FormField (adapt-component "FormField"))
-(def FormGroup (adapt-component "FormGroup"))
-(def FormInput (adapt-component "FormInput"))
-(def FormSelect (adapt-component "FormSelect"))
+(def FormDropdown (adapt-semantic-component "FormDropdown"))
+(def FormField (adapt-semantic-component "FormField"))
+(def FormGroup (adapt-semantic-component "FormGroup"))
+(def FormInput (adapt-semantic-component "FormInput"))
+(def FormSelect (adapt-semantic-component "FormSelect"))
 
-(def Grid (adapt-component "Grid"))
+(def Grid (adapt-semantic-component "Grid"))
 ;;(def GridColumn (adapt-component "GridColumn"))
 ;;(def GridRow (adapt-component "GridRow"))
 
-(def Icon (adapt-component "Icon"))
-(def IconGroup (adapt-component "IconGroup"))
+(def Icon (adapt-semantic-component "Icon"))
+(def IconGroup (adapt-semantic-component "IconGroup"))
 
 ;;(def Item (adapt-component "Item"))
 ;;(def ItemContent (adapt-component "ItemContent"))
@@ -84,78 +86,78 @@
 ;;(def ItemImage (adapt-component "ItemImage"))
 ;;(def ItemMeta (adapt-component "ItemMeta"))
 
-(def Image (adapt-component "Image"))
+(def Image (adapt-semantic-component "Image"))
 
-(def Input (adapt-component "Input"))
+(def Input (adapt-semantic-component "Input"))
 
-(def Header (adapt-component "Header"))
+(def Header (adapt-semantic-component "Header"))
 ;;(def HeaderContent (adapt-component "HeaderContent"))
-(def HeaderSubheader (adapt-component "HeaderSubheader"))
+(def HeaderSubheader (adapt-semantic-component "HeaderSubheader"))
 
-(def Label (adapt-component "Label"))
-(def LabelDetail (adapt-component "LabelDetail"))
+(def Label (adapt-semantic-component "Label"))
+(def LabelDetail (adapt-semantic-component "LabelDetail"))
 
-(def ListSA (adapt-component "List"))
-(def ListContent (adapt-component "ListContent"))
-(def ListDescription (adapt-component "ListDescription"))
-(def ListHeader (adapt-component "ListHeader"))
-(def ListIcon (adapt-component "ListIcon"))
-(def ListItem (adapt-component "ListItem"))
+(def ListSA (adapt-semantic-component "List"))
+(def ListContent (adapt-semantic-component "ListContent"))
+(def ListDescription (adapt-semantic-component "ListDescription"))
+(def ListHeader (adapt-semantic-component "ListHeader"))
+(def ListIcon (adapt-semantic-component "ListIcon"))
+(def ListItem (adapt-semantic-component "ListItem"))
 
-(def Loader (adapt-component "Loader"))
+(def Loader (adapt-semantic-component "Loader"))
 
-(def Menu (adapt-component "Menu"))
-(def MenuItem (adapt-component "MenuItem"))
-(def MenuMenu (adapt-component "MenuMenu"))
+(def Menu (adapt-semantic-component "Menu"))
+(def MenuItem (adapt-semantic-component "MenuItem"))
+(def MenuMenu (adapt-semantic-component "MenuMenu"))
 
-(def Message (adapt-component "Message"))
-(def MessageHeader (adapt-component "MessageHeader"))
-(def MessageContent (adapt-component "MessageContent"))
+(def Message (adapt-semantic-component "Message"))
+(def MessageHeader (adapt-semantic-component "MessageHeader"))
+(def MessageContent (adapt-semantic-component "MessageContent"))
 ;;(def MessageList (adapt-component "MessageList"))
 ;;(def MessageItem (adapt-component "MessageItem"))
 
-(def Modal (adapt-component "Modal"))
-(def ModalActions (adapt-component "ModalActions"))
-(def ModalContent (adapt-component "ModalContent"))
-(def ModalHeader (adapt-component "ModalHeader"))
+(def Modal (adapt-semantic-component "Modal"))
+(def ModalActions (adapt-semantic-component "ModalActions"))
+(def ModalContent (adapt-semantic-component "ModalContent"))
+(def ModalHeader (adapt-semantic-component "ModalHeader"))
 
-(def Pagination (r/adapt-react-class (aget js/semanticUIReact "Pagination")))
+(def Pagination (adapt-semantic-component "Pagination"))
 
-(def Popup (adapt-component "Popup"))
-(def PopupHeader (adapt-component "PopupHeader"))
-(def PopupContent (adapt-component "PopupContent"))
-(def Progress (adapt-component "Progress"))
+(def Popup (adapt-semantic-component "Popup"))
+(def PopupHeader (adapt-semantic-component "PopupHeader"))
+(def PopupContent (adapt-semantic-component "PopupContent"))
+(def Progress (adapt-semantic-component "Progress"))
 
 ;;(def Rail (adapt-component "Rail"))
 ;;(def Ref (adapt-component "Ref"))
 
-(def Responsive (adapt-component "Responsive"))
+(def Responsive (adapt-semantic-component "Responsive"))
 
-(def Segment (adapt-component "Segment"))
+(def Segment (adapt-semantic-component "Segment"))
 ;;(def SegmentGroup (adapt-component "SegmentGroup"))
 
-(def Sidebar (adapt-component "Sidebar"))
-(def SidebarPushable (adapt-component "SidebarPushable"))
-(def SidebarPusher (adapt-component "SidebarPusher"))
+(def Sidebar (adapt-semantic-component "Sidebar"))
+(def SidebarPushable (adapt-semantic-component "SidebarPushable"))
+(def SidebarPusher (adapt-semantic-component "SidebarPusher"))
 
-(def Statistic (adapt-component "Statistic"))
-(def StatisticGroup (adapt-component "StatisticGroup"))
-(def StatisticLabel (adapt-component "StatisticLabel"))
-(def StatisticValue (adapt-component "StatisticValue"))
+(def Statistic (adapt-semantic-component "Statistic"))
+(def StatisticGroup (adapt-semantic-component "StatisticGroup"))
+(def StatisticLabel (adapt-semantic-component "StatisticLabel"))
+(def StatisticValue (adapt-semantic-component "StatisticValue"))
 
-(def Tab (adapt-component "Tab"))
-(def TabPane (adapt-component "TabPane"))
+(def Tab (adapt-semantic-component "Tab"))
+(def TabPane (adapt-semantic-component "TabPane"))
 
-(def Table (adapt-component "Table"))
-(def TableBody (adapt-component "TableBody"))
-(def TableCell (adapt-component "TableCell"))
-(def TableFooter (adapt-component "TableFooter"))
-(def TableHeader (adapt-component "TableHeader"))
-(def TableHeaderCell (adapt-component "TableHeaderCell"))
-(def TableRow (adapt-component "TableRow"))
+(def Table (adapt-semantic-component "Table"))
+(def TableBody (adapt-semantic-component "TableBody"))
+(def TableCell (adapt-semantic-component "TableCell"))
+(def TableFooter (adapt-semantic-component "TableFooter"))
+(def TableHeader (adapt-semantic-component "TableHeader"))
+(def TableHeaderCell (adapt-semantic-component "TableHeaderCell"))
+(def TableRow (adapt-semantic-component "TableRow"))
 
-(def TextArea (adapt-component "TextArea"))
+(def TextArea (adapt-semantic-component "TextArea"))
 
-(def Transition (adapt-component "Transition"))
+(def Transition (adapt-semantic-component "Transition"))
 
-(def TransitionablePortal (adapt-component "TransitionablePortal"))
+(def TransitionablePortal (adapt-semantic-component "TransitionablePortal"))
