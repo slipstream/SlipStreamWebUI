@@ -88,7 +88,7 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/chartjs "2.7.0-0"]]
+                 [cljsjs/react-chartjs-2 "2.7.0-0"]]
 
   :source-paths ["src/clj" "src/cljs"]
 

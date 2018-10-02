@@ -122,7 +122,7 @@
         [ui/Responsive {:as            "div"
                         :fire-on-mount true
                         :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
-         [ui/SidebarPushable {:as    (ui/array-get "Segment")
+         [ui/SidebarPushable {:as    (ui/array-get-semantic "Segment")
                               :basic true}
           [sidebar/menu]
           [ui/SidebarPusher

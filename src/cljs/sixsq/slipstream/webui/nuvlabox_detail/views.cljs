@@ -61,19 +61,16 @@
 (defn load-chartjs
   [_ load]
   (let [load-stats (u/load-statistics load)]
-    (let [chartjs-data {:type    "horizontalBar"
-                        :data    {:labels   (mapv :label load-stats)
-                                  :datasets [{:data (mapv :percentage load-stats)}]}
-                        :options {:scales {:xAxes [{:type  "linear"
-                                                    :ticks {:beginAtZero true
-                                                            :max         100}}]
-                                           :yAxes [{:gridLines {:display false}}]}}}]
-
-      [ui/CardGroup {:doubling true, :items-per-row 2}
-       [ui/Card
-        [ui/CardContent
-         [ui/CardHeader "Load Percentages"]
-         [plot/chartjs-plot chartjs-data]]]])))
+    [ui/CardGroup {:doubling true, :items-per-row 2}
+     [ui/Card
+      [ui/CardContent
+       [ui/CardHeader "Load Percentages"]
+       [plot/HorizontalBar {:data    {:labels   (mapv :label load-stats)
+                                      :datasets [{:data (mapv :percentage load-stats)}]}
+                            :options {:scales {:xAxes [{:type  "linear"
+                                                        :ticks {:beginAtZero true
+                                                                :max         100}}]
+                                               :yAxes [{:gridLines {:display false}}]}}}]]]]))
 
 
 (defn load

@@ -1,9 +1,7 @@
 (ns sixsq.slipstream.webui.plot.plot
   (:require
-    [cljsjs.chartjs]
-    [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.utils.general :as general]))
+    [cljsjs.react-chartjs-2]))
 
 
 ;; setup global defaults
@@ -18,37 +16,24 @@
 (-> chartjs-global .-legend .-display (set! false))
 
 
-(defn chartjs-plot-inner
-  [plot-data]
-  (let [plot-id (str "chartjs-" (general/random-element-id))
-        chartjs-instance (atom nil)]
-    (reagent/create-class
-      {:display-name "chartjs-plot"
-       :component-did-mount
-                     (fn [comp]
-                       (reset! chartjs-instance
-                               (some-> (.getElementById js/document plot-id)
-                                       (js/Chart. (clj->js plot-data)))))
-       :reagent-render
-                     (fn [plot-data]
-                       [:div {:class "chartjs-container"
-                              :style {:position "relative", :width "100%", :height "100%"}}
-                        [:canvas {:id plot-id}]])
-       :component-did-update
-                     (fn [comp]
-                       (let [plot-data (second (reagent/argv comp))]
-                         (when-let [labels (clj->js (get-in plot-data [:data :labels]))]
-                           (set! (.. @chartjs-instance -data -labels) labels))
-                         (doseq [[i dataset] (map-indexed vector (get-in plot-data [:data :datasets]))]
-                           (set!
-                             (.-data (aget (.. @chartjs-instance -data -datasets) i))
-                             (clj->js (:data dataset)))))
-                       (.update @chartjs-instance))
-       :component-will-unmount
-                     (fn [comp]
-                       (some-> @chartjs-instance .destroy))})))
+(defn adapt-chartjs-component [tag]
+  (reagent/adapt-react-class
+    (aget js/ReactChartjs2 tag)))
 
+(def HorizontalBar (adapt-chartjs-component "HorizontalBar"))
 
-(defn chartjs-plot
-  [plot-data]
-  [chartjs-plot-inner plot-data])
+;(def Bar (adapt-component "Bar"))
+
+;(def Doughnut (adapt-component "Doughnut"))
+
+;(def Pie (adapt-component "Pie"))
+
+;(def Line (adapt-component "Line"))
+
+;(def Radar (adapt-component "Radar"))
+
+;(def Polar (adapt-component "Polar"))
+
+;(def Bubble (adapt-component "Bubble"))
+
+;(def Scatter (adapt-component "Scatter"))
