@@ -32,61 +32,49 @@
 (defn jvm-thread-chartjs
   []
   (let [jvm-threads (subscribe [::metrics-subs/jvm-threads])]
-    (let [chartjs-data {:type    "horizontalBar"
-                        :data    {:labels   (mapv :state @jvm-threads)
-                                  :datasets [{:data (mapv :threads @jvm-threads)}]}
-                        :options {:scales {:xAxes [{:type "linear"}]
-                                           :yAxes [{:gridLines {:display false}}]}}}]
-
-      [ui/Card
-       [ui/CardContent
-        [ui/CardHeader "JVM Thread State Counts"]
-        [plot/chartjs-plot chartjs-data]]])))
+    [ui/Card
+     [ui/CardContent
+      [ui/CardHeader "JVM Thread State Counts"]
+      [plot/HorizontalBar {:data    {:labels   (mapv :state @jvm-threads)
+                                     :datasets [{:data (mapv :threads @jvm-threads)}]}
+                           :options {:scales {:xAxes [{:type "linear"}]
+                                              :yAxes [{:gridLines {:display false}}]}}}]]]))
 
 
 (defn jvm-memory-chartjs
   []
   (let [jvm-memory (subscribe [::metrics-subs/jvm-memory])]
-    (let [chartjs-data {:type    "horizontalBar"
-                        :data    {:labels   (mapv :type @jvm-memory)
-                                  :datasets [{:data (mapv #(/ % 1000000000.) (mapv :memory @jvm-memory))}]}
-                        :options {:scales {:xAxes [{:type "linear"}]
-                                           :yAxes [{:gridLines {:display false}}]}}}]
-
-      [ui/Card
-       [ui/CardContent
-        [ui/CardHeader "JVM Memory (GB)"]
-        [plot/chartjs-plot chartjs-data]]])))
+    [ui/Card
+     [ui/CardContent
+      [ui/CardHeader "JVM Memory (GB)"]
+      [plot/HorizontalBar {:data    {:labels   (mapv :type @jvm-memory)
+                                     :datasets [{:data (mapv #(/ % 1000000000.) (mapv :memory @jvm-memory))}]}
+                           :options {:scales {:xAxes [{:type "linear"}]
+                                              :yAxes [{:gridLines {:display false}}]}}}]]]))
 
 
 (defn request-rates-chartjs
   []
   (let [rates (subscribe [::metrics-subs/ring-request-rates])]
-    (let [chartjs-data {:type    "horizontalBar"
-                        :data    {:labels   (mapv :requests @rates)
-                                  :datasets [{:data (mapv :rate @rates)}]}
-                        :options {:scales {:xAxes [{:type "linear"}]
-                                           :yAxes [{:gridLines {:display false}}]}}}]
-
-      [ui/Card
-       [ui/CardContent
-        [ui/CardHeader "Request Rates (request/s)"]
-        [plot/chartjs-plot chartjs-data]]])))
+    [ui/Card
+     [ui/CardContent
+      [ui/CardHeader "Request Rates (request/s)"]
+      [plot/HorizontalBar {:data    {:labels   (mapv :requests @rates)
+                                     :datasets [{:data (mapv :rate @rates)}]}
+                           :options {:scales {:xAxes [{:type "linear"}]
+                                              :yAxes [{:gridLines {:display false}}]}}}]]]))
 
 
 (defn response-rates-chartjs
   []
   (let [rates (subscribe [::metrics-subs/ring-response-rates])]
-    (let [chartjs-data {:type    "horizontalBar"
-                        :data    {:labels   (mapv :responses @rates)
-                                  :datasets [{:data (mapv :rate @rates)}]}
-                        :options {:scales {:xAxes [{:type "linear"}]
-                                           :yAxes [{:gridLines {:display false}}]}}}]
-
-      [ui/Card
-       [ui/CardContent
-        [ui/CardHeader "Response Rates (response/s)"]
-        [plot/chartjs-plot chartjs-data]]])))
+    [ui/Card
+     [ui/CardContent
+      [ui/CardHeader "Response Rates (response/s)"]
+      [plot/HorizontalBar {:data    {:labels   (mapv :responses @rates)
+                                     :datasets [{:data (mapv :rate @rates)}]}
+                           :options {:scales {:xAxes [{:type "linear"}]
+                                              :yAxes [{:gridLines {:display false}}]}}}]]]))
 
 
 (defn success-rate
@@ -128,22 +116,19 @@
 
 (defn job-chartjs
   []
-  (let [job-info (subscribe [::metrics-subs/job-info])]
-    (let [sorted-data (->> @job-info
-                           :states
-                           (map (juxt :key :doc_count))
-                           (sort-by first))
-          chartjs-data {:type    "horizontalBar"
-                        :data    {:labels   (mapv first sorted-data)
-                                  :datasets [{:data (mapv second sorted-data)}]}
-                        :options {:scales {:xAxes [{:type "linear"}]
-                                           :yAxes [{:gridLines {:display false}}]}}}]
-
-      [ui/Card
-       [ui/CardContent
-        [ui/CardHeader "Job States"]
-        [job-numbers]
-        [plot/chartjs-plot chartjs-data]]])))
+  (let [job-info (subscribe [::metrics-subs/job-info])
+        sorted-data (->> @job-info
+                         :states
+                         (map (juxt :key :doc_count))
+                         (sort-by first))]
+    [ui/Card
+     [ui/CardContent
+      [ui/CardHeader "Job States"]
+      [job-numbers]
+      [plot/HorizontalBar {:data    {:labels   (mapv first sorted-data)
+                                     :datasets [{:data (mapv second sorted-data)}]}
+                           :options {:scales {:xAxes [{:type "linear"}]
+                                              :yAxes [{:gridLines {:display false}}]}}}]]]))
 
 
 (defn metrics-info
