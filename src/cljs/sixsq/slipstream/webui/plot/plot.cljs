@@ -16,26 +16,24 @@
 (-> chartjs-global .-legend .-display (set! false))
 
 
-(defn array-get [tag]
-  (aget js/ReactChartjs2 tag))
+(defn adapt-chartjs-component [tag]
+  (reagent/adapt-react-class
+    (aget js/ReactChartjs2 tag)))
 
-(defn adapt-component [tag]
-  (reagent/adapt-react-class (array-get tag)))
-
-(def HorizontalBar (adapt-component "HorizontalBar"))
+(def HorizontalBar (adapt-chartjs-component "HorizontalBar"))
 
 ;(def Bar (adapt-component "Bar"))
-;
+
 ;(def Doughnut (adapt-component "Doughnut"))
-;
+
 ;(def Pie (adapt-component "Pie"))
-;
+
 ;(def Line (adapt-component "Line"))
-;
+
 ;(def Radar (adapt-component "Radar"))
-;
+
 ;(def Polar (adapt-component "Polar"))
-;
+
 ;(def Bubble (adapt-component "Bubble"))
-;
+
 ;(def Scatter (adapt-component "Scatter"))
