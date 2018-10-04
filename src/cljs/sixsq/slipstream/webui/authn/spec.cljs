@@ -5,15 +5,19 @@
     [sixsq.slipstream.webui.config :as config]))
 
 
-(s/def ::open-modal (s/nilable #{:login :signup}))
+(s/def ::open-modal (s/nilable #{:login :reset-password :signup}))
 
 (s/def ::selected-method-group (s/nilable any?))
 
 (s/def ::session (s/nilable any?))
 
+(s/def ::username (s/nilable any?))
+
 (s/def ::current-user-params (s/nilable any?))
 
 (s/def ::error-message (s/nilable string?))
+
+(s/def ::success-message (s/nilable string?))
 
 (s/def ::redirect-uri (s/nilable string?))
 
@@ -23,9 +27,11 @@
 
 (s/def ::db (s/keys :req [::open-modal
                           ::selected-method-group
+                          ::username
                           ::session
                           ::current-user-params
                           ::error-message
+                          ::success-message
                           ::redirect-uri
                           ::server-redirect-uri
                           ::form-id]))
@@ -33,9 +39,11 @@
 (def defaults
   {::open-modal            nil
    ::selected-method-group nil
+   ::username              nil
    ::session               nil
    ::current-user-params   nil
    ::error-message         nil
+   ::success-message       nil
    ::redirect-uri          nil
    ::server-redirect-uri   (str @config/path-prefix "/profile")
    ::form-id               nil})

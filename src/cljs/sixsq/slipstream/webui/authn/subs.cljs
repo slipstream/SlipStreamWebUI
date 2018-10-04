@@ -7,6 +7,11 @@
 
 
 (reg-sub
+  ::username
+  ::authn-spec/username)
+
+
+(reg-sub
   ::open-modal
   ::authn-spec/open-modal)
 
@@ -50,6 +55,11 @@
 (reg-sub
   ::error-message
   ::authn-spec/error-message)
+
+
+(reg-sub
+  ::success-message
+  ::authn-spec/success-message)
 
 
 (reg-sub

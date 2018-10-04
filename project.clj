@@ -76,6 +76,7 @@
                  [reagent]
 
                  [re-frame]
+                 [day8.re-frame/http-fx "0.1.6"]
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
