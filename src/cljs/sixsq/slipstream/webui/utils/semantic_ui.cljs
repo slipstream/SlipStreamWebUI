@@ -2,7 +2,7 @@
   "Mapping of names of Semantic UI components to the Soda Ash wrappers. This
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
-  (:require                                                 ;[soda-ash.core :as sa]
+  (:require
     [cljsjs.react-datepicker]
     cljsjs.semantic-ui-react
     [reagent.core :as reagent]))
@@ -15,9 +15,9 @@
   (reagent/adapt-react-class
     (array-get-semantic tag)))
 
-;;(def Accordion (adapt-component "Accordion"))
-;;(def AccordionTitle (adapt-component "AccordionTitle"))
-;;(def AccordionContent (adapt-component "AccordionContent"))
+;;(def Accordion (adapt-semantic-component "Accordion"))
+;;(def AccordionTitle (adapt-semantic-component "AccordionTitle"))
+;;(def AccordionContent (adapt-semantic-component "AccordionContent"))
 
 (def Breadcrumb (adapt-semantic-component "Breadcrumb"))
 (def BreadcrumbDivider (adapt-semantic-component "BreadcrumbDivider"))
@@ -51,19 +51,19 @@
 (def DropdownItem (adapt-semantic-component "DropdownItem"))
 (def DropdownMenu (adapt-semantic-component "DropdownMenu"))
 
-;;(def Feed (adapt-component "Feed"))
-;;(def FeedContent (adapt-component "FeedContent"))
-;;(def FeedDate (adapt-component "FeedDate"))
-;;(def FeedEvent (adapt-component "FeedEvent"))
-;;(def FeedExtra (adapt-component "FeedExtra"))
-;;(def FeedLabel (adapt-component "FeedLabel"))
-;;(def FeedLike (adapt-component "FeedLike"))
-;;(def FeedMeta (adapt-component "FeedMeta"))
-;;(def FeedSummary (adapt-component "FeedSummary"))
-;;(def FeedUser (adapt-component "FeedUser"))
+;;(def Feed (adapt-semantic-component "Feed"))
+;;(def FeedContent (adapt-semantic-component "FeedContent"))
+;;(def FeedDate (adapt-semantic-component "FeedDate"))
+;;(def FeedEvent (adapt-semantic-component "FeedEvent"))
+;;(def FeedExtra (adapt-semantic-component "FeedExtra"))
+;;(def FeedLabel (adapt-semantic-component "FeedLabel"))
+;;(def FeedLike (adapt-semantic-component "FeedLike"))
+;;(def FeedMeta (adapt-semantic-component "FeedMeta"))
+;;(def FeedSummary (adapt-semantic-component "FeedSummary"))
+;;(def FeedUser (adapt-semantic-component "FeedUser"))
 
 (def Form (adapt-semantic-component "Form"))
-;;(def FormButton (adapt-component "FormButton"))
+;;(def FormButton (adapt-semantic-component "FormButton"))
 (def FormDropdown (adapt-semantic-component "FormDropdown"))
 (def FormField (adapt-semantic-component "FormField"))
 (def FormGroup (adapt-semantic-component "FormGroup"))
@@ -71,27 +71,27 @@
 (def FormSelect (adapt-semantic-component "FormSelect"))
 
 (def Grid (adapt-semantic-component "Grid"))
-;;(def GridColumn (adapt-component "GridColumn"))
-;;(def GridRow (adapt-component "GridRow"))
+(def GridColumn (adapt-semantic-component "GridColumn"))
+;;(def GridRow (adapt-semantic-component "GridRow"))
 
 (def Icon (adapt-semantic-component "Icon"))
 (def IconGroup (adapt-semantic-component "IconGroup"))
 
-;;(def Item (adapt-component "Item"))
-;;(def ItemContent (adapt-component "ItemContent"))
-;;(def ItemDescription (adapt-component "ItemDescription"))
-;;(def ItemExtra (adapt-component "ItemExtra"))
-;;(def ItemGroup (adapt-component "ItemGroup"))
-;;(def ItemHeader (adapt-component "ItemHeader"))
-;;(def ItemImage (adapt-component "ItemImage"))
-;;(def ItemMeta (adapt-component "ItemMeta"))
+;;(def Item (adapt-semantic-component "Item"))
+;;(def ItemContent (adapt-semantic-component "ItemContent"))
+;;(def ItemDescription (adapt-semantic-component "ItemDescription"))
+;;(def ItemExtra (adapt-semantic-component "ItemExtra"))
+;;(def ItemGroup (adapt-semantic-component "ItemGroup"))
+;;(def ItemHeader (adapt-semantic-component "ItemHeader"))
+;;(def ItemImage (adapt-semantic-component "ItemImage"))
+;;(def ItemMeta (adapt-semantic-component "ItemMeta"))
 
 (def Image (adapt-semantic-component "Image"))
 
 (def Input (adapt-semantic-component "Input"))
 
 (def Header (adapt-semantic-component "Header"))
-;;(def HeaderContent (adapt-component "HeaderContent"))
+;;(def HeaderContent (adapt-semantic-component "HeaderContent"))
 (def HeaderSubheader (adapt-semantic-component "HeaderSubheader"))
 
 (def Label (adapt-semantic-component "Label"))
@@ -113,8 +113,8 @@
 (def Message (adapt-semantic-component "Message"))
 (def MessageHeader (adapt-semantic-component "MessageHeader"))
 (def MessageContent (adapt-semantic-component "MessageContent"))
-;;(def MessageList (adapt-component "MessageList"))
-;;(def MessageItem (adapt-component "MessageItem"))
+;;(def MessageList (adapt-semantic-component "MessageList"))
+;;(def MessageItem (adapt-semantic-component "MessageItem"))
 
 (def Modal (adapt-semantic-component "Modal"))
 (def ModalActions (adapt-semantic-component "ModalActions"))
@@ -128,13 +128,13 @@
 (def PopupContent (adapt-semantic-component "PopupContent"))
 (def Progress (adapt-semantic-component "Progress"))
 
-;;(def Rail (adapt-component "Rail"))
-;;(def Ref (adapt-component "Ref"))
+;;(def Rail (adapt-semantic-component "Rail"))
+;;(def Ref (adapt-semantic-component "Ref"))
 
 (def Responsive (adapt-semantic-component "Responsive"))
 
 (def Segment (adapt-semantic-component "Segment"))
-;;(def SegmentGroup (adapt-component "SegmentGroup"))
+;;(def SegmentGroup (adapt-semantic-component "SegmentGroup"))
 
 (def Sidebar (adapt-semantic-component "Sidebar"))
 (def SidebarPushable (adapt-semantic-component "SidebarPushable"))

@@ -17,6 +17,7 @@
     [sixsq.slipstream.webui.messages.views :as messages]
     [sixsq.slipstream.webui.metrics.views]
     [sixsq.slipstream.webui.nuvlabox.views]
+    [sixsq.slipstream.webui.appstore.views]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.profile.views]
     [sixsq.slipstream.webui.quota.views]

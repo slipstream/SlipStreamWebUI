@@ -73,6 +73,7 @@
        [item :usage "usage" "history"]
        [item :deployment "deployment" "cloud"]
        [item :application "application" "sitemap"]
+       [item :appstore "appstore" "play"]
        [item :nuvlabox-ctrl "nuvlabox" "desktop"]
        (when @is-admin? [item :metrics "metrics" "bar chart"])
        [item :cimi "cimi" "code"]]]]))

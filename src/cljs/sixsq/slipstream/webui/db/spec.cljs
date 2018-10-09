@@ -3,6 +3,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [sixsq.slipstream.webui.application.spec :as application]
+    [sixsq.slipstream.webui.appstore.spec :as appstore]
     [sixsq.slipstream.webui.authn.spec :as authn]
     [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail]
     [sixsq.slipstream.webui.cimi.spec :as cimi]
@@ -33,11 +34,13 @@
                      ::messages/db
                      ::nuvlabox/db
                      ::nuvlabox-detail/db
-                     ::usage/db))
+                     ::usage/db
+                     ::appstore/db))
 
 
 (def default-db
   (merge application/defaults
+         appstore/defaults
          authn/defaults
          cimi/defaults
          cimi-detail/defaults
