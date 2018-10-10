@@ -36,7 +36,7 @@
                ::full-text-search              nil
                ::parent-path-search            ""
                ::page                          1
-               ::elements-per-page             10
+               ::elements-per-page             8
                ::total-elements                0
                ::deploy-module                 nil
                ::deploy-modal-visible?         false
