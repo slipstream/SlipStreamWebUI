@@ -22,6 +22,7 @@
     (go
       (let [projects (:modules (<! (cimi/search client "modules"
                                                 {:$filter (str "type='PROJECT' and parentPath='" parent-path-search "'")
+                                                 :$orderby "name"
                                                  :$select "id, name"})))]
         (callback projects)))))
 

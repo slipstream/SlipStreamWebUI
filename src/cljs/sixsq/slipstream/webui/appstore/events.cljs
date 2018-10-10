@@ -26,7 +26,7 @@
     {:$first   (inc (* (dec page) elements-per-page))
      :$last    (* page elements-per-page)
      :$orderby "name"
-     :$select  "id, name, description, type, parentPath, path"
+     :$select  "id, name, description, type, parentPath, path, logo"
      :$filter  filter-str}))
 
 

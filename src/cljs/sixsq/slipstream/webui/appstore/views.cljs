@@ -93,16 +93,21 @@
 
 
 (defn format-module
-  [{:keys [id name description type parentPath] :as module}]
+  [{:keys [id name description type parentPath logo] :as module}]
   (let [tr (subscribe [::i18n-subs/tr])]
-    (fn [{:keys [id name description type parentPath] :as module}]
+    (fn [{:keys [id name description type parentPath logo] :as module}]
       ^{:key id}
       [ui/Card
        [ui/CardContent
         [ui/CardHeader
          [ui/Icon {:name (category-icon type)}]
-         (or name id)]
-        [ui/CardMeta parentPath]
+         (or name id)
+         (when logo
+           [ui/Image {:src     (:href logo),
+                      :floated "right",
+                      :size    "tiny"}])]
+        [ui/CardMeta {:style {:text-overflow "ellipsis"
+                              :overflow      "hidden"}} parentPath]
         [ui/CardDescription description]]
        [ui/Button {:fluid    true
                    :primary  true
@@ -190,7 +195,7 @@
         [uix/Button {:text     (@tr [:cancel]),
                      :on-click hide-fn
                      }]
-        [uix/Button {:text (@tr [:deploy]), :primary true,
+        [uix/Button {:text     (@tr [:deploy]), :primary true,
                      :on-click #(do (hide-fn) (submit-fn))
                      }]]])))
 
