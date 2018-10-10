@@ -99,14 +99,15 @@
     (fn [{:keys [id name description type parentPath logo] :as module}]
       ^{:key id}
       [ui/Card
+       (when logo
+         [ui/Image {:src   (:href logo),
+                    :style {:width      "auto"
+                            :height     "100px"
+                            :object-fit "contain"}}])
        [ui/CardContent
         [ui/CardHeader
          [ui/Icon {:name (category-icon type)}]
-         (or name id)
-         (when logo
-           [ui/Image {:src     (:href logo),
-                      :floated "right",
-                      :size    "tiny"}])]
+         (or name id)]
         [ui/CardMeta {:style {:text-overflow "ellipsis"
                               :overflow      "hidden"}} parentPath]
         [ui/CardDescription description]]
