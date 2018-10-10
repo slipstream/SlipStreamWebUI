@@ -48,3 +48,15 @@
             {:keys [status resource-id] :as response} (<! (cimi/add client "deployments" data))]
         (when (and resource-id (= 201 status))
           (callback resource-id))))))
+
+
+(reg-fx
+  ::create-deployment-template
+  (fn [[client module-id callback]]
+    (go
+      (let [data {:name (str "Deployment Template " module-id)
+                  :description (str "A deployment template for the module " module-id)
+                  :module {:href module-id}}
+            {:keys [status resource-id] :as response} (<! (cimi/add client "deploymentTemplates" data))]
+        (when (and resource-id (= 201 status))
+          (callback resource-id))))))
