@@ -42,12 +42,16 @@
 
 (reg-fx
   ::deploy
-  (fn [[client deployment-template-id callback]]
+  (fn [[client {:keys [id] :as deployment-template} callback]]
     (go
-      (let [data {:deploymentTemplate {:href deployment-template-id}}
-            {:keys [status resource-id] :as response} (<! (cimi/add client "deployments" data))]
-        (when (and resource-id (= 201 status))
-          (callback resource-id))))))
+      (let [{response-id :id :as response} (<! (cimi/edit client id deployment-template))]
+        (log/info "deployment template update status" id response-id)
+        (when (= id response-id)
+          (let [data {:deploymentTemplate {:href id}}
+                {:keys [status resource-id] :as response} (<! (cimi/add client "deployments" data))]
+            (log/info "deployment create" status resource-id)
+            (when (and resource-id (= 201 status))
+              (callback resource-id))))))))
 
 
 (reg-fx
@@ -57,6 +61,6 @@
       (let [data {:name (str "Deployment Template " module-id)
                   :description (str "A deployment template for the module " module-id)
                   :module {:href module-id}}
-            {:keys [status resource-id] :as response} (<! (cimi/add client "deploymentTemplates" data))]
-        (when (and resource-id (= 201 status))
-          (callback resource-id))))))
+            {:keys [status] :as response} (<! (cimi/add client "deploymentTemplates" data))]
+        (when (= 201 status)
+          (callback))))))

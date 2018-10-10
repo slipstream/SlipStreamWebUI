@@ -18,6 +18,10 @@
 (s/def ::deploy-modal-visible? boolean?)
 (s/def ::deploy-module any?)
 
+(s/def ::loading-deployment-templates? boolean?)
+(s/def ::selected-deployment-template any?)
+(s/def ::deployment-templates (s/nilable (s/coll-of any? :kind vector?)))
+
 (s/def ::db (s/keys :req [::modules
                           ::full-text-search
                           ::parent-path-search

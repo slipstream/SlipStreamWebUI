@@ -101,11 +101,19 @@
                                 #(dispatch [::set-modules %])]}))
 
 (reg-event-fx
-  ::open-deploy-modal
+  ::get-deployment-templates
   (fn [{{:keys [::client-spec/client
-                ::spec/add-data
-                ::spec/active-tab
-                ::spec/module] :as db} :db} [_ module]]
+                ::spec/deploy-module] :as db} :db} _]
+    (when client
+      {:db                                    (assoc db ::spec/deployment-templates nil
+                                                        ::spec/loading-deployment-templates? true
+                                                        ::spec/deploy-modal-visible? true)
+       ::appstore-fx/get-deployment-templates [client (:id deploy-module) #(dispatch [::set-deployment-templates %])]})))
+
+
+(reg-event-fx
+  ::open-deploy-modal
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ module]]
     (when client
       {:db                                    (assoc db ::spec/deployment-templates nil
                                                         ::spec/loading-deployment-templates? true
@@ -123,11 +131,8 @@
 
 (reg-event-db
   ::set-selected-deployment-template
-  (fn [{:keys [::spec/deployment-templates] :as db} [_ template-id]]
-    (->> deployment-templates
-         (filter #(= template-id (:id %)))
-         first
-         (assoc db ::spec/selected-deployment-template))))
+  (fn [{:keys [::spec/deployment-templates] :as db} [_ template]]
+    (assoc db ::spec/selected-deployment-template template)))
 
 
 (reg-event-db
@@ -140,10 +145,10 @@
 (reg-event-fx
   ::create-deployment-template
   (fn [{{:keys [::client-spec/client
-                ::spec/module]} :db :as cofx} _]
-    (when (and client (:id module))
+                ::spec/deploy-module]} :db :as cofx} _]
+    (when client
       (assoc cofx ::appstore-fx/create-deployment-template
-                  [client (:id module) #(dispatch [::open-deploy-modal])])))) ;; FIXME: Should be better way to do this.
+                  [client (:id deploy-module) #(dispatch [::get-deployment-templates])]))))
 
 
 (reg-event-fx
@@ -151,4 +156,4 @@
     (fn [{{:keys [::client-spec/client ::spec/selected-deployment-template]} :db :as cofx} _]
       (when (and client (:id selected-deployment-template))
         (assoc cofx ::appstore-fx/deploy
-                    [client (:id selected-deployment-template) #(dispatch [::history-evts/navigate (str "cimi/" %)])]))))
+                    [client selected-deployment-template #(dispatch [::history-evts/navigate (str "cimi/" %)])]))))

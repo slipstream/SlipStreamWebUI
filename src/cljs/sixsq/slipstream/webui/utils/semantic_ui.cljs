@@ -145,6 +145,12 @@
 (def StatisticLabel (adapt-semantic-component "StatisticLabel"))
 (def StatisticValue (adapt-semantic-component "StatisticValue"))
 
+(def Step (adapt-semantic-component "Step"))
+(def StepGroup (adapt-semantic-component "StepGroup"))
+(def StepContent (adapt-semantic-component "StepContent"))
+(def StepDescription (adapt-semantic-component "StepDescription"))
+(def StepTitle (adapt-semantic-component "StepTitle"))
+
 (def Tab (adapt-semantic-component "Tab"))
 (def TabPane (adapt-semantic-component "TabPane"))
 

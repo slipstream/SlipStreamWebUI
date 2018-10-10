@@ -15,7 +15,8 @@
     [sixsq.slipstream.webui.utils.general :as general-utils]
     [sixsq.slipstream.webui.utils.general :as utils]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [sixsq.slipstream.webui.utils.form-fields :as ff]))
 
 
 
@@ -129,7 +130,7 @@
     ^{:key id}
     (let [{selected-id :id} @selected-deployment-template
           icon-name (if (= id selected-id) "check circle outline" "circle outline")]
-      [ui/ListItem {:on-click #(dispatch [::appstore-events/set-selected-deployment-template id])}
+      [ui/ListItem {:on-click #(dispatch [::appstore-events/set-selected-deployment-template tpl])}
        [ui/ListIcon {:name icon-name, :size "large", :vertical-align "middle"}]
        [ui/ListContent
         [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
@@ -168,36 +169,137 @@
         ;; FIXME: Correct problem where the editor doesn't see external changes to the text.
         #_[editor/json-editor text]))))
 
+(defn deployment-summary
+  []
+  (let [deploy-module (subscribe [::appstore-subs/deploy-module])]
+    (let [{:keys [id name description path]} @deploy-module]
+      [:div
+       #_[format-module @deploy-module]
+       [ui/ListSA
+        [ui/ListItem id]
+        [ui/ListItem name]
+        [ui/ListItem description]
+        [ui/ListItem path]
+        ]])))
+
+
+(defn deployment-resources
+  []
+  [ui/Form
+   [ui/FormInput {:type "number", :label "CPU"}]
+   [ui/FormInput {:type "number", :label "RAM"}]
+   [ui/FormInput {:type "number", :label "DISK"}]
+   ])
+
+
+(defn template
+  []
+  (let [template (subscribe [::appstore-subs/selected-deployment-template])
+        text (reagent/atom (utils/edn->json (or @template {})))]
+    (fn []
+      (let [json-str (utils/edn->json (or @template {}))]
+        (reset! text json-str)
+        [:pre @text]
+
+        ;; FIXME: Correct problem where the editor doesn't see external changes to the text.
+        #_[editor/json-editor text]))))
+
+
+(defn as-form-input
+  [{:keys [parameter description value] :as param}]
+  (let [template (subscribe [::appstore-subs/selected-deployment-template])]
+    ^{:key parameter}
+    [ui/FormField
+     [:label parameter ff/nbsp (ff/help-popup description)]
+     [ui/Input
+      {:type      "text"
+       :name      parameter
+       :read-only false
+       :fluid     true
+       :on-blur   (ui-callback/input-callback (fn [new-value]
+                                                (let [updated-tpl (->> @template
+                                                                       :module
+                                                                       :content
+                                                                       :inputParameters
+                                                                       (remove #(= parameter (:parameter %)))
+                                                                       (cons {:parameter   parameter
+                                                                              :description description
+                                                                              :value       new-value})
+                                                                       vec
+                                                                       (assoc-in @template [:module :content :inputParameters]))]
+                                                  (dispatch [::appstore-events/set-selected-deployment-template updated-tpl]))))}]]))
+
+(defn deployment-params
+  []
+  (let [template (subscribe [::appstore-subs/selected-deployment-template])]
+    (let [params (-> @template :module :content :inputParameters)]
+      (vec (concat [ui/Form]
+                   (map as-form-input params))))))
+
 
 (defn deploy-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::appstore-subs/deploy-modal-visible?])
         deploy-module (subscribe [::appstore-subs/deploy-module])
-        loading? (subscribe [::appstore-subs/loading-deployment-templates?])]
-    (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
-          submit-fn #(dispatch [::appstore-events/deploy])
-          ]
-      [ui/Modal {:open       @visible?
-                 :close-icon true
-                 :on-close   hide-fn}
+        loading? (subscribe [::appstore-subs/loading-deployment-templates?])
+        step-id (reagent/atom "params")]
+    (fn []
+      (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
+            submit-fn #(dispatch [::appstore-events/deploy])]
+        [ui/Modal {:open       @visible?
+                   :close-icon true
+                   :on-close   hide-fn}
 
-       [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (:path @deploy-module)]
+         [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (:path @deploy-module)]
 
-       [ui/ModalContent {:scrolling true}
-        [ui/Segment
-         {:loading @loading?}
-         [deployment-template-list]]
-        [ui/Segment
-         [deployment-template-details]]]
+         [ui/ModalContent {:scrolling true}
+          [ui/StepGroup {:attached "top"}
+           [ui/Step {:icon        "check"
+                     :title       "summary"
+                     :description "one desc"
+                     :on-click    #(reset! step-id "summary")
+                     :active      (= "summary" @step-id)
+                     }
+            ]
+           [ui/Step {:icon        "check"
+                     :title       "template"
+                     :description "one desc"
+                     :on-click    #(reset! step-id "template-list")
+                     :active      (= "template-list" @step-id)
+                     }
+            ]
+           [ui/Step {:icon        "check"
+                     :title       "resources"
+                     :description "one desc"
+                     :on-click    #(reset! step-id "resources")
+                     :active      (= "resources" @step-id)
+                     }
+            ]
+           [ui/Step {:icon        "check"
+                     :title       "parameters"
+                     :description "one desc"
+                     :on-click    #(reset! step-id "params")
+                     :active      (= "params" @step-id)
+                     }
+            ]]
+          [ui/Segment {:attached true, :loading @loading?}
+           (case @step-id
+             "summary" [deployment-summary]
+             "template-list" [deployment-template-list]
+             "resources" [deployment-resources]
+             "params" [deployment-params]
+             nil)]
+          #_[ui/Segment
+             [deployment-template-details]]]
 
-       [ui/ModalActions
-        [uix/Button {:text     (@tr [:cancel]),
-                     :on-click hide-fn
-                     }]
-        [uix/Button {:text     (@tr [:deploy]), :primary true,
-                     :on-click #(do (hide-fn) (submit-fn))
-                     }]]])))
+         [ui/ModalActions
+          [uix/Button {:text     (@tr [:cancel]),
+                       :on-click hide-fn
+                       }]
+          [uix/Button {:text     (@tr [:deploy]), :primary true,
+                       :on-click #(do (hide-fn) (submit-fn))
+                       }]]]))))
 
 (defn module-resources
   []
