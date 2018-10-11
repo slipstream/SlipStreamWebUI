@@ -209,7 +209,6 @@
        username (subscribe [::authn-subs/username])
        error-message (subscribe [::authn-subs/error-message])
        success-message (subscribe [::authn-subs/success-message])
-       {:keys [baseURI]} @cep
        tr (subscribe [::i18n-subs/tr])]
 
     [ui/Modal
