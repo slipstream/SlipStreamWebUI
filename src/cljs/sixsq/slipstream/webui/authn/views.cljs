@@ -48,7 +48,8 @@
 
 (defn reset-password [tr]
   [[:div {:style {:text-align "right"}}
-         [:a {:on-click (fn []
+         [:a {:style {:cursor "pointer"}
+              :on-click (fn []
                            (dispatch [::authn-events/close-modal])
                            (dispatch [::authn-events/set-selected-method-group nil])
                            (dispatch [::authn-events/set-form-id nil])
@@ -201,7 +202,6 @@
 
 
 (defn reset-password-modal
-  "Modal that holds the authentication (login or sign up) forms."
   []
   (let [open-modal (subscribe [::authn-subs/open-modal])
        form-id (subscribe [::authn-subs/form-id])
