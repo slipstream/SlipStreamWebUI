@@ -43,7 +43,7 @@
                   :format          (ajax/url-request-format)
                   :response-format (ajax/text-response-format {:keywords? true})
                   :on-success      [::set-success-message]
-                  :on-failure      [::set-errormessage]}}))
+                  :on-failure      [::set-error-message]}}))
 
 
 (reg-event-db
