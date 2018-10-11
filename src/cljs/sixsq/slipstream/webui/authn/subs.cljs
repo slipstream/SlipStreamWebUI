@@ -7,11 +7,6 @@
 
 
 (reg-sub
-  ::username
-  ::authn-spec/username)
-
-
-(reg-sub
   ::open-modal
   ::authn-spec/open-modal)
 

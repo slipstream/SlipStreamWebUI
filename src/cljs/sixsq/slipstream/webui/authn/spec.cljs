@@ -11,8 +11,6 @@
 
 (s/def ::session (s/nilable any?))
 
-(s/def ::username (s/nilable any?))
-
 (s/def ::current-user-params (s/nilable any?))
 
 (s/def ::error-message (s/nilable string?))
@@ -27,7 +25,6 @@
 
 (s/def ::db (s/keys :req [::open-modal
                           ::selected-method-group
-                          ::username
                           ::session
                           ::current-user-params
                           ::error-message
@@ -39,7 +36,6 @@
 (def defaults
   {::open-modal            nil
    ::selected-method-group nil
-   ::username              nil
    ::session               nil
    ::current-user-params   nil
    ::error-message         nil

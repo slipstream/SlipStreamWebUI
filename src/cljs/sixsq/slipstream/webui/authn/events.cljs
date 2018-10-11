@@ -47,12 +47,6 @@
 
 
 (reg-event-db
-  ::username
-  (fn [db [_ username]]
-    (assoc db ::authn-spec/username username)))
-
-
-(reg-event-db
   ::set-current-user-params
   (fn [db [_ user]]
     (assoc db ::authn-spec/current-user-params user)))

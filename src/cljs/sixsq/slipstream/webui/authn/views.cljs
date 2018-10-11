@@ -201,12 +201,13 @@
                    [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:login-link]))]])))))
 
 
+(def username (r/atom nil))
+
 (defn reset-password-modal
   []
   (let [open-modal (subscribe [::authn-subs/open-modal])
        form-id (subscribe [::authn-subs/form-id])
        cep (subscribe [::cimi-subs/cloud-entry-point])
-       username (subscribe [::authn-subs/username])
        error-message (subscribe [::authn-subs/error-message])
        success-message (subscribe [::authn-subs/success-message])
        tr (subscribe [::i18n-subs/tr])]
@@ -246,7 +247,7 @@
                        :iconPosition "left"
                        :required     true
                        :autoComplete "off"
-                       :on-change    #(dispatch [::authn-events/username (-> % .-target .-value)])}]
+                       :on-change     (ui-callback/value #(reset! username %))}]
 
         [:div {:style {:padding "10px 0"} } (@tr [:reset-password-inst])]]
 
@@ -255,6 +256,7 @@
        [uix/Button
          {:text     (@tr [:reset-password])
           :positive true
+          :disabled (str/blank? @username)
           :on-click #(do
                         (.preventDefault %)
                         (dispatch [::authn-events/reset-password username]))}]]]))
