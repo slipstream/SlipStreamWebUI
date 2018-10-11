@@ -206,12 +206,11 @@
 (defn reset-password-modal
   []
   (let [open-modal (subscribe [::authn-subs/open-modal])
-       form-id (subscribe [::authn-subs/form-id])
-       cep (subscribe [::cimi-subs/cloud-entry-point])
-       error-message (subscribe [::authn-subs/error-message])
-       success-message (subscribe [::authn-subs/success-message])
-       loading? (subscribe [::authn-subs/loading?])
-       tr (subscribe [::i18n-subs/tr])]
+        cep (subscribe [::cimi-subs/cloud-entry-point])
+        error-message (subscribe [::authn-subs/error-message])
+        success-message (subscribe [::authn-subs/success-message])
+        loading? (subscribe [::authn-subs/loading?])
+        tr (subscribe [::i18n-subs/tr])]
 
     [ui/Modal
       {:id        "reset-password-modal"
