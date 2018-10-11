@@ -210,7 +210,6 @@
        error-message (subscribe [::authn-subs/error-message])
        success-message (subscribe [::authn-subs/success-message])
        {:keys [baseURI]} @cep
-       form-id "reset-password-modal-form"
        tr (subscribe [::i18n-subs/tr])]
 
     [ui/Modal
