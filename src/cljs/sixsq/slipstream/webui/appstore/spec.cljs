@@ -22,6 +22,10 @@
 (s/def ::selected-deployment-template any?)
 (s/def ::deployment-templates (s/nilable (s/coll-of any? :kind vector?)))
 
+(s/def ::loading-credentials? boolean?)
+(s/def ::selected-credential any?)
+(s/def ::credentials (s/nilable (s/coll-of any? :kind vector?)))
+
 (s/def ::db (s/keys :req [::modules
                           ::full-text-search
                           ::parent-path-search
@@ -33,7 +37,10 @@
                           ::deploy-modal-visible?
                           ::loading-deployment-templates?
                           ::selected-deployment-template
-                          ::deployment-templates]))
+                          ::deployment-templates
+                          ::loading-credentials?
+                          ::selected-credential
+                          ::credentials]))
 
 (def defaults {::modules                       nil
                ::paths                         []
@@ -46,4 +53,7 @@
                ::deploy-modal-visible?         false
                ::loading-deployment-templates? false
                ::selected-deployment-template  nil
-               ::deployment-templates          nil})
+               ::deployment-templates          nil
+               ::loading-credentials?          false
+               ::selected-credential           nil
+               ::credentials                   nil})

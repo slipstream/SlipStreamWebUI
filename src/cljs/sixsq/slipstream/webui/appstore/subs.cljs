@@ -32,6 +32,7 @@
   ::deploy-modal-visible?
   ::appstore-spec/deploy-modal-visible?)
 
+
 (reg-sub
   ::loading-deployment-templates?
   ::appstore-spec/loading-deployment-templates?)
@@ -46,6 +47,24 @@
   ::deployment-templates
   ::appstore-spec/deployment-templates)
 
+
 (reg-sub
   ::deploy-module
   ::appstore-spec/deploy-module)
+
+
+(reg-sub
+  ::loading-credentials?
+  ::appstore-spec/loading-credentials?)
+
+
+(reg-sub
+  ::selected-credential
+  ::appstore-spec/selected-credential)
+
+
+(reg-sub
+  ::credentials
+  ::appstore-spec/credentials)
+
+

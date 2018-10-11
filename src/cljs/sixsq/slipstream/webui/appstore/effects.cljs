@@ -41,6 +41,18 @@
 
 
 (reg-fx
+  ::get-credentials
+  (fn [[client callback]]
+    (when client
+      (go
+        (let [credential-filter (str "type^='cloud-cred'")
+              credentials (-> (<! (cimi/search client "credentials" {:$filter credential-filter}))
+                            :credentials)]
+
+          (callback (or credentials [])))))))
+
+
+(reg-fx
   ::deploy
   (fn [[client {:keys [id] :as deployment-template} callback]]
     (go

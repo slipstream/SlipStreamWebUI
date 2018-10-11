@@ -4,7 +4,6 @@
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.appstore.events :as appstore-events]
     [sixsq.slipstream.webui.appstore.subs :as appstore-subs]
-    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
@@ -13,11 +12,10 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [taoensso.timbre :as log]
     [sixsq.slipstream.webui.utils.general :as general-utils]
-    [sixsq.slipstream.webui.utils.general :as utils]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.form-fields :as ff]))
-
+    [sixsq.slipstream.webui.utils.form-fields :as ff]
+    [sixsq.slipstream.webui.appstore.utils :as utils]))
 
 
 (defn refresh-button
@@ -69,8 +67,7 @@
                 ))))))))
 
 (defn control-bar []
-  (let [tr (subscribe [::i18n-subs/tr])
-        cep (subscribe [::cimi-subs/cloud-entry-point])]
+  (let [tr (subscribe [::i18n-subs/tr])]
     [:div
      [ui/Menu {:attached "top", :borderless true}
       [refresh-button]
@@ -96,24 +93,23 @@
 (defn format-module
   [{:keys [id name description type parentPath logo] :as module}]
   (let [tr (subscribe [::i18n-subs/tr])]
-    (fn [{:keys [id name description type parentPath logo] :as module}]
-      ^{:key id}
-      [ui/Card
-       (when logo
-         [ui/Image {:src   (:href logo),
-                    :style {:width      "auto"
-                            :height     "100px"
-                            :object-fit "contain"}}])
-       [ui/CardContent
-        [ui/CardHeader {:style {:word-wrap "break-word"}}
-         [ui/Icon {:name (category-icon type)}]
-         (or name id)]
-        [ui/CardMeta {:style {:word-wrap "break-word"}} parentPath]
-        [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]]
-       [ui/Button {:fluid    true
-                   :primary  true
-                   :on-click #(dispatch [::appstore-events/open-deploy-modal module])}
-        (@tr [:deploy])]])))
+    ^{:key id}
+    [ui/Card
+     (when logo
+       [ui/Image {:src   (:href logo)
+                  :style {:width      "auto"
+                          :height     "100px"
+                          :object-fit "contain"}}])
+     [ui/CardContent
+      [ui/CardHeader {:style {:word-wrap "break-word"}}
+       [ui/Icon {:name (category-icon type)}]
+       (or name id)]
+      [ui/CardMeta {:style {:word-wrap "break-word"}} parentPath]
+      [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]]
+     [ui/Button {:fluid    true
+                 :primary  true
+                 :on-click #(dispatch [::appstore-events/open-deploy-modal module])}
+      (@tr [:deploy])]]))
 
 
 (defn modules-cards-group
@@ -157,30 +153,16 @@
                  (mapv deployment-template-list-item @deployment-templates)))))
 
 
-(defn deployment-template-details
-  []
-  (let [template (subscribe [::appstore-subs/selected-deployment-template])
-        text (reagent/atom (utils/edn->json (or @template {})))]
-    (fn []
-      (let [json-str (utils/edn->json (or @template {}))]
-        (reset! text json-str)
-        [:pre @text]
-
-        ;; FIXME: Correct problem where the editor doesn't see external changes to the text.
-        #_[editor/json-editor text]))))
-
 (defn deployment-summary
   []
   (let [deploy-module (subscribe [::appstore-subs/deploy-module])]
     (let [{:keys [id name description path]} @deploy-module]
-      [:div
-       #_[format-module @deploy-module]
-       [ui/ListSA
-        [ui/ListItem id]
-        [ui/ListItem name]
-        [ui/ListItem description]
-        [ui/ListItem path]
-        ]])))
+      [ui/ListSA
+       [ui/ListItem id]
+       [ui/ListItem name]
+       [ui/ListItem description]
+       [ui/ListItem path]
+       ])))
 
 
 (defn deployment-resources
@@ -192,19 +174,6 @@
    ])
 
 
-(defn template
-  []
-  (let [template (subscribe [::appstore-subs/selected-deployment-template])
-        text (reagent/atom (utils/edn->json (or @template {})))]
-    (fn []
-      (let [json-str (utils/edn->json (or @template {}))]
-        (reset! text json-str)
-        [:pre @text]
-
-        ;; FIXME: Correct problem where the editor doesn't see external changes to the text.
-        #_[editor/json-editor text]))))
-
-
 (defn as-form-input
   [{:keys [parameter description value] :as param}]
   (let [template (subscribe [::appstore-subs/selected-deployment-template])]
@@ -214,20 +183,13 @@
      [ui/Input
       {:type      "text"
        :name      parameter
+       :value     (or value "")
        :read-only false
        :fluid     true
        :on-blur   (ui-callback/input-callback (fn [new-value]
-                                                (let [updated-tpl (->> @template
-                                                                       :module
-                                                                       :content
-                                                                       :inputParameters
-                                                                       (remove #(= parameter (:parameter %)))
-                                                                       (cons {:parameter   parameter
-                                                                              :description description
-                                                                              :value       new-value})
-                                                                       vec
-                                                                       (assoc-in @template [:module :content :inputParameters]))]
+                                                (let [updated-tpl (utils/update-parameter-in-template parameter new-value @template)]
                                                   (dispatch [::appstore-events/set-selected-deployment-template updated-tpl]))))}]]))
+
 
 (defn deployment-params
   []
@@ -237,13 +199,35 @@
                    (map as-form-input params))))))
 
 
+(defn credential-list-item
+  [{:keys [id name description created] :as credential}]
+  (let [selected-credential (subscribe [::appstore-subs/selected-credential])]
+    ^{:key id}
+    (let [{selected-id :id} @selected-credential
+          icon-name (if (= id selected-id) "check circle outline" "circle outline")]
+      [ui/ListItem {:on-click #(dispatch [::appstore-events/set-selected-credential credential])}
+       [ui/ListIcon {:name icon-name, :size "large", :vertical-align "middle"}]
+       [ui/ListContent
+        [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
+        (or description "")]])))
+
+
+(defn credential-list
+  []
+  (let [credentials (subscribe [::appstore-subs/credentials])]
+    (vec (concat [ui/ListSA {:divided   true
+                             :relaxed   true
+                             :selection true}]
+                 (mapv credential-list-item @credentials)))))
+
+
 (defn deploy-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::appstore-subs/deploy-modal-visible?])
         deploy-module (subscribe [::appstore-subs/deploy-module])
         loading? (subscribe [::appstore-subs/loading-deployment-templates?])
-        step-id (reagent/atom "params")]
+        step-id (reagent/atom "summary")]
     (fn []
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
             submit-fn #(dispatch [::appstore-events/deploy])]
@@ -255,43 +239,49 @@
 
          [ui/ModalContent {:scrolling true}
           [ui/StepGroup {:attached "top"}
-           [ui/Step {:icon        "check"
-                     :title       "summary"
-                     :description "one desc"
-                     :on-click    #(reset! step-id "summary")
-                     :active      (= "summary" @step-id)
+           [ui/Step {:icon     "check"
+                     :title    "summary"
+                     ;:description "An overview of the application to be deployed."
+                     :on-click #(reset! step-id "summary")
+                     :active   (= "summary" @step-id)
                      }
             ]
-           [ui/Step {:icon        "check"
-                     :title       "template"
-                     :description "one desc"
-                     :on-click    #(reset! step-id "template-list")
-                     :active      (= "template-list" @step-id)
+           [ui/Step {:icon     "check"
+                     :title    "templates"
+                     ;:description "Storage for deployment information."
+                     :on-click #(reset! step-id "templates")
+                     :active   (= "templates" @step-id)
                      }
             ]
-           [ui/Step {:icon        "check"
-                     :title       "resources"
-                     :description "one desc"
-                     :on-click    #(reset! step-id "resources")
-                     :active      (= "resources" @step-id)
+           #_[ui/Step {:icon     "check"
+                       :title    "offers"
+                       ;:description "Resource constraints and service offers."
+                       :on-click #(reset! step-id "offers")
+                       :active   (= "offers" @step-id)
+                       }
+              ]
+           [ui/Step {:icon     "check"
+                     :title    "credentials"
+                     ;:description "Infrastructure credentials to use for the deployment."
+                     :on-click #(reset! step-id "credentials")
+                     :active   (= "credentials" @step-id)
                      }
             ]
-           [ui/Step {:icon        "check"
-                     :title       "parameters"
-                     :description "one desc"
-                     :on-click    #(reset! step-id "params")
-                     :active      (= "params" @step-id)
+           [ui/Step {:icon     "check"
+                     :title    "parameters"
+                     ;:description "Input parameters for the application."
+                     :on-click #(reset! step-id "parameters")
+                     :active   (= "parameters" @step-id)
                      }
             ]]
           [ui/Segment {:attached true, :loading @loading?}
            (case @step-id
              "summary" [deployment-summary]
-             "template-list" [deployment-template-list]
-             "resources" [deployment-resources]
-             "params" [deployment-params]
-             nil)]
-          #_[ui/Segment
-             [deployment-template-details]]]
+             "templates" [deployment-template-list]
+             "offers" [deployment-resources]
+             "parameters" [deployment-params]
+             "credentials" [credential-list]
+             nil)]]
 
          [ui/ModalActions
           [uix/Button {:text     (@tr [:cancel]),

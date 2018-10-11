@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [clojure.string :as str]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.appstore.utils :as utils]))
 
 
 (reg-event-db
@@ -115,11 +116,16 @@
   ::open-deploy-modal
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ module]]
     (when client
-      {:db                                    (assoc db ::spec/deployment-templates nil
-                                                        ::spec/loading-deployment-templates? true
+      {:db                                    (assoc db ::spec/loading-deployment-templates? true
+                                                        ::spec/deployment-templates nil
+                                                        ::spec/selected-deployment-template nil
+                                                        ::spec/loading-credentials? true
+                                                        ::spec/credentials nil
+                                                        ::spec/selected-credential nil
                                                         ::spec/deploy-modal-visible? true
                                                         ::spec/deploy-module module)
-       ::appstore-fx/get-deployment-templates [client (:id module) #(dispatch [::set-deployment-templates %])]})))
+       ::appstore-fx/get-deployment-templates [client (:id module) #(dispatch [::set-deployment-templates %])]
+       ::appstore-fx/get-credentials [client #(dispatch [::set-credentials %])]})))
 
 
 (reg-event-db
@@ -128,11 +134,26 @@
     (assoc db ::spec/deploy-modal-visible? false)))
 
 
-
 (reg-event-db
   ::set-selected-deployment-template
   (fn [{:keys [::spec/deployment-templates] :as db} [_ template]]
     (assoc db ::spec/selected-deployment-template template)))
+
+
+(reg-event-db
+  ::set-credentials
+  (fn [{:keys [::spec/selected-deployment-template] :as db} [_ credentials]]
+
+    (assoc db ::spec/credentials credentials
+              ::spec/loading-credentials? false)))
+
+
+(reg-event-db
+  ::set-selected-credential
+  (fn [{:keys [::spec/selected-deployment-template ::spec/credentials] :as db} [_ {:keys [id] :as credential}]]
+    (let [updated-template (utils/update-parameter-in-template "credential.id" id selected-deployment-template)]
+      (assoc db ::spec/selected-credential credential
+                ::spec/selected-deployment-template updated-template))))
 
 
 (reg-event-db
@@ -152,8 +173,8 @@
 
 
 (reg-event-fx
-    ::deploy
-    (fn [{{:keys [::client-spec/client ::spec/selected-deployment-template]} :db :as cofx} _]
-      (when (and client (:id selected-deployment-template))
-        (assoc cofx ::appstore-fx/deploy
-                    [client selected-deployment-template #(dispatch [::history-evts/navigate (str "cimi/" %)])]))))
+  ::deploy
+  (fn [{{:keys [::client-spec/client ::spec/selected-deployment-template]} :db :as cofx} _]
+    (when (and client (:id selected-deployment-template))
+      (assoc cofx ::appstore-fx/deploy
+                  [client selected-deployment-template #(dispatch [::history-evts/navigate (str "cimi/" %)])]))))
