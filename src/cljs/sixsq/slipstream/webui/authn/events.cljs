@@ -37,6 +37,7 @@
 (reg-event-fx
   ::reset-password
   (fn [db [_ username]]
+    (dispatch [::set-loading])
     {:http-xhrio {:method          :post
                   :uri             "https://nuv.la/reset" ; FIXME: should use a configuration parameter for http://nuv.la, or move reset to /api
                   :params          {:username @username}
@@ -81,6 +82,18 @@
 
 
 (reg-event-db
+  ::clear-loading
+  (fn [db _]
+    (assoc db ::authn-spec/loading? false)))
+
+
+(reg-event-db
+  ::set-loading
+  (fn [db _]
+    (assoc db ::authn-spec/loading? true)))
+
+
+(reg-event-db
   ::set-error-message
   (fn [db [_ error-message]]
     (assoc db ::authn-spec/error-message error-message)))
@@ -95,12 +108,14 @@
 (reg-event-db
   ::set-success-message
   (fn [db [_ success-message]]
+    (dispatch [::clear-loading])
     (assoc db ::authn-spec/success-message success-message)))
 
 
 (reg-event-db
   ::clear-success-message
   (fn [db _]
+    (dispatch [::clear-loading])
     (assoc db ::authn-spec/success-message nil)))
 
 

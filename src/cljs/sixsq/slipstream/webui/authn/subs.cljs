@@ -22,6 +22,11 @@
 
 
 (reg-sub
+  ::loading?
+  ::authn-spec/loading?)
+
+
+(reg-sub
   ::current-user-params
   ::authn-spec/current-user-params)
 

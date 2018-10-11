@@ -210,6 +210,7 @@
        cep (subscribe [::cimi-subs/cloud-entry-point])
        error-message (subscribe [::authn-subs/error-message])
        success-message (subscribe [::authn-subs/success-message])
+       loading? (subscribe [::authn-subs/loading?])
        tr (subscribe [::i18n-subs/tr])]
 
     [ui/Modal
@@ -256,6 +257,7 @@
        [uix/Button
          {:text     (@tr [:reset-password])
           :positive true
+          :loading  @loading?
           :disabled (str/blank? @username)
           :on-click #(do
                         (.preventDefault %)

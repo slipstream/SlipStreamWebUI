@@ -23,6 +23,8 @@
 
 (s/def ::form-id (s/nilable string?))
 
+(s/def ::loading? boolean?)
+
 (s/def ::db (s/keys :req [::open-modal
                           ::selected-method-group
                           ::session
@@ -31,6 +33,7 @@
                           ::success-message
                           ::redirect-uri
                           ::server-redirect-uri
+                          ::loading?
                           ::form-id]))
 
 (def defaults
@@ -42,4 +45,5 @@
    ::success-message       nil
    ::redirect-uri          nil
    ::server-redirect-uri   (str @config/path-prefix "/profile")
+   ::loading?              false
    ::form-id               nil})
