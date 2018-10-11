@@ -240,20 +240,20 @@
           [:p @success-message]])
 
         [ui/FormInput {:name         "username"
-                      :type         "text"
-                      :placeholder  "Username"
-                      :icon         "user"
-                      :iconPosition "left"
-                      :required     true
-                      :autoComplete "off"
-                      :on-change #(dispatch [::authn-events/username (-> % .-target .-value)])}]
+                       :type         "text"
+                       :placeholder  "Username"
+                       :icon         "user"
+                       :iconPosition "left"
+                       :required     true
+                       :autoComplete "off"
+                       :on-change    #(dispatch [::authn-events/username (-> % .-target .-value)])}]
 
         [:div {:style {:padding "10px 0"} } (@tr [:reset-password-inst])]]
 
       [ui/ModalActions 
        [switch-panel-link :reset-password]
        [uix/Button
-         {:text     (str/capitalize (@tr [:reset-password]))
+         {:text     (@tr [:reset-password])
           :positive true
           :on-click #(do
                         (.preventDefault %)
