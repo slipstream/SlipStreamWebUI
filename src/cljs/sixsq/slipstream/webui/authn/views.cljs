@@ -220,7 +220,8 @@
        :on-close  (fn []
                     (dispatch [::authn-events/close-modal])
                     (dispatch [::authn-events/clear-success-message])
-                    (dispatch [::authn-events/clear-error-message]))}
+                    (dispatch [::authn-events/clear-error-message])
+                    (reset! username nil))}
 
       [ui/ModalHeader (@tr [:reset-password])]
 
