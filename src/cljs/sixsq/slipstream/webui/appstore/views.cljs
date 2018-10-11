@@ -105,12 +105,11 @@
                             :height     "100px"
                             :object-fit "contain"}}])
        [ui/CardContent
-        [ui/CardHeader
+        [ui/CardHeader {:style {:word-wrap "break-word"}}
          [ui/Icon {:name (category-icon type)}]
          (or name id)]
-        [ui/CardMeta {:style {:text-overflow "ellipsis"
-                              :overflow      "hidden"}} parentPath]
-        [ui/CardDescription description]]
+        [ui/CardMeta {:style {:word-wrap "break-word"}} parentPath]
+        [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]]
        [ui/Button {:fluid    true
                    :primary  true
                    :on-click #(dispatch [::appstore-events/open-deploy-modal module])}
