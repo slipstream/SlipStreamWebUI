@@ -1,5 +1,6 @@
 (ns sixsq.slipstream.webui.authn.views
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.authn.events :as authn-events]
@@ -45,13 +46,25 @@
   {:key id, :text label, :value id})
 
 
+(defn reset-password [tr]
+  [[:div {:style {:text-align "right"}}
+         [:a {:style {:cursor "pointer"}
+              :on-click (fn []
+                           (dispatch [::authn-events/close-modal])
+                           (dispatch [::authn-events/set-selected-method-group nil])
+                           (dispatch [::authn-events/set-form-id nil])
+                           (dispatch [::authn-events/open-modal :reset-password]))}
+             (@tr [:forgot-password])]]])
+
+
 (defn authn-method-form
   "Renders the form for a particular authentication (login or sign up) method.
    The fields are taken from the method description."
   [methods collections-kw]
   (let [cep (subscribe [::cimi-subs/cloud-entry-point])
         server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])
-        form-id (subscribe [::authn-subs/form-id])]
+        form-id (subscribe [::authn-subs/form-id])
+        tr (subscribe [::i18n-subs/tr])]
     (fn [methods collections-kw]
       (let [dropdown? (> (count methods) 1)
             method (u/select-method-by-id @form-id methods)
@@ -76,11 +89,12 @@
                                :value         @form-id
                                :fluid         true
                                :selection     true
-
                                :close-on-blur true
                                :on-change     (ui-callback/dropdown ::authn-events/set-form-id)}])]
 
-                          (mapv form-component inputs-method)))]))))))
+                          (mapv form-component inputs-method)
+                          (when (= "internal" (:method method))
+                                (reset-password tr))))]))))))
 
 
 (defn login-method-form
@@ -171,6 +185,7 @@
     (fn [modal-kw]
       (let [other-modal (case modal-kw
                           :login :signup
+                          :reset-password :login
                           :signup :login)
             f (fn []
                 (dispatch [::authn-events/close-modal])
@@ -180,8 +195,73 @@
         (case modal-kw
           :login [:span (@tr [:no-account?]) " "
                   [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:signup-link]))]]
+          :reset-password [:span (@tr [:already-registered?]) " "
+                           [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:login-link]))]]
           :signup [:span (@tr [:already-registered?]) " "
                    [:a {:on-click f :style {:cursor "pointer"}} (str (@tr [:login-link]))]])))))
+
+
+(def username (r/atom nil))
+
+(defn reset-password-modal
+  []
+  (let [open-modal (subscribe [::authn-subs/open-modal])
+        cep (subscribe [::cimi-subs/cloud-entry-point])
+        error-message (subscribe [::authn-subs/error-message])
+        success-message (subscribe [::authn-subs/success-message])
+        loading? (subscribe [::authn-subs/loading?])
+        tr (subscribe [::i18n-subs/tr])]
+
+    [ui/Modal
+      {:id        "reset-password-modal"
+       :size      :tiny
+       :open      (= @open-modal :reset-password)
+       :closeIcon true
+       :on-close  (fn []
+                    (dispatch [::authn-events/close-modal])
+                    (dispatch [::authn-events/clear-success-message])
+                    (dispatch [::authn-events/clear-error-message])
+                    (reset! username nil))}
+
+      [ui/ModalHeader (@tr [:reset-password])]
+
+      [ui/ModalContent
+
+        (when @error-message
+          [ui/Message {:negative  true
+                      :size      "tiny"
+                      :onDismiss #(dispatch [::authn-events/clear-error-message])}
+          [ui/MessageHeader (@tr [:reset-password-error])]
+          [:p @error-message]])
+
+        (when @success-message
+          [ui/Message {:negative  false
+                      :size      "tiny"
+                      :onDismiss #(dispatch [::authn-events/clear-success-message])}
+          [ui/MessageHeader (@tr [:reset-password-success])]
+          [:p @success-message]])
+
+        [ui/FormInput {:name         "username"
+                       :type         "text"
+                       :placeholder  "Username"
+                       :icon         "user"
+                       :iconPosition "left"
+                       :required     true
+                       :autoComplete "off"
+                       :on-change     (ui-callback/value #(reset! username %))}]
+
+        [:div {:style {:padding "10px 0"} } (@tr [:reset-password-inst])]]
+
+      [ui/ModalActions 
+       [switch-panel-link :reset-password]
+       [uix/Button
+         {:text     (@tr [:reset-password])
+          :positive true
+          :loading  @loading?
+          :disabled (str/blank? @username)
+          :on-click #(do
+                        (.preventDefault %)
+                        (dispatch [::authn-events/reset-password username]))}]]]))
 
 
 (defn authn-modal
@@ -216,6 +296,10 @@
 
 (defn modal-login []
   [authn-modal "modal-login-id" :login login-form-container])
+
+
+(defn modal-reset-password []
+  [reset-password-modal])
 
 
 (defn modal-signup []
@@ -284,6 +368,7 @@
                                :href       (str "mailto:support%40sixsq%2Ecom?subject=%5BSlipStream%5D%20Support%20"
                                                 "question%20%2D%20Not%20logged%20in")}]]))]
        [modal-login]
+       [modal-reset-password]
        [modal-signup]])))
 
 

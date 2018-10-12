@@ -76,6 +76,7 @@
                  [reagent]
 
                  [re-frame]
+                 [day8.re-frame/http-fx]
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
@@ -88,7 +89,7 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/react-chartjs-2 "2.7.0-0"]]
+                 [cljsjs/react-chartjs-2]]
 
   :source-paths ["src/clj" "src/cljs"]
 

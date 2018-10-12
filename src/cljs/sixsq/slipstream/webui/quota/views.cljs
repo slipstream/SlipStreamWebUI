@@ -7,10 +7,10 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.quota.events :as quota-events]
     [sixsq.slipstream.webui.quota.subs :as quota-subs]
+    [sixsq.slipstream.webui.utils.general :as general-utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.general :as general-utils]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn control-bar
