@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.plot.plot
   (:require
-    [reagent.core :as reagent]
-    [cljsjs.react-chartjs-2]))
+    [cljsjs.react-chartjs-2]
+    [reagent.core :as reagent]))
 
 
 ;; setup global defaults
