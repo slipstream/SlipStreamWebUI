@@ -1,12 +1,7 @@
 # SlipStream Web UI
 
 An application that provides a graphical interface to cloud management
-services that use the CIMI interface.  The tortured acronym comes from
-"Cimi resoUrces via a Browser InterfaCe".
-
-It is an alpha-level **prototype**, but in regular use by the
-developers.  Feedback (as GitHub issues) on the UI, source code, and
-underlying technologies is welcome.
+services that use the CIMI interface.
 
 ## Frameworks and Libraries
 
@@ -49,15 +44,20 @@ $ open /Applications/Google\ Chrome.app \
        --args --disable-web-security --user-data-dir
 ```
 
-For **Safari**, first enable the "Develop" menu.  Open the Safari
-preferences, click the "Advanced" tab, and then activate the "Show
-Develop menu in menu bar" option.  Once the "Develop" menu is visible,
-choose the "Disable Cross-Origin Restrictions" option.
+For **Safari**, first enable the "Develop" menu:
+
+ * Open the Safari preferences,
+ * Click the "Advanced" tab, and
+ * Then activate the "Show Develop menu in menu bar" option.
+
+Once the "Develop" menu is visible, **choose the "Disable Cross-Origin
+Restrictions" option**.
 
 There may be **FireFox** plugins that will allow you to disable the
-CORS protections.  Easier solution is to use Chrome or Safari.
+CORS protections.  The easier solution is to use Chrome or Safari.
 
 ### Development
+
 The development environment requires [`lein`](https://leiningen.org).
 
 Once `lein` is installed, you can setup the interactive environment by
