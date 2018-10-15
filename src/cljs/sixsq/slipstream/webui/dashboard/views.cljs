@@ -14,8 +14,7 @@
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
 
 
 (defn as-statistic [{:keys [label value]}]
@@ -34,10 +33,6 @@
 
 (defn vms-deployments []
   (let [selected-tab (subscribe [::dashboard-subs/selected-tab])]
-    (dispatch [::main-events/action-interval {:action    :start
-                                              :id        :dashboard-tab
-                                              :frequency 15000
-                                              :event     [::dashboard-events/fetch-tab-records]}])
     (fn []
       [ui/Tab
        {:activeIndex (active-index @selected-tab)
@@ -67,6 +62,10 @@
   (let [tr (subscribe [::i18n-subs/tr])
         statistics (subscribe [::dashboard-subs/statistics])
         loading? (subscribe [::dashboard-subs/loading?])]
+    (dispatch [::main-events/action-interval {:action    :start
+                                              :id        :dashboard-tab
+                                              :frequency 15000
+                                              :event     [::dashboard-events/fetch-tab-records]}])
     (fn []
       [ui/Container {:fluid true}
        [ui/Menu {:borderless true}
@@ -84,8 +83,10 @@
 
 
 (defn ^:export set-cloud-filter [cloud]
-  (log/debug "dispatch open-modal for authn view")
   (dispatch [::dashboard-events/set-filtered-cloud cloud]))
+
+(defn ^:export fetch-tab-records []
+  (dispatch [::dashboard-events/fetch-tab-records]))
 
 
 (defmethod panel/render :dashboard

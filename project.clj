@@ -1,4 +1,4 @@
-(def +version+ "3.59-SNAPSHOT")
+(def +version+ "3.62-SNAPSHOT")
 
 (def package-json-template
   "
@@ -14,7 +14,7 @@
   }
   ")
 
-(defproject com.sixsq.slipstream/SlipStreamWebUI "3.59-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.62-SNAPSHOT"
 
   :description "Web Browser User Interface"
 
@@ -32,7 +32,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.11"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.12"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
@@ -76,6 +76,7 @@
                  [reagent]
 
                  [re-frame]
+                 [day8.re-frame/http-fx]
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
@@ -88,7 +89,7 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/chartjs "2.7.0-0"]]
+                 [cljsjs/react-chartjs-2]]
 
   :source-paths ["src/clj" "src/cljs"]
 

@@ -98,15 +98,10 @@
              (assoc ::dashboard-spec/filtered-cloud (if (= cloud "All Clouds") nil cloud))
              (assoc ::dashboard-spec/loading-tab? true))}))
 
-(defn page-count [record-displayed element-count]
-  (cond-> element-count
-          true (quot record-displayed)
-          (pos? (mod element-count record-displayed)) inc))
-
 (reg-event-db
   ::set-virtual-machines
   (fn [{:keys [::dashboard-spec/records-displayed] :as db} [_ virtual-machines]]
-    (let [total-pages (page-count records-displayed (:count virtual-machines))
+    (let [total-pages (general-utils/total-pages (:count virtual-machines) records-displayed)
           new-db (-> db
                      (assoc ::dashboard-spec/virtual-machines virtual-machines)
                      (assoc ::dashboard-spec/total-pages total-pages)
@@ -118,7 +113,7 @@
   ::set-deployments
   (fn [{:keys [::dashboard-spec/records-displayed] :as db} [_ deployments]]
     (let [deployments-count (get-in deployments [:runs :totalCount] 0)
-          total-pages (page-count records-displayed deployments-count)
+          total-pages (general-utils/total-pages deployments-count records-displayed)
           new-db (-> db
                      (assoc ::dashboard-spec/deployments deployments)
                      (assoc ::dashboard-spec/total-pages total-pages)

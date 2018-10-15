@@ -1,9 +1,7 @@
 (ns sixsq.slipstream.webui.plot.plot
   (:require
-    [cljsjs.chartjs]
-    [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as reagent]
-    [sixsq.slipstream.webui.utils.general :as general]))
+    [cljsjs.react-chartjs-2]
+    [reagent.core :as reagent]))
 
 
 ;; setup global defaults
@@ -17,47 +15,25 @@
 (-> chartjs-global .-elements .-rectangle .-borderWidth (set! 2))
 (-> chartjs-global .-legend .-display (set! false))
 
-;; All animation turned off.  See comment below about plot updates.
-(-> chartjs-global .-animation (set! false))
 
+(defn adapt-chartjs-component [tag]
+  (reagent/adapt-react-class
+    (aget js/ReactChartjs2 tag)))
 
-(defn chartjs-plot-inner
-  [plot-data]
-  (let [plot-id (str "chartjs-" (general/random-element-id))
-        chartjs-instance (atom nil)
-        destroy-chart (fn []
-                        (some-> @chartjs-instance .destroy))
-        new-chart (fn [plot-data]
-                    (destroy-chart)
-                    (reset! chartjs-instance
-                            (some-> (.getElementById js/document plot-id)
-                                    (js/Chart. (clj->js plot-data)))))]
-    (reagent/create-class
-      {:display-name "chartjs-plot"
-       :component-did-mount
-                     (fn [comp]
-                       (new-chart plot-data))
-       :reagent-render
-                     (fn [plot-data]
+(def HorizontalBar (adapt-chartjs-component "HorizontalBar"))
 
-                       ;; This is a brutal way of updating data.  It recreates the chart
-                       ;; instance each time the data changes.  The plot animation is
-                       ;; turned off globally to make the transitions between the plots
-                       ;; less disturbing.
-                       ;;
-                       ;; The correct solution is to mutate the chart object data directly.
-                       ;; However, all my attempts to do this from clojurescript have
-                       ;; not worked.  The data is correctly updated, but the .update
-                       ;; function doesn't actually update the plot visualization.
-                       (new-chart plot-data)
+;(def Bar (adapt-component "Bar"))
 
-                       [:div {:class "chartjs-container"
-                              :style {:position "relative", :width "100%", :height "100%"}}
-                        [:canvas {:id plot-id}]])
-       :component-will-unmount
-                     destroy-chart})))
+;(def Doughnut (adapt-component "Doughnut"))
 
+;(def Pie (adapt-component "Pie"))
 
-(defn chartjs-plot
-  [plot-data]
-  [chartjs-plot-inner plot-data])
+;(def Line (adapt-component "Line"))
+
+;(def Radar (adapt-component "Radar"))
+
+;(def Polar (adapt-component "Polar"))
+
+;(def Bubble (adapt-component "Bubble"))
+
+;(def Scatter (adapt-component "Scatter"))

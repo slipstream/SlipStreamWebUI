@@ -24,6 +24,12 @@
             unhealthy (into {} (map #(vector % false) stale))
             healthy (into {} (map #(vector % true) active))
             healthy? (merge unhealthy healthy)]
-        (callback {:stale-count stale-count
+        (callback {:stale-count  stale-count
                    :active-count active-count
-                   :healthy? healthy?})))))
+                   :healthy?     healthy?})))))
+
+
+(reg-fx
+  ::get-nuvlabox-records
+  (fn [_]
+    (dispatch [:sixsq.slipstream.webui.nuvlabox.events/get-nuvlabox-records])))

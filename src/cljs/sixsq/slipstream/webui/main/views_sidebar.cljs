@@ -55,7 +55,7 @@
   (let [show? (subscribe [::main-subs/sidebar-open?])
         is-admin? (subscribe [::authn-subs/is-admin?])]
 
-    [ui/Sidebar {:as        (ui/array-get "Menu")
+    [ui/Sidebar {:as        (ui/array-get-semantic "Menu")
                  :className "medium thin"
                  :vertical  true
                  :inverted  true
@@ -73,6 +73,6 @@
        [item :usage "usage" "history"]
        [item :deployment "deployment" "cloud"]
        [item :application "application" "sitemap"]
-       (when @is-admin? [item :nuvlabox-ctrl "nuvlabox" "desktop"])
+       [item :nuvlabox-ctrl "nuvlabox" "desktop"]
        (when @is-admin? [item :metrics "metrics" "bar chart"])
        [item :cimi "cimi" "code"]]]]))
