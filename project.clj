@@ -1,19 +1,5 @@
 (def +version+ "3.62-SNAPSHOT")
 
-(def package-json-template
-  "
-  {
-      \"name\": \"CUBIC\",
-      \"version\": \"3.49-SNAPSHOT\",
-      \"main\": \"resources/electron-main.js\",
-      \"devDependencies\": {
-          \"electron\": \"^1.8.4\",
-          \"electron-packager\": \"^12.0.0\",
-          \"electron-installer-dmg\": \"0.2.1\"
-      }
-  }
-  ")
-
 (defproject com.sixsq.slipstream/SlipStreamWebUI "3.62-SNAPSHOT"
 
   :description "Web Browser User Interface"
@@ -43,12 +29,7 @@
                                     "target"
                                     "test/js"
                                     "resources/public/css/version.css"
-                                    "resources/public/css/codemirror.css"
-                                    "resources/electron-main.js"
-                                    "resources/public/js/electron-renderer.js"
-                                    "resources/public/js/electron-renderer.js.map"
-                                    "resources/public/js/electron-renderer-out"
-                                    "resources/public/js/electron-release"]
+                                    "resources/public/css/codemirror.css"]
 
   :auto-clean false
 
@@ -60,10 +41,7 @@
 
   :filegen [{:data        ["#release-version:after {content: '" ~+version+ "';}\n"]
              :template-fn #(apply str %)
-             :target      "target/version.css"}
-            {:data        [~package-json-template ~+version+]
-             :template-fn #(apply format %)
-             :target      "./package.json"}]
+             :target      "target/version.css"}]
 
   :resource {:resource-paths
              [["target/cljsjs/codemirror/cljsjs/codemirror/development/codemirror.css"
@@ -128,51 +106,6 @@
                     :output-dir    "target/test/webui/out"
                     :optimizations :whitespace}}
 
-    ;;
-    ;; electron UI builds
-    ;;
-
-    {:source-paths ["src/cljs"]
-     :id           "electron-dev"
-     :compiler     {:output-to      "resources/main.js"
-                    :output-dir     "resources/public/js/electron-dev"
-                    :optimizations  :simple
-                    :pretty-print   true
-                    :cache-analysis true}}
-    #_{:source-paths ["src/cljs"]
-       :id           "frontend-dev"
-       :compiler     {:output-to      "resources/public/js/electron-ui-core.js"
-                      :output-dir     "resources/public/js/electron-ui-out"
-                      :source-map     true
-                      :asset-path     "js/electron-ui-out"
-                      :optimizations  :none
-                      :cache-analysis true
-                      :main           "dev.core"}}
-    {:source-paths ["src/cljs"]
-     :id           "electron-release"
-     :compiler     {:output-to       "resources/electron-main.js"
-                    :output-dir      "resources/public/js/electron-release"
-                    :optimizations   :simple #_:advanced    ;; FIXME: advanced doesn't work
-                    :pretty-print    true
-                    :cache-analysis  true
-                    ;:infer-externs  true
-                    :main            "sixsq.slipstream.webui.electron.main"
-                    :closure-defines {sixsq.slipstream.webui.electron.main/devtools? true
-                                      goog.DEBUG                                     true}}}
-    {:source-paths ["src/cljs"]
-     :id           "frontend-release"
-
-     :compiler     {:output-to       "resources/public/js/electron-renderer.js"
-                    :output-dir      "resources/public/js/electron-renderer-out"
-                    :source-map      "resources/public/js/electron-renderer.js.map"
-                    :optimizations   :simple #_:advanced    ;; FIXME: advanced doesn't work
-                    :cache-analysis  true
-                    ;:infer-externs  true
-                    :main            "sixsq.slipstream.webui.electron.renderer"
-                    :closure-defines {sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
-                                      sixsq.slipstream.webui.utils.defines/CONTEXT  ""
-                                      goog.DEBUG                                    true}}}
-
     ]}
 
   :profiles
@@ -190,7 +123,4 @@
             "dev"       ["do" "prepare" ["figwheel" "dev"]]
             "install"   ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
             "test-auto" ["doo" "nashorn" "test"]
-            "test"      ["test-auto" "once"]
-            "electron"  ["do" ["clean"] "prepare"
-                         ["cljsbuild" "once" "electron-release"]
-                         ["cljsbuild" "once" "frontend-release"]]})
+            "test"      ["test-auto" "once"]})
