@@ -50,6 +50,9 @@
   (render-component-when-present "modal-signup" authn-views/modal-signup
                                  :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
                                                          (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
+  (render-component-when-present "modal-reset-password" authn-views/modal-reset-password
+                                 :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
+                                                         (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
   (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
   (render-component-when-present "usage" usage-views/usage)
   (render-component-when-present "deployment-detail-reports" deployment-detail-views/reports-list))
