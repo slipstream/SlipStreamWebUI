@@ -25,6 +25,7 @@
       [uix/MenuItemWithIcon
        {:name      (@tr [:refresh])
         :icon-name "refresh"
+        :position "right"
         :on-click  #(dispatch [::appstore-events/get-modules])}])))
 
 
@@ -70,15 +71,14 @@
   (let [tr (subscribe [::i18n-subs/tr])]
     [:div
      [ui/Menu {:attached "top", :borderless true}
-      [refresh-button]
       [ui/MenuItem
        [breadcrumb-path]]
-      [ui/MenuMenu {:position "right"}
+      [ui/MenuMenu
        [ui/MenuItem
         [ui/Input {:placeholder (@tr [:search])
                    :icon        "search"
-                   :on-change   (ui-callback/input-callback #(dispatch [::appstore-events/set-full-text-search %]))}]]
-       ]]]))
+                   :on-change   (ui-callback/input-callback #(dispatch [::appstore-events/set-full-text-search %]))}]]]
+      [refresh-button]]]))
 
 (defn category-icon
   [category]
@@ -91,7 +91,7 @@
 
 
 (defn format-module
-  [{:keys [id name description type parentPath logo] :as module}]
+  [{:keys [id name description type parentPath logo version] :as module}]
   (let [tr (subscribe [::i18n-subs/tr])]
     ^{:key id}
     [ui/Card
@@ -105,11 +105,19 @@
        [ui/Icon {:name (category-icon type)}]
        (or name id)]
       [ui/CardMeta {:style {:word-wrap "break-word"}} parentPath]
-      [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]]
-     [ui/Button {:fluid    true
-                 :primary  true
-                 :on-click #(dispatch [::appstore-events/open-deploy-modal module])}
-      (@tr [:deploy])]]))
+      [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]
+      [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} version]]
+      [:div {:class "ui buttons"}
+      [ui/Button {:fluid    false
+                  :primary  false
+                  :on-click #(dispatch [::appstore-events/open-deploy-modal module])}
+       "View"]
+       [:div {:class "or"}]
+       [ui/Button {:fluid    false
+                   :primary  true
+                   :on-click #(dispatch [::appstore-events/open-deploy-modal module])}
+        (@tr [:deploy])]
+      ]]))
 
 
 (defn modules-cards-group

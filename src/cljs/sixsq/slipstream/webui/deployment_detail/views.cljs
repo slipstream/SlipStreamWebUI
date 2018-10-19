@@ -167,6 +167,57 @@
         [cc/collapsible-segment (@tr [:parameters]) contents]))))
 
 
+(defn card [name i completed]
+  (let [tr (subscribe [::i18n-subs/tr])]
+    [ui/Card
+     [ui/CardContent {:as "h1"}
+      [ui/CardHeader [ui/Header {:as "h1"}
+                      (str name "." i)]]
+      [ui/CardDescription      
+        [:div
+          [ui/Icon {:name "external"}]
+          [:a {:href "http://123.234.1.1:2300"} "123.234.1.1:2300"]]
+        [:div
+          [ui/Icon {:name "terminal"}]
+          [:a {:href "ssh://123.234.1.1"} "123.234.1.1"]]
+        [:div "energy-saving: 23%"]
+        [:div "refresh-rate: 45 secs"]
+        [:div "password: ••••••" [:a 
+        (let [icon [ui/Icon {:name "clipboard outline"}]]
+        [ui/Popup
+         {:trigger        (r/as-element icon)
+          :content        "copy to clipboard"
+          :on             "hover"
+          :hide-on-scroll true}])]]
+        [:div "Installing apache..."]
+        [:div [:a {:href "#apache.1"} "details"]]
+        (when (true? completed)
+          [:div {:align "right"} [ui/Icon {:name "check"}]])]]]))
+
+
+(defn summary-section
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        resource (subscribe [::deployment-detail-subs/resource])
+        selected-section (r/atom nil)]
+    (fn []
+      [cc/collapsible-segment "summary"
+        [ui/Input {:placeholder "filter"
+                   :icon        "search"}]
+        [:div {:style {:padding "10px"}}]
+        [ui/CardGroup {:centered true}
+         [card "apache" 1 true]
+         [card "apache" 2 true]
+         [card "apache" 3 false]
+         [card "client" 1 false]
+         [card "client" 2 true]]
+         [:div {:align "right" :style {:padding-top "20px"}}
+         [uix/Pagination {:size         "tiny"
+                          :totalPages   5
+                          :activePage   1
+                          }]]])))
+      
+
 (defn report-item
   [{:keys [id component created state] :as report}]
   ^{:key id} [:li
@@ -272,6 +323,7 @@
        {:name      (@tr [:refresh])
         :icon-name "refresh"
         :loading?  @loading?
+        :position  "right"
         :on-click  #(dispatch [::deployment-detail-events/get-deployment @runUUID])}])))
 
 
@@ -299,14 +351,39 @@
            (constantly nil)])))))
 
 
+(defn quick-links
+  [] [:div "toto"]
+  [ui/ButtonGroup ;{:primary true}
+   [ui/Button {:aria-label "quicklink"}
+    [ui/Icon {:name "external"}] "123.234.1.2"]
+   [ui/Dropdown {:inline    true
+                 :button    true
+                 :pointing  "top right"
+                 :className "icon"}
+        [ui/DropdownMenu
+          [ui/DropdownItem
+            {:key      "sign-out"
+             :text     "apache.1: 123.234.1.2"
+             :icon     "external"}]
+          [ui/DropdownItem
+            {:key      "sign-out"
+             :text     "apache.1: 123.234.1.2"
+             :icon     "external"}]
+          [ui/DropdownItem
+            {:key      "sign-out"
+             :text     "apache.1: 123.234.1.2"
+             :icon     "external"}]]]])
+
 (defn service-link-button
   []
   (let [resource (subscribe [::deployment-detail-subs/resource])]
     (fn []
       (let [parameters-kv (grouped-parameters @resource)
             global-params (get parameters-kv "ss")
-            state (second (first (filter #(= "ss:state" (first %)) global-params)))
-            link (second (first (filter #(= "ss:url.service" (first %)) global-params)))]
+            state "Ready" ;(second (first (filter #(= "ss:state" (first %)) global-params)))
+            link "http:123.234.111.22"] ;(second (first (filter #(= "ss:url.service" (first %)) global-params)))]
+            [uix/MenuItemWithIcon
+        (quick-links)]
         (when (and link (= "Ready" state))
           [uix/MenuItemWithIcon
            {:name      (general/truncate link)
@@ -318,10 +395,60 @@
 (defn menu
   []
   [ui/Menu {:borderless true}
-   [refresh-button]
+   ;[service-link-button]
    [terminate-button]
-   [service-link-button]])
+   (quick-links)
+   [refresh-button]])
 
+
+(defn timeline
+  []
+  (let [step-id (r/atom "summary")]
+  [ui/StepGroup {:fluid true}
+   [ui/Step {:icon     "check"
+             :title    "Pre-install"
+             :description "5:45"
+             :on-click #(reset! step-id "summary")
+             :active   false
+             }
+    ]
+   [ui/Step {:icon     "check"
+             :title    "Install packages"
+             :description "11:23"
+             :on-click #(reset! step-id "templates")
+             :active   (= "templates" @step-id)
+             }
+    ]
+   [ui/Step {:icon     "check"
+               :title    "Post-install"
+               :description "0:23"
+               :on-click #(reset! step-id "offers")
+               :active   (= "offers" @step-id)
+               }
+      ]
+   [ui/Step {:icon     "rocket"
+             :title    "Deployment"
+             :description "Running for 3:45"
+             :on-click #(reset! step-id "credentials")
+             :active   true
+             }
+    ]
+  [ui/Step {:icon     ""
+            :title    "Reporting"
+            :description "Gathering for posterity."
+            :on-click #(reset! step-id "credentials")
+            :active   false
+            :disabled true
+            }
+   ]
+   [ui/Step {:icon     ""
+             :title    "Ready"
+             :description "All systems go."
+             :on-click #(reset! step-id "parameters")
+             :active   false
+             :disabled true
+             }
+    ]]))
 
 (defn deployment-detail
   []
@@ -341,6 +468,8 @@
              [menu]]
             (when (and @runUUID @resource correct-resource?) ;; FIXME: Don't show information for a different resource.
               [[metadata-section]
+               [timeline]
+               [summary-section]
                [parameters-section]
                [events-section]
                [reports-section]])))))))
