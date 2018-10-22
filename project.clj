@@ -18,7 +18,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.12"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.13"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
