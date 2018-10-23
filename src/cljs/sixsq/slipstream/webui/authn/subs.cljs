@@ -22,6 +22,11 @@
 
 
 (reg-sub
+  ::loading?
+  ::authn-spec/loading?)
+
+
+(reg-sub
   ::current-user-params
   ::authn-spec/current-user-params)
 
@@ -50,6 +55,11 @@
 (reg-sub
   ::error-message
   ::authn-spec/error-message)
+
+
+(reg-sub
+  ::success-message
+  ::authn-spec/success-message)
 
 
 (reg-sub
