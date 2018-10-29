@@ -37,7 +37,7 @@
 
   :pom-location "target/"
 
-  :unpack-resources {:resource [cljsjs/codemirror "5.31.0-0"] :extract-path "target/cljsjs/codemirror"}
+  :unpack-resources {:resource [cljsjs/codemirror "5.40.2-1"] :extract-path "target/cljsjs/codemirror"}
 
   :filegen [{:data        ["#release-version:after {content: '" ~+version+ "';}\n"]
              :template-fn #(apply str %)
