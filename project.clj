@@ -29,7 +29,8 @@
                                     "target"
                                     "test/js"
                                     "resources/public/css/version.css"
-                                    "resources/public/css/codemirror.css"]
+                                    "resources/public/css/codemirror.css"
+                                    "figwheel_server.log"]
 
   :auto-clean false
 
