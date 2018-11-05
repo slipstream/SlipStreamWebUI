@@ -75,4 +75,5 @@
        [item :application "application" "sitemap"]
        [item :nuvlabox-ctrl "nuvlabox" "desktop"]
        (when @is-admin? [item :metrics "metrics" "bar chart"])
+       [item :documentation "documentation" "book"]
        [item :cimi "cimi" "code"]]]]))
