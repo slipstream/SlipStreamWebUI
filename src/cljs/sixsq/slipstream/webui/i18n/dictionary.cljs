@@ -10,6 +10,7 @@
         :about                    "about"
         :about-subtitle           "This software is brought to you"
         :active?                  "active only?"
+        :actions                  "actions"
         :add                      "add"
         :aggregation              "aggregation"
         :all-credentials          "all credentials"
@@ -147,6 +148,7 @@
    :fr {:lang                   "français"
 
         :add                    "ajouter"
+        :actions                "actions"
         :active?                "uniquement actif ?"
         :aggregation            "aggréger"
         :all-users              "tous les utilisateurs"

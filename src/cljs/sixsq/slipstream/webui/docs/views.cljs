@@ -9,25 +9,9 @@
     [sixsq.slipstream.webui.docs.subs :as subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.docs-detail.views :as docs-details-view]
-    [taoensso.timbre :as log]
     [sixsq.slipstream.webui.utils.general :as general-utils]))
-
-
-#_(defn control-bar
-    []
-    (let [tr (subscribe [::i18n-subs/tr])]
-      (dispatch [__quota-events/get-quotas])
-      (fn []
-        [:div
-         [ui/Menu {:attached "top", :borderless true}
-          [uix/MenuItemWithIcon
-           {:name      (@tr [:refresh])
-            :icon-name "refresh"
-            :on-click  #(dispatch [__quota-events/get-quotas])}]]])))
-
 
 
 (defn row-fn [{:keys [id] :as entry}]
@@ -61,37 +45,30 @@
            [ui/TableHeaderCell (@tr [:name])]
            [ui/TableHeaderCell (@tr [:description])]]]
          (vec (concat [ui/TableBody]
-                      (map row-fn (sort-by :name (vals @documents)))))]
-        #_[:pre (with-out-str (cljs.pprint/pprint @documents))]]
-       )]))
-
-
+                      (map row-fn (sort-by :name (vals @documents)))))]])]))
 
 
 (defn documents-view
   []
-  (dispatch [::events/get-documents])
-  (fn []
-    [ui/Container {:fluid true}
-     #_[control-bar]
-     [documents-table]]))
+  [ui/Container {:fluid true}
+   [documents-table]])
 
 
 (defmethod panel/render :documentation
   [_]
   [documents-view])
 
+
 (defn documentation-resource
   []
   (let [path (subscribe [::main-subs/nav-path])
-        query-params (subscribe [::main-subs/nav-query-params])
         documents (subscribe [::subs/documents])]
+    (dispatch [::events/get-documents])
     (fn []
       (let [n (count @path)
             children (case n
                        1 [[documents-view]]
-                       2 [[docs-details-view/docs-detail
-                           (get @documents (str "resource-metadata/"  (second @path)))]]
+                       2 [[docs-details-view/docs-detail (str "resource-metadata/" (second @path))]]
                        [[documents-view]])]
         (vec (concat [ui/Segment style/basic] children))))))
 
