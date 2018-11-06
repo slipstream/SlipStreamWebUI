@@ -3,6 +3,7 @@
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
   (:require
+    ["react-copy-to-clipboard" :as copy-to-clipboard]
     ["react-datepicker" :as date-picker]
     ["react-markdown" :as react-markdown]
     ["semantic-ui-react" :as semantic]
@@ -164,3 +165,9 @@
 ;;
 
 (def ReactMarkdown (reagent/adapt-react-class react-markdown))
+
+;;
+;; copy
+;;
+
+(def CopyToClipboard (reagent/adapt-react-class copy-to-clipboard/CopyToClipboard))
