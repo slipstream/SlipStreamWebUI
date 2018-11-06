@@ -87,18 +87,25 @@
                     :preloads             [devtools.preload
                                            day8.re-frame-10x.preload]
                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_"         true
-                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://185.19.31.69"
+                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://185.19.28.151"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
-                    :external-config      {:devtools/config {:features-to-install :all}}}}
+                    :external-config      {:devtools/config {:features-to-install :all}}
+
+                    :npm-deps             {:react-markdown "4.0.3"}
+                    :install-deps         true}}
 
     {:id           "prod"
      :source-paths ["src/cljs"]
      :compiler     {:main            sixsq.slipstream.webui.core
                     :output-to       "resources/public/js/webui.js"
                     :optimizations   :advanced
+                    :infer-externs   true
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
+                    :pretty-print    false
+
+                    :npm-deps        {:react-markdown "4.0.3"}
+                    :install-deps    true}}
 
     {:id           "test"
      :source-paths ["src/cljs" "test/cljs"]
