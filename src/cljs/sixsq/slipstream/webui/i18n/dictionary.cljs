@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.i18n.dictionary
   ;; the moment.js locale must be included for any supported language
   (:require
-    [cljsjs.moment.locale.fr]))
+    ["moment/locale/fr"]))
 
 
 (def dictionary

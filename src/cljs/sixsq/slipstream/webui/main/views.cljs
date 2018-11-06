@@ -120,16 +120,16 @@
     (let [show? (subscribe [::main-subs/sidebar-open?])
           cep (subscribe [::cimi-subs/cloud-entry-point])]
       (if @cep
-        [ui/Responsive {:as            "div"
-                        :fire-on-mount true
-                        :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
-         [ui/SidebarPushable {:as    (ui/array-get-semantic "Segment")
-                              :basic true}
-          [sidebar/menu]
-          [ui/SidebarPusher
-           [ui/Container (cond-> {:id "webui-main" :fluid true}
-                                 @show? (assoc :className "sidebar-visible"))
-            [header]
-            [contents]
-            [footer]]]]]
-        [ui/Container [ui/Loader {:active true :size "massive"}]]))))
+          [ui/Responsive {:as            "div"
+                          :fire-on-mount true
+                          :on-update     (responsive/callback #(dispatch [::main-events/set-device %]))}
+           [ui/SidebarPushable {:as    ui/SegmentRaw
+                                :basic true}
+            [sidebar/menu]
+            [ui/SidebarPusher
+             [ui/Container (cond-> {:id "webui-main" :fluid true}
+                                   @show? (assoc :className "sidebar-visible"))
+              [header]
+              [contents]
+              [footer]]]]]
+          [ui/Container [ui/Loader {:active true :size "massive"}]]))))

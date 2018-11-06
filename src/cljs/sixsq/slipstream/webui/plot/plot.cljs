@@ -1,13 +1,14 @@
 (ns sixsq.slipstream.webui.plot.plot
   (:require
-    [cljsjs.react-chartjs-2]
+    ["chart.js" :as chartjs]
+    ["react-chartjs-2" :as chartjs2]
     [reagent.core :as reagent]))
 
 
 ;; setup global defaults
 (def dodger-blue "rgba(30, 144, 255, 0.5)")
 (def dodger-blue-opaque "rgba(30, 144, 255, 1.00)")
-(def chartjs-global (.-global (.-defaults js/Chart)))
+(def chartjs-global (.-global (.-defaults chartjs)))
 
 (-> chartjs-global .-defaultColor (set! dodger-blue-opaque))
 (-> chartjs-global .-elements .-rectangle .-backgroundColor (set! dodger-blue))
@@ -16,24 +17,21 @@
 (-> chartjs-global .-legend .-display (set! false))
 
 
-(defn adapt-chartjs-component [tag]
-  (reagent/adapt-react-class
-    (aget js/ReactChartjs2 tag)))
+(def HorizontalBar (reagent/adapt-react-class chartjs2/HorizontalBar))
 
-(def HorizontalBar (adapt-chartjs-component "HorizontalBar"))
+;(def Bar (reagent/adapt-react-class chartjs2/Bar))
 
-;(def Bar (adapt-component "Bar"))
+;(def Doughnut (reagent/adapt-react-class chartjs2/Doughnut))
 
-;(def Doughnut (adapt-component "Doughnut"))
+;(def Pie (reagent/adapt-react-class chartjs2/Pie))
 
-;(def Pie (adapt-component "Pie"))
+;(def Line (reagent/adapt-react-class chartjs2/Line))
 
-;(def Line (adapt-component "Line"))
+;(def Radar (reagent/adapt-react-class chartjs2/Radar))
 
-;(def Radar (adapt-component "Radar"))
+;(def Polar (reagent/adapt-react-class chartjs2/Polar))
 
-;(def Polar (adapt-component "Polar"))
+;(def Bubble (reagent/adapt-react-class chartjs2/Bubble))
 
-;(def Bubble (adapt-component "Bubble"))
+;(def Scatter (reagent/adapt-react-class chartjs2/Scatter))
 
-;(def Scatter (adapt-component "Scatter"))

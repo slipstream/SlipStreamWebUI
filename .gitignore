@@ -2,25 +2,19 @@
 *.iml
 .idea
 .nrepl*
-out
 target
 .DS_Store
-*/.cljs_rhino_repl/*
-figwheel_server.log
 .rebel_readline_history
-doo-index.html
 .lein-*
-resources/public/js/webui.js
+
 resources/public/css/version.css
 resources/public/css/codemirror.css
+resources/public/css/react-datepicker.min.css
 
-resources/electron-main.js
-resources/public/js/electron-renderer.js
-resources/public/js/electron-renderer.js.map
-resources/public/js/electron-renderer-out
-
-resources/public/js/electron-release
+resources/public/js
 
 package.json
 package-lock.json
 node_modules
+
+.shadow-cljs
