@@ -2,16 +2,15 @@
   "Mapping of names of Semantic UI components to the Soda Ash wrappers. This
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
-  (:require                                                 ;[soda-ash.core :as sa]
+  (:require
     ["semantic-ui-react" :as semantic]
     [reagent.core :as reagent]
-    ["react-datepicker" :as date-picker]
-    [taoensso.timbre :as log]))
+    ["react-datepicker" :as date-picker]))
 
 
-;;(def Accordion (adapt-component semantic/Accordion))
-;;(def AccordionTitle (adapt-component semantic/AccordionTitle))
-;;(def AccordionContent (adapt-component semantic/AccordionContent))
+;;(def Accordion (reagent/adapt-react-class semantic/Accordion))
+;;(def AccordionTitle (reagent/adapt-react-class semantic/AccordionTitle))
+;;(def AccordionContent (reagent/adapt-react-class semantic/AccordionContent))
 
 (def Breadcrumb (reagent/adapt-react-class semantic/Breadcrumb))
 (def BreadcrumbDivider (reagent/adapt-react-class semantic/BreadcrumbDivider))
@@ -45,19 +44,19 @@
 (def DropdownItem (reagent/adapt-react-class semantic/DropdownItem))
 (def DropdownMenu (reagent/adapt-react-class semantic/DropdownMenu))
 
-;;(def Feed (adapt-component semantic/Feed))
-;;(def FeedContent (adapt-component semantic/FeedContent))
-;;(def FeedDate (adapt-component semantic/FeedDate))
-;;(def FeedEvent (adapt-component semantic/FeedEvent))
-;;(def FeedExtra (adapt-component semantic/FeedExtra))
-;;(def FeedLabel (adapt-component semantic/FeedLabel))
-;;(def FeedLike (adapt-component semantic/FeedLike))
-;;(def FeedMeta (adapt-component semantic/FeedMeta))
-;;(def FeedSummary (adapt-component semantic/FeedSummary))
-;;(def FeedUser (adapt-component semantic/FeedUser))
+;;(def Feed (reagent/adapt-react-class semantic/Feed))
+;;(def FeedContent (reagent/adapt-react-class semantic/FeedContent))
+;;(def FeedDate (reagent/adapt-react-class semantic/FeedDate))
+;;(def FeedEvent (reagent/adapt-react-class semantic/FeedEvent))
+;;(def FeedExtra (reagent/adapt-react-class semantic/FeedExtra))
+;;(def FeedLabel (reagent/adapt-react-class semantic/FeedLabel))
+;;(def FeedLike (reagent/adapt-react-class semantic/FeedLike))
+;;(def FeedMeta (reagent/adapt-react-class semantic/FeedMeta))
+;;(def FeedSummary (reagent/adapt-react-class semantic/FeedSummary))
+;;(def FeedUser (reagent/adapt-react-class semantic/FeedUser))
 
 (def Form (reagent/adapt-react-class semantic/Form))
-;;(def FormButton (adapt-component semantic/FormButton))
+;;(def FormButton (reagent/adapt-react-class semantic/FormButton))
 (def FormDropdown (reagent/adapt-react-class semantic/FormDropdown))
 (def FormField (reagent/adapt-react-class semantic/FormField))
 (def FormGroup (reagent/adapt-react-class semantic/FormGroup))
@@ -65,27 +64,27 @@
 (def FormSelect (reagent/adapt-react-class semantic/FormSelect))
 
 (def Grid (reagent/adapt-react-class semantic/Grid))
-;;(def GridColumn (adapt-component semantic/GridColumn))
-;;(def GridRow (adapt-component semantic/GridRow))
+;;(def GridColumn (reagent/adapt-react-class semantic/GridColumn))
+;;(def GridRow (reagent/adapt-react-class semantic/GridRow))
 
 (def Icon (reagent/adapt-react-class semantic/Icon))
 (def IconGroup (reagent/adapt-react-class semantic/IconGroup))
 
-;;(def Item (adapt-component semantic/Item))
-;;(def ItemContent (adapt-component semantic/ItemContent))
-;;(def ItemDescription (adapt-component semantic/ItemDescription))
-;;(def ItemExtra (adapt-component semantic/ItemExtra))
-;;(def ItemGroup (adapt-component semantic/ItemGroup))
-;;(def ItemHeader (adapt-component semantic/ItemHeader))
-;;(def ItemImage (adapt-component semantic/ItemImage))
-;;(def ItemMeta (adapt-component semantic/ItemMeta))
+;;(def Item (reagent/adapt-react-class semantic/Item))
+;;(def ItemContent (reagent/adapt-react-class semantic/ItemContent))
+;;(def ItemDescription (reagent/adapt-react-class semantic/ItemDescription))
+;;(def ItemExtra (reagent/adapt-react-class semantic/ItemExtra))
+;;(def ItemGroup (reagent/adapt-react-class semantic/ItemGroup))
+;;(def ItemHeader (reagent/adapt-react-class semantic/ItemHeader))
+;;(def ItemImage (reagent/adapt-react-class semantic/ItemImage))
+;;(def ItemMeta (reagent/adapt-react-class semantic/ItemMeta))
 
 (def Image (reagent/adapt-react-class semantic/Image))
 
 (def Input (reagent/adapt-react-class semantic/Input))
 
 (def Header (reagent/adapt-react-class semantic/Header))
-;;(def HeaderContent (adapt-component semantic/HeaderContent))
+;;(def HeaderContent (reagent/adapt-react-class semantic/HeaderContent))
 (def HeaderSubheader (reagent/adapt-react-class semantic/HeaderSubheader))
 
 (def Label (reagent/adapt-react-class semantic/Label))
@@ -109,8 +108,8 @@
 (def Message (reagent/adapt-react-class semantic/Message))
 (def MessageHeader (reagent/adapt-react-class semantic/MessageHeader))
 (def MessageContent (reagent/adapt-react-class semantic/MessageContent))
-;;(def MessageList (adapt-component semantic/MessageList))
-;;(def MessageItem (adapt-component semantic/MessageItem))
+;;(def MessageList (reagent/adapt-react-class semantic/MessageList))
+;;(def MessageItem (reagent/adapt-react-class semantic/MessageItem))
 
 (def Modal (reagent/adapt-react-class semantic/Modal))
 (def ModalActions (reagent/adapt-react-class semantic/ModalActions))
@@ -124,14 +123,14 @@
 (def PopupContent (reagent/adapt-react-class semantic/PopupContent))
 (def Progress (reagent/adapt-react-class semantic/Progress))
 
-;;(def Rail (adapt-component semantic/Rail))
-;;(def Ref (adapt-component semantic/Ref))
+;;(def Rail (reagent/adapt-react-class semantic/Rail))
+;;(def Ref (reagent/adapt-react-class semantic/Ref))
 
 (def Responsive (reagent/adapt-react-class semantic/Responsive))
 
 (def SegmentRaw semantic/Segment)
 (def Segment (reagent/adapt-react-class semantic/Segment))
-;;(def SegmentGroup (adapt-component semantic/SegmentGroup))
+;;(def SegmentGroup (reagent/adapt-react-class semantic/SegmentGroup))
 
 (def Sidebar (reagent/adapt-react-class semantic/Sidebar))
 (def SidebarPushable (reagent/adapt-react-class semantic/SidebarPushable))
