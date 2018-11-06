@@ -68,7 +68,8 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/react-chartjs-2]]
+                 [cljsjs/react-chartjs-2]
+                 [markdown-to-hiccup "0.3.0"]]
 
   :source-paths ["src/clj" "src/cljs"]
 
@@ -90,15 +91,22 @@
                                            sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
-                    :external-config      {:devtools/config {:features-to-install :all}}}}
+                    :external-config      {:devtools/config {:features-to-install :all}}
+
+                    :npm-deps             {:react-markdown "4.0.3"}
+                    :install-deps         true}}
 
     {:id           "prod"
      :source-paths ["src/cljs"]
      :compiler     {:main            sixsq.slipstream.webui.core
                     :output-to       "resources/public/js/webui.js"
                     :optimizations   :advanced
+                    :infer-externs   true
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
+                    :pretty-print    false
+
+                    :npm-deps        {:react-markdown "4.0.3"}
+                    :install-deps    true}}
 
     {:id           "test"
      :source-paths ["src/cljs" "test/cljs"]

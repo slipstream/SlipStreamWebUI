@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
     [sixsq.slipstream.webui.deployment.spec :as deployment]
+    [sixsq.slipstream.webui.docs.spec :as docs]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
     [sixsq.slipstream.webui.legacy-application.spec :as legacy-application]
     [sixsq.slipstream.webui.main.spec :as main]
@@ -26,6 +27,7 @@
                      ::cimi-detail/db
                      ::client/db
                      ::dashboard/db
+                     ::docs/db
                      ::i18n/db
                      ::legacy-application/db
                      ::main/db
@@ -44,6 +46,7 @@
          deployment/defaults
          client/defaults
          dashboard/defaults
+         docs/defaults
          i18n/defaults
          legacy-application/defaults
          main/defaults
