@@ -1,12 +1,12 @@
 (ns sixsq.slipstream.webui.docs-detail.views
   (:require
+    [markdown-to-hiccup.core :as m]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.docs.subs :as docs-subs]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.style :as style]
-    [markdown-to-hiccup.core :as m]))
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn metadata-section

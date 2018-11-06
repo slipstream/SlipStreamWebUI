@@ -3,9 +3,9 @@
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
   (:require
+    ["react-datepicker" :as date-picker]
     ["semantic-ui-react" :as semantic]
-    [reagent.core :as reagent]
-    ["react-datepicker" :as date-picker]))
+    [reagent.core :as reagent]))
 
 
 ;;(def Accordion (reagent/adapt-react-class semantic/Accordion))

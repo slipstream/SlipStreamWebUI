@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.webui.plot.plot
   (:require
-    ["react-chartjs-2" :as chartjs2]
     ["chart.js" :as chartjs]
+    ["react-chartjs-2" :as chartjs2]
     [reagent.core :as reagent]))
 
 

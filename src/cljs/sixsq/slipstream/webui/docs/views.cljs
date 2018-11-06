@@ -2,16 +2,16 @@
   (:require
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.docs.events :as events]
-    [sixsq.slipstream.webui.history.events :as history-events]
-    [sixsq.slipstream.webui.docs.subs :as subs]
-    [sixsq.slipstream.webui.main.subs :as main-subs]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.docs-detail.views :as docs-details-view]
-    [sixsq.slipstream.webui.utils.general :as general-utils]))
+    [sixsq.slipstream.webui.docs.events :as events]
+    [sixsq.slipstream.webui.docs.subs :as subs]
+    [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.main.subs :as main-subs]
+    [sixsq.slipstream.webui.panel :as panel]
+    [sixsq.slipstream.webui.utils.general :as general-utils]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.style :as style]))
 
 
 (defn row-fn [{:keys [id] :as entry}]
