@@ -13,7 +13,6 @@ resources/public/css/react-datepicker.min.css
 
 resources/public/js
 
-package.json
 package-lock.json
 node_modules
 
