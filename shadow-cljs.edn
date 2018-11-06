@@ -15,7 +15,7 @@
                                            :after-load       sixsq.slipstream.webui.core/mount-root
                                            :preloads         [devtools.preload]}
 
-                        :compiler-options {:clojure-defines {sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"}}
+                        :compiler-options {:closure-defines {sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"}}
 
 
                         :release          {:compiler-options {:optimizations :advanced}}}}}

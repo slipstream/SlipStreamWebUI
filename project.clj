@@ -11,9 +11,6 @@
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
-            [lein-figwheel "0.5.16"]
-            [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
-            [lein-doo "0.1.10"]
             [lein-unpack-resources "0.1.1"]
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
@@ -27,10 +24,10 @@
 
   :clean-targets ^{:protect false} ["resources/public/js/"
                                     "target"
-                                    "test/js"
                                     "resources/public/css/version.css"
                                     "resources/public/css/codemirror.css"
-                                    "figwheel_server.log"]
+                                    "resources/public/css/react-datepicker.min.css"
+                                    "resources/public/css/codemirror.css"]
 
   :auto-clean false
 
@@ -38,98 +35,42 @@
 
   :pom-location "target/"
 
-  :unpack-resources {:resource [cljsjs/codemirror "5.40.2-1"] :extract-path "target/cljsjs/codemirror"}
-
   :filegen [{:data        ["#release-version:after {content: '" ~+version+ "';}\n"]
              :template-fn #(apply str %)
              :target      "target/version.css"}]
 
   :resource {:resource-paths
-             [["target/cljsjs/codemirror/cljsjs/codemirror/development/codemirror.css"
+             [["node_modules/react-datepicker/dist/react-datepicker.min.css"
+               {:target-path "resources/public/css/react-datepicker.min.css"}]
+              ["node_modules/codemirror/lib/codemirror.css"
                {:target-path "resources/public/css/codemirror.css"}]
               ["target/version.css"
                {:target-path "resources/public/css/version.css"}]]}
 
-  :dependencies [[org.clojure/clojure]
-                 [org.clojure/clojurescript]
-                 [reagent]
-
+  :dependencies [[reagent]
                  [re-frame]
                  [day8.re-frame/http-fx]
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
-                 #_[cljsjs/codemirror]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
-                 #_[cljsjs/semantic-ui-react]
-                 #_[cljsjs/moment]
-                 #_[cljsjs/react-datepicker]
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 #_[cljsjs/react-chartjs-2]
                  [markdown-to-hiccup "0.3.0"]]
 
-  :source-paths ["src/clj" "src/cljs" "test/clj"]
-
-  :test-paths ["test/clj" "test/cljs"]
-
-  :cljsbuild
-  {:builds
-   [{:id           "dev"
-     :source-paths ["src/cljs" "test/clj"]
-     :figwheel     {:on-jsload "sixsq.slipstream.webui.core/mount-root"}
-     :compiler     {:main                 sixsq.slipstream.webui.core
-                    :output-to            "resources/public/js/webui.js"
-                    :output-dir           "resources/public/js/out"
-                    :asset-path           "/js/out"
-                    :source-map-timestamp true
-                    :preloads             [devtools.preload
-                                           day8.re-frame-10x.preload]
-                    :closure-defines      {"re_frame.trace.trace_enabled_QMARK_"         true
-                                           sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
-                                           ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
-                                           goog.DEBUG                                    true}
-                    :external-config      {:devtools/config {:features-to-install :all}}}}
-
-    {:id           "prod"
-     :source-paths ["src/cljs"]
-     :compiler     {:main            sixsq.slipstream.webui.core
-                    :output-to       "resources/public/js/webui.js"
-                    :optimizations   :advanced
-                    :infer-externs   true
-                    :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
-
-    {:id           "test"
-     :source-paths ["src/cljs" "test/cljs"]
-     :compiler     {:main          sixsq.slipstream.webui.runner
-                    :output-to     "target/test/webui/webui-test.js"
-                    :output-dir    "target/test/webui/out"
-                    :optimizations :whitespace}}
-
-    ]}
+  :source-paths ["src/clj" "src/cljs"]
 
   :profiles
-  {:dev
-          {:dependencies [[org.clojure/clojure "1.9.0"]
-                          [org.clojure/clojurescript "1.10.339"]
-                          [binaryage/devtools "0.9.8"]
-                          [day8.re-frame/re-frame-10x]
-                          [ring]
-                          [ring/ring-defaults]
-                          [commons-io]                      ; dependency of ring
-                          [compojure]]
-           :figwheel     {:server-port  3000
-                          :ring-handler sixsq.slipstream.webui.dev_server/http-handler}}
+  {:dev   {:dependencies [[org.clojure/clojure]
+                          [org.clojure/clojurescript]
+                          [binaryage/devtools]]}
 
    :scljs {:dependencies [[thheller/shadow-cljs "2.6.14"]
                           [com.google.javascript/closure-compiler-unshaded "v20180910"]]}}
 
 
-  :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
-            "dev"       ["do" "prepare" ["figwheel" "dev"]]
-            "install"   ["do" "prepare" ["cljsbuild" "once" "prod"] ["install"]]
-            "test-auto" ["doo" "nashorn" "test"]
-            "test"      ["test-auto" "once"]})
+  :aliases {"prepare"   ["do" ["filegen"] ["resource"]]
+            "dev"       ["do" "prepare" ["with-profile" "+scljs" "run" "-m" "shadow.cljs.devtools.cli" "watch" "webui"]]
+            "install"   ["do" "prepare" ["with-profile" "+scljs" "run" "-m" "shadow.cljs.devtools.cli" "release" "webui"] ["install"]]})
