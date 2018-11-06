@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.utils.response
   "parses JSON responses from the CIMI API"
   (:require
+    [cljs.pprint :refer [pprint]]
     [sixsq.slipstream.webui.utils.general :as utils]
     [taoensso.timbre :as log]))
 
@@ -14,10 +15,10 @@
         (log/error document)
         (if (or status message resource-id)
           document
-          {:message (with-out-str (cljs.pprint/pprint document))}))
+          {:message (with-out-str (pprint document))}))
       (catch :default _
         {:message json-str}))
-    {:message (with-out-str (cljs.pprint/pprint json-str))}))
+    {:message (with-out-str (pprint json-str))}))
 
 
 (defn parse-ex-info
