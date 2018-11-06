@@ -91,10 +91,7 @@
                                            sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"
                                            ;'sixsq.slipstream.webui.utils.defines/CONTEXT     ""
                                            goog.DEBUG                                    true}
-                    :external-config      {:devtools/config {:features-to-install :all}}
-
-                    :npm-deps             {:react-markdown "4.0.3"}
-                    :install-deps         true}}
+                    :external-config      {:devtools/config {:features-to-install :all}}}}
 
     {:id           "prod"
      :source-paths ["src/cljs"]
@@ -103,10 +100,7 @@
                     :optimizations   :advanced
                     :infer-externs   true
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false
-
-                    :npm-deps        {:react-markdown "4.0.3"}
-                    :install-deps    true}}
+                    :pretty-print    false}}
 
     {:id           "test"
      :source-paths ["src/cljs" "test/cljs"]
