@@ -57,8 +57,7 @@
                  [com.taoensso/tempura]
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
-                 [camel-snake-kebab]
-                 [markdown-to-hiccup "0.3.0"]]
+                 [camel-snake-kebab]]
 
   :source-paths ["src/clj" "src/cljs"]
 
