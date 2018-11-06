@@ -2,17 +2,14 @@
 *.iml
 .idea
 .nrepl*
-out
 target
 .DS_Store
-*/.cljs_rhino_repl/*
-figwheel_server.log
 .rebel_readline_history
-doo-index.html
 .lein-*
 
 resources/public/css/version.css
 resources/public/css/codemirror.css
+resources/public/css/react-datepicker.min.css
 
 resources/public/js
 
