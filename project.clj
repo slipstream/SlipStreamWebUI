@@ -68,7 +68,8 @@
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/react-chartjs-2]]
+                 [cljsjs/react-chartjs-2]
+                 [markdown-to-hiccup "0.3.0"]]
 
   :source-paths ["src/clj" "src/cljs"]
 

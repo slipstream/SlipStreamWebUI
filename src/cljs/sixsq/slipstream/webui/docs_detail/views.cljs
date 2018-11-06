@@ -5,7 +5,8 @@
     [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [markdown-to-hiccup.core :as m]))
 
 
 (defn metadata-section
@@ -15,7 +16,7 @@
       [cc/metadata
        {:title       name
         :subtitle    id
-        :description description
+        :description (-> description m/md->hiccup m/component)
         :icon        "book"}])))
 
 
