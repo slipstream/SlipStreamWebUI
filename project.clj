@@ -59,19 +59,19 @@
                  [secretary]
                  [expound]
                  [com.taoensso/timbre]
-                 [cljsjs/codemirror]
+                 #_[cljsjs/codemirror]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [com.taoensso/tempura]
-                 [cljsjs/semantic-ui-react]
-                 [cljsjs/moment]
-                 [cljsjs/react-datepicker]
+                 #_[cljsjs/semantic-ui-react]
+                 #_[cljsjs/moment]
+                 #_[cljsjs/react-datepicker]
                  [funcool/promesa]
                  [com.taoensso/encore]                      ;; fix conflict, needed indirectly
                  [camel-snake-kebab]
-                 [cljsjs/react-chartjs-2]
+                 #_[cljsjs/react-chartjs-2]
                  [markdown-to-hiccup "0.3.0"]]
 
-  :source-paths ["src/clj" "src/cljs"]
+  :source-paths ["src/clj" "src/cljs" "test/clj"]
 
   :test-paths ["test/clj" "test/cljs"]
 
@@ -113,14 +113,20 @@
 
   :profiles
   {:dev
-   {:dependencies [[binaryage/devtools]
-                   [day8.re-frame/re-frame-10x]
-                   [ring]
-                   [ring/ring-defaults]
-                   [commons-io]                             ; dependency of ring
-                   [compojure]]
-    :figwheel     {:server-port  3000
-                   :ring-handler sixsq.slipstream.webui.dev_server/http-handler}}}
+          {:dependencies [[org.clojure/clojure "1.9.0"]
+                          [org.clojure/clojurescript "1.10.339"]
+                          [binaryage/devtools "0.9.8"]
+                          [day8.re-frame/re-frame-10x]
+                          [ring]
+                          [ring/ring-defaults]
+                          [commons-io]                      ; dependency of ring
+                          [compojure]]
+           :figwheel     {:server-port  3000
+                          :ring-handler sixsq.slipstream.webui.dev_server/http-handler}}
+
+   :scljs {:dependencies [[thheller/shadow-cljs "2.6.14"]
+                          [com.google.javascript/closure-compiler-unshaded "v20180910"]]}}
+
 
   :aliases {"prepare"   ["do" ["filegen"] ["unpack-resources"] ["resource"]]
             "dev"       ["do" "prepare" ["figwheel" "dev"]]

@@ -1,34 +1,34 @@
 (ns sixsq.slipstream.webui.utils.time
   (:require
-    [cljsjs.moment]
+    ["moment" :as moment]
     [clojure.string :as str]))
 
 
 (def ^:const default-locale "en")
 
 
-(def ^:private iso8601-format (.-ISO_8601 js/moment))
+(def ^:private iso8601-format (.-ISO_8601 moment))
 
 
 (defn now
   ([]
    (now default-locale))
   ([locale]
-   (.locale (js/moment) locale)))
+   (.locale (moment) locale)))
 
 
 (defn parse-iso8601
   ([iso8601]
    (parse-iso8601 iso8601 default-locale))
   ([iso8601 locale]
-   (js/moment iso8601 iso8601-format locale true)))
+   (moment iso8601 iso8601-format locale true)))
 
 
 (defn invalid
   ([]
    (invalid default-locale))
   ([locale]
-   (-> js/moment .invalid .clone (.locale locale) .format)))
+   (-> moment .invalid .clone (.locale locale) .format)))
 
 
 (defn ago
@@ -71,7 +71,7 @@
   ([start end]
    (let [start-moment (parse-iso8601 start)
          end-moment (parse-iso8601 end)]
-     (.duration js/moment (.diff end-moment start-moment true)))))
+     (.duration moment (.diff end-moment start-moment true)))))
 
 
 (defn delta-minutes

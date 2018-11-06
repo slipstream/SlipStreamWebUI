@@ -31,7 +31,7 @@
 
      NOTE: When using an endpoint other than the one serving the javascript code
            you MUST turn off the XSS protections of the browser."}
-  HOST_URL "")
+  HOST_URL "https://nuv.la")
 
 ;;
 ;;

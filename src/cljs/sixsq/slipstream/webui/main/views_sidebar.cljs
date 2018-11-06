@@ -55,7 +55,7 @@
   (let [show? (subscribe [::main-subs/sidebar-open?])
         is-admin? (subscribe [::authn-subs/is-admin?])]
 
-    [ui/Sidebar {:as        (ui/array-get-semantic "Menu")
+    [ui/Sidebar {:as        ui/MenuRaw
                  :className "medium thin"
                  :vertical  true
                  :inverted  true
