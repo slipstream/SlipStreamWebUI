@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.utils.resource-details
   (:require
     [cljs.pprint :refer [pprint]]
-    ["codemirror" :refer [clojure javascript] :as cm]
-    #_["codemirror.mode.clojure"]
-    #_["codemirror.mode.javascript"]
+    ["codemirror" :as cm]
+    ["codemirror/mode/clojure/clojure"]
+    ["codemirror/mode/javascript/javascript"]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
