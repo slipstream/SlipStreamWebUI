@@ -1,6 +1,5 @@
 (ns sixsq.slipstream.webui.docs-detail.views
   (:require
-    [markdown-to-hiccup.core :as m]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -10,14 +9,19 @@
 
 
 (defn metadata-section
+  [{:keys [id name] :as document}]
+  [cc/metadata
+   {:title       name
+    :subtitle    id
+    :icon        "book"}])
+
+
+(defn description-section
   [document]
-  (fn [{:keys [id name description] :as document}]
-    (let []
-      [cc/metadata
-       {:title       name
-        :subtitle    id
-        :description (-> description m/md->hiccup m/component)
-        :icon        "book"}])))
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn [{:keys [description]}]
+      [cc/collapsible-segment (@tr [:description])
+       [ui/ReactMarkdown {:source description}]])))
 
 
 (defn row-attribute-fn [{:keys [name description type namespace uri providerMandatory consumerMandatory mutable
@@ -133,5 +137,6 @@
       (let [document (get @documents resource-id)]
         [ui/Container {:fluid true}
          [metadata-section document]
+         [description-section document]
          [attributes-section document]
          [actions-section document]]))))

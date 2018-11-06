@@ -4,6 +4,7 @@
    about undefined symbols."
   (:require
     ["react-datepicker" :as date-picker]
+    ["react-markdown" :as react-markdown]
     ["semantic-ui-react" :as semantic]
     [reagent.core :as reagent]))
 
@@ -157,3 +158,9 @@
 (def Transition (reagent/adapt-react-class semantic/Transition))
 
 (def TransitionablePortal (reagent/adapt-react-class semantic/TransitionablePortal))
+
+;;
+;; markdown
+;;
+
+(def ReactMarkdown (reagent/adapt-react-class react-markdown))
