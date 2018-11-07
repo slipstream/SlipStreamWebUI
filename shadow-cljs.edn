@@ -7,7 +7,7 @@
 
  :builds            {:webui {:target     :browser
                              :output-dir "resources/public/js"
-                             :asset-path "js"
+                             :asset-path "/js"
 
                              :modules    {:webui {:entries [sixsq.slipstream.webui.core]}}
 
