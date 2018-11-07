@@ -24,10 +24,6 @@
     "codemirror": "^5.41.0",
     "create-react-class": "15.6.3",
     "moment": "^2.22.2",
-<<<<<<< HEAD
-    "npm": "^6.4.1",
-=======
->>>>>>> master
     "react": "16.5.2",
     "react-chartjs-2": "^2.7.4",
     "react-copy-to-clipboard": "^5.0.1",
