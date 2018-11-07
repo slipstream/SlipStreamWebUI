@@ -304,7 +304,7 @@
            {:name      (general/truncate link)
             :icon-name "external"
             :position  "right"
-            :on-click  #(dispatch [::deployment-detail-events/open-link link])}])))))
+            :on-click  #(dispatch [::main-events/open-link link])}])))))
 
 
 (defn node-card

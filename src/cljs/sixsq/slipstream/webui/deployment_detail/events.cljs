@@ -3,7 +3,6 @@
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.deployment-detail.effects :as deployment-detail-fx]
     [sixsq.slipstream.webui.deployment-detail.spec :as spec]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.main.effects :as main-fx]
@@ -105,9 +104,7 @@
                                                                 status (str " (" status ")"))
                                                :content message
                                                :type    :error}]))
-                                 (dispatch [::get-deployment href])
-                                 )]}))
-
+                                 (dispatch [::get-deployment href]))]}))
 
 
 (reg-event-db
@@ -131,15 +128,11 @@
                              #(dispatch [::set-events %])]})))
 
 
-(reg-event-fx
-  ::open-link
-  (fn [_ [_ uri]]
-    {::main-fx/open-new-window [uri]}))
-
 (reg-event-db
   ::set-node-parameters
   (fn [db [_ node-parameters]]
     (assoc db ::spec/node-parameters node-parameters)))
+
 
 (defn get-node-parameters
   [client deployment node-name]
@@ -152,12 +145,14 @@
                            (general-utils/prepare-params query-params)
                            #(dispatch [::set-node-parameters (:deploymentParameters %)])]}))
 
+
 (reg-event-db
   ::show-node-parameters-modal
   (fn [{:keys [::client-spec/client
                ::spec/deployment] :as db} [_ node-name]]
     (assoc db ::spec/node-parameters-modal node-name
               ::spec/node-parameters nil)))
+
 
 (reg-event-fx
   ::get-node-parameters
@@ -174,6 +169,7 @@
                                "deploymentParameters"
                                (general-utils/prepare-params query-params)
                                #(dispatch [::set-node-parameters (:deploymentParameters %)])]}))))
+
 
 (reg-event-db
   ::close-node-parameters-modal

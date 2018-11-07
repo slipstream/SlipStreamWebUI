@@ -2,7 +2,6 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.deployment.events :as deployment-events]
     [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
@@ -16,41 +15,24 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.general :as general-utils]
-    [taoensso.timbre :as log]
-    [reagent.core :as reagent]))
+    [taoensso.timbre :as log]))
 
 
-(defn bool->int [bool]
-  (if bool 1 0))
-
-
-(defn runs-control []
+(defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        query-params (subscribe [::deployment-subs/query-params])]
-    (fn []
-      (let [{:keys [offset limit cloud activeOnly]} @query-params]
-        [ui/Form {:on-key-press (partial forms/on-return-key
-                                         #(dispatch [::deployment-events/get-deployments]))}
+        active-only? (subscribe [::deployment-subs/active-only?])]
+    [ui/Form {:on-key-press (partial forms/on-return-key
+                                     #(dispatch [::deployment-events/get-deployments]))}
 
-         [ui/FormGroup
-          [ui/FormField
-           ^{:key (str "cloud:" cloud)}
-           [ui/Input {:type         "text"
-                      :label        (@tr [:cloud])
-                      :defaultValue cloud
-                      :placeholder  "e.g. exoscale-ch-dk"
-                      :on-blur      (ui-callback/input-callback
-                                      #(dispatch [::deployment-events/set-query-params {:cloud %}]))}]]
-          [ui/FormField
-           ^{:key (str "activeOnly:" activeOnly)}
-           [ui/Checkbox {:defaultChecked (-> activeOnly js/parseInt zero? not)
-                         :toggle         true
-                         :fitted         true
-                         :label          (@tr [:active?])
-                         :on-change      (ui-callback/checked
-                                           #(dispatch [::deployment-events/set-query-params
-                                                       {:activeOnly (bool->int %)}]))}]]]]))))
-
+     [ui/FormGroup
+      [ui/FormField
+       ^{:key (str "activeOnly:" @active-only?)}
+       [ui/Checkbox {:defaultChecked @active-only?
+                     :toggle         true
+                     :fitted         true
+                     :label          (@tr [:active?])
+                     :on-change      (ui-callback/checked
+                                       #(dispatch [::deployment-events/set-active-only? %]))}]]]]))
 
 
 (defn refresh-button
@@ -63,10 +45,10 @@
       :loading?  @loading?
       :on-click  #(dispatch [::deployment-events/get-deployments])}]))
 
-(defn control-bar
+
+(defn menu-bar
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::deployment-subs/loading?])]
+  (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [:div
        [ui/Menu {:attached "top", :borderless true}
@@ -75,28 +57,11 @@
          [ui/MenuItem
           [ui/Input {:placeholder (@tr [:search])
                      :icon        "search"
-                     ;:on-change   (ui-callback/input-callback #(dispatch [::appstore-events/set-full-text-search %])) FIXME
-                     }]]
-         ]]
+                     :on-change   (ui-callback/input-callback #(dispatch [::deployment-events/set-full-text-search %]))
+                     }]]]]
 
        [ui/Segment {:attached "bottom"}
-        [runs-control]]])))
-
-
-(defn service-url
-  [url status]
-  [:span
-   (if (and (= status "Ready") (not (str/blank? url)))
-     [:a {:href url, :target "_blank", :rel "noreferrer"}
-      [:i {:class (str "zmdi zmdi-hc-fw-rc zmdi-mail-reply")}]]
-     "\u00a0")])
-
-
-(defn format-module
-  [module]
-  (let [tag (second (reverse (str/split module #"/")))]
-    (fn []
-      [:span tag])))
+        [control-bar]]])))
 
 
 (defn format-href
@@ -106,21 +71,20 @@
 
 
 (defn row-fn [{:keys [id state module acl] :as deployment}]
-  (let [deployments-creds-map (subscribe [::deployment-subs/deployments-creds-map])]
+  (let [deployments-creds-map (subscribe [::deployment-subs/deployments-creds-map])
+        deployments-service-url-map (subscribe [::deployment-subs/deployments-service-url-map])
+        service-url (get @deployments-service-url-map id)]
     ^{:key id}
     [ui/TableRow
      [ui/TableCell [format-href id]]
      [ui/TableCell state]
-     [ui/TableCell #_(:activeVm deployment) 0]            ;FIXME
-     [ui/TableCell "" #_[service-url (:serviceUrl deployment) (:status deployment)]] ;FIXME
+     [ui/TableCell "-"]                                     ;FIXME virtual machine mapping not available for cimi deployment
+     [ui/TableCell (when service-url [:a {:href service-url :target "_blank", :rel "noreferrer"} service-url])]
      [ui/TableCell (:name module)]
-     [ui/TableCell (:created deployment)]                 ;FIXME should be start time
+     [ui/TableCell (:created deployment)]                   ;FIXME should be start time but not available in cimi deployment
      [ui/TableCell (str/join ", " (get @deployments-creds-map id ""))] ;FIXME
-     [ui/TableCell ""]                                    ;FIXME TAGS
-     [ui/TableCell (get-in acl [:owner :principal])]]
-    #_(fn [{:keys [id state module acl] :as deployment}]
-      #_(log/error  @deployments-creds-map #_(str/join ", " (get @deployments-creds-map id "")))
-      )))
+     [ui/TableCell (get-in acl [:owner :principal])]]))
+
 
 (defn vertical-data-table
   [deployments-list]
@@ -140,7 +104,6 @@
          [ui/TableHeaderCell (@tr [:module])]
          [ui/TableHeaderCell (@tr [:start])]
          [ui/TableHeaderCell (@tr [:cloud])]
-         [ui/TableHeaderCell (@tr [:tags])]
          [ui/TableHeaderCell (@tr [:username])]]]
        (vec (concat [ui/TableBody]
                     (map row-fn deployments-list)))])))
@@ -151,7 +114,6 @@
   (let [tr (subscribe [::i18n-subs/tr])
         loading? (subscribe [::deployment-subs/loading?])]
     (fn [deployments]
-      ;(log/warn deployments)
       (let [deployments-list (get deployments :deployments [])]
         [ui/Segment (merge style/basic
                            {:class-name "webui-x-autoscroll"
@@ -173,7 +135,7 @@
     (fn []
       (let [total-pages (general-utils/total-pages (get @deployments :count 0) @elements-per-page)]
         [ui/Container {:fluid true}
-         [control-bar]
+         [menu-bar]
          [ui/Segment style/basic
           [deployments-display @deployments]]
          (when (> total-pages 1)
