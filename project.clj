@@ -72,4 +72,5 @@
 
   :aliases {"prepare"   ["do" ["filegen"] ["resource"]]
             "dev"       ["do" "prepare" ["with-profile" "+scljs" "run" "-m" "shadow.cljs.devtools.cli" "watch" "webui"]]
+            "cljs-repl" ["with-profile" "+scljs" "run" "-m" "shadow.cljs.devtools.cli" "cljs-repl" "webui"]
             "install"   ["do" "prepare" ["with-profile" "+scljs" "run" "-m" "shadow.cljs.devtools.cli" "release" "webui"] ["install"]]})

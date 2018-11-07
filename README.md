@@ -56,52 +56,58 @@ Restrictions" option**.
 There may be **FireFox** plugins that will allow you to disable the
 CORS protections.  The easier solution is to use Chrome or Safari.
 
-### Development
+### NPM
 
-The development environment requires [`lein`](https://leiningen.org).
+The build uses [shadow-cljs](http://shadow-cljs.org/) to facilitate
+the use of Javascript modules packaged with NPM.  This requires that
+you install the `npm` command line interface on your development
+machine.
 
-Once `lein` is installed, you can setup the interactive environment by
-doing the following:
+On Mac OS, the `npm` command comes with the Node.js distribution of
+Homebrew.  Just run the command `brew install node`.
 
- * In a terminal, start development server for the webui.
+For other distributions or for direct installation on Mac OS, take a
+look at the Node.js [downloads](https://nodejs.org/en/download/)
+page. 
 
-     ```
-     $ lein dev
-     ```
+### Leiningen
 
- * You will get automatically a REPL, with Figwheel controls:
+The development environment requires
+[`lein`](https://leiningen.org). Follow the instructions on the
+Leiningen website to install the tool.
 
-     ```
-     dev:cljs.user=>
-     ```
+### Workflow
 
- * Wait a bit, then browse to
- [http://localhost:3000/webui.html](http://localhost:3000/webui.html).
+Once all of the development tools have been installed, the workflow is
+as follows:
 
+ 1. Run `npm install` at the root of the cloned repository.  This only
+    needs to be done once at the beginning and then whenever
+    dependencies change.
 
-You should see the client application running.  Any changes you make
-to the source files (either ClojureScript sources or HTML templates)
-should be reflected immediately in the browser.
+ 2. Start a development server for the build with `lein dev`.  When
+    this completes ("build completed" message in the terminal), you
+    can then connect to the process on http://localhost:8280.
 
-### Testing
+ 3. Changes you make to the code should automatically be recompiled
+    and then pushed to your browser.
 
-* In a terminal, start tests for the webui.
+ 4. If you need a REPL, you can run the command `lein cljs-repl` from
+    a different terminal.
 
-     ```
-     $ lein test
-     ```
-
-* You can also get automatic tests re-execution triggered on your code
-  change with following command :
-
-     ```
-     $ lein test-auto
-     ```
+ 5. You can terminate the process with Ctrl-C from the terminal window. 
 
 ## Integration with IntelliJ
 
 You can import the repository through IntelliJ, using the "leiningen"
 method in the dialog.
+
+If you have the IntelliJ command line installed, the shadow-cljs
+heads-up display, should open files in the IntelliJ editor.
+
+The command for opening Chrome with the security disabled, can be
+configured as an "external tool" in IntelliJ.  In "Preferences", go to
+the "Tools" -> "External Tools" panel.
 
 ### Logging
 
