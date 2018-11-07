@@ -24,7 +24,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [taoensso.timbre :as log]))
 
 
 (defn id-selector-formatter [entry]
@@ -323,7 +324,8 @@
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::cimi-subs/show-add-modal?])
         collection-name (subscribe [::cimi-subs/collection-name])
-        text (reagent/atom "")]
+        text (reagent/atom (general/edn->json {:key "value"}))]
+    (log/error {:key "value"})
     (fn []
       (let [template-href (some-> @collection-name keyword cimi-utils/template-href keyword)
             templates-info (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
@@ -338,7 +340,7 @@
                                      (cimi-api-utils/create-template @collection-name data)])
                           (dispatch [::cimi-events/hide-add-modal]))]
             (do
-              (reset! text (general/edn->json {:key "value"}))
+              #_(reset! text (general/edn->json {:key "value"}))
               [ui/Modal
                {:size       "large"
                 :scrollable true
@@ -346,7 +348,14 @@
                 :onClose    #(dispatch [::cimi-events/hide-add-modal])
                 :open       @show?}
                [ui/ModalContent
-                [editor/json-editor text]]
+                [ui/CodeMirror {:value            @text
+                                :options          {:mode              "application/json"
+                                                   :line-numbers      true
+                                                   :matchBrackets     true
+                                                   :style-active-line true}
+                                :on-before-change (fn [editor data value]
+                                                    (reset! text value))}]
+                #_[editor/json-editor text]]
                [ui/ModalActions
                 [uix/Button
                  {:text     (@tr [:cancel])

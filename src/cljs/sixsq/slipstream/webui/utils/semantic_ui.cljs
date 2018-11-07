@@ -3,6 +3,10 @@
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
   (:require
+    ["react-codemirror2" :as code-mirror]
+    ["codemirror/addon/edit/matchbrackets"]
+    ["codemirror/addon/selection/active-line"]
+    ["codemirror/mode/clojure/clojure"]
     ["react-copy-to-clipboard" :as copy-to-clipboard]
     ["react-datepicker" :as date-picker]
     ["react-markdown" :as react-markdown]
@@ -171,3 +175,10 @@
 ;;
 
 (def CopyToClipboard (reagent/adapt-react-class copy-to-clipboard/CopyToClipboard))
+
+
+;;
+;; code mirror
+;;
+(def CodeMirror (reagent/adapt-react-class code-mirror/Controlled))
+(def CodeMirrorUncontrolled (reagent/adapt-react-class code-mirror/UnControlled))
