@@ -2,31 +2,42 @@
   (:require
     [clojure.spec.alpha :as s]))
 
-(s/def ::runUUID (s/nilable string?))
+(s/def ::runUUID (s/nilable string?))                       ; Used by old UI
 
 (s/def ::reports any?)
 
 (s/def ::loading? boolean?)
 
-(s/def ::cached-resource-id (s/nilable string?))
+(s/def ::deployment any?)
 
-(s/def ::resource any?)
+(s/def ::global-deployment-parameters any?)
 
 (s/def ::events any?)
 
+(s/def ::node-parameters-modal (s/nilable string?))
+
+(s/def ::node-parameters any?)
+
+(s/def ::summary-nodes-parameters any?)
 
 
 (s/def ::db (s/keys :req [::runUUID
                           ::reports
                           ::loading?
-                          ::cached-resource-id
-                          ::resource
-                          ::events]))
+                          ::deployment
+                          ::global-deployment-parameters
+                          ::events
+                          ::node-parameters-modal
+                          ::node-parameters
+                          ::summary-nodes-parameters]))
 
 
-(def defaults {::runUUID            nil
-               ::reports            nil
-               ::loading?           false
-               ::cached-resource-id nil
-               ::resource           nil
-               ::events             nil})
+(def defaults {::runUUID                      nil
+               ::reports                      nil
+               ::loading?                     false
+               ::deployment                   nil
+               ::global-deployment-parameters nil
+               ::events                       nil
+               ::node-parameters-modal        nil
+               ::node-parameters              nil
+               ::summary-nodes-parameters     nil})

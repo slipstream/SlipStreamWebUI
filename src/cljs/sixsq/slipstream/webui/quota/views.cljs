@@ -128,8 +128,7 @@
                                    start-slice
                                    end-slice)))))]
          (when (> total-pages 1)
-           [uix/Pagination {:size         "tiny"
-                            :totalPages   total-pages
+           [uix/Pagination {:totalPages   total-pages
                             :activePage   @active-page
                             :onPageChange (ui-callback/callback :activePage set-page)}])]))))
 

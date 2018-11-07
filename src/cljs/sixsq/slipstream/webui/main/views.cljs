@@ -3,6 +3,7 @@
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.about.views]
     [sixsq.slipstream.webui.application.views]
+    [sixsq.slipstream.webui.appstore.views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.views]
