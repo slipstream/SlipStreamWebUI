@@ -16,11 +16,9 @@
                                            :preloads         [devtools.preload]}
 
                         :compiler-options {:closure-defines {sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"}
-                                           :infer-externs   :auto
-                                           :process-shim    true}
+                                           :infer-externs   :auto}
 
 
                         :release          {:closure-defines  {sixsq.slipstream.webui.utils.defines/HOST_URL ""}
                                            :compiler-options {:infer-externs :auto
-                                                              :process-shim  true
                                                               :optimizations :advanced}}}}}
