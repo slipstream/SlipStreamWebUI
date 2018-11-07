@@ -68,8 +68,16 @@
    current working directory"
   []
   (when-not (exists? js/process)
+    (log/info "creating js/process global variable")
     (set! js/process (clj->js {})))
-  (aset js/process "cwd" (constantly "/")))
+
+  (when-not (.-env js/process)
+    (log/info "creating js/process.env map")
+    (aset js/process "env" (clj->js {})))
+
+  (when-not (.-cwd js/process)
+    (log/info "creating js/process.cwd function")
+    (aset js/process "cwd" (constantly "/"))))
 
 
 (defn ^:export init []
