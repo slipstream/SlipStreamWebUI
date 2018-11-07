@@ -6,15 +6,6 @@
     [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.runs :as runs]))
 
-
-(reg-fx
-  ::get-deployment
-  (fn [[client resource-id callback]]
-    (go
-      (let [deployment (<! (runs/get-run client resource-id))]
-        (callback deployment)))))
-
-
 (reg-fx
   ::terminate-deployment
   (fn [[client uuid]]

@@ -1,7 +1,6 @@
 (ns sixsq.slipstream.webui.editor.editor
   (:require
-    [cljsjs.codemirror]
-    [cljsjs.codemirror.mode.javascript]
+    ["codemirror" :refer [clojure javascript] :as cm]
     [re-frame.core :refer [subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.utils.general :as general]

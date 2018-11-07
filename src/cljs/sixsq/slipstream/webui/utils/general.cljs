@@ -124,3 +124,7 @@
   (cond-> total-elements
           true (quot elements-per-page)
           (pos? (mod total-elements elements-per-page)) inc))
+
+(defn resource-id->uuid
+  [resource-id]
+  (-> resource-id (str/split #"/") second))

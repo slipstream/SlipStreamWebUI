@@ -5,11 +5,6 @@
 
 
 (reg-sub
-  ::runUUID
-  ::deployment-detail-spec/runUUID)
-
-
-(reg-sub
   ::reports
   ::deployment-detail-spec/reports)
 
@@ -20,15 +15,28 @@
 
 
 (reg-sub
-  ::cached-resource-id
-  ::deployment-detail-spec/cached-resource-id)
-
-
-(reg-sub
-  ::resource
-  ::deployment-detail-spec/resource)
+  ::deployment
+  ::deployment-detail-spec/deployment)
 
 
 (reg-sub
   ::events
   ::deployment-detail-spec/events)
+
+(reg-sub
+  ::global-deployment-parameters
+  ::deployment-detail-spec/global-deployment-parameters)
+
+(reg-sub
+  ::node-parameters-modal
+  (fn [db]
+    (::deployment-detail-spec/node-parameters-modal db)))
+
+(reg-sub
+  ::node-parameters
+  ::deployment-detail-spec/node-parameters)
+
+(reg-sub
+  ::summary-nodes-parameters
+  (fn [db]
+    (::deployment-detail-spec/summary-nodes-parameters db)))

@@ -8,3 +8,11 @@
   [start {end :timestamp :as evt}]
   (assoc evt :delta-time (time/delta-minutes start end)))
 
+(defn category-icon
+  [category]
+  (case category
+    "PROJECT" "folder"
+    "APPLICATION" "sitemap"
+    "IMAGE" "file"
+    "COMPONENT" "microchip"
+    "question circle"))

@@ -134,8 +134,7 @@
           (vec (concat [ui/TableBody]
                        (mapv (partial format-nb-row healthy?) (get @nuvlabox-records :nuvlaboxRecords []))))]
 
-         [uix/Pagination {:size         "tiny"
-                          :totalPages   (general-utils/total-pages total-elements @elements-per-page)
+         [uix/Pagination {:totalPages   (general-utils/total-pages total-elements @elements-per-page)
                           :activePage   @page
                           :onPageChange (ui-callback/callback :activePage #(dispatch [::nuvlabox-events/set-page %]))}]
          ]))))

@@ -15,35 +15,55 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [taoensso.timbre :as log]
+    [reagent.core :as reagent]))
 
 
-(defn ^:export set-runUUID [uuid]
-  (dispatch [::deployment-detail-events/set-runUUID uuid]))
+(defn nodes-list                                            ;FIXME
+  []
+  ["machine"])
+
+(defn automatic-refresh
+  [resource-id]
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-detail-get-deployment
+              :frequency 30000
+              :event     [::deployment-detail-events/get-deployment resource-id]}])
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-detail-get-summary-nodes-parameters
+              :frequency 30000
+              :event     [::deployment-detail-events/get-summary-nodes-parameters (nodes-list)]}])
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-detail-reports
+              :frequency 30000
+              :event     [::deployment-detail-events/get-reports resource-id]}])
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-detail-deployment-parameters
+              :frequency 20000
+              :event     [::deployment-detail-events/get-global-deployment-parameters resource-id]}])
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-detail-events
+              :frequency 30000
+              :event     [::deployment-detail-events/get-events resource-id]}]))
 
 
-(def summary-keys #{:creation
-                    :category
-                    :resourceUri
-                    :lastStateChangeTime
-                    :startTime
-                    :endTime
-                    :state
-                    :type
-                    :user
-                    :cloudServiceNames})
-
-
-(def terminate-summary-keys #{:resourceUri
-                              :startTime
-                              :state
-                              :user
-                              :cloudServiceNames})
+(def deployment-summary-keys #{:created
+                               :updated
+                               :resourceUri
+                               :state
+                               :id
+                               :name
+                               :description})
 
 
 (defn module-name
-  [resource]
-  (-> resource :run :module :name))
+  [deployment]
+  (-> deployment :module :name))
 
 
 (defn format-parameter-key
@@ -77,55 +97,20 @@
                           :overflow      "hidden"}} (format-parameter-value key value)]])
 
 
-(defn category-icon
-  [category]
-  (case category
-    "Project" "folder"
-    "Deployment" "sitemap"
-    "Image" "microchip"
-    "question circle"))
-
-
 (defn metadata-section
   []
-  (let [cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
-        resource (subscribe [::deployment-detail-subs/resource])]
+  (let [deployment (subscribe [::deployment-detail-subs/deployment])]
     (fn []
-      (let [module (module-name @resource)
-            short-name (second (re-matches #"^.*/(.*)$" (str (or module "TITLE"))))
-            state (-> @resource :run :state)
-            summary-info (-> (select-keys (:run @resource) summary-keys)
-                             (assoc :uuid @cached-resource-id)
-                             (assoc :module module))
-            icon (-> summary-info :category category-icon)
+      (let [summary-info (-> (select-keys @deployment deployment-summary-keys)
+                             (merge (select-keys (:module @deployment) #{:name :path :type})))
+            icon (-> @deployment :module :type deployment-detail-utils/category-icon)
             rows (map tuple-to-row summary-info)]
         [cc/metadata
-         {:title       short-name
-          :subtitle    state
+         {:title       (module-name @deployment)
+          :subtitle    (:state @deployment)
           :description (:startTime summary-info)
           :icon        icon}
          rows]))))
-
-
-(defn terminate-summary
-  []
-  (let [resource (subscribe [::deployment-detail-subs/resource])]
-    (fn []
-      (let [module (module-name @resource)
-            summary-info (-> (select-keys (:run @resource) terminate-summary-keys)
-                             (assoc :module module))]
-        [ui/Table style/definition
-         (vec (concat [ui/TableBody]
-                      (map tuple-to-row summary-info)))]))))
-
-
-(def node-parameter-pattern #"([^:]+?)(\.\d+)?:(.+)")
-
-
-(defn parameter-section
-  [[k _]]
-  (when-let [[_ node] (re-matches node-parameter-pattern k)]
-    node))
 
 
 (defn node-parameter-table
@@ -134,37 +119,47 @@
    (vec (concat [ui/TableBody] (map tuple-to-row params)))])
 
 
-(defn grouped-parameters
-  [resource]
-  (let [parameters (-> resource :run :runtimeParameters :entry)
-        parameters-kv (->> parameters
-                           (mapv (juxt :string #(-> % :runtimeParameter :content)))
-                           (group-by parameter-section))]
-    parameters-kv))
+(defn parameter-to-row
+  [{:keys [nodeID name description value] :as param}]
+  [ui/Popup
+   {:content (reagent/as-element [:p description])
+    :trigger (reagent/as-element
+               [ui/TableRow
+                [ui/TableCell name]
+                [ui/TableCell value]])}])
 
-
-(defn parameters-dropdown
-  [selected-section]
-  (let [resource (subscribe [::deployment-detail-subs/resource])]
-    (let [parameter-groups (sort (keys (grouped-parameters @resource)))]
-      [ui/Dropdown
-       {:options       (map #(identity {:key %, :text %, :value %}) parameter-groups)
-        :selection     true
-        :default-value "ss"
-        :on-change     (ui-callback/value #(reset! selected-section %))}])))
-
-
-(defn parameters-section
+(defn global-parameters-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        resource (subscribe [::deployment-detail-subs/resource])
-        selected-section (r/atom nil)]
+        deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
     (fn []
-      (let [parameters-kv (grouped-parameters @resource)
-            parameter-group (get parameters-kv (or @selected-section "ss"))
-            parameter-table (node-parameter-table parameter-group)
-            contents (vec (concat [:div] [[parameters-dropdown selected-section]] [parameter-table]))]
-        [cc/collapsible-segment (@tr [:parameters]) contents]))))
+      [cc/collapsible-segment (@tr [:global-parameters])
+       [ui/Segment style/autoscroll-x
+        [ui/Table style/single-line
+         [ui/TableHeader
+          [ui/TableRow
+           [ui/TableHeaderCell [:span (@tr [:name])]]
+           [ui/TableHeaderCell [:span (@tr [:value])]]]]
+         (vec (concat [ui/TableBody]
+                      (map parameter-to-row @deployment-parameters)))]]])))
+
+(defn node-parameters-section
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        node-parameters (subscribe [::deployment-detail-subs/node-parameters])]
+    (dispatch [::main-events/action-interval
+               {:action    :start
+                :id        :deployment-detail-get-node-parameters
+                :frequency 5000
+                :event     [::deployment-detail-events/get-node-parameters]}])
+    (fn []
+      [ui/Table style/single-line
+       [ui/TableHeader
+        [ui/TableRow
+         [ui/TableHeaderCell [:span (@tr [:name])]]
+         [ui/TableHeaderCell [:span (@tr [:value])]]]]
+       (vec (concat [ui/TableBody]
+                    (map parameter-to-row @node-parameters)))])))
 
 
 (defn report-item
@@ -172,7 +167,8 @@
   ^{:key id} [:li
               (let [label (str/join " " [component created])]
                 (if (= state "ready")
-                  [:a {:onClick #(dispatch [::deployment-detail-events/download-report id])} label]
+                  [:a {:style    {:cursor "pointer"}
+                       :on-click #(dispatch [::deployment-detail-events/download-report id])} label]
                   label))])
 
 
@@ -224,90 +220,71 @@
 (defn events-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        events-collection (subscribe [::deployment-detail-subs/events])]
-    (dispatch [::deployment-detail-events/fetch-events])
-    (dispatch [::main-events/action-interval
-               {:action    :start
-                :id        :deployment-detail-events
-                :frequency 30000
-                :event     [::deployment-detail-events/fetch-events]}])
+        events (subscribe [::deployment-detail-subs/events])]
     (fn []
-      (let [events (-> @events-collection :events events-table-info)]
+      (let [events (-> @events :events events-table-info)]
         [cc/collapsible-segment
          (@tr [:events])
          [events-table events]]))))
 
 
-(defn reports-list
-  []
-  (let [reports (subscribe [::deployment-detail-subs/reports])
-        runUUID (subscribe [::deployment-detail-subs/runUUID])]
-    (when-not (str/blank? @runUUID)
-      (dispatch [::main-events/action-interval
-                 {:action    :start
-                  :id        :deployment-detail-reports
-                  :frequency 30000
-                  :event     [::deployment-detail-events/fetch-reports]}]))
-    (if (seq @reports)
-      (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
-      [:p "Reports will be displayed as soon as available. No need to refresh."])))
+(defn reports-list                                          ;FIXME used in src/cljs/sixsq/slipstream/webui/core.cljs
+  [href]
+  (log/error "reports-list: " href)
+  )
 
 
 (defn reports-section
-  []
-  (let [tr (subscribe [::i18n-subs/tr])]
+  [href]
+  (let [tr (subscribe [::i18n-subs/tr])
+        reports (subscribe [::deployment-detail-subs/reports])]
     (fn []
       [cc/collapsible-segment
        (@tr [:reports])
-       [reports-list]])))
+       (if (seq @reports)
+         (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
+         [:p "Reports will be displayed as soon as available. No need to refresh."])])))
 
 
 (defn refresh-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
         loading? (subscribe [::deployment-detail-subs/loading?])
-        runUUID (subscribe [::deployment-detail-subs/runUUID])]
+        deployment (subscribe [::deployment-detail-subs/deployment])]
     (fn []
       [uix/MenuItemWithIcon
        {:name      (@tr [:refresh])
         :icon-name "refresh"
         :loading?  @loading?
-        :on-click  #(dispatch [::deployment-detail-events/get-deployment @runUUID])}])))
+        :on-click  #(dispatch [::deployment-detail-events/get-deployment (:id @deployment)])}])))
 
 
-;; FIXME: Remove duplicated function.
-(defn is-terminated-state? [state]
-  (#{"Finalizing" "Done" "Aborted" "Cancelled"} state))
-
-
-(defn terminate-button
+(defn stop-button
   "Creates a button that will bring up a delete dialog and will execute the
    delete when confirmed."
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
-        resource (subscribe [::deployment-detail-subs/resource])]
+        deployment (subscribe [::deployment-detail-subs/deployment])]
     (fn []
-      (when-let [state (-> @resource :run :state)]
-        (when-not (is-terminated-state? state)
-          [resource-details/action-button-icon
-           (@tr [:terminate])
-           "close"
-           (@tr [:terminate])
-           [terminate-summary]
-           #(dispatch [::deployment-detail-events/terminate-deployment @cached-resource-id])
-           (constantly nil)])))))
+      (when-not (empty?
+                  (filter #(= "http://schemas.dmtf.org/cimi/2/action/stop" (:rel %))
+                          (get-in @deployment [:operations])))
+
+        [resource-details/action-button-icon
+         (@tr [:stop])
+         "stop"
+         (@tr [:stop])
+         [:p (@tr [:are-you-sure?])]
+         #(dispatch [::deployment-detail-events/stop-deployment (:id @deployment)])
+         (constantly nil)]))))
 
 
 (defn service-link-button
   []
-  (let [resource (subscribe [::deployment-detail-subs/resource])]
+  (let [deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
     (fn []
-      (let [parameters-kv (grouped-parameters @resource)
-            global-params (get parameters-kv "ss")
-            state (second (first (filter #(= "ss:state" (first %)) global-params)))
-            link (second (first (filter #(= "ss:url.service" (first %)) global-params)))]
-        (when (and link (= "Ready" state))
+      (let [link (:value (first (filter #(= "ss:url.service" (:name %)) @deployment-parameters)))]
+        (when link
           [uix/MenuItemWithIcon
            {:name      (general/truncate link)
             :icon-name "external"
@@ -315,32 +292,93 @@
             :on-click  #(dispatch [::deployment-detail-events/open-link link])}])))))
 
 
+(defn node-card
+  [node-name]
+  (let [summary-nodes-parameters (subscribe [::deployment-detail-subs/summary-nodes-parameters])
+        node-params (get @summary-nodes-parameters node-name [])
+        params-by-name (into {} (map (juxt :name identity) node-params))
+        service-url (get-in params-by-name ["url.service" :value])
+        custom-state (get-in params-by-name ["statecustom" :value])
+        ssh-url (get-in params-by-name ["url.ssh" :value])
+        ssh-password (get-in params-by-name ["password.ssh" :value])
+        complete (get-in params-by-name ["complete" :value])]
+    ^{:key node-name}
+    [ui/Card
+     [ui/CardContent
+      [ui/CardHeader [ui/Header node-name]]
+      [ui/CardDescription
+       [:div
+        [ui/Icon {:name "external"}]
+        [:a {:href service-url} service-url]]
+       [:div
+        [ui/Icon {:name "terminal"}]
+        [:a {:href ssh-url} ssh-url]]
+       [:div (str "password: " (when ssh-password "••••••"))
+        (when ssh-password
+          [ui/Popup {:trigger  (r/as-element [ui/CopyToClipboard {:text ssh-password}
+                                              [:a [ui/Icon {:name "clipboard outline"}]]])
+                     :position "top center"}
+           "copy to clipboard"])]
+       [:div custom-state]
+       [:div [:a {:href     "#apache.1"
+                  :on-click #(dispatch [::deployment-detail-events/show-node-parameters-modal node-name])}
+              "details"]]
+       (when (= complete "Ready")
+         [:div {:align "right"} [ui/Icon {:name "check"}]])]]]))
+
+
+(defn summary-section
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    [cc/collapsible-segment
+     (@tr [:summary])
+     (vec (concat [ui/CardGroup {:centered true}]
+                  (map node-card (nodes-list))))]))
+
+
+(defn node-parameters-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        node-name (subscribe [::deployment-detail-subs/node-parameters-modal])
+        deployment (subscribe [::deployment-detail-subs/deployment])]
+    (fn []
+      (let [hide-fn #(do (dispatch [::deployment-detail-events/close-node-parameters-modal])
+                         (automatic-refresh (:id @deployment)))]
+        [ui/Modal {:open       (boolean @node-name)
+                   :close-icon true
+                   :on-close   hide-fn}
+
+         [ui/ModalHeader [ui/Icon {:name "microchip"}] @node-name]
+
+         [ui/ModalContent {:scrolling true}
+          [node-parameters-section]]
+
+         [ui/ModalActions
+          [uix/Button {:text     (@tr [:close]),
+                       :on-click hide-fn}]]]))))
+
+
 (defn menu
   []
   [ui/Menu {:borderless true}
    [refresh-button]
-   [terminate-button]
+   [stop-button]
    [service-link-button]])
 
 
 (defn deployment-detail
-  []
-  (let [runUUID (subscribe [::deployment-detail-subs/runUUID])
-        cached-resource-id (subscribe [::deployment-detail-subs/cached-resource-id])
-        resource (subscribe [::deployment-detail-subs/resource])]
-    (fn []
-      (let [correct-resource? (and @runUUID (= @runUUID @cached-resource-id))]
-
-        (when-not correct-resource?
-          (dispatch [::deployment-detail-events/get-deployment @runUUID]))
-
-        (vec
-          (concat
-            [ui/Container {:fluid   true
-                           :loading (not correct-resource?)}
-             [menu]]
-            (when (and @runUUID @resource correct-resource?) ;; FIXME: Don't show information for a different resource.
-              [[metadata-section]
-               [parameters-section]
-               [events-section]
-               [reports-section]])))))))
+  [resource-id]
+  (let [deployment (subscribe [::deployment-detail-subs/deployment])]
+    (automatic-refresh resource-id)
+    (fn [resource-id]
+      [ui/Segment (merge style/basic
+                         {:loading (not= resource-id (:id @deployment))})
+       [ui/Container {:fluid true}
+        [menu]
+        [metadata-section]
+        [summary-section]
+        [global-parameters-section]
+        [events-section]
+        [reports-section resource-id]
+        [node-parameters-modal]
+        ]])))

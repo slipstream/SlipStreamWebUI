@@ -15,11 +15,28 @@
 
 (s/def ::deployments any?)
 
-(s/def ::db (s/keys :req [::loading? ::query-params ::deployments]))
+(s/def ::deployments-creds-map any?)
 
-(def defaults {::loading?        false
-               ::query-params    {:offset     ""
-                                  :limit      ""
-                                  :cloud      ""
-                                  :activeOnly 1}
-               ::deployments     nil})
+(s/def ::page int?)
+(s/def ::elements-per-page int?)
+
+(s/def ::full-text-search (s/nilable string?))
+
+(s/def ::db (s/keys :req [::loading?
+                          ::query-params
+                          ::deployments
+                          ::page
+                          ::elements-per-page
+                          ::full-text-search
+                          ::deployments-creds-map]))
+
+(def defaults {::loading?              false
+               ::page                  1
+               ::elements-per-page     10
+               ::full-text-search      nil
+               ::query-params          {:offset     ""
+                                        :limit      ""
+                                        :cloud      ""
+                                        :activeOnly 1}
+               ::deployments           nil
+               ::deployments-creds-map {}})

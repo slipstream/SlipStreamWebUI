@@ -47,5 +47,6 @@
       [card :application :welcome-application-desc "sitemap" "application"]
       [card :nuvlabox-ctrl :welcome-nuvlabox-desc "desktop" "nuvlabox"]
       (when @is-admin? [card :metrics :welcome-metrics-desc "bar chart" "metrics"])
+      [card :documentation :welcome-docs-desc "book" "documentation"]
       [card :cimi :welcome-cimi-desc "code" "cimi"]
       ]]))
