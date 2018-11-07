@@ -5,9 +5,13 @@
 
 
 (reg-sub
+  ::runUUID
+  (fn [db]
+    (::deployment-detail-spec/runUUID db)))
+
+(reg-sub
   ::reports
   ::deployment-detail-spec/reports)
-
 
 (reg-sub
   ::loading?

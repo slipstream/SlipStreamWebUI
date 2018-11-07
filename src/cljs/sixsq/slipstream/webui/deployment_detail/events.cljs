@@ -13,6 +13,13 @@
     [taoensso.timbre :as log]
     [clojure.string :as str]))
 
+
+(reg-event-db
+  ::set-runUUID
+  (fn [{:keys [::spec/runUUID] :as db} [_ uuid]]
+    (assoc db ::spec/runUUID uuid)))
+
+
 (reg-event-db
   ::set-reports
   (fn [db [_ reports]]

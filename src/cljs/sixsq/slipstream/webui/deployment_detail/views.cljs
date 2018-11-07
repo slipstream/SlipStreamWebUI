@@ -19,6 +19,10 @@
     [reagent.core :as reagent]))
 
 
+(defn ^:export set-runUUID [uuid]                           ;Used by old UI
+  (dispatch [::deployment-detail-events/set-runUUID uuid]))
+
+
 (defn nodes-list                                            ;FIXME
   []
   ["machine"])
@@ -227,23 +231,34 @@
          (@tr [:events])
          [events-table events]]))))
 
+(defn reports-list-view
+  []
+  (let [reports (subscribe [::deployment-detail-subs/reports])]
+    (if (seq @reports)
+     (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
+     [:p "Reports will be displayed as soon as available. No need to refresh."])))
 
-(defn reports-list                                          ;FIXME used in src/cljs/sixsq/slipstream/webui/core.cljs
-  [href]
-  (log/error "reports-list: " href)
-  )
+
+(defn reports-list                                          ; Used by old UI
+  []
+  (let [reports (subscribe [::deployment-detail-subs/reports])
+        runUUID (subscribe [::deployment-detail-subs/runUUID])]
+    (when-not (str/blank? @runUUID)
+      (dispatch [::main-events/action-interval
+                 {:action    :start
+                  :id        :deployment-detail-reports
+                  :frequency 30000
+                  :event     [::deployment-detail-events/get-reports @runUUID]}]))
+    [reports-list-view]))
 
 
 (defn reports-section
   [href]
-  (let [tr (subscribe [::i18n-subs/tr])
-        reports (subscribe [::deployment-detail-subs/reports])]
+  (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
       [cc/collapsible-segment
        (@tr [:reports])
-       (if (seq @reports)
-         (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
-         [:p "Reports will be displayed as soon as available. No need to refresh."])])))
+       [reports-list-view]])))
 
 
 (defn refresh-button
