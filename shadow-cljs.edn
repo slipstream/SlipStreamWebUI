@@ -15,7 +15,7 @@
                                            :after-load       sixsq.slipstream.webui.core/mount-root
                                            :preloads         [devtools.preload]}
 
-                        :compiler-options {:closure-defines {sixsq.slipstream.webui.utils.defines/HOST_URL "https://185.19.28.151"}
+                        :compiler-options {:closure-defines {sixsq.slipstream.webui.utils.defines/HOST_URL "https://nuv.la"}
                                            :infer-externs   :auto}
 
 
