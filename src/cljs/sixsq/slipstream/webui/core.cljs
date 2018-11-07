@@ -63,7 +63,17 @@
     (.addEventListener js/document "visibilitychange" callback)))
 
 
+(defn patch-process
+  "patch for npm markdown module that calls into the process object for the
+   current working directory"
+  []
+  (when-not (exists? js/process)
+    (set! js/process (clj->js {})))
+  (aset js/process "cwd" (constantly "/")))
+
+
 (defn ^:export init []
+  (patch-process)
   (dev-setup)
   (dispatch-sync [::db-events/initialize-db])
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
@@ -75,5 +85,3 @@
   (dispatch [::history-events/initialize @config/path-prefix])
   (mount-root)
   (log/info "finished initialization"))
-
-

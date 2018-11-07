@@ -1,6 +1,8 @@
 ;; shadow-cljs configuration
 {:lein         {:profile "+scljs"}
 
+ :open-file-command ["idea" :pwd "--line" :line :file]
+
  :repositories {"sixsq-community-releases" {:url "https://nexus.sixsq.com/content/repositories/releases-community-rhel7/"}}
 
  :builds       {:webui {:target           :browser
