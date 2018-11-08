@@ -46,17 +46,25 @@
        ::main-fx/action-interval [{:action :clean}]
        ::history-fx/replace-url-history [path]})))
 
+
 (reg-event-fx
   ::action-interval
   (fn [_ [_ opts]]
     {::main-fx/action-interval [opts]}))
+
 
 (reg-event-fx
   ::push-breadcrumb
   (fn [{{:keys [::main-spec/nav-path] :as db} :db} [_ path-element]]
     {::history-fx/navigate [(str/join "/" (conj nav-path path-element))]}))
 
+
 (reg-event-fx
   ::trim-breadcrumb
   (fn [{{:keys [::main-spec/nav-path] :as db} :db} [_ index]]
     {::history-fx/navigate [(str/join "/" (take (inc index) nav-path))]}))
+
+(reg-event-fx
+  ::open-link
+  (fn [_ [_ uri]]
+    {::main-fx/open-new-window [uri]}))
