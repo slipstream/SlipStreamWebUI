@@ -10,7 +10,6 @@
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
-    [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -324,8 +323,8 @@
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::cimi-subs/show-add-modal?])
         collection-name (subscribe [::cimi-subs/collection-name])
-        text (reagent/atom (general/edn->json {:key "value"}))]
-    (log/error {:key "value"})
+        default-text (general/edn->json {:key "value"})
+        text (reagent/atom default-text)]
     (fn []
       (let [template-href (some-> @collection-name keyword cimi-utils/template-href keyword)
             templates-info (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
@@ -340,7 +339,6 @@
                                      (cimi-api-utils/create-template @collection-name data)])
                           (dispatch [::cimi-events/hide-add-modal]))]
             (do
-              #_(reset! text (general/edn->json {:key "value"}))
               [ui/Modal
                {:size       "large"
                 :scrollable true
@@ -348,18 +346,12 @@
                 :onClose    #(dispatch [::cimi-events/hide-add-modal])
                 :open       @show?}
                [ui/ModalContent
-                [ui/CodeMirror {:value            @text
-                                :options          {:mode              "application/json"
-                                                   :line-numbers      true
-                                                   :matchBrackets     true
-                                                   :style-active-line true}
-                                :on-before-change (fn [editor data value]
-                                                    (reset! text value))}]
-                #_[editor/json-editor text]]
+                [uix/EditorJson text]]
                [ui/ModalActions
                 [uix/Button
                  {:text     (@tr [:cancel])
                   :on-click (fn []
+                              (reset! text default-text)
                               (dispatch [::cimi-events/hide-add-modal]))}]
                 [uix/Button
                  {:text     (@tr [:create])

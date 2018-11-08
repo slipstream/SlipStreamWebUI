@@ -5,7 +5,6 @@
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
-    [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
@@ -176,7 +175,9 @@
   [script]
   (if (str/blank? script)
     [:span "undefined"]
-    [editor/editor (reagent/atom script) :options {:lineNumbers true, :readOnly true}]))
+    [ui/CodeMirror {:value   script
+                    :options {:line-numbers true
+                              :read-only    true}}]))
 
 
 (defn format-targets
