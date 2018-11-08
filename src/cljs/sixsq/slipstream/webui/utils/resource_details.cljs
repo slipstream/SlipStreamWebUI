@@ -1,14 +1,10 @@
 (ns sixsq.slipstream.webui.utils.resource-details
   (:require
-    ["codemirror" :as cm]
-    ["codemirror/mode/clojure/clojure"]
-    ["codemirror/mode/javascript/javascript"]
     [cljs.pprint :refer [pprint]]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
-    [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
@@ -125,16 +121,16 @@
              [ui/MenuItem [ui/Label "Invalid JSON!!!"]])]
           [ui/Segment {:attached "bottom"}
            (if @editor-mode?
-             [editor/json-editor text]
+             [uix/EditorJson text]
              (vec (concat [ui/Form]
                           (template-form text description))))]]
-         [editor/json-editor text])
+         [uix/EditorJson text])
        (fn []
          (try
            (action-fn (general/json->edn @text))
            (catch :default e
              (action-fn e))))
-       (constantly nil)
+       #(reset! text (general/edn->json data))
        true])))
 
 
