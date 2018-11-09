@@ -110,3 +110,9 @@
   (and start1 end1 start2 end2
        (.isSame start1 start2)
        (.isSame end1 end2)))
+
+
+(defn time->utc-str
+  "Time to UTC string"
+  [moment]
+  (-> moment .clone .utc .format))
