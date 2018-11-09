@@ -77,7 +77,6 @@
 (reg-event-fx
   ::get-deployment
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id]]
-    (log/error "::get-deployment href: " resource-id)
     (when client
       (let [get-depl-callback #(if (instance? js/Error %)
                                  (let [{:keys [status message]} (response/parse-ex-info %)]

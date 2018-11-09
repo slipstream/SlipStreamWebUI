@@ -39,7 +39,6 @@
                              deployments-service-url-map (->> (get deployment-params "ss:url.service")
                                                               (map (juxt (comp :href :deployment) :value))
                                                               (into {}))]
-                         (log/error "deployments-service-url-map: " deployments-service-url-map)
                          (dispatch [::set-deployments-creds-map deployments-creds-map])
                          (dispatch [::set-deployments-service-url-map deployments-service-url-map]))))]
       (cond-> {:db (assoc db ::spec/loading? false

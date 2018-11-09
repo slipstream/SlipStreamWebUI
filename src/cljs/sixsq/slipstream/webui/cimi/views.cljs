@@ -341,7 +341,6 @@
             (do
               [ui/Modal
                {:size       "large"
-                :scrollable true
                 :closeIcon  true
                 :onClose    #(dispatch [::cimi-events/hide-add-modal])
                 :open       @show?}
