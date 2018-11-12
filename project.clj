@@ -50,7 +50,7 @@
   :dependencies [[reagent]
                  [re-frame]
                  [day8.re-frame/http-fx]
-                 [secretary]
+                 [clj-commons/secretary "1.2.4"]            ;; patched version for 1.10.439
                  [expound]
                  [com.taoensso/timbre]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
@@ -63,11 +63,11 @@
 
   :profiles
   {:dev   {:dependencies [[org.clojure/clojure]
-                          [org.clojure/clojurescript]
+                          [org.clojure/clojurescript "1.10.439"]
                           [binaryage/devtools]]}
 
-   :scljs {:dependencies [[thheller/shadow-cljs "2.6.14"]
-                          [com.google.javascript/closure-compiler-unshaded "v20180910"]]}}
+   :scljs {:dependencies [[thheller/shadow-cljs "2.7.2"]
+                          [com.google.javascript/closure-compiler-unshaded "v20181028"]]}}
 
 
   :aliases {"prepare"   ["do" ["filegen"] ["resource"]]
