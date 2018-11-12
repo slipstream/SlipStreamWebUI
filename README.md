@@ -1,12 +1,7 @@
 # SlipStream Web UI
 
 An application that provides a graphical interface to cloud management
-services that use the CIMI interface.  The tortured acronym comes from
-"Cimi resoUrces via a Browser InterfaCe".
-
-It is an alpha-level **prototype**, but in regular use by the
-developers.  Feedback (as GitHub issues) on the UI, source code, and
-underlying technologies is welcome.
+services that use the CIMI interface.
 
 ## Frameworks and Libraries
 
@@ -49,59 +44,70 @@ $ open /Applications/Google\ Chrome.app \
        --args --disable-web-security --user-data-dir
 ```
 
-For **Safari**, first enable the "Develop" menu.  Open the Safari
-preferences, click the "Advanced" tab, and then activate the "Show
-Develop menu in menu bar" option.  Once the "Develop" menu is visible,
-choose the "Disable Cross-Origin Restrictions" option.
+For **Safari**, first enable the "Develop" menu:
+
+ * Open the Safari preferences,
+ * Click the "Advanced" tab, and
+ * Then activate the "Show Develop menu in menu bar" option.
+
+Once the "Develop" menu is visible, **choose the "Disable Cross-Origin
+Restrictions" option**.
 
 There may be **FireFox** plugins that will allow you to disable the
-CORS protections.  Easier solution is to use Chrome or Safari.
+CORS protections.  The easier solution is to use Chrome or Safari.
 
-### Development
-The development environment requires [`lein`](https://leiningen.org).
+### NPM
 
-Once `lein` is installed, you can setup the interactive environment by
-doing the following:
+The build uses [shadow-cljs](http://shadow-cljs.org/) to facilitate
+the use of Javascript modules packaged with NPM.  This requires that
+you install the `npm` command line interface on your development
+machine.
 
- * In a terminal, start development server for the webui.
+On Mac OS, the `npm` command comes with the Node.js distribution of
+Homebrew.  Just run the command `brew install node`.
 
-     ```
-     $ lein dev
-     ```
+For other distributions or for direct installation on Mac OS, take a
+look at the Node.js [downloads](https://nodejs.org/en/download/)
+page. 
 
- * You will get automatically a REPL, with Figwheel controls:
+### Leiningen
 
-     ```
-     dev:cljs.user=>
-     ```
+The development environment requires
+[`lein`](https://leiningen.org). Follow the instructions on the
+Leiningen website to install the tool.
 
- * Wait a bit, then browse to
- [http://localhost:3000/webui.html](http://localhost:3000/webui.html).
+### Workflow
 
+Once all of the development tools have been installed, the workflow is
+as follows:
 
-You should see the client application running.  Any changes you make
-to the source files (either ClojureScript sources or HTML templates)
-should be reflected immediately in the browser.
+ 1. Run `npm install` at the root of the cloned repository.  This only
+    needs to be done once at the beginning and then whenever
+    dependencies change.
 
-### Testing
+ 2. Start a development server for the build with `lein dev`.  When
+    this completes ("build completed" message in the terminal), you
+    can then connect to the process on http://localhost:8280.
 
-* In a terminal, start tests for the webui.
+ 3. Changes you make to the code should automatically be recompiled
+    and then pushed to your browser.
 
-     ```
-     $ lein test
-     ```
+ 4. If you need a REPL, you can run the command `lein cljs-repl` from
+    a different terminal.
 
-* You can also get automatic tests re-execution triggered on your code
-  change with following command :
-
-     ```
-     $ lein test-auto
-     ```
+ 5. You can terminate the process with Ctrl-C from the terminal window. 
 
 ## Integration with IntelliJ
 
 You can import the repository through IntelliJ, using the "leiningen"
 method in the dialog.
+
+If you have the IntelliJ command line installed, the shadow-cljs
+heads-up display, should open files in the IntelliJ editor.
+
+The command for opening Chrome with the security disabled, can be
+configured as an "external tool" in IntelliJ.  In "Preferences", go to
+the "Tools" -> "External Tools" panel.
 
 ### Logging
 
@@ -116,76 +122,3 @@ in development mode. From the REPL do:
 The default value is `:debug` which will log all of the HTTP requests
 and responses.  This is useful when debugging interactions with
 SlipStream, but annoying otherwise.
-
-## Electron
-
-The SlipStream WebUI can be run as an
-[electron](https://electronjs.org/) application.  This support is
-experimental and feedback is welcome. It has only been tested on MacOS
-and there are numerous things that do not work correctly, notably the
-login workflows do not work well because they rely on automatic
-redirects.
-
-To compile the SlipStream WebUI electron application, you must have
-[`nodejs`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/)
-installed on your machine. On MacOS, these can be installed with
-[`homebrew`](https://brew.sh/).
-
-The configuration is based on the
-[cljs-electron](https://github.com/Gonzih/cljs-electron) project on
-GitHub. 
-
-At the root of this repository, run the command:
-
-```sh
-$ npm install \
-    electron \
-    electron-packager \
-    electron-installer-dmg
-```
-
-This will install both electron and the electron-packager within the
-`node_modules` subdirectory.  Update your path with the following:
-
-```
-$ export PATH=$PATH:`pwd`/node_modules/.bin
-```
-
-Both `electron` and `electron-packager` should be in your PATH.
-
-To build and run the electron application from the command line,
-run the following commands:
-
-```
-$ lein electron
-$ electron .
-```
-
-This should compile and then start the SlipStream WebUI as an electron
-application.
-
-To package the application,
-
-```
-$ electron-packager . CUBIC \
-    --platform=darwin \
-    --arch=x64 \
-    --electron-version=1.8.4 \
-    --overwrite \
-    --out target
-```
-
-You can then run this application with `open
-target/CUBIC-darwin-x64/CUBIC.app`.
-
-This can be packaged as a DMG file with the following:
-
-```
-$ electron-installer-dmg \
-    target/CUBIC-darwin-x64/CUBIC.app \
-    CUBIC \
-    --out target
-```
-
-This will generate the file `CUBIC.dmg` which can then be used to
-install the application as usual on MacOS.

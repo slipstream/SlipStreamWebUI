@@ -48,13 +48,13 @@
 
 (defn reset-password [tr]
   [[:div {:style {:text-align "right"}}
-         [:a {:style {:cursor "pointer"}
-              :on-click (fn []
-                           (dispatch [::authn-events/close-modal])
-                           (dispatch [::authn-events/set-selected-method-group nil])
-                           (dispatch [::authn-events/set-form-id nil])
-                           (dispatch [::authn-events/open-modal :reset-password]))}
-             (@tr [:forgot-password])]]])
+    [:a {:style    {:cursor "pointer"}
+         :on-click (fn []
+                     (dispatch [::authn-events/close-modal])
+                     (dispatch [::authn-events/set-selected-method-group nil])
+                     (dispatch [::authn-events/set-form-id nil])
+                     (dispatch [::authn-events/open-modal :reset-password]))}
+     (@tr [:forgot-password])]]])
 
 
 (defn authn-method-form
@@ -94,7 +94,7 @@
 
                           (mapv form-component inputs-method)
                           (when (= "internal" (:method method))
-                                (reset-password tr))))]))))))
+                            (reset-password tr))))]))))))
 
 
 (defn login-method-form
@@ -213,55 +213,55 @@
         tr (subscribe [::i18n-subs/tr])]
 
     [ui/Modal
-      {:id        "reset-password-modal"
-       :size      :tiny
-       :open      (= @open-modal :reset-password)
-       :closeIcon true
-       :on-close  (fn []
-                    (dispatch [::authn-events/close-modal])
-                    (dispatch [::authn-events/clear-success-message])
-                    (dispatch [::authn-events/clear-error-message])
-                    (reset! username nil))}
+     {:id        "modal-reset-password-id"
+      :size      :tiny
+      :open      (= @open-modal :reset-password)
+      :closeIcon true
+      :on-close  (fn []
+                   (dispatch [::authn-events/close-modal])
+                   (dispatch [::authn-events/clear-success-message])
+                   (dispatch [::authn-events/clear-error-message])
+                   (reset! username nil))}
 
-      [ui/ModalHeader (@tr [:reset-password])]
+     [ui/ModalHeader (@tr [:reset-password])]
 
-      [ui/ModalContent
+     [ui/ModalContent
 
-        (when @error-message
-          [ui/Message {:negative  true
-                      :size      "tiny"
-                      :onDismiss #(dispatch [::authn-events/clear-error-message])}
-          [ui/MessageHeader (@tr [:reset-password-error])]
-          [:p @error-message]])
+      (when @error-message
+        [ui/Message {:negative  true
+                     :size      "tiny"
+                     :onDismiss #(dispatch [::authn-events/clear-error-message])}
+         [ui/MessageHeader (@tr [:reset-password-error])]
+         [:p @error-message]])
 
-        (when @success-message
-          [ui/Message {:negative  false
-                      :size      "tiny"
-                      :onDismiss #(dispatch [::authn-events/clear-success-message])}
-          [ui/MessageHeader (@tr [:reset-password-success])]
-          [:p @success-message]])
+      (when @success-message
+        [ui/Message {:negative  false
+                     :size      "tiny"
+                     :onDismiss #(dispatch [::authn-events/clear-success-message])}
+         [ui/MessageHeader (@tr [:reset-password-success])]
+         [:p @success-message]])
 
-        [ui/FormInput {:name         "username"
-                       :type         "text"
-                       :placeholder  "Username"
-                       :icon         "user"
-                       :iconPosition "left"
-                       :required     true
-                       :autoComplete "off"
-                       :on-change     (ui-callback/value #(reset! username %))}]
+      [ui/FormInput {:name         "username"
+                     :type         "text"
+                     :placeholder  "Username"
+                     :icon         "user"
+                     :iconPosition "left"
+                     :required     true
+                     :autoComplete "off"
+                     :on-change    (ui-callback/value #(reset! username %))}]
 
-        [:div {:style {:padding "10px 0"} } (@tr [:reset-password-inst])]]
+      [:div {:style {:padding "10px 0"}} (@tr [:reset-password-inst])]]
 
-      [ui/ModalActions 
-       [switch-panel-link :reset-password]
-       [uix/Button
-         {:text     (@tr [:reset-password])
-          :positive true
-          :loading  @loading?
-          :disabled (str/blank? @username)
-          :on-click #(do
-                        (.preventDefault %)
-                        (dispatch [::authn-events/reset-password username]))}]]]))
+     [ui/ModalActions
+      [switch-panel-link :reset-password]
+      [uix/Button
+       {:text     (@tr [:reset-password])
+        :positive true
+        :loading  @loading?
+        :disabled (str/blank? @username)
+        :on-click #(do
+                     (.preventDefault %)
+                     (dispatch [::authn-events/reset-password username]))}]]]))
 
 
 (defn authn-modal
@@ -324,7 +324,7 @@
 
       [ui/ButtonGroup {:primary true}
        [ui/Button {:aria-label (if logged-in? "profile" "login")
-                   :on-click (if logged-in? profile-fn login-fn)}
+                   :on-click   (if logged-in? profile-fn login-fn)}
         [ui/Icon {:name (if logged-in? "user" "sign in")}]
         (if logged-in? (utils/truncate @user) (@tr [:login]))]
        [ui/Dropdown {:inline    true

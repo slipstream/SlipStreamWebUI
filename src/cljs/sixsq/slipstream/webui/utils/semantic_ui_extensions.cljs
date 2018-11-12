@@ -82,4 +82,19 @@
            :lastItem  {:content (reagent/as-element [ui/Icon {:name "angle double right"}]) :icon true}
            :prevItem  {:content (reagent/as-element [ui/Icon {:name "angle left"}]) :icon true}
            :nextItem  {:content (reagent/as-element [ui/Icon {:name "angle right"}]) :icon true}}
-          options)])
+          (merge {:floated "right", :size "tiny"} options))])
+
+(defn EditorJson
+  "A convenience function to setup the CodeMirror editor component for JSON."
+  [text]
+  (let [default-text @text]
+    (fn [text]
+      [ui/CodeMirror {:value     default-text
+                      :options   {:mode                "application/json"
+                                  :line-numbers        true
+                                  :match-brackets      true
+                                  :auto-close-brackets true
+                                  :style-active-line   true}
+                      :on-change (fn [editor data value]
+                                   (reset! text value))}])))
+

@@ -50,6 +50,9 @@
   (render-component-when-present "modal-signup" authn-views/modal-signup
                                  :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
                                                          (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
+  (render-component-when-present "modal-reset-password" authn-views/modal-reset-password
+                                 :initialization-fn #(do (dispatch-sync [::authn-events/server-redirect-uri "/login"])
+                                                         (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
   (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
   (render-component-when-present "usage" usage-views/usage)
   (render-component-when-present "deployment-detail-reports" deployment-detail-views/reports-list))
@@ -60,7 +63,25 @@
     (.addEventListener js/document "visibilitychange" callback)))
 
 
+(defn patch-process
+  "patch for npm markdown module that calls into the process object for the
+   current working directory"
+  []
+  (when-not (exists? js/process)
+    (log/info "creating js/process global variable")
+    (set! js/process (clj->js {})))
+
+  (when-not (.-env js/process)
+    (log/info "creating js/process.env map")
+    (aset js/process "env" (clj->js {})))
+
+  (when-not (.-cwd js/process)
+    (log/info "creating js/process.cwd function")
+    (aset js/process "cwd" (constantly "/"))))
+
+
 (defn ^:export init []
+  (patch-process)
   (dev-setup)
   (dispatch-sync [::db-events/initialize-db])
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
@@ -72,5 +93,3 @@
   (dispatch [::history-events/initialize @config/path-prefix])
   (mount-root)
   (log/info "finished initialization"))
-
-

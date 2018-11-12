@@ -6,7 +6,6 @@
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
-    [sixsq.slipstream.webui.editor.editor :as editor]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
@@ -19,7 +18,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.application.utils :as utils]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.resource-details :as resource-details]))
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
+    [sixsq.slipstream.webui.utils.general :as general]))
 
 
 (defn category-icon
@@ -81,6 +81,7 @@
   []
   (let [add-data (subscribe [::application-subs/add-data])]
     (let [{{:keys [name description] :as project-data} :project} @add-data]
+      ^{:key "project-pane"}
       [ui/TabPane
        [ui/Form {:id "add-project"}
         [ui/FormInput {:label     "name"
@@ -102,6 +103,7 @@
                    loginUser
                    networkType
                    os] :as image-data} :image} @add-data]
+      ^{:key "image-pane"}
       [ui/TabPane
        [ui/Form {:id "add-image"}
         [ui/FormInput {:label     "name"
@@ -133,6 +135,7 @@
 
 (defn component-pane
   []
+  ^{:key "component-pane"}
   [ui/TabPane
    [ui/Form {:id "add-component"}
     [ui/FormInput {:label "name"}]
@@ -141,6 +144,7 @@
 
 (defn application-pane
   []
+  ^{:key "application-pane"}
   [ui/TabPane
    [ui/Form {:id "add-application"}
     [ui/FormInput {:label "name"}]
@@ -236,9 +240,9 @@
 (defn deployment-template-details
   []
   (let [template (subscribe [::application-subs/selected-deployment-template])
-        text (reagent/atom (utils/edn->json (or @template {})))]
+        text (reagent/atom (general/edn->json (or @template {})))]
     (fn []
-      (let [json-str (utils/edn->json (or @template {}))]
+      (let [json-str (general/edn->json (or @template {}))]
         (reset! text json-str)
         [:pre @text]
 
@@ -396,7 +400,9 @@
   [script]
   (if (str/blank? script)
     [:span "undefined"]
-    [editor/editor (reagent/atom script) :options {:lineNumbers true, :readOnly true}]))
+    [ui/CodeMirror {:value   script
+                    :options {:line-numbers true
+                              :read-only    true}}]))
 
 
 (defn format-targets

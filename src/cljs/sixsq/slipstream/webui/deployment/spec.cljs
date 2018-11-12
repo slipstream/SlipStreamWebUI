@@ -6,20 +6,34 @@
 
 (s/def ::loading? boolean?)
 
-(s/def ::offset string?)
-(s/def ::limit string?)
-(s/def ::cloud string?)
-(s/def ::activeOnly int?)
-
-(s/def ::query-params (only-keys :req-un [::offset ::limit ::cloud ::activeOnly]))
+(s/def ::active-only? boolean?)
 
 (s/def ::deployments any?)
 
-(s/def ::db (s/keys :req [::loading? ::query-params ::deployments]))
+(s/def ::deployments-creds-map any?)
 
-(def defaults {::loading?        false
-               ::query-params    {:offset     ""
-                                  :limit      ""
-                                  :cloud      ""
-                                  :activeOnly 1}
-               ::deployments     nil})
+(s/def ::deployments-service-url-map any?)
+
+(s/def ::page int?)
+
+(s/def ::elements-per-page int?)
+
+(s/def ::full-text-search (s/nilable string?))
+
+(s/def ::db (s/keys :req [::loading?
+                          ::deployments
+                          ::page
+                          ::elements-per-page
+                          ::full-text-search
+                          ::active-only?
+                          ::deployments-creds-map
+                          ::deployments-service-url-map]))
+
+(def defaults {::loading?                    false
+               ::page                        1
+               ::elements-per-page           10
+               ::full-text-search            nil
+               ::active-only?                true
+               ::deployments                 nil
+               ::deployments-creds-map       {}
+               ::deployments-service-url-map {}})
