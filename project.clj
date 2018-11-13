@@ -15,7 +15,7 @@
             [pdok/lein-filegen "0.1.0"]
             [lein-resource "16.9.1"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.13"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.15"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
@@ -50,7 +50,7 @@
   :dependencies [[reagent]
                  [re-frame]
                  [day8.re-frame/http-fx]
-                 [clj-commons/secretary "1.2.4"]            ;; patched version for 1.10.439
+                 [clj-commons/secretary]
                  [expound]
                  [com.taoensso/timbre]
                  [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
@@ -63,11 +63,11 @@
 
   :profiles
   {:dev   {:dependencies [[org.clojure/clojure]
-                          [org.clojure/clojurescript "1.10.439"]
+                          [org.clojure/clojurescript]
                           [binaryage/devtools]]}
 
-   :scljs {:dependencies [[thheller/shadow-cljs "2.7.2"]
-                          [com.google.javascript/closure-compiler-unshaded "v20181028"]]}}
+   :scljs {:dependencies [[thheller/shadow-cljs]            ;; WARNING: also in package.json
+                          [com.google.javascript/closure-compiler-unshaded]]}}
 
 
   :aliases {"prepare"   ["do" ["filegen"] ["resource"]]
