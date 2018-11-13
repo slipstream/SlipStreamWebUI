@@ -5,12 +5,26 @@
 
 (s/def ::completed? boolean?)
 
-(s/def ::module-id (s/nilable string?))
+(s/def ::module-path (s/nilable string?))
 
 (s/def ::module any?)
 
-(s/def ::db (s/keys :req [::completed? ::module-id ::module]))
+(s/def ::add-modal-visible? boolean?)
 
-(def defaults {::completed? true
-               ::module-id  nil
-               ::module     nil})
+(s/def ::active-tab keyword?)
+
+(s/def ::add-data (s/nilable map?))
+
+(s/def ::db (s/keys :req [::completed?
+                          ::module-path
+                          ::module
+                          ::add-modal-visible?
+                          ::active-tab
+                          ::add-data]))
+
+(def defaults {::completed?                    true
+               ::module-path                   nil
+               ::module                        nil
+               ::add-modal-visible?            false
+               ::active-tab                    :project
+               ::add-data                      nil})

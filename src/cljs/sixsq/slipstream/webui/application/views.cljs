@@ -5,14 +5,21 @@
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
+    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
+    [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
+    [sixsq.slipstream.webui.application.utils :as utils]
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
+    [sixsq.slipstream.webui.appstore.views :as appstore-views]
+    [sixsq.slipstream.webui.appstore.events :as appstore-events]))
 
 
 (defn category-icon
@@ -30,6 +37,172 @@
   (if (= "PROJECT" category)
     "folder open"
     (category-icon category)))
+
+
+(defn refresh-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [uix/MenuItemWithIcon
+       {:name      (@tr [:refresh])
+        :icon-name "refresh"
+        :loading?  false                                    ;; FIXME: Add loading flag for module.
+        :on-click  #(dispatch [::application-events/get-module])}])))
+
+
+(defn control-bar []
+  (let [tr (subscribe [::i18n-subs/tr])
+        module (subscribe [::application-subs/module])
+        cep (subscribe [::cimi-subs/cloud-entry-point])]
+    (let [add-disabled? (not= "PROJECT" (:type @module))
+          deploy-disabled? (= "PROJECT" (:type @module))]
+      (vec (concat [ui/Menu {:borderless true}]
+
+                   (resource-details/format-operations [refresh-button] @module (:baseURI @cep) {})
+
+                   [[uix/MenuItemWithIcon
+                     {:name      (@tr [:deploy])
+                      :icon-name "play"
+                      :disabled  deploy-disabled?
+                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module)])}]
+
+                    [uix/MenuItemWithIcon
+                     {:name      (@tr [:add])
+                      :icon-name "add"
+                      :disabled  add-disabled?
+                      :on-click  #(dispatch [::application-events/open-add-modal])}]])))))
+
+
+(defn form-input-callback
+  [path]
+  (ui-callback/value #(dispatch [::application-events/update-add-data path %])))
+
+
+(defn project-pane
+  []
+  (let [add-data (subscribe [::application-subs/add-data])]
+    (let [{{:keys [name description] :as project-data} :project} @add-data]
+      ^{:key "project-pane"}
+      [ui/TabPane
+       [ui/Form {:id "add-project"}
+        [ui/FormInput {:label     "name"
+                       :value     (or name "")
+                       :on-change (form-input-callback [:project :name])}]
+        [ui/FormInput {:label     "description"
+                       :value     (or description "")
+                       :on-change (form-input-callback [:project :description])}]]])))
+
+
+(defn image-pane
+  []
+  (let [add-data (subscribe [::application-subs/add-data])]
+    (let [{{:keys [name
+                   description
+                   connector
+                   image-id
+                   author
+                   loginUser
+                   networkType
+                   os] :as image-data} :image} @add-data]
+      ^{:key "image-pane"}
+      [ui/TabPane
+       [ui/Form {:id "add-image"}
+        [ui/FormInput {:label     "name"
+                       :value     (or name "")
+                       :on-change (form-input-callback [:image :name])}]
+        [ui/FormInput {:label     "description"
+                       :value     (or description "")
+                       :on-change (form-input-callback [:image :description])}]
+        [ui/FormInput {:label     "connector"
+                       :value     (or connector "")
+                       :on-change (form-input-callback [:image :connector])}]
+        [ui/FormInput {:label     "image ID"
+                       :value     (or image-id "")
+                       :on-change (form-input-callback [:image :image-id])}]
+        [ui/FormInput {:label     "author"
+                       :value     (or author "")
+                       :on-change (form-input-callback [:image :author])}]
+        [ui/FormInput {:label     "loginUser"
+                       :value     (or loginUser "")
+                       :on-change (form-input-callback [:image :loginUser])}]
+        [ui/FormInput {:label     "networkType"
+                       :value     (or networkType "")
+                       :on-change (form-input-callback [:image :networkType])}]
+        [ui/FormInput {:label     "os"
+                       :value     (or os "")
+                       :on-change (form-input-callback [:image :os])}]
+        ]])))
+
+
+(defn component-pane
+  []
+  ^{:key "component-pane"}
+  [ui/TabPane
+   [ui/Form {:id "add-component"}
+    [ui/FormInput {:label "name"}]
+    [ui/FormInput {:label "description"}]]])
+
+
+(defn application-pane
+  []
+  ^{:key "application-pane"}
+  [ui/TabPane
+   [ui/Form {:id "add-application"}
+    [ui/FormInput {:label "name"}]
+    [ui/FormInput {:label "description"}]]])
+
+
+(defn kw->icon-name
+  [kw]
+  (-> kw name str/upper-case category-icon))
+
+
+(defn pane
+  [tr kw element]
+  {:menuItem {:key     (name kw)
+              :icon    (kw->icon-name kw)
+              :content (@tr [kw])}
+   :render   (fn [] (reagent/as-element [element]))})
+
+
+(defn index->kw
+  [index]
+  (case index
+    0 :project
+    1 :image
+    2 :component
+    3 :application
+    :project))
+
+
+(defn add-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        visible? (subscribe [::application-subs/add-modal-visible?])
+        nav-path (subscribe [::main-subs/nav-path])]
+    (let [hide-fn #(dispatch [::application-events/close-add-modal])
+          submit-fn #(dispatch [::application-events/add-module])]
+      [ui/Modal {:open       @visible?
+                 :close-icon true
+                 :on-close   hide-fn}
+
+       [ui/ModalHeader [ui/Icon {:name "add"}] (@tr [:add])]
+
+       [ui/ModalContent {:scrolling true}
+        [ui/Header {:as "h3"} (utils/nav-path->module-path @nav-path)]
+        [ui/Tab
+         {:panes         [(pane tr :project project-pane)
+                          (pane tr :image image-pane)
+                          #_(pane tr :component component-pane)
+                          #_(pane tr :application application-pane)]
+          :on-tab-change (ui-callback/callback :activeIndex
+                                               (fn [index]
+                                                 (let [kw (index->kw index)]
+                                                   (dispatch [::application-events/set-active-tab kw]))))}]]
+
+       [ui/ModalActions
+        [uix/Button {:text (@tr [:cancel]), :on-click hide-fn}]
+        [uix/Button {:text (@tr [:add]), :positive true, :on-click submit-fn}]]])))
 
 
 (defn format-module [{:keys [type name description] :as module}]
@@ -85,29 +258,11 @@
   [error]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [error]
-      (let [reason-text (error-text tr error)]
+      (when (instance? js/Error error)
         [ui/Container
-         [ui/Header {:as   "h3"
-                     :icon true}
+         [ui/Header {:as "h3", :icon true}
           [ui/Icon {:name "warning sign"}]
-          reason-text]]))))
-
-
-(defn dimmer
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        data (subscribe [::application-subs/module])]
-    (fn []
-      (let [loading? (not @data)]
-        [ui/Dimmer {:active   loading?
-                    :page     false
-                    :inverted true}
-         [ui/Header {:as       "h3"
-                     :icon     true
-                     :inverted false}
-          [ui/Icon {:name    "refresh"
-                    :loading true}]
-          (@tr [:loading])]]))))
+          (error-text tr error)]]))))
 
 
 (defn format-module-children
@@ -245,22 +400,22 @@
 (defn module-resource []
   (let [data (subscribe [::application-subs/module])]
     (fn []
-      (let [loading? (not @data)]
-        [ui/DimmerDimmable
-         (vec (concat [ui/Container {:fluid true} [dimmer]]
-                      (when-not loading?
-                        (if (instance? js/Error @data)
-                          [[format-error @data]]
-                          (let [{:keys [children content]} @data
-                                metadata (dissoc @data :content)
-                                {:keys [targets nodes inputParameters outputParameters]} content
-                                type (:type metadata)]
-                            [[format-meta metadata]
-                             (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
-                             (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
-                             (when (= type "COMPONENT") [format-targets targets])
-                             (when (= type "APPLICATION") [format-nodes nodes])
-                             [format-module-children children]])))))]))))
+      (vec (concat [ui/Container {:fluid true}
+                    [control-bar]
+                    [add-modal]
+                    [appstore-views/deploy-modal]
+                    [format-error @data]]
+                   (when (and @data (not (instance? js/Error @data)))
+                     (let [{:keys [children content]} @data
+                           metadata (dissoc @data :content)
+                           {:keys [targets nodes inputParameters outputParameters]} content
+                           type (:type metadata)]
+                       [[format-meta metadata]
+                        (when (= type "COMPONENT") [format-parameters :input-parameters inputParameters])
+                        (when (= type "COMPONENT") [format-parameters :output-parameters outputParameters])
+                        (when (= type "COMPONENT") [format-targets targets])
+                        (when (= type "APPLICATION") [format-nodes nodes])
+                        [format-module-children children]])))))))
 
 
 (defmethod panel/render :application
