@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.main.spec :as main-spec]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [taoensso.timbre :as log]))
 
 
 (reg-event-db
@@ -27,27 +28,9 @@
 (reg-event-db
   ::close-add-modal
   (fn [db _]
-    (assoc db ::spec/add-modal-visible? false)))
+    (assoc db ::spec/add-modal-visible? false
+              ::spec/add-data nil)))
 
-
-(reg-event-fx
-  ::open-deploy-modal
-  (fn [{{:keys [::client-spec/client
-                ::main-spec/nav-path
-                ::spec/add-data
-                ::spec/active-tab
-                ::spec/module] :as db} :db} _]
-    (when (and client (:id module))
-      {:db                                       (assoc db ::spec/deployment-templates nil
-                                                           ::spec/loading-deployment-templates? true
-                                                           ::spec/deploy-modal-visible? true)
-       ::application-fx/get-deployment-templates [client (:id module) #(dispatch [::set-deployment-templates %])]})))
-
-
-(reg-event-db
-  ::close-deploy-modal
-  (fn [db _]
-    (assoc db ::spec/deploy-modal-visible? false)))
 
 
 (defn fixup-image-data
@@ -78,7 +61,10 @@
                             :parentPath path
                             :path module-path)
                      fixup-image-data)]
-        {::application-fx/create-module [client path data #(dispatch [::history-evts/navigate (str "application/" module-path)])]}))))
+        {::application-fx/create-module [client path data
+                                         #(do
+                                            (dispatch [::close-add-modal])
+                                            (dispatch [::history-evts/navigate (str "application/" module-path)]))]}))))
 
 
 (reg-event-fx
@@ -103,34 +89,3 @@
   (fn [db [_ active-tab]]
     (assoc db ::spec/active-tab active-tab)))
 
-
-(reg-event-db
-  ::set-selected-deployment-template
-  (fn [{:keys [::spec/deployment-templates] :as db} [_ template-id]]
-    (->> deployment-templates
-         (filter #(= template-id (:id %)))
-         first
-         (assoc db ::spec/selected-deployment-template))))
-
-
-(reg-event-db
-  ::set-deployment-templates
-  (fn [db [_ deployment-templates]]
-    (assoc db ::spec/deployment-templates deployment-templates
-              ::spec/loading-deployment-templates? false)))
-
-
-(reg-event-fx
-  ::create-deployment-template
-  (fn [{{:keys [::client-spec/client ::spec/module]} :db :as cofx} _]
-    (when (and client (:id module))
-      (assoc cofx ::application-fx/create-deployment-template
-                  [client (:id module) #(dispatch [::open-deploy-modal])])))) ;; FIXME: Should be better way to do this.
-
-
-(reg-event-fx
-  ::deploy
-  (fn [{{:keys [::client-spec/client ::spec/selected-deployment-template]} :db :as cofx} _]
-    (when (and client (:id selected-deployment-template))
-      (assoc cofx ::application-fx/deploy
-                  [client (:id selected-deployment-template) #(dispatch [::history-evts/navigate (str "cimi/" %)])]))))

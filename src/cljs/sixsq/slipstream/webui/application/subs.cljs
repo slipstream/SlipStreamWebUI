@@ -29,21 +29,3 @@
   ::application-spec/active-tab)
 
 
-(reg-sub
-  ::deploy-modal-visible?
-  ::application-spec/deploy-modal-visible?)
-
-
-(reg-sub
-  ::loading-deployment-templates?
-  ::application-spec/loading-deployment-templates?)
-
-
-(reg-sub
-  ::selected-deployment-template
-  ::application-spec/selected-deployment-template)
-
-
-(reg-sub
-  ::deployment-templates
-  ::application-spec/deployment-templates)

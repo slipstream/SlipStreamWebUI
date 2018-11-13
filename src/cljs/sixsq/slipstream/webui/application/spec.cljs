@@ -15,32 +15,16 @@
 
 (s/def ::add-data (s/nilable map?))
 
-(s/def ::deploy-modal-visible? boolean?)
-
-(s/def ::loading-deployment-templates? boolean?)
-
-(s/def ::selected-deployment-template any?)
-
-(s/def ::deployment-templates any?)
-
 (s/def ::db (s/keys :req [::completed?
                           ::module-path
                           ::module
                           ::add-modal-visible?
                           ::active-tab
-                          ::add-data
-                          ::deploy-modal-visible?
-                          ::loading-deployment-templates?
-                          ::selected-deployment-template
-                          ::deployment-templates]))
+                          ::add-data]))
 
 (def defaults {::completed?                    true
                ::module-path                   nil
                ::module                        nil
                ::add-modal-visible?            false
                ::active-tab                    :project
-               ::add-data                      nil
-               ::deploy-modal-visible?         false
-               ::loading-deployment-templates? false
-               ::selected-deployment-template  nil
-               ::deployment-templates          nil})
+               ::add-data                      nil})

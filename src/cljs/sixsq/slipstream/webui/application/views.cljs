@@ -17,9 +17,9 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.resource-details :as resource-details]
-    [sixsq.slipstream.webui.utils.general :as general]))
+    [sixsq.slipstream.webui.appstore.views :as appstore-views]
+    [sixsq.slipstream.webui.appstore.events :as appstore-events]))
 
 
 (defn category-icon
@@ -64,7 +64,8 @@
                      {:name      (@tr [:deploy])
                       :icon-name "play"
                       :disabled  deploy-disabled?
-                      :on-click  #(dispatch [::application-events/open-deploy-modal])}]
+                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module)])}]
+
                     [uix/MenuItemWithIcon
                      {:name      (@tr [:add])
                       :icon-name "add"
@@ -158,8 +159,8 @@
 
 (defn pane
   [tr kw element]
-  ^{:key (name kw)}
-  {:menuItem {:icon    (kw->icon-name kw)
+  {:menuItem {:key     (name kw)
+              :icon    (kw->icon-name kw)
               :content (@tr [kw])}
    :render   (fn [] (reagent/as-element [element]))})
 
@@ -201,78 +202,7 @@
 
        [ui/ModalActions
         [uix/Button {:text (@tr [:cancel]), :on-click hide-fn}]
-        [uix/Button {:text (@tr [:add]), :positive true, :on-click #(do (hide-fn) (submit-fn))}]]])))
-
-
-(defn deployment-template-list-item
-  [{:keys [id name description created] :as tpl}]
-  (let [selected-deployment-template (subscribe [::application-subs/selected-deployment-template])]
-    ^{:key id}
-    (let [{selected-id :id} @selected-deployment-template
-          icon-name (if (= id selected-id) "check circle outline" "circle outline")]
-      [ui/ListItem {:on-click #(dispatch [::application-events/set-selected-deployment-template id])}
-       [ui/ListIcon {:name icon-name, :size "large", :vertical-align "middle"}]
-       [ui/ListContent
-        [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
-        (or description "")]])))
-
-
-(defn new-deployment-template-list-item
-  []
-  ^{:key "new-deployment-template-list-item"}
-  [ui/ListItem {:on-click #(dispatch [::application-events/create-deployment-template])}
-   [ui/ListIcon {:name "plus", :size "large", :vertical-align "middle"}]
-   [ui/ListContent
-    [ui/ListHeader "New Deployment Template"]
-    "Create a new deployment template for this module."]])
-
-
-(defn deployment-template-list
-  []
-  (let [deployment-templates (subscribe [::application-subs/deployment-templates])]
-    (vec (concat [ui/ListSA {:divided   true
-                             :relaxed   true
-                             :selection true}
-                  [new-deployment-template-list-item]]
-                 (mapv deployment-template-list-item @deployment-templates)))))
-
-
-(defn deployment-template-details
-  []
-  (let [template (subscribe [::application-subs/selected-deployment-template])
-        text (reagent/atom (general/edn->json (or @template {})))]
-    (fn []
-      (let [json-str (general/edn->json (or @template {}))]
-        (reset! text json-str)
-        [:pre @text]
-
-        ;; FIXME: Correct problem where the editor doesn't see external changes to the text.
-        #_[editor/json-editor text]))))
-
-
-(defn deploy-modal
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        visible? (subscribe [::application-subs/deploy-modal-visible?])
-        nav-path (subscribe [::main-subs/nav-path])
-        loading? (subscribe [::application-subs/loading-deployment-templates?])]
-    (let [hide-fn #(dispatch [::application-events/close-deploy-modal])
-          submit-fn #(dispatch [::application-events/deploy])]
-      [ui/Modal {:open       @visible?
-                 :close-icon true
-                 :on-close   hide-fn}
-
-       [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (utils/nav-path->module-path @nav-path)]
-
-       [ui/ModalContent {:scrolling true}
-        [ui/Segment {:loading @loading?}
-         [deployment-template-list]]
-        [ui/Segment
-         [deployment-template-details]]]
-
-       [ui/ModalActions
-        [uix/Button {:text (@tr [:cancel]), :on-click hide-fn}]
-        [uix/Button {:text (@tr [:deploy]), :positive true, :on-click #(do (hide-fn) (submit-fn))}]]])))
+        [uix/Button {:text (@tr [:add]), :positive true, :on-click submit-fn}]]])))
 
 
 (defn format-module [{:keys [type name description] :as module}]
@@ -473,7 +403,7 @@
       (vec (concat [ui/Container {:fluid true}
                     [control-bar]
                     [add-modal]
-                    [deploy-modal]
+                    [appstore-views/deploy-modal]
                     [format-error @data]]
                    (when (and @data (not (instance? js/Error @data)))
                      (let [{:keys [children content]} @data
