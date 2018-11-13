@@ -51,7 +51,7 @@
       [ui/Card {:fluid true}
        [ui/CardContent
         (when logo
-          [ui/Image {:floated "right", :size :tiny, :src (:href logo)}])
+          [ui/Image {:floated "right", :size :tiny, :src logo}])
         [ui/CardHeader
          [ui/Icon {:name icon}]
          (cond-> title

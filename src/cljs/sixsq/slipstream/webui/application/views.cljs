@@ -225,11 +225,11 @@
 
 
 (defn preprocess-metadata
-  [{:keys [name path description logo type acl] :as module-meta}]
+  [{:keys [name path description logoURL type acl] :as module-meta}]
   {:title       name
    :subtitle    path
    :description description
-   :logo        logo
+   :logo        logoURL
    :icon        (meta-category-icon type)
    :acl         acl})
 
