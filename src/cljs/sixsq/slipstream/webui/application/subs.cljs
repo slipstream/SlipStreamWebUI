@@ -10,10 +10,22 @@
 
 
 (reg-sub
-  ::module-id
-  ::application-spec/module-id)
+  ::module
+  ::application-spec/module)
 
 
 (reg-sub
-  ::module
-  ::application-spec/module)
+  ::add-modal-visible?
+  ::application-spec/add-modal-visible?)
+
+
+(reg-sub
+  ::add-data
+  ::application-spec/add-data)
+
+
+(reg-sub
+  ::active-tab
+  ::application-spec/active-tab)
+
+

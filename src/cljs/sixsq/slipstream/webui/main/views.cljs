@@ -34,7 +34,7 @@
 (defn crumb
   [index segment]
   (let [nav-fn (fn [& _] (dispatch [::main-events/trim-breadcrumb index]))]
-    ^{:key segment} [ui/BreadcrumbSection [:a {:on-click nav-fn :style {:cursor "pointer"}}
+    ^{:key (str index "_" segment)} [ui/BreadcrumbSection [:a {:on-click nav-fn :style {:cursor "pointer"}}
                                            (utils/truncate (str segment))]]))
 
 

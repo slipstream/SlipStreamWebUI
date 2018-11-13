@@ -9,7 +9,8 @@
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 
 (reg-event-db
@@ -107,11 +108,14 @@
 
 (reg-event-fx
   ::create-deployment
-  (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ depl-tmpl-id]]
+  (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id]]
     (when client
-      (let [data {:name               (str "Deployment from " depl-tmpl-id)
-                  :description        (str "A deployment for the deployment template " depl-tmpl-id)
-                  :deploymentTemplate {:href depl-tmpl-id}}
+      (log/error id)
+      (let [data (if (str/starts-with? id "module/")
+                   {:deploymentTemplate {:module {:href id}}}
+                   {:name               (str "Deployment from " id)
+                    :description        (str "A deployment for the deployment template " id)
+                    :deploymentTemplate {:href id}})
             add-depl-callback (fn [response]
                                 (if (instance? js/Error response)
                                   (let [{:keys [status message]} (response/parse-ex-info response)]

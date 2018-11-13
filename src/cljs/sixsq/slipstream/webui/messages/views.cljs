@@ -60,7 +60,6 @@
           [ui/TransitionablePortal {:transition transition, :open open?}
            [ui/Message (merge (type->message-type type)
                               {:style      top-right
-                               :padded     false
                                :on-dismiss #(dispatch [::message-events/hide])})
             [ui/MessageHeader [ui/Icon {:name icon-name}] header "\u2001\u00a0"]
             [:a {:on-click #(dispatch [::message-events/open-modal])} (@tr [:more-info])]]])))))

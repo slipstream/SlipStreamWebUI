@@ -20,8 +20,8 @@
                                                      (-> (<! (cimi/search client "modules" {:$filter path-filter}))
                                                          :modules
                                                          first)
-                                                     {:type "PROJECT"
-                                                      :name "Applications"
+                                                     {:type        "PROJECT"
+                                                      :name        "Applications"
                                                       :description "cloud applications at your service"})
 
             module (if (not= "PROJECT" type)
@@ -34,3 +34,14 @@
             module-data (assoc module :children children)]
 
         (callback module-data)))))
+
+
+(reg-fx
+  ::create-module
+  (fn [[client path data callback]]
+    (go
+      (let [{:keys [status] :as response} (<! (cimi/add client "modules" data))]
+        (when (= 201 status)
+          (callback response))))))
+
+
