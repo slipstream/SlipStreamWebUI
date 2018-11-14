@@ -110,7 +110,6 @@
   ::create-deployment
   (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id]]
     (when client
-      (log/error id)
       (let [data (if (str/starts-with? id "module/")
                    {:deploymentTemplate {:module {:href id}}}
                    {:name               (str "Deployment from " id)

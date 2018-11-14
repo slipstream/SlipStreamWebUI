@@ -10,10 +10,11 @@
     (::spec/time-period db)))
 
 
-(reg-sub
-  ::service-offers
-  (fn [db]
-    (::spec/service-offers db)))
+;; unused, all information taken when fetching content-types
+;;(reg-sub
+;;  ::service-offers
+;;  (fn [db]
+;;    (::spec/service-offers db)))
 
 
 (reg-sub
@@ -26,6 +27,24 @@
   ::content-types
   (fn [db]
     (::spec/content-types db)))
+
+
+(reg-sub
+  ::application-select-visible?
+  (fn [db]
+    (::spec/application-select-visible? db)))
+
+
+(reg-sub
+  ::loading-applications?
+  (fn [db]
+    (::spec/loading-applications? db)))
+
+
+(reg-sub
+  ::applications
+  (fn [db]
+    (::spec/applications db)))
 
 
 

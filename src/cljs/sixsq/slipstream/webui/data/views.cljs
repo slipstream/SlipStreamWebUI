@@ -13,12 +13,15 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.application.utils :as application-utils]
+    [sixsq.slipstream.webui.appstore.views :as appstore-views]
+    [sixsq.slipstream.webui.appstore.events :as appstore-events]
     [taoensso.timbre :as log]
     [reagent.core :as reagent]))
 
 
 (defn refresh []
-  (dispatch [::events/get-service-offers])
+  ;(dispatch [::events/get-service-offers])  ;; unused, all information taken with get-content-types
   (dispatch [::events/get-content-types])
   (dispatch [::events/get-credentials]))
 
@@ -92,6 +95,72 @@
       [search-header]]]))
 
 
+(defn application-list-item
+  [{:keys [id name description type created] :as application}]
+  ^{:key id}
+  [ui/ListItem {:on-click #(do
+                             (dispatch [::events/close-application-select-modal])
+                             (dispatch [::appstore-events/create-deployment id]))}
+   [ui/ListIcon {:name (application-utils/category-icon type), :size "large", :vertical-align "middle"}]
+   [ui/ListContent
+    [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
+    (or description "")]])
+
+
+(defn application-list
+  []
+  (let [applications (subscribe [::subs/applications])]
+    (vec (concat [ui/ListSA {:divided   true
+                             :relaxed   true
+                             :selection true}]
+                 (mapv application-list-item @applications)))))
+
+(defn application-select-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        visible? (subscribe [::subs/application-select-visible?])
+        loading? (subscribe [::subs/loading-applications?])]
+    (fn []
+      (let [hide-fn #(dispatch [::events/close-application-select-modal])
+            submit-fn #()                                   ;#(dispatch [::events/edit-deployment])
+            ]
+        [ui/Modal {:open       @visible?
+                   :close-icon true
+                   :on-close   hide-fn}
+
+         [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 "
+          ;(get-in @deployment [:module :path])
+          ]
+
+         [ui/ModalContent {:scrolling true}
+          [ui/Segment {:attached true, :loading @loading?}
+           [application-list]
+
+           ;;[ui/StepGroup {:attached "top"}
+           ;; [deployment-step "summary" "info" "An overview of the application to be deployed."]
+           ;; #_[deployment-step "offers" "check" "Resource constraints and service offers."]
+           ;; [deployment-step "size" "resize vertical" "Infrastructure cpu ram disk to use for the deployment."]
+           ;; [deployment-step "credentials" "key" "Infrastructure credentials to use for the deployment."]
+           ;; [deployment-step "parameters" "list alternate outline" "Input parameters for the application."]]
+           ;;(case @step-id
+           ;;  "summary" [deployment-summary]
+           ;;  "offers" [deployment-resources]
+           ;;  "parameters" [deployment-params]
+           ;;  "credentials" [credential-list]
+           ;;  "size" [deployment-resources]
+           ;;  nil)
+           ]]
+
+         [ui/ModalActions
+          ;;[uix/Button {:text     (@tr [:cancel]),
+          ;;             :on-click hide-fn
+          ;;             :disabled (not (:id @deployment))}]
+          ;;[uix/Button {:text     (@tr [:deploy]), :primary true,
+          ;;             :on-click #(submit-fn)
+          ;;             }]
+          ]]))))
+
+
 (defn format-content-type
   [{:keys [key doc_count] :as content-type}]
   (let [tr (subscribe [::i18n-subs/tr])]
@@ -103,7 +172,7 @@
       #_[ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]]
      [ui/Button {:fluid    true
                  :primary  true
-                 :on-click #()}
+                 :on-click #(dispatch [::events/open-application-select-modal key])}
       (@tr [:process])]]))
 
 
@@ -248,7 +317,7 @@
 
 (defn service-offer-resources
   []
-  (let [service-offers (subscribe [::subs/service-offers])
+  (let [;service-offers (subscribe [::subs/service-offers]) ;; unused, query done entirely then fetching content types
         credentials (subscribe [::subs/credentials])
         deployment-templates (subscribe [::subs/deployment-templates])
         elements-per-page (subscribe [::subs/elements-per-page])
@@ -257,6 +326,8 @@
       (let [total-pages (general-utils/total-pages (get @deployment-templates :count 0) @elements-per-page)]
         [ui/Container {:fluid true}
          [control-bar]
+         [application-select-modal]
+         [appstore-views/deploy-modal]
          [content-types-cards-group]
          #_[deploy-modal]
          #_[deployment-templates-cards-group (get @deployment-templates :deploymentTemplates [])]

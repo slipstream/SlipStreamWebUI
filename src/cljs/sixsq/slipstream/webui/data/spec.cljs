@@ -31,6 +31,11 @@
 (s/def ::credentials (s/nilable (s/coll-of any? :kind vector?)))
 (s/def ::content-types (s/nilable (s/coll-of string? :kind vector?)))
 
+(s/def ::application-select-visible? boolean?)
+
+(s/def ::loading-applications? boolean?)
+
+(s/def ::applications (s/nilable (s/coll-of any? :kind vector?)))
 
 (s/def ::db (s/keys :req [
 
@@ -38,6 +43,9 @@
                           ::service-offers
                           ::credentials
                           ::content-types
+                          ::application-select-visible?
+                          ::loading-applications?
+                          ::applications
 
                           ::deployment-templates
                           ::full-text-search
@@ -50,19 +58,24 @@
                           ::selected-credential
                           ::step-id]))
 
+;; FIXME: Make default dates use current date.
 (def defaults {
-               ::time-period           [(time/days-before 1) (time/now)]
-               ::service-offers        nil
-               ::credentials           nil
-               ::content-types         nil
+               ::time-period                 [(time/parse-iso8601 "2018-01-01T00:00:00.00Z")
+                                              (time/parse-iso8601 "2018-10-31T11:45:00.00Z")]
+               ::service-offers              nil
+               ::credentials                 nil
+               ::content-types               nil
+               ::application-select-visible? false
+               ::loading-applications?       false
+               ::applications                nil
 
-               ::deployment-templates  nil
-               ::full-text-search      nil
-               ::page                  1
-               ::elements-per-page     8
-               ::deployment            nil
-               ::deploy-modal-visible? false
-               ::loading-deployment?   false
-               ::loading-credentials?  false
-               ::selected-credential   nil
-               ::step-id               "summary"})
+               ::deployment-templates        nil
+               ::full-text-search            nil
+               ::page                        1
+               ::elements-per-page           8
+               ::deployment                  nil
+               ::deploy-modal-visible?       false
+               ::loading-deployment?         false
+               ::loading-credentials?        false
+               ::selected-credential         nil
+               ::step-id                     "summary"})

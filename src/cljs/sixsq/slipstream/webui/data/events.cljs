@@ -37,10 +37,10 @@
 
 (defn filter-service-offer
   [[time-start time-end :as time-period] credentials]
-  (let [filter-time (str "(resource:time>='"
-                         (str/replace (time/time->utc-str time-start) #"[-:]" "") ;FIXME "in meantime mapping fix for resource:time"
-                         "' and resource:time<'"
-                         (str/replace (time/time->utc-str time-end) #"[-:]" "")
+  (let [filter-time (str "(data:timestamp>='"
+                         (time/time->utc-str time-start)
+                         "' and data:timestamp<'"
+                         (time/time->utc-str time-end)
                          "')")
         clouds (map (comp general-utils/resource-id->uuid :href :connector) credentials)
         filter-cred (some->> clouds
@@ -56,23 +56,23 @@
          (str/join " and "))))
 
 
-(reg-event-fx
-  ::get-service-offers
-  (fn [{{:keys [::client-spec/client
-                ::spec/time-period
-                ::spec/credentials] :as db} :db} _]
-    (when client
-      (let [filter (filter-service-offer time-period credentials)]
-        (cond-> {:db (assoc db ::spec/service-offers nil)}
-                (not-empty credentials) (assoc ::cimi-api-fx/search
-                                               [client "serviceOffers" {:$filter filter}
-                                                #(dispatch [::set-service-offers %])]))))))
+;;(reg-event-fx
+;;  ::get-service-offers
+;;  (fn [{{:keys [::client-spec/client
+;;                ::spec/time-period
+;;                ::spec/credentials] :as db} :db} _]
+;;    (when client
+;;      (let [filter (filter-service-offer time-period credentials)]
+;;        (cond-> {:db (assoc db ::spec/service-offers nil)}
+;;                (not-empty credentials) (assoc ::cimi-api-fx/search
+;;                                               [client "serviceOffers" {:$filter filter}
+;;                                                #(dispatch [::set-service-offers %])]))))))
 
 
 (reg-event-db
   ::set-content-types
   (fn [db [_ content-types-response]]
-    (let [buckets (get-in content-types-response [:aggregations :terms:resource:contentType :buckets])]
+    (let [buckets (get-in content-types-response [:aggregations :terms:data:contentType :buckets])]
       (assoc db ::spec/content-types buckets))))
 
 
@@ -87,8 +87,9 @@
                 (not-empty credentials) (assoc ::cimi-api-fx/search
                                                [client "serviceOffers" {:$filter      filter
                                                                         :$last        0
-                                                                        :$aggregation "terms:resource:contentType"}
+                                                                        :$aggregation "terms:data:contentType"}
                                                 #(dispatch [::set-content-types %])]))))))
+
 
 (reg-event-fx
   ::get-credentials
@@ -100,7 +101,28 @@
                              #(dispatch [::set-credentials %])]})))
 
 
+(reg-event-db
+  ::set-applications
+  (fn [db [_ applications]]
+    (assoc db ::spec/applications (:modules applications)
+              ::spec/loading-applications? false)))
 
+
+(reg-event-fx
+  ::open-application-select-modal
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ content-type]]
+    {:db                  (assoc db ::spec/application-select-visible? true
+                                    ::spec/loading-applications? true)
+     ::cimi-api-fx/search [client "modules" {:$filter (str "dataAcceptContentTypes='" content-type "'")}
+                           #(dispatch [::set-applications %])]
+     }))
+
+
+(reg-event-db
+  ::close-application-select-modal
+  (fn [db _]
+    (assoc db ::spec/applications nil
+              ::spec/application-select-visible? false)))
 
 
 (defn get-query-params
@@ -241,4 +263,12 @@
                                             :type    :error}]))
                               (dispatch [::start-deployment resource-id])))]
         {::cimi-api-fx/edit [client resource-id deployment edit-callback]}))))
+
+
+(reg-event-db
+  ::process-data
+  (fn [db [_ content-type]]
+    (js/alert (str "got here " (str content-type)))
+    db))
+
 

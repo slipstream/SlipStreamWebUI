@@ -19,24 +19,8 @@
     [sixsq.slipstream.webui.application.utils :as utils]
     [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.appstore.views :as appstore-views]
-    [sixsq.slipstream.webui.appstore.events :as appstore-events]))
-
-
-(defn category-icon
-  [category]
-  (case category
-    "PROJECT" "folder"
-    "APPLICATION" "sitemap"
-    "IMAGE" "file"
-    "COMPONENT" "microchip"
-    "question circle"))
-
-
-(defn meta-category-icon
-  [category]
-  (if (= "PROJECT" category)
-    "folder open"
-    (category-icon category)))
+    [sixsq.slipstream.webui.appstore.events :as appstore-events]
+    [taoensso.timbre :as log]))
 
 
 (defn refresh-button
@@ -154,7 +138,7 @@
 
 (defn kw->icon-name
   [kw]
-  (-> kw name str/upper-case category-icon))
+  (-> kw name str/upper-case utils/category-icon))
 
 
 (defn pane
@@ -208,7 +192,7 @@
 (defn format-module [{:keys [type name description] :as module}]
   (when module
     (let [on-click #(dispatch [::main-events/push-breadcrumb name])
-          icon-name (category-icon type)]
+          icon-name (utils/category-icon type)]
       [ui/ListItem {:on-click on-click}
        [ui/ListIcon {:name           icon-name
                      :size           "large"
@@ -230,7 +214,7 @@
    :subtitle    path
    :description description
    :logo        logoURL
-   :icon        (meta-category-icon type)
+   :icon        (utils/meta-category-icon type)
    :acl         acl})
 
 
@@ -268,11 +252,14 @@
 (defn format-module-children
   [module-children]
   (when (pos? (count module-children))
+    (log/error module-children)
     [ui/Segment style/basic
      (vec (concat [ui/ListSA {:divided   true
                               :relaxed   true
                               :selection true}]
-                  (map format-module module-children)))]))
+                  (map (fn [{:keys [id] :as module}]
+                         ^{:key id}
+                         [format-module module]) module-children)))]))
 
 
 (defn parameter-table-row
