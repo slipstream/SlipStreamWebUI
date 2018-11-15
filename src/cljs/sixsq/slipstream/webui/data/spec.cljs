@@ -20,6 +20,8 @@
 
 (s/def ::gnss-filter string?)
 
+(s/def ::content-type-filter (s/nilable string?))
+
 (s/def ::application-select-visible? boolean?)
 
 (s/def ::loading-applications? boolean?)
@@ -36,6 +38,7 @@
                           ::loading-applications?
                           ::applications
                           ::gnss-filter
+                          ::content-type-filter
                           ]))
 
 (def default-time-period [(time/parse-iso8601 "2018-01-01T00:00:00.00Z")
@@ -53,4 +56,5 @@
                ::loading-applications?       false
                ::applications                nil
                ::gnss-filter                 "(resource:type='DATA' and resource:bucket^='gnss')"
+               ::content-type-filter         nil
                })

@@ -11,28 +11,9 @@
 
 
 (reg-sub
-  ::time-period-filter
-  (fn [db]
-    (::spec/time-period-filter db)))
-
-
-;; unused, all information taken when fetching content-types
-;;(reg-sub
-;;  ::service-offers
-;;  (fn [db]
-;;    (::spec/service-offers db)))
-
-
-(reg-sub
   ::credentials
   (fn [db]
     (::spec/credentials db)))
-
-
-(reg-sub
-  ::cloud-filter
-  (fn [db]
-    (::spec/cloud-filter db)))
 
 
 (reg-sub
@@ -57,12 +38,3 @@
   ::applications
   (fn [db]
     (::spec/applications db)))
-
-
-
-(reg-sub
-  ::gnss-filter
-  (fn [db]
-    (::spec/gnss-filter db)))
-
-

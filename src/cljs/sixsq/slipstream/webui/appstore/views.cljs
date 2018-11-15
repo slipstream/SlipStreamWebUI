@@ -116,20 +116,13 @@
     (str "Number of data objects: " (or doc_count ""))]])
 
 
-(defn data-clouds-list
+(defn deployment-data
   []
   (let [data-clouds (subscribe [::subs/data-clouds])]
     (vec (concat [ui/ListSA {:divided   true
                              :relaxed   true
                              :selection true}]
                  (mapv data-clouds-list-item @data-clouds)))))
-
-
-
-(defn deployment-data
-  []
-  (let [data-clouds (subscribe [::subs/data-clouds])]
-    [data-clouds-list]))
 
 
 (defn as-form-input
@@ -197,7 +190,6 @@
         deployment (subscribe [::subs/deployment])
         loading? (subscribe [::subs/loading-deployment?])
         step-id (subscribe [::subs/step-id])]
-    (dispatch [::appstore-events/get-service-offers-by-cred])
     (fn []
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
             submit-fn #(dispatch [::appstore-events/edit-deployment])]

@@ -95,7 +95,8 @@
   ::open-application-select-modal
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ content-type]]
     {:db                  (assoc db ::spec/application-select-visible? true
-                                    ::spec/loading-applications? true)
+                                    ::spec/loading-applications? true
+                                    ::spec/content-type-filter (str "data:contentType='" content-type "'"))
      ::cimi-api-fx/search [client "modules" {:$filter (str "dataAcceptContentTypes='" content-type "'")}
                            #(dispatch [::set-applications %])]
      }))
