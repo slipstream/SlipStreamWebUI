@@ -51,3 +51,9 @@
 (reg-sub
   ::step-id
   ::appstore-spec/step-id)
+
+
+(reg-sub
+  ::data-clouds
+  (fn [db]
+    (::appstore-spec/data-clouds db)))

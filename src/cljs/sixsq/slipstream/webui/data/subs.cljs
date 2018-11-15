@@ -10,6 +10,12 @@
     (::spec/time-period db)))
 
 
+(reg-sub
+  ::time-period-filter
+  (fn [db]
+    (::spec/time-period-filter db)))
+
+
 ;; unused, all information taken when fetching content-types
 ;;(reg-sub
 ;;  ::service-offers
@@ -21,6 +27,12 @@
   ::credentials
   (fn [db]
     (::spec/credentials db)))
+
+
+(reg-sub
+  ::cloud-filter
+  (fn [db]
+    (::spec/cloud-filter db)))
 
 
 (reg-sub
@@ -49,44 +61,8 @@
 
 
 (reg-sub
-  ::deployment-templates
-  ::spec/deployment-templates)
-
-(reg-sub
-  ::elements-per-page
-  ::spec/elements-per-page)
+  ::gnss-filter
+  (fn [db]
+    (::spec/gnss-filter db)))
 
 
-(reg-sub
-  ::page
-  ::spec/page)
-
-
-(reg-sub
-  ::deploy-modal-visible?
-  ::spec/deploy-modal-visible?)
-
-
-(reg-sub
-  ::loading-deployment?
-  ::spec/loading-deployment?)
-
-
-(reg-sub
-  ::deployment
-  ::spec/deployment)
-
-
-(reg-sub
-  ::loading-credentials?
-  ::spec/loading-credentials?)
-
-
-(reg-sub
-  ::selected-credential
-  ::spec/selected-credential)
-
-
-(reg-sub
-  ::step-id
-  ::spec/step-id)

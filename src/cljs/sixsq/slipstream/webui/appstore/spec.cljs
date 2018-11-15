@@ -22,6 +22,10 @@
 
 (s/def ::step-id string?)
 
+(s/def ::data-clouds any?)
+
+(s/def ::cloud-filter (s/nilable string?))
+
 (s/def ::db (s/keys :req [::deployment-templates
                           ::full-text-search
                           ::page
@@ -32,7 +36,9 @@
                           ::loading-credentials?
                           ::selected-credential
                           ::credentials
-                          ::step-id]))
+                          ::step-id
+                          ::data-clouds
+                          ::cloud-filter]))
 
 (def defaults {::deployment-templates  nil
                ::full-text-search      nil
@@ -44,4 +50,6 @@
                ::loading-credentials?  false
                ::selected-credential   nil
                ::credentials           nil
-               ::step-id               "summary"})
+               ::step-id               "summary"
+               ::data-clouds           nil
+               ::cloud-filter          nil})

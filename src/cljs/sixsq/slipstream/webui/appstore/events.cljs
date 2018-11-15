@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.appstore.spec :as spec]
-    [sixsq.slipstream.webui.appstore.spec :as spec]
+    [sixsq.slipstream.webui.data.spec :as data-spec]
     [sixsq.slipstream.webui.appstore.utils :as utils]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.response :as response]
     [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [sixsq.slipstream.webui.data.utils :as data-utils]))
 
 
 (reg-event-db
@@ -75,14 +76,22 @@
     (assoc db ::spec/credentials credentials
               ::spec/loading-credentials? false)))
 
-
-(reg-event-db
+(reg-event-fx
   ::set-selected-credential
-  (fn [{:keys [::spec/deployment
-               ::spec/credentials] :as db} [_ {:keys [id] :as credential}]]
-    (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)]
-      (assoc db ::spec/selected-credential credential
-                ::spec/deployment updated-deployment))))
+  (fn [{{:keys [::client-spec/client
+                ::spec/deployment
+                ::data-spec/time-period-filter
+                ::data-spec/gnss-filter
+                ::spec/cloud-filter] :as db} :db} [_ {:keys [id] :as credential}]]
+    (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
+          filter (data-utils/join-filters time-period-filter cloud-filter gnss-filter)
+          callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
+                           (dispatch
+                             [::set-deployment
+                              (assoc deployment :serviceOffers service-offers-ids)]))]
+      {:db                  (assoc db ::spec/selected-credential credential
+                                      ::spec/deployment updated-deployment)
+       ::cimi-api-fx/search [client "serviceOffers" {:$filter filter :$select "id"} callback-data]})))
 
 
 (reg-event-db
@@ -94,6 +103,7 @@
 (reg-event-db
   ::set-deployment
   (fn [db [_ deployment]]
+    (log/error deployment)
     (assoc db ::spec/deployment deployment
               ::spec/loading-deployment? false)))
 
@@ -124,16 +134,27 @@
                                                 :content message
                                                 :type    :error}])
                                     (dispatch [::close-deploy-modal]))
-                                  (dispatch [::get-deployment (:resource-id response)])))
-            search-creds-callback #(dispatch [::set-credentials (get % :credentials [])])]
-        {:db                  (assoc db ::spec/loading-deployment? true
-                                        ::spec/loading-credentials? true
+                                  (dispatch [::get-deployment (:resource-id response)])))]
+        {:db               (assoc db ::spec/loading-deployment? true
+                                     ::spec/selected-credential nil
+                                     ::spec/deploy-modal-visible? true
+                                     ::spec/step-id "summary"
+                                     ::spec/cloud-filter nil)
+         ::cimi-api-fx/add [client "deployments" data add-depl-callback]}))))
+
+(reg-event-fx
+  ::get-credentials
+  (fn [{{:keys [::client-spec/client
+                ::spec/cloud-filter] :as db} :db :as cofx} _]
+    (when client
+      (let [search-creds-callback #(dispatch [::set-credentials (get % :credentials [])])]
+        {:db                  (assoc db ::spec/loading-credentials? true
                                         ::spec/credentials nil
-                                        ::spec/selected-credential nil
-                                        ::spec/deploy-modal-visible? true
-                                        ::spec/step-id "summary")
-         ::cimi-api-fx/add    [client "deployments" data add-depl-callback]
-         ::cimi-api-fx/search [client "credentials" {:$filter (str "type^='cloud-cred'")} search-creds-callback]}))))
+                                        ::spec/selected-credential nil)
+         ::cimi-api-fx/search [client "credentials"
+                               {:$filter (data-utils/join-filters
+                                           cloud-filter
+                                           (str "type^='cloud-cred'"))} search-creds-callback]}))))
 
 
 (reg-event-fx
@@ -175,4 +196,34 @@
                                             :type    :error}]))
                               (dispatch [::start-deployment resource-id])))]
         {::cimi-api-fx/edit [client resource-id deployment edit-callback]}))))
+
+
+(reg-event-db
+  ::set-data-clouds
+  (fn [db [_ data-clouds-response]]
+    (let [buckets (get-in data-clouds-response [:aggregations (keyword "terms:connector/href") :buckets])]
+      (assoc db ::spec/data-clouds buckets))))
+
+
+(reg-event-fx
+  ::get-service-offers-by-cred
+  (fn [{{:keys [::client-spec/client
+                ::data-spec/time-period-filter
+                ::data-spec/cloud-filter
+                ::data-spec/gnss-filter
+                ::data-spec/credentials] :as db} :db} _]
+    (when client
+      (let [filter (data-utils/join-filters time-period-filter cloud-filter gnss-filter)]
+        (log/error filter)
+        (-> {:db db}
+            (assoc ::cimi-api-fx/search
+                   [client "serviceOffers" {:$filter      filter
+                                            :$last        0
+                                            :$aggregation "terms:connector/href"}
+                    #(dispatch [::set-data-clouds %])]))))))
+
+(reg-event-db
+  ::set-cloud-filter
+  (fn [db [_ cloud]]
+    (assoc db ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')"))))
 

@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.appstore.events :as appstore-events]
-    [sixsq.slipstream.webui.appstore.subs :as appstore-subs]
+    [sixsq.slipstream.webui.appstore.subs :as subs]
     [sixsq.slipstream.webui.appstore.utils :as utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
@@ -73,7 +73,7 @@
 
 (defn deployment-summary
   []
-  (let [deployment (subscribe [::appstore-subs/deployment])]
+  (let [deployment (subscribe [::subs/deployment])]
     (let [{:keys [id name description module]} @deployment]
       [ui/ListSA
        [ui/ListItem id]
@@ -85,7 +85,7 @@
 
 (defn input-size
   [name property-key]
-  (let [deployment (subscribe [::appstore-subs/deployment])]
+  (let [deployment (subscribe [::subs/deployment])]
     ^{:key (str (:id @deployment) "-" name)}
     [ui/FormInput {:type          "number",
                    :label         name,
@@ -104,9 +104,37 @@
    [input-size "DISK [GB]" :disk]])
 
 
+(defn data-clouds-list-item
+  [{:keys [key doc_count]}]
+  ^{:key key}
+  [ui/ListItem {:on-click #(do
+                             (dispatch [::appstore-events/set-cloud-filter key])
+                             (dispatch [::appstore-events/set-step-id "size"]))}
+   [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
+   [ui/ListContent
+    [ui/ListHeader key]
+    (str "Number of data objects: " (or doc_count ""))]])
+
+
+(defn data-clouds-list
+  []
+  (let [data-clouds (subscribe [::subs/data-clouds])]
+    (vec (concat [ui/ListSA {:divided   true
+                             :relaxed   true
+                             :selection true}]
+                 (mapv data-clouds-list-item @data-clouds)))))
+
+
+
+(defn deployment-data
+  []
+  (let [data-clouds (subscribe [::subs/data-clouds])]
+    [data-clouds-list]))
+
+
 (defn as-form-input
   [{:keys [parameter description value] :as param}]
-  (let [deployment (subscribe [::appstore-subs/deployment])]
+  (let [deployment (subscribe [::subs/deployment])]
     ^{:key parameter}
     [ui/FormField
      [:label parameter ff/nbsp (ff/help-popup description)]
@@ -124,7 +152,7 @@
 
 (defn deployment-params
   []
-  (let [template (subscribe [::appstore-subs/deployment])]
+  (let [template (subscribe [::subs/deployment])]
     (let [params (-> @template :module :content :inputParameters)]
       (vec (concat [ui/Form]
                    (map as-form-input params))))))
@@ -132,7 +160,7 @@
 
 (defn credential-list-item
   [{:keys [id name description created] :as credential}]
-  (let [selected-credential (subscribe [::appstore-subs/selected-credential])]
+  (let [selected-credential (subscribe [::subs/selected-credential])]
     ^{:key id}
     (let [{selected-id :id} @selected-credential
           icon-name (if (= id selected-id) "check circle outline" "circle outline")]
@@ -145,15 +173,17 @@
 
 (defn credential-list
   []
-  (let [credentials (subscribe [::appstore-subs/credentials])]
-    (vec (concat [ui/ListSA {:divided   true
-                             :relaxed   true
-                             :selection true}]
-                 (mapv credential-list-item @credentials)))))
+  (dispatch [::appstore-events/get-credentials])
+  (fn []
+    (let [credentials (subscribe [::subs/credentials])]
+     (vec (concat [ui/ListSA {:divided   true
+                              :relaxed   true
+                              :selection true}]
+                  (mapv credential-list-item @credentials))))))
 
 (defn deployment-step
   [name icon description]
-  (let [step-id (subscribe [::appstore-subs/step-id])]
+  (let [step-id (subscribe [::subs/step-id])]
     [ui/Step {:icon     icon
               :title    name
               ;:description description
@@ -163,13 +193,15 @@
 (defn deploy-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        visible? (subscribe [::appstore-subs/deploy-modal-visible?])
-        deployment (subscribe [::appstore-subs/deployment])
-        loading? (subscribe [::appstore-subs/loading-deployment?])
-        step-id (subscribe [::appstore-subs/step-id])]
+        visible? (subscribe [::subs/deploy-modal-visible?])
+        deployment (subscribe [::subs/deployment])
+        loading? (subscribe [::subs/loading-deployment?])
+        step-id (subscribe [::subs/step-id])]
+    (dispatch [::appstore-events/get-service-offers-by-cred])
     (fn []
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
             submit-fn #(dispatch [::appstore-events/edit-deployment])]
+
         [ui/Modal {:open       @visible?
                    :close-icon true
                    :on-close   hide-fn}
@@ -180,13 +212,13 @@
           [ui/Segment {:attached true, :loading @loading?}
            [ui/StepGroup {:attached "top"}
             [deployment-step "summary" "info" "An overview of the application to be deployed."]
-            #_[deployment-step "offers" "check" "Resource constraints and service offers."]
+            [deployment-step "data" "database" "Data resources."]
             [deployment-step "size" "resize vertical" "Infrastructure cpu ram disk to use for the deployment."]
             [deployment-step "credentials" "key" "Infrastructure credentials to use for the deployment."]
             [deployment-step "parameters" "list alternate outline" "Input parameters for the application."]]
            (case @step-id
              "summary" [deployment-summary]
-             "offers" [deployment-resources]
+             "data" [deployment-data]
              "parameters" [deployment-params]
              "credentials" [credential-list]
              "size" [deployment-resources]
@@ -202,9 +234,9 @@
 
 (defn deployment-template-resources
   []
-  (let [deployment-templates (subscribe [::appstore-subs/deployment-templates])
-        elements-per-page (subscribe [::appstore-subs/elements-per-page])
-        page (subscribe [::appstore-subs/page])]
+  (let [deployment-templates (subscribe [::subs/deployment-templates])
+        elements-per-page (subscribe [::subs/elements-per-page])
+        page (subscribe [::subs/page])]
     (fn []
       (let [total-pages (general-utils/total-pages (get @deployment-templates :count 0) @elements-per-page)]
         [ui/Container {:fluid true}
