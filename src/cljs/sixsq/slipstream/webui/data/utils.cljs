@@ -47,7 +47,7 @@
   (let [clouds (map (comp general-utils/resource-id->uuid :href :connector) credentials)]
     (some->> clouds
              (seq)
-             (map #(str "connector/href='" % "'"))
+             (map #(str "connector/href='connector/" % "'"))
              (str/join " or "))))
 
 

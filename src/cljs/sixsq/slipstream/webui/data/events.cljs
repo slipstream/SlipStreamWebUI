@@ -66,7 +66,6 @@
                 ::spec/credentials] :as db} :db} _]
     (when client
       (let [filter (utils/join-filters time-period-filter cloud-filter gnss-filter)]
-        (log/error filter)
         (cond-> {:db (assoc db ::spec/content-types nil)}
                 (not-empty credentials) (assoc ::cimi-api-fx/search
                                                [client "serviceOffers" {:$filter      filter

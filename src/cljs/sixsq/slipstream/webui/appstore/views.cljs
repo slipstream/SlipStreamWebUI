@@ -152,8 +152,8 @@
 
 (defn deployment-params
   []
-  (let [template (subscribe [::subs/deployment])]
-    (let [params (-> @template :module :content :inputParameters)]
+  (let [deployment (subscribe [::subs/deployment])]
+    (let [params (-> @deployment :module :content :inputParameters)]
       (vec (concat [ui/Form]
                    (map as-form-input params))))))
 

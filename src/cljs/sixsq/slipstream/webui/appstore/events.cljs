@@ -88,7 +88,7 @@
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch
                              [::set-deployment
-                              (assoc deployment :serviceOffers service-offers-ids)]))]
+                              (assoc updated-deployment :serviceOffers service-offers-ids)]))]
       {:db                  (assoc db ::spec/selected-credential credential
                                       ::spec/deployment updated-deployment)
        ::cimi-api-fx/search [client "serviceOffers" {:$filter filter :$select "id"} callback-data]})))
@@ -103,7 +103,6 @@
 (reg-event-db
   ::set-deployment
   (fn [db [_ deployment]]
-    (log/error deployment)
     (assoc db ::spec/deployment deployment
               ::spec/loading-deployment? false)))
 
@@ -214,7 +213,6 @@
                 ::data-spec/credentials] :as db} :db} _]
     (when client
       (let [filter (data-utils/join-filters time-period-filter cloud-filter gnss-filter)]
-        (log/error filter)
         (-> {:db db}
             (assoc ::cimi-api-fx/search
                    [client "serviceOffers" {:$filter      filter
