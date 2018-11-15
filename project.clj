@@ -26,6 +26,7 @@
                                     "target"
                                     "resources/public/css/version.css"
                                     "resources/public/css/codemirror.css"
+                                    "resources/public/css/foldgutter.css"
                                     "resources/public/css/react-datepicker.min.css"
                                     "resources/public/css/codemirror.css"]
 
@@ -44,6 +45,8 @@
                {:target-path "resources/public/css/react-datepicker.min.css"}]
               ["node_modules/codemirror/lib/codemirror.css"
                {:target-path "resources/public/css/codemirror.css"}]
+              ["node_modules/codemirror/addon/fold/foldgutter.css"
+               {:target-path "resources/public/css/foldgutter.css"}]
               ["target/version.css"
                {:target-path "resources/public/css/version.css"}]]}
 
