@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import json
 import re
 import requests
 import string
@@ -65,15 +64,17 @@ def generate_service_offer(tmpl, i):
     gnss_info = clouds[cloud_name]
     timestamp = (t_start + timedelta(seconds=i)).isoformat() + 'Z'
     timestamp_gnss = re.sub('[^a-zA-Z0-9]', '',
-                            (t_start + timedelta(hours=i / 3600)).isoformat('t') + 'z')
+                            (t_start + timedelta(seconds=i)).isoformat('t') + 'z')
+    timestamp_bucket = re.sub('[^a-zA-Z0-9]', '',
+                              (t_start + timedelta(hours=i / 3600)).isoformat('t') + 'z')
 
     rand_type = data_formats[randint(0, len(data_formats) - 1)]
     content_type = "application/x-{}".format(rand_type)
 
     prefix = ''.join(choice(string.ascii_lowercase) for _ in range(8))
-    bucket_name = "gnss-%s-%s" % (cloud_name, timestamp_gnss)
+    bucket_name = "gnss-%s-%s" % (cloud_name, timestamp_bucket)
     object_name = "%s_%s_%s" % (prefix, rand_type, timestamp)
-    name = object_name
+    name = "GNSS_TEST_" + object_name
     description = bucket_name + "/" + object_name + "    " + content_type
 
     gnss_info.update({"name": name,
@@ -134,10 +135,10 @@ def _upload_data(url, content_type, bytes):
 
 
 seconds = 5 * 24 * 3600  # 5 days in seconds
-step_sec = seconds + 1000 # 15 * 60  # every 15 minutes
+step_sec = seconds + 1000  # 15 * 60  # every 15 minutes
 
 for i in xrange(0, seconds, step_sec):
     service_offer = generate_service_offer(service_offer_template, i)
     create_and_fill_external_object(service_offer)
     api.cimi_add("serviceOffers", service_offer)
-    #print(json.dumps(service_offer, indent=2))
+    # print(json.dumps(service_offer, indent=2))
