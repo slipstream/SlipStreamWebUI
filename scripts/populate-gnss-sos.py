@@ -136,7 +136,7 @@ def _upload_data(url, content_type, bytes):
 
 
 seconds = 5 * 24 * 3600  # 5 days in seconds
-step_sec = seconds + 1000  # 15 * 60  # every 15 minutes
+step_sec = 15 * 60  # every 15 minutes
 
 for i in xrange(0, seconds, step_sec):
     service_offer = generate_service_offer(service_offer_template, i)
