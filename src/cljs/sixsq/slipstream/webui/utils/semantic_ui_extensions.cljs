@@ -94,7 +94,9 @@
                                   :line-numbers        true
                                   :match-brackets      true
                                   :auto-close-brackets true
-                                  :style-active-line   true}
+                                  :style-active-line   true
+                                  :fold-gutter         true
+                                  :gutters             ["CodeMirror-foldgutter"]}
                       :on-change (fn [editor data value]
                                    (reset! text value))}])))
 

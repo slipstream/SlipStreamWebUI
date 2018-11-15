@@ -38,7 +38,7 @@
              {:action    :start
               :id        :deployment-detail-get-summary-nodes-parameters
               :frequency 30000
-              :event     [::deployment-detail-events/get-summary-nodes-parameters (nodes-list)]}])
+              :event     [::deployment-detail-events/get-summary-nodes-parameters resource-id (nodes-list)]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-reports
@@ -241,8 +241,7 @@
 
 (defn reports-list                                          ; Used by old UI
   []
-  (let [reports (subscribe [::deployment-detail-subs/reports])
-        runUUID (subscribe [::deployment-detail-subs/runUUID])]
+  (let [runUUID (subscribe [::deployment-detail-subs/runUUID])]
     (when-not (str/blank? @runUUID)
       (dispatch [::main-events/action-interval
                  {:action    :start

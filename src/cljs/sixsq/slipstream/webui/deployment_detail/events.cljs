@@ -76,7 +76,8 @@
 
 (reg-event-fx
   ::get-deployment
-  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id]]
+  (fn [{{:keys [::client-spec/client
+                ::spec/deployment] :as db} :db} [_ resource-id]]
     (when client
       (let [get-depl-callback #(if (instance? js/Error %)
                                  (let [{:keys [status message]} (response/parse-ex-info %)]
@@ -87,7 +88,15 @@
                                                :type    :error}])
                                    (dispatch [::history-events/navigate "deployment"]))
                                  (dispatch [::set-deployment %]))]
-        {:db               (assoc db ::spec/loading? true)
+        {:db               (cond-> (assoc db ::spec/loading? true)
+                                   (not= (:id deployment) resource-id) (assoc ::spec/deployment nil
+                                                                              ::spec/global-deployment-parameters nil
+                                                                              ::spec/events nil
+                                                                              ::spec/reports nil
+                                                                              ::spec/node-parameters-modal nil
+                                                                              ::spec/node-parameters nil
+                                                                              ::spec/summary-nodes-parameters nil)
+                                   )
          ::cimi-api-fx/get [client resource-id get-depl-callback]}))))
 
 
@@ -116,7 +125,7 @@
   ::get-events
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ href]]
     (let [filter-str (str "content/resource/href='" href "'")
-          order-by-str "timestamp:asc"
+          order-by-str "timestamp:desc"
           select-str "id, content, severity, timestamp, type"
           query-params {:$filter  filter-str
                         :$orderby order-by-str
@@ -190,12 +199,11 @@
 
 (reg-event-fx
   ::get-summary-nodes-parameters
-  (fn [{{:keys [::client-spec/client
-                ::spec/deployment] :as db} :db} [_ nodes]]
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id nodes]]
     (when (some? nodes)
       (let [nodes-filter (str/join " or " (map #(str "nodeID='" % "'") nodes))
             names-filter (str/join " or " (map #(str "name='" % "'") summary-param-names))
-            filter-str (str/join " and " [(str "deployment/href='" (:id deployment) "'")
+            filter-str (str/join " and " [(str "deployment/href='" resource-id "'")
                                           (str "(" nodes-filter ")")
                                           (str "(" names-filter ")")])
             select-str "nodeID, name, value"
