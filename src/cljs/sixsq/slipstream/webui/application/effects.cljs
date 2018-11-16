@@ -31,7 +31,8 @@
             children (when (= type "PROJECT")
                        (:modules (<! (cimi/search client "modules" {:$filter children-filter}))))
 
-            module-data (assoc module :children children)]
+            module-data (cond-> module
+                                children (assoc :children children))]
 
         (callback module-data)))))
 
