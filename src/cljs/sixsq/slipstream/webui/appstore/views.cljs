@@ -126,14 +126,18 @@
 
 (defn data-clouds-list-item
   [{:keys [key doc_count]}]
-  (let [selected-cloud (subscribe [::subs/selected-cloud])]
+  (let [selected-cloud (subscribe [::subs/selected-cloud])
+        connectors (subscribe [::subs/connectors])
+        {:keys [name description]} (get @connectors key)]
     ^{:key key}
     [ui/ListItem {:active   (= key @selected-cloud)
                   :on-click #(dispatch [::appstore-events/set-cloud-filter key])}
      [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
      [ui/ListContent
-      [ui/ListHeader key]
-      (str "Number of data objects: " (or doc_count ""))]]))
+      [ui/ListHeader (or name key)]
+      (when description
+        [ui/ListDescription description])
+      [:span (str "Number of data objects: " (or doc_count ""))]]]))
 
 
 (defn deployment-data
@@ -217,7 +221,6 @@
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::subs/deploy-modal-visible?])
         deployment (subscribe [::subs/deployment])
-        loading? (subscribe [::subs/loading-deployment?])
         step-id (subscribe [::subs/step-id])
 
         selected-cloud (subscribe [::subs/selected-cloud])
@@ -234,8 +237,7 @@
          [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (get-in @deployment [:module :path])]
 
          [ui/ModalContent {:scrolling true}
-          [ui/ModalDescription {:loading @loading?
-                                :style   {:height "30em"}}
+          [ui/ModalDescription {:style   {:height "30em"}}
            [ui/StepGroup {:attached "top"}
             (when show-data?
               [deployment-step "data" "database"])

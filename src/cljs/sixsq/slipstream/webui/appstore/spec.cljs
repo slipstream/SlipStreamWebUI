@@ -26,6 +26,7 @@
 
 (s/def ::selected-cloud (s/nilable string?))
 (s/def ::cloud-filter (s/nilable string?))
+(s/def ::connectors any?)
 
 (s/def ::db (s/keys :req [::deployment-templates
                           ::full-text-search
@@ -40,7 +41,8 @@
                           ::step-id
                           ::data-clouds
                           ::selected-cloud
-                          ::cloud-filter]))
+                          ::cloud-filter
+                          ::connectors]))
 
 (def defaults {::deployment-templates  nil
                ::full-text-search      nil
@@ -55,4 +57,5 @@
                ::step-id               "data"
                ::data-clouds           nil
                ::selected-cloud        nil
-               ::cloud-filter          nil})
+               ::cloud-filter          nil
+               ::connectors            nil})

@@ -3,14 +3,11 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
+    [sixsq.slipstream.webui.data.effects :as fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
-    [sixsq.slipstream.webui.history.events :as history-evts]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.general :as general-utils]
-    [sixsq.slipstream.webui.utils.response :as response]
 
     [taoensso.timbre :as log]))
 
@@ -37,41 +34,25 @@
               ::spec/cloud-filter (utils/create-cloud-filter credentials))))
 
 
-;;(reg-event-fx
-;;  ::get-service-offers
-;;  (fn [{{:keys [::client-spec/client
-;;                ::spec/time-period
-;;                ::spec/credentials] :as db} :db} _]
-;;    (when client
-;;      (let [filter (filter-service-offer time-period credentials)]
-;;        (cond-> {:db (assoc db ::spec/service-offers nil)}
-;;                (not-empty credentials) (assoc ::cimi-api-fx/search
-;;                                               [client "serviceOffers" {:$filter filter}
-;;                                                #(dispatch [::set-service-offers %])]))))))
-
-
 (reg-event-db
-  ::set-content-types
-  (fn [db [_ content-types-response]]
-    (let [buckets (get-in content-types-response [:aggregations :terms:data:contentType :buckets])]
-      (assoc db ::spec/content-types buckets))))
+  ::set-data
+  (fn [db [_ data-query-id response]]
+    (let [doc-count (get-in response [:aggregations :count:id :value])]
+      (update db ::spec/data assoc data-query-id doc-count))))
 
 
 (reg-event-fx
-  ::get-content-types
+  ::get-data
   (fn [{{:keys [::client-spec/client
                 ::spec/time-period-filter
                 ::spec/cloud-filter
-                ::spec/gnss-filter
-                ::spec/credentials] :as db} :db} _]
+                ::spec/credentials
+                ::spec/data-queries] :as db} :db} _]
     (when client
-      (let [filter (utils/join-filters time-period-filter cloud-filter gnss-filter)]
-        (cond-> {:db (assoc db ::spec/content-types nil)}
-                (not-empty credentials) (assoc ::cimi-api-fx/search
-                                               [client "serviceOffers" {:$filter      filter
-                                                                        :$last        0
-                                                                        :$aggregation "terms:data:contentType"}
-                                                #(dispatch [::set-content-types %])]))))))
+      (cond-> {:db (assoc db ::spec/data nil)}
+              (not-empty credentials) (assoc ::fx/fetch-data
+                                             [client time-period-filter cloud-filter (vals data-queries)
+                                              #(dispatch [::set-data %1 %2])])))))
 
 
 (reg-event-fx
@@ -93,13 +74,15 @@
 
 (reg-event-fx
   ::open-application-select-modal
-  (fn [{{:keys [::client-spec/client] :as db} :db} [_ content-type]]
-    {:db                  (assoc db ::spec/application-select-visible? true
-                                    ::spec/loading-applications? true
-                                    ::spec/content-type-filter (str "data:contentType='" content-type "'"))
-     ::cimi-api-fx/search [client "modules" {:$filter (str "dataAcceptContentTypes='" content-type "'")}
-                           #(dispatch [::set-applications %])]
-     }))
+  (fn [{{:keys [::client-spec/client
+                ::spec/data-queries] :as db} :db} [_ data-query-id]]
+    (let [{:keys [query-data query-application]} (get data-queries data-query-id)]
+      {:db                  (assoc db ::spec/application-select-visible? true
+                                      ::spec/loading-applications? true
+                                      ::spec/content-type-filter query-data)
+       ::cimi-api-fx/search [client "modules" {:$filter query-application}
+                             #(dispatch [::set-applications %])]
+       })))
 
 
 (reg-event-db

@@ -63,3 +63,8 @@
   ::selected-cloud
   (fn [db]
     (::spec/selected-cloud db)))
+
+(reg-sub
+  ::connectors
+  (fn [db]
+    (::spec/connectors db)))

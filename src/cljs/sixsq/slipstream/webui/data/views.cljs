@@ -16,7 +16,7 @@
 
 
 (defn refresh []
-  (dispatch [::events/get-content-types])
+  (dispatch [::events/get-data])
   (dispatch [::events/get-credentials]))
 
 
@@ -120,28 +120,31 @@
            [application-list]]]]))))
 
 
-(defn format-content-type
-  [{:keys [key doc_count] :as content-type}]
-  (let [tr (subscribe [::i18n-subs/tr])]
-    ^{:key key}
+(defn format-data-query
+  [{:keys [id name description] :as data-query}]
+  (let [tr (subscribe [::i18n-subs/tr])
+        data (subscribe [::subs/data])
+        count (get @data id "...")]
+    ^{:key id}
     [ui/Card
      [ui/CardContent
-      [ui/CardHeader {:style {:word-wrap "break-word"}} key]
-      [ui/CardMeta {:style {:word-wrap "break-word"}} (@tr [:count]) ": " doc_count]]
+      [ui/CardHeader {:style {:word-wrap "break-word"}} (or name id)]
+      [ui/CardMeta description]
+      [ui/CardDescription {:style {:word-wrap "break-word"}} (@tr [:count]) ": " count]]
      [ui/Button {:fluid    true
                  :primary  true
-                 :on-click #(dispatch [::events/open-application-select-modal key])}
+                 :on-click #(dispatch [::events/open-application-select-modal id])}
       (@tr [:process])]]))
 
 
-(defn content-types-cards-group
+(defn queries-cards-group
   []
-  (let [content-types (subscribe [::subs/content-types])]
+  (let [data-queries (subscribe [::subs/data-queries])]
     [ui/Segment style/basic
      (vec (concat [ui/CardGroup]
-                  (map (fn [content-type]
-                         [format-content-type content-type])
-                       @content-types)))]))
+                  (map (fn [data-query]
+                         [format-data-query data-query])
+                       (vals @data-queries))))]))
 
 
 (defn service-offer-resources
@@ -150,7 +153,7 @@
    [control-bar]
    [application-select-modal]
    [appstore-views/deploy-modal true]
-   [content-types-cards-group]])
+   [queries-cards-group]])
 
 
 (defmethod panel/render :data

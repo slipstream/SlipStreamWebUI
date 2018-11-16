@@ -17,12 +17,6 @@
 
 
 (reg-sub
-  ::content-types
-  (fn [db]
-    (::spec/content-types db)))
-
-
-(reg-sub
   ::application-select-visible?
   (fn [db]
     (::spec/application-select-visible? db)))
@@ -38,3 +32,15 @@
   ::applications
   (fn [db]
     (::spec/applications db)))
+
+
+(reg-sub
+  ::data-queries
+  (fn [db]
+    (::spec/data-queries db)))
+
+
+(reg-sub
+  ::data
+  (fn [db]
+    (::spec/data db)))

@@ -81,11 +81,10 @@
   (fn [{{:keys [::client-spec/client
                 ::spec/deployment
                 ::data-spec/time-period-filter
-                ::data-spec/gnss-filter
                 ::spec/cloud-filter
                 ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential}]]
     (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
-          filter (data-utils/join-filters time-period-filter cloud-filter gnss-filter content-type-filter)
+          filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch
                              [::set-deployment
@@ -154,7 +153,7 @@
                                         ::spec/credentials nil
                                         ::spec/selected-credential nil)
          ::cimi-api-fx/search [client "credentials"
-                               {:$filter (data-utils/join-filters
+                               {:$filter (data-utils/join-and
                                            cloud-filter
                                            (str "type^='cloud-cred'"))} search-creds-callback]}))))
 
@@ -201,10 +200,21 @@
 
 
 (reg-event-db
+  ::set-connectors
+  (fn [db [_ {:keys [connectors]}]]
+    (assoc db ::spec/connectors (into {} (map (juxt :id identity) connectors)))))
+
+
+(reg-event-fx
   ::set-data-clouds
-  (fn [db [_ data-clouds-response]]
-    (let [buckets (get-in data-clouds-response [:aggregations (keyword "terms:connector/href") :buckets])]
-      (assoc db ::spec/data-clouds buckets))))
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ data-clouds-response]]
+    (let [buckets (get-in data-clouds-response [:aggregations (keyword "terms:connector/href") :buckets])
+          clouds (map :key buckets)
+          filter (apply data-utils/join-or (map #(str "id='" % "'") clouds))]
+      {:db                  (assoc db ::spec/data-clouds buckets)
+       ::cimi-api-fx/search [client "connectors"
+                             {:$filter filter
+                              :$select "id, name, description"} #(dispatch [::set-connectors %])]})))
 
 
 (reg-event-fx
@@ -212,11 +222,10 @@
   (fn [{{:keys [::client-spec/client
                 ::data-spec/time-period-filter
                 ::data-spec/cloud-filter
-                ::data-spec/gnss-filter
                 ::data-spec/content-type-filter
                 ::data-spec/credentials] :as db} :db} _]
     (when client
-      (let [filter (data-utils/join-filters time-period-filter cloud-filter gnss-filter content-type-filter)]
+      (let [filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)]
         (-> {:db db}
             (assoc ::cimi-api-fx/search
                    [client "serviceOffers" {:$filter      filter
