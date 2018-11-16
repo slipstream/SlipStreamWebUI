@@ -1,6 +1,13 @@
 (ns sixsq.slipstream.webui.appstore.utils)
 
 
+(def next-steps {"data"        "credentials"
+                 "credentials" "size"
+                 "size"        "parameters"
+                 "parameters"  "summary"
+                 "summary"     nil})
+
+
 (defn matches-parameter-name?
   [parameter-name parameter]
   (and parameter-name (= parameter-name (:parameter parameter))))

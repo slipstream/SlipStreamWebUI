@@ -4,6 +4,7 @@
     [sixsq.slipstream.webui.appstore.events :as appstore-events]
     [sixsq.slipstream.webui.appstore.subs :as subs]
     [sixsq.slipstream.webui.appstore.utils :as utils]
+    [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
@@ -12,7 +13,6 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [taoensso.timbre :as log]))
 
@@ -58,7 +58,7 @@
       [ui/CardDescription {:style {:overflow "hidden" :max-height "100px"}} description]]
      [ui/Button {:fluid    true
                  :primary  true
-                 :on-click #(dispatch [::appstore-events/create-deployment id])}
+                 :on-click #(dispatch [::appstore-events/create-deployment id "credentials"])}
       (@tr [:deploy])]]))
 
 
@@ -75,7 +75,8 @@
   []
   (let [deployment (subscribe [::subs/deployment])
         data-clouds (subscribe [::subs/data-clouds])
-        selected-cloud (subscribe [::subs/selected-cloud])]
+        selected-cloud (subscribe [::subs/selected-cloud])
+        selected-credential (subscribe [::subs/selected-credential])]
     (let [{:keys [id name description module]} @deployment
           {:keys [key doc_count]} (first (filter #(= @selected-cloud (:key %)) @data-clouds))]
 
@@ -87,12 +88,18 @@
         [ui/TableRow
          [ui/TableCell "Application Path"]
          [ui/TableCell (:path module)]]
-        [ui/TableRow
-         [ui/TableCell "Selected Cloud"]
-         [ui/TableCell key]]
-        [ui/TableRow
-         [ui/TableCell "Number of Selected Objects"]
-         [ui/TableCell doc_count]]
+        (when (:id @selected-credential)
+          [ui/TableRow
+           [ui/TableCell "Credential"]
+           [ui/TableCell (:id @selected-credential)]])
+        (when key
+          [ui/TableRow
+           [ui/TableCell "Selected Cloud"]
+           [ui/TableCell key]])
+        (when doc_count
+          [ui/TableRow
+           [ui/TableCell "Number of Selected Objects"]
+           [ui/TableCell doc_count]])
         ]])))
 
 
@@ -122,10 +129,7 @@
   (let [selected-cloud (subscribe [::subs/selected-cloud])]
     ^{:key key}
     [ui/ListItem {:active   (= key @selected-cloud)
-                  :on-click #(do
-                               (dispatch [::appstore-events/set-cloud-filter key])
-                               ;(dispatch [::appstore-events/set-step-id "size"])
-                               )}
+                  :on-click #(dispatch [::appstore-events/set-cloud-filter key])}
      [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
      [ui/ListContent
       [ui/ListHeader key]
@@ -191,22 +195,34 @@
                    (mapv credential-list-item @credentials))))))
 
 (defn deployment-step
-  [name icon description]
+  [name icon]
   (let [step-id (subscribe [::subs/step-id])]
     [ui/Step {:icon   icon
               :title  name
-              ;:description description
-              ;:on-click #(dispatch [::appstore-events/set-step-id name])
               :active (= name @step-id)}]))
 
+
+(defn next-disabled?
+  [step-id
+   selected-cloud
+   selected-credential]
+  (case step-id
+        "data" (not (boolean selected-cloud))
+        "credentials" (not (boolean selected-credential))
+        false))
+
+
 (defn deploy-modal
-  []
+  [show-data?]
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::subs/deploy-modal-visible?])
         deployment (subscribe [::subs/deployment])
         loading? (subscribe [::subs/loading-deployment?])
-        step-id (subscribe [::subs/step-id])]
-    (fn []
+        step-id (subscribe [::subs/step-id])
+
+        selected-cloud (subscribe [::subs/selected-cloud])
+        selected-credential (subscribe [::subs/selected-credential])]
+    (fn [show-data?]
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
             submit-fn #(dispatch [::appstore-events/edit-deployment])
             next-fn #(dispatch [::appstore-events/next-step])]
@@ -221,11 +237,12 @@
           [ui/ModalDescription {:loading @loading?
                                 :style   {:height "30em"}}
            [ui/StepGroup {:attached "top"}
-            [deployment-step "data" "database" "Data resources."]
-            [deployment-step "credentials" "key" "Infrastructure credentials to use for the deployment."]
-            [deployment-step "size" "resize vertical" "Infrastructure cpu ram disk to use for the deployment."]
-            [deployment-step "parameters" "list alternate outline" "Input parameters for the application."]
-            [deployment-step "summary" "info" "An overview of the application to be deployed."]]
+            (when show-data?
+              [deployment-step "data" "database"])
+            [deployment-step "credentials" "key"]
+            [deployment-step "size" "resize vertical"]
+            [deployment-step "parameters" "list alternate outline"]
+            [deployment-step "summary" "info"]]
            (case @step-id
              "summary" [deployment-summary]
              "data" [deployment-data]
@@ -239,11 +256,14 @@
                        :on-click hide-fn
                        :disabled (not (:id @deployment))}]
           (if (not= @step-id "summary")
-            [uix/Button {:text     (@tr [:next-step]), :primary true,
-                         :on-click #(next-fn)
+            [uix/Button {:disabled (next-disabled? @step-id
+                                                   @selected-cloud
+                                                   @selected-credential)
+                         :text     (@tr [:next-step]), :primary true,
+                         :on-click next-fn
                          }]
             [uix/Button {:text     (@tr [:deploy]), :primary true,
-                         :on-click #(submit-fn)
+                         :on-click submit-fn
                          }])]]))))
 
 (defn deployment-template-resources
@@ -255,7 +275,7 @@
       (let [total-pages (general-utils/total-pages (get @deployment-templates :count 0) @elements-per-page)]
         [ui/Container {:fluid true}
          [control-bar]
-         [deploy-modal]
+         [deploy-modal false]
          [deployment-templates-cards-group (get @deployment-templates :deploymentTemplates [])]
          (when (> total-pages 1)
            [uix/Pagination

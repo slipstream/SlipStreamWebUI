@@ -1,13 +1,13 @@
 (ns sixsq.slipstream.webui.application.events
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.application.effects :as application-fx]
-    [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.application.spec :as spec]
-    [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.main.spec :as main-spec]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [clojure.string :as str]
+    [sixsq.slipstream.webui.client.spec :as client-spec]
+    [sixsq.slipstream.webui.history.events :as history-evts]
+    [sixsq.slipstream.webui.main.spec :as main-spec]
     [taoensso.timbre :as log]))
 
 

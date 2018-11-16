@@ -1,18 +1,18 @@
 (ns sixsq.slipstream.webui.data.events
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
+    [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
+    [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
-    [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.utils.general :as general-utils]
     [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]
 
-    [sixsq.slipstream.webui.utils.general :as general-utils]))
+    [taoensso.timbre :as log]))
 
 
 

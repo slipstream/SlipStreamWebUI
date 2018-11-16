@@ -12,7 +12,6 @@
   (if (string? json-str)
     (try
       (let [{:keys [status message resource-id] :as document} (utils/json->edn json-str)]
-        (log/error document)
         (if (or status message resource-id)
           document
           {:message (with-out-str (pprint document))}))

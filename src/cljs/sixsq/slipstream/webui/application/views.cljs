@@ -5,6 +5,9 @@
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
+    [sixsq.slipstream.webui.application.utils :as utils]
+    [sixsq.slipstream.webui.appstore.events :as appstore-events]
+    [sixsq.slipstream.webui.appstore.views :as appstore-views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -12,14 +15,11 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.application.utils :as utils]
-    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
-    [sixsq.slipstream.webui.appstore.views :as appstore-views]
-    [sixsq.slipstream.webui.appstore.events :as appstore-events]
     [taoensso.timbre :as log]))
 
 
@@ -48,7 +48,7 @@
                      {:name      (@tr [:deploy])
                       :icon-name "play"
                       :disabled  deploy-disabled?
-                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module)])}]
+                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module) "credentials"])}]
 
                     [uix/MenuItemWithIcon
                      {:name      (@tr [:add])
@@ -252,7 +252,6 @@
 (defn format-module-children
   [module-children]
   (when (pos? (count module-children))
-    (log/error module-children)
     [ui/Segment style/basic
      (vec (concat [ui/ListSA {:divided   true
                               :relaxed   true
@@ -390,7 +389,7 @@
       (vec (concat [ui/Container {:fluid true}
                     [control-bar]
                     [add-modal]
-                    [appstore-views/deploy-modal]
+                    [appstore-views/deploy-modal false]
                     [format-error @data]]
                    (when (and @data (not (instance? js/Error @data)))
                      (let [{:keys [children content]} @data

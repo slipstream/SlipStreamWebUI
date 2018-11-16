@@ -1,17 +1,17 @@
 (ns sixsq.slipstream.webui.appstore.events
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.appstore.spec :as spec]
-    [sixsq.slipstream.webui.data.spec :as data-spec]
     [sixsq.slipstream.webui.appstore.utils :as utils]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
+    [sixsq.slipstream.webui.data.spec :as data-spec]
+    [sixsq.slipstream.webui.data.utils :as data-utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]
-    [sixsq.slipstream.webui.data.utils :as data-utils]))
+    [taoensso.timbre :as log]))
 
 
 (reg-event-db
@@ -118,7 +118,7 @@
 
 (reg-event-fx
   ::create-deployment
-  (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id]]
+  (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id first-step]]
     (when client
       (dispatch [::get-service-offers-by-cred])
       (let [data (if (str/starts-with? id "module/")
@@ -139,7 +139,7 @@
         {:db               (assoc db ::spec/loading-deployment? true
                                      ::spec/selected-credential nil
                                      ::spec/deploy-modal-visible? true
-                                     ::spec/step-id "data"
+                                     ::spec/step-id (or first-step "data")
                                      ::spec/cloud-filter nil
                                      ::spec/selected-cloud nil)
          ::cimi-api-fx/add [client "deployments" data add-depl-callback]}))))
@@ -217,7 +217,6 @@
                 ::data-spec/credentials] :as db} :db} _]
     (when client
       (let [filter (data-utils/join-filters time-period-filter cloud-filter gnss-filter content-type-filter)]
-        (log/error filter)
         (-> {:db db}
             (assoc ::cimi-api-fx/search
                    [client "serviceOffers" {:$filter      filter
@@ -231,16 +230,11 @@
     (assoc db ::spec/selected-cloud cloud
               ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')"))))
 
-(def next-steps {"data"        "credentials"
-                 "credentials" "size"
-                 "size"        "parameters"
-                 "parameters"  "summary"
-                 "summary"     nil})
 
 (reg-event-db
   ::next-step
   (fn [{:keys [::spec/step-id] :as db} _]
     (let []
-      (assoc db ::spec/step-id (get next-steps step-id)))))
+      (assoc db ::spec/step-id (get utils/next-steps step-id)))))
 
 

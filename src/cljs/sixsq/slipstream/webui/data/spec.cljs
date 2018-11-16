@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.webui.data.spec
   (:require
     [clojure.spec.alpha :as s]
-    [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.data.utils :as utils]))
+    [sixsq.slipstream.webui.data.utils :as utils]
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (s/def ::time-period (s/tuple any? any?))

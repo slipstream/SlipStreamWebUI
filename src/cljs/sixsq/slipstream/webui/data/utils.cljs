@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.webui.data.utils
   (:require
-    [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.general :as general-utils]
     [clojure.string :as str]
+    [sixsq.slipstream.webui.utils.general :as general-utils]
+    [sixsq.slipstream.webui.utils.time :as time]
     [taoensso.timbre :as log]))
 
 
