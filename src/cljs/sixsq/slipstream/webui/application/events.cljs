@@ -53,9 +53,11 @@
                 ::spec/add-data
                 ::spec/active-tab] :as db} :db} _]
     (when client
-      (let [path (utils/nav-path->module-path nav-path)
+      (let [path (or (utils/nav-path->module-path nav-path) "")
             {project-name :name :as form-data} (get add-data active-tab)
-            module-path (str path "/" project-name)
+            module-path (if (str/blank? path)
+                          project-name
+                          (str path "/" project-name))
             data (-> form-data
                      (assoc :type (-> active-tab name str/upper-case)
                             :parentPath path
