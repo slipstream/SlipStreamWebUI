@@ -235,8 +235,8 @@
   []
   (let [reports (subscribe [::deployment-detail-subs/reports])]
     (if (seq @reports)
-     (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
-     [:p "Reports will be displayed as soon as available. No need to refresh."])))
+      (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
+      [:p "Reports will be displayed as soon as available. No need to refresh."])))
 
 
 (defn reports-list                                          ; Used by old UI

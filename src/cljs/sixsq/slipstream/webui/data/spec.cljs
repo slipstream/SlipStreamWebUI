@@ -41,8 +41,8 @@
                           ::content-type-filter
                           ]))
 
-(def default-time-period [(time/parse-iso8601 "2018-01-01T00:00:00.00Z")
-                          (time/parse-iso8601 "2018-10-31T11:45:00.00Z")])
+(def default-time-period [(time/parse-iso8601 "2018-10-01T00:00:00.00Z")
+                          (time/parse-iso8601 "2018-11-15T00:00:00.00Z")])
 
 ;; FIXME: Make default dates use current date.
 (def defaults {

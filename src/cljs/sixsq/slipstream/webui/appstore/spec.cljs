@@ -24,6 +24,7 @@
 
 (s/def ::data-clouds any?)
 
+(s/def ::selected-cloud (s/nilable string?))
 (s/def ::cloud-filter (s/nilable string?))
 
 (s/def ::db (s/keys :req [::deployment-templates
@@ -38,6 +39,7 @@
                           ::credentials
                           ::step-id
                           ::data-clouds
+                          ::selected-cloud
                           ::cloud-filter]))
 
 (def defaults {::deployment-templates  nil
@@ -50,6 +52,7 @@
                ::loading-credentials?  false
                ::selected-credential   nil
                ::credentials           nil
-               ::step-id               "summary"
+               ::step-id               "data"
                ::data-clouds           nil
+               ::selected-cloud        nil
                ::cloud-filter          nil})

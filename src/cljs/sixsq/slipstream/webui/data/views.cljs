@@ -43,12 +43,13 @@
         ;range-dropdown (reagent/atom range-initial-val)
         ]
     (fn []
-      (let [[time-start time-end] @time-period
-            ]
-        [ui/Form
+      (let [[time-start time-end] @time-period]
+        [ui/Form {:widths "equal"}
          [ui/FormGroup
           [ui/FormField
-           [ui/DatePicker {:custom-input     (reagent/as-element [ui/Input {:label (@tr [:from])}])
+           ;; FIXME: Find a better way to set the field width.
+           [ui/DatePicker {:custom-input     (reagent/as-element [ui/Input {:label (@tr [:from])
+                                                                            :style {:min-width "25em"}}])
                            :selected         time-start
                            :start-date       time-start
                            :end-date         time-end
@@ -62,8 +63,10 @@
                            :date-format      "LLL"
                            :on-change        #(dispatch [::events/set-time-period [% time-end]])
                            }]]
+          ;; FIXME: Find a better way to set the field width.
           [ui/FormField
-           [ui/DatePicker {:custom-input     (reagent/as-element [ui/Input {:label (@tr [:to])}])
+           [ui/DatePicker {:custom-input     (reagent/as-element [ui/Input {:label (@tr [:to])
+                                                                            :style {:min-width "25em"}}])
                            :selected         time-end
                            :start-date       time-start
                            :end-date         time-end
@@ -128,7 +131,7 @@
                    :close-icon true
                    :on-close   hide-fn}
 
-         [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 "
+         [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:select-application])
           ;(get-in @deployment [:module :path])
           ]
 

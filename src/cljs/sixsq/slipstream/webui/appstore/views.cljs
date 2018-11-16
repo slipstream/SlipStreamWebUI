@@ -73,14 +73,27 @@
 
 (defn deployment-summary
   []
-  (let [deployment (subscribe [::subs/deployment])]
-    (let [{:keys [id name description module]} @deployment]
-      [ui/ListSA
-       [ui/ListItem id]
-       [ui/ListItem name]
-       [ui/ListItem description]
-       [ui/ListItem (:path module)]
-       ])))
+  (let [deployment (subscribe [::subs/deployment])
+        data-clouds (subscribe [::subs/data-clouds])
+        selected-cloud (subscribe [::subs/selected-cloud])]
+    (let [{:keys [id name description module]} @deployment
+          {:keys [key doc_count]} (first (filter #(= @selected-cloud (:key %)) @data-clouds))]
+
+      [ui/Table
+       [ui/TableBody
+        [ui/TableRow
+         [ui/TableCell "Application Name"]
+         [ui/TableCell (or name id)]]
+        [ui/TableRow
+         [ui/TableCell "Application Path"]
+         [ui/TableCell (:path module)]]
+        [ui/TableRow
+         [ui/TableCell "Selected Cloud"]
+         [ui/TableCell key]]
+        [ui/TableRow
+         [ui/TableCell "Number of Selected Objects"]
+         [ui/TableCell doc_count]]
+        ]])))
 
 
 (defn input-size
@@ -106,14 +119,17 @@
 
 (defn data-clouds-list-item
   [{:keys [key doc_count]}]
-  ^{:key key}
-  [ui/ListItem {:on-click #(do
-                             (dispatch [::appstore-events/set-cloud-filter key])
-                             (dispatch [::appstore-events/set-step-id "size"]))}
-   [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
-   [ui/ListContent
-    [ui/ListHeader key]
-    (str "Number of data objects: " (or doc_count ""))]])
+  (let [selected-cloud (subscribe [::subs/selected-cloud])]
+    ^{:key key}
+    [ui/ListItem {:active   (= key @selected-cloud)
+                  :on-click #(do
+                               (dispatch [::appstore-events/set-cloud-filter key])
+                               ;(dispatch [::appstore-events/set-step-id "size"])
+                               )}
+     [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
+     [ui/ListContent
+      [ui/ListHeader key]
+      (str "Number of data objects: " (or doc_count ""))]]))
 
 
 (defn deployment-data
@@ -155,10 +171,10 @@
   [{:keys [id name description created] :as credential}]
   (let [selected-credential (subscribe [::subs/selected-credential])]
     ^{:key id}
-    (let [{selected-id :id} @selected-credential
-          icon-name (if (= id selected-id) "check circle outline" "circle outline")]
-      [ui/ListItem {:on-click #(dispatch [::appstore-events/set-selected-credential credential])}
-       [ui/ListIcon {:name icon-name, :size "large", :vertical-align "middle"}]
+    (let [{selected-id :id} @selected-credential]
+      [ui/ListItem {:active   (= id selected-id)
+                    :on-click #(dispatch [::appstore-events/set-selected-credential credential])}
+       [ui/ListIcon {:name "key", :size "large", :vertical-align "middle"}]
        [ui/ListContent
         [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
         (or description "")]])))
@@ -169,19 +185,19 @@
   (dispatch [::appstore-events/get-credentials])
   (fn []
     (let [credentials (subscribe [::subs/credentials])]
-     (vec (concat [ui/ListSA {:divided   true
-                              :relaxed   true
-                              :selection true}]
-                  (mapv credential-list-item @credentials))))))
+      (vec (concat [ui/ListSA {:divided   true
+                               :relaxed   true
+                               :selection true}]
+                   (mapv credential-list-item @credentials))))))
 
 (defn deployment-step
   [name icon description]
   (let [step-id (subscribe [::subs/step-id])]
-    [ui/Step {:icon     icon
-              :title    name
+    [ui/Step {:icon   icon
+              :title  name
               ;:description description
-              :on-click #(dispatch [::appstore-events/set-step-id name])
-              :active   (= name @step-id)}]))
+              ;:on-click #(dispatch [::appstore-events/set-step-id name])
+              :active (= name @step-id)}]))
 
 (defn deploy-modal
   []
@@ -192,7 +208,8 @@
         step-id (subscribe [::subs/step-id])]
     (fn []
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
-            submit-fn #(dispatch [::appstore-events/edit-deployment])]
+            submit-fn #(dispatch [::appstore-events/edit-deployment])
+            next-fn #(dispatch [::appstore-events/next-step])]
 
         [ui/Modal {:open       @visible?
                    :close-icon true
@@ -201,13 +218,14 @@
          [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (get-in @deployment [:module :path])]
 
          [ui/ModalContent {:scrolling true}
-          [ui/Segment {:attached true, :loading @loading?}
+          [ui/ModalDescription {:loading @loading?
+                                :style   {:height "30em"}}
            [ui/StepGroup {:attached "top"}
-            [deployment-step "summary" "info" "An overview of the application to be deployed."]
             [deployment-step "data" "database" "Data resources."]
-            [deployment-step "size" "resize vertical" "Infrastructure cpu ram disk to use for the deployment."]
             [deployment-step "credentials" "key" "Infrastructure credentials to use for the deployment."]
-            [deployment-step "parameters" "list alternate outline" "Input parameters for the application."]]
+            [deployment-step "size" "resize vertical" "Infrastructure cpu ram disk to use for the deployment."]
+            [deployment-step "parameters" "list alternate outline" "Input parameters for the application."]
+            [deployment-step "summary" "info" "An overview of the application to be deployed."]]
            (case @step-id
              "summary" [deployment-summary]
              "data" [deployment-data]
@@ -220,9 +238,13 @@
           [uix/Button {:text     (@tr [:cancel]),
                        :on-click hide-fn
                        :disabled (not (:id @deployment))}]
-          [uix/Button {:text     (@tr [:deploy]), :primary true,
-                       :on-click #(submit-fn)
-                       }]]]))))
+          (if (not= @step-id "summary")
+            [uix/Button {:text     (@tr [:next-step]), :primary true,
+                         :on-click #(next-fn)
+                         }]
+            [uix/Button {:text     (@tr [:deploy]), :primary true,
+                         :on-click #(submit-fn)
+                         }])]]))))
 
 (defn deployment-template-resources
   []

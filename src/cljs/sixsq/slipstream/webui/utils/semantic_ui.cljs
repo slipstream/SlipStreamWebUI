@@ -128,6 +128,7 @@
 (def Modal (reagent/adapt-react-class semantic/Modal))
 (def ModalActions (reagent/adapt-react-class semantic/ModalActions))
 (def ModalContent (reagent/adapt-react-class semantic/ModalContent))
+(def ModalDescription (reagent/adapt-react-class semantic/ModalDescription))
 (def ModalHeader (reagent/adapt-react-class semantic/ModalHeader))
 
 (def Pagination (reagent/adapt-react-class semantic/Pagination))

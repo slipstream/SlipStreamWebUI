@@ -139,8 +139,9 @@
         {:db               (assoc db ::spec/loading-deployment? true
                                      ::spec/selected-credential nil
                                      ::spec/deploy-modal-visible? true
-                                     ::spec/step-id "summary"
-                                     ::spec/cloud-filter nil)
+                                     ::spec/step-id "data"
+                                     ::spec/cloud-filter nil
+                                     ::spec/selected-cloud nil)
          ::cimi-api-fx/add [client "deployments" data add-depl-callback]}))))
 
 (reg-event-fx
@@ -227,5 +228,19 @@
 (reg-event-db
   ::set-cloud-filter
   (fn [db [_ cloud]]
-    (assoc db ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')"))))
+    (assoc db ::spec/selected-cloud cloud
+              ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')"))))
+
+(def next-steps {"data"        "credentials"
+                 "credentials" "size"
+                 "size"        "parameters"
+                 "parameters"  "summary"
+                 "summary"     nil})
+
+(reg-event-db
+  ::next-step
+  (fn [{:keys [::spec/step-id] :as db} _]
+    (let []
+      (assoc db ::spec/step-id (get next-steps step-id)))))
+
 
