@@ -16,7 +16,6 @@
 
 
 (defn refresh []
-  (dispatch [::events/get-data])
   (dispatch [::events/get-credentials]))
 
 

@@ -28,13 +28,6 @@
 
 
 (reg-event-db
-  ::set-credentials
-  (fn [db [_ {:keys [credentials]}]]
-    (assoc db ::spec/credentials credentials
-              ::spec/cloud-filter (utils/create-cloud-filter credentials))))
-
-
-(reg-event-db
   ::set-data
   (fn [db [_ data-query-id response]]
     (let [doc-count (get-in response [:aggregations :count:id :value])]
@@ -42,17 +35,18 @@
 
 
 (reg-event-fx
-  ::get-data
+  ::set-credentials
   (fn [{{:keys [::client-spec/client
                 ::spec/time-period-filter
-                ::spec/cloud-filter
-                ::spec/credentials
-                ::spec/data-queries] :as db} :db} _]
-    (when client
-      (cond-> {:db (assoc db ::spec/data nil)}
-              (not-empty credentials) (assoc ::fx/fetch-data
-                                             [client time-period-filter cloud-filter (vals data-queries)
-                                              #(dispatch [::set-data %1 %2])])))))
+                ::spec/data-queries] :as db} :db} [_ {:keys [credentials]}]]
+    (let [cloud-filter (utils/create-cloud-filter credentials)]
+      (when client
+        (cond-> {:db (assoc db ::spec/credentials credentials
+                               ::spec/cloud-filter cloud-filter
+                               ::spec/data nil)}
+                (not-empty credentials) (assoc ::fx/fetch-data
+                                               [client time-period-filter cloud-filter (vals data-queries)
+                                                #(dispatch [::set-data %1 %2])]))))))
 
 
 (reg-event-fx
