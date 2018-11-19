@@ -141,15 +141,17 @@
   (let [tr (subscribe [::i18n-subs/tr])
         deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
     (fn []
-      [cc/collapsible-segment (@tr [:global-parameters])
-       [ui/Segment style/autoscroll-x
-        [ui/Table style/single-line
-         [ui/TableHeader
-          [ui/TableRow
-           [ui/TableHeaderCell [:span (@tr [:name])]]
-           [ui/TableHeaderCell [:span (@tr [:value])]]]]
-         (vec (concat [ui/TableBody]
-                      (map parameter-to-row (vals @deployment-parameters))))]]])))
+      (let [global-params (vals @deployment-parameters)]
+        [cc/collapsible-segment (@tr [:global-parameters])
+        [ui/Segment style/autoscroll-x
+         [ui/Table style/single-line
+          [ui/TableHeader
+           [ui/TableRow
+            [ui/TableHeaderCell [:span (@tr [:name])]]
+            [ui/TableHeaderCell [:span (@tr [:value])]]]]
+          (when-not (empty? global-params)
+            (vec (concat [ui/TableBody]
+                         (map parameter-to-row global-params))))]]]))))
 
 (defn node-parameters-section
   []
