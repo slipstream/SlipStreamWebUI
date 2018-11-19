@@ -14,7 +14,9 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as str]
+    [sixsq.slipstream.webui.history.views :as history]))
 
 
 (defn refresh-button
@@ -76,26 +78,38 @@
   (let [deployment (subscribe [::subs/deployment])
         data-clouds (subscribe [::subs/data-clouds])
         selected-cloud (subscribe [::subs/selected-cloud])
-        selected-credential (subscribe [::subs/selected-credential])]
-    (let [{:keys [id name description module]} @deployment
-          {:keys [key doc_count]} (first (filter #(= @selected-cloud (:key %)) @data-clouds))]
+        selected-credential (subscribe [::subs/selected-credential])
+        connectors (subscribe [::subs/connectors])]
+    (let [{:keys [name module]} @deployment
+          {:keys [connector-id doc_count]} (first (filter #(= @selected-cloud (:key %)) @data-clouds))
+          {cred-id          :id
+           cred-name        :name
+           cred-description :description} @selected-credential
+          {connector-name        :name
+           connector-description :description} (get @connectors connector-id)]
 
       [ui/Table
        [ui/TableBody
         [ui/TableRow
          [ui/TableCell "Application Name"]
-         [ui/TableCell (or name id)]]
+         [ui/TableCell (or name (-> module :path (str/split #"/") last))]]
         [ui/TableRow
          [ui/TableCell "Application Path"]
          [ui/TableCell (:path module)]]
-        (when (:id @selected-credential)
+        (when cred-id
           [ui/TableRow
            [ui/TableCell "Credential"]
-           [ui/TableCell (:id @selected-credential)]])
-        (when key
+           [ui/TableCell (or cred-name (history/link (str "cimi/" cred-id) cred-id))
+            (when cred-description
+              [:br]
+              [:p cred-description])]])
+        (when connector-id
           [ui/TableRow
            [ui/TableCell "Selected Cloud"]
-           [ui/TableCell key]])
+           [ui/TableCell (or connector-name (history/link (str "cimi/" connector-id) connector-id))
+            (when connector-description
+              [:br]
+              [:p connector-description])]])
         (when doc_count
           [ui/TableRow
            [ui/TableCell "Number of Selected Objects"]
@@ -167,12 +181,27 @@
                             (dispatch [::appstore-events/set-deployment updated-deployment]))))}]]))
 
 
+(defn remove-input-params
+  [collection set-params-to-remove]
+  (remove #(set-params-to-remove (:parameter %)) collection))
+
+
 (defn deployment-params
   []
-  (let [deployment (subscribe [::subs/deployment])]
-    (let [params (-> @deployment :module :content :inputParameters)]
-      (vec (concat [ui/Form]
-                   (map as-form-input params))))))
+  (let [deployment (subscribe [::subs/deployment])
+        selected-credential (subscribe [::subs/selected-credential])]
+    (let [is-not-docker? (not= (:type @selected-credential) "cloud-cred-docker")
+          params-to-filter (cond-> #{"credential.id"}
+                                   is-not-docker? (conj "cloud.node.publish.ports"))
+          params (-> @deployment
+                     :module
+                     :content
+                     :inputParameters
+                     (remove-input-params params-to-filter))]
+      (if (pos? (count params))
+        (vec (concat [ui/Form]
+                     (map as-form-input params)))
+        [ui/Message {:success true} "Nothing to do, next step"]))))
 
 
 (defn credential-list-item
@@ -207,13 +236,19 @@
 
 
 (defn next-disabled?
-  [step-id
-   selected-cloud
-   selected-credential]
+  [step-id selected-cloud selected-credential]
   (case step-id
-        "data" (not (boolean selected-cloud))
-        "credentials" (not (boolean selected-credential))
-        false))
+    "data" (not (boolean selected-cloud))
+    "credentials" (not (boolean selected-credential))
+    false))
+
+
+
+(defn previous-disabled?
+  [step-id show-data?]
+  (or
+    (and (not show-data?) (= step-id "credentials"))
+    (and show-data? (= step-id "data"))))
 
 
 (defn deploy-modal
@@ -228,7 +263,8 @@
     (fn [show-data?]
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
             submit-fn #(dispatch [::appstore-events/edit-deployment])
-            next-fn #(dispatch [::appstore-events/next-step])]
+            next-fn #(dispatch [::appstore-events/next-step])
+            pervious-fn #(dispatch [::appstore-events/previous-step])]
 
         [ui/Modal {:open       @visible?
                    :close-icon true
@@ -237,7 +273,7 @@
          [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (get-in @deployment [:module :path])]
 
          [ui/ModalContent {:scrolling true}
-          [ui/ModalDescription {:style   {:height "30em"}}
+          [ui/ModalDescription {:style {:height "30em"}}
            [ui/StepGroup {:attached "top"}
             (when show-data?
               [deployment-step "data" "database"])
@@ -257,16 +293,17 @@
           [uix/Button {:text     (@tr [:cancel]),
                        :on-click hide-fn
                        :disabled (not (:id @deployment))}]
+          [uix/Button {:disabled (previous-disabled? @step-id show-data?)
+                       :text     (@tr [:previous-step]),
+                       :on-click pervious-fn}]
           (if (not= @step-id "summary")
             [uix/Button {:disabled (next-disabled? @step-id
                                                    @selected-cloud
                                                    @selected-credential)
                          :text     (@tr [:next-step]), :primary true,
-                         :on-click next-fn
-                         }]
+                         :on-click next-fn}]
             [uix/Button {:text     (@tr [:deploy]), :primary true,
-                         :on-click submit-fn
-                         }])]]))))
+                         :on-click submit-fn}])]]))))
 
 (defn deployment-template-resources
   []

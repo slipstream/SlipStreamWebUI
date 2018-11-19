@@ -119,7 +119,8 @@
   ::create-deployment
   (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id first-step]]
     (when client
-      (dispatch [::get-service-offers-by-cred])
+      (when (= "data" first-step)
+        (dispatch [::get-service-offers-by-cred]))
       (let [data (if (str/starts-with? id "module/")
                    {:deploymentTemplate {:module {:href id}}}
                    {:name               (str "Deployment from " id)
@@ -140,7 +141,9 @@
                                      ::spec/deploy-modal-visible? true
                                      ::spec/step-id (or first-step "data")
                                      ::spec/cloud-filter nil
-                                     ::spec/selected-cloud nil)
+                                     ::spec/selected-cloud nil
+                                     ::spec/connectors nil
+                                     ::spec/data-clouds nil)
          ::cimi-api-fx/add [client "deployments" data add-depl-callback]}))))
 
 (reg-event-fx
@@ -153,7 +156,8 @@
                                         ::spec/credentials nil
                                         ::spec/selected-credential nil)
          ::cimi-api-fx/search [client "credentials"
-                               {:$filter (data-utils/join-and
+                               {:$select "id, name, description, created, type"
+                                :$filter (data-utils/join-and
                                            cloud-filter
                                            (str "type^='cloud-cred'"))} search-creds-callback]}))))
 
@@ -214,7 +218,7 @@
       {:db                  (assoc db ::spec/data-clouds buckets)
        ::cimi-api-fx/search [client "connectors"
                              {:$filter filter
-                              :$select "id, name, description"} #(dispatch [::set-connectors %])]})))
+                              :$select "id, name, description, cloudServiceType"} #(dispatch [::set-connectors %])]})))
 
 
 (reg-event-fx
@@ -246,4 +250,8 @@
     (let []
       (assoc db ::spec/step-id (get utils/next-steps step-id)))))
 
-
+(reg-event-db
+  ::previous-step
+  (fn [{:keys [::spec/step-id] :as db} _]
+    (let []
+      (assoc db ::spec/step-id (get utils/previous-steps step-id)))))

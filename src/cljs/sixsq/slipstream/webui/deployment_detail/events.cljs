@@ -62,7 +62,8 @@
 (reg-event-db
   ::set-deployment-parameters
   (fn [db [_ resources]]
-    (assoc db ::spec/global-deployment-parameters (get resources :deploymentParameters []))))
+    (assoc db ::spec/global-deployment-parameters
+              (into {} (map (juxt :name identity) (get resources :deploymentParameters []))))))
 
 
 (reg-event-fx

@@ -19,13 +19,15 @@
     [taoensso.timbre :as log]))
 
 
-(defn ^:export set-runUUID [uuid]                           ;Used by old UI
+(defn ^:export set-runUUID
+  [uuid]                                                    ;Used by old UI
   (dispatch [::deployment-detail-events/set-runUUID uuid]))
 
 
 (defn nodes-list                                            ;FIXME
   []
   ["machine"])
+
 
 (defn automatic-refresh
   [resource-id]
@@ -103,17 +105,19 @@
 
 (defn metadata-section
   []
-  (let [deployment (subscribe [::deployment-detail-subs/deployment])]
+  (let [deployment (subscribe [::deployment-detail-subs/deployment])
+        deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
     (fn []
       (let [summary-info (-> (select-keys @deployment deployment-summary-keys)
                              (merge (select-keys (:module @deployment) #{:name :path :type})))
             icon (-> @deployment :module :type deployment-detail-utils/category-icon)
-            rows (map tuple-to-row summary-info)]
+            rows (map tuple-to-row summary-info)
+            ss-state (-> @deployment-parameters (get "ss:state" {}) :value)]
         [cc/metadata
-         {:title       (module-name @deployment)
-          :subtitle    (:state @deployment)
-          :description (:startTime summary-info)
-          :icon        icon}
+         (cond-> {:title       (module-name @deployment)
+                  :description (:startTime summary-info)
+                  :icon        icon}
+                 ss-state (assoc :subtitle ss-state))
          rows]))))
 
 
@@ -145,7 +149,7 @@
            [ui/TableHeaderCell [:span (@tr [:name])]]
            [ui/TableHeaderCell [:span (@tr [:value])]]]]
          (vec (concat [ui/TableBody]
-                      (map parameter-to-row @deployment-parameters)))]]])))
+                      (map parameter-to-row (vals @deployment-parameters))))]]])))
 
 (defn node-parameters-section
   []
@@ -297,7 +301,7 @@
   []
   (let [deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
     (fn []
-      (let [link (:value (first (filter #(= "ss:url.service" (:name %)) @deployment-parameters)))]
+      (let [link (-> @deployment-parameters (get "ss:url.service") :value)]
         (when link
           [uix/MenuItemWithIcon
            {:name      (general/truncate link)
@@ -321,19 +325,22 @@
      [ui/CardContent
       [ui/CardHeader [ui/Header node-name]]
       [ui/CardDescription
-       [:div
-        [ui/Icon {:name "external"}]
-        [:a {:href service-url} service-url]]
-       [:div
-        [ui/Icon {:name "terminal"}]
-        [:a {:href ssh-url} ssh-url]]
-       [:div (str "password: " (when ssh-password "••••••"))
-        (when ssh-password
+       (when service-url
+         [:div
+          [ui/Icon {:name "external"}]
+          [:a {:href service-url, :target "_blank"} service-url]])
+       (when ssh-url
+         [:div
+          [ui/Icon {:name "terminal"}]
+          [:a {:href ssh-url} ssh-url]])
+       (when ssh-password
+         [:div (str "password: " (when ssh-password "••••••"))
           [ui/Popup {:trigger  (r/as-element [ui/CopyToClipboard {:text ssh-password}
                                               [:a [ui/Icon {:name "clipboard outline"}]]])
                      :position "top center"}
-           "copy to clipboard"])]
-       [:div custom-state]
+           "copy to clipboard"]])
+       (when custom-state
+         [:div custom-state])
        [:div [:a {:href     "#apache.1"
                   :on-click #(dispatch [::deployment-detail-events/show-node-parameters-modal node-name])}
               "details"]]
