@@ -52,8 +52,7 @@
                            :locale           @locale
                            :fixed-height     true
                            :date-format      "LLL"
-                           :on-change        #(dispatch [::events/set-time-period [% time-end]])
-                           }]]
+                           :on-change        #(dispatch [::events/set-time-period [% time-end]])}]]
           ;; FIXME: Find a better way to set the field width.
           [ui/FormField
            [ui/DatePicker {:custom-input     (reagent/as-element [ui/Input {:label (@tr [:to])
@@ -70,9 +69,8 @@
                            :locale           @locale
                            :fixed-height     true
                            :date-format      "LLL"
-                           :on-change        #(dispatch [::events/set-time-period [time-start %]])
-                           }]]]
-         ]))))
+                           :on-change        #(dispatch [::events/set-time-period [time-start %]])}]]]]))))
+
 
 (defn control-bar []
   [:div

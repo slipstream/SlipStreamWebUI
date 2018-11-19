@@ -76,6 +76,7 @@
     (assoc db ::spec/credentials credentials
               ::spec/loading-credentials? false)))
 
+
 (reg-event-fx
   ::set-selected-credential
   (fn [{{:keys [::client-spec/client
@@ -86,12 +87,13 @@
     (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
           filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
-                           (dispatch
-                             [::set-deployment
-                              (assoc updated-deployment :serviceOffers service-offers-ids)]))]
-      {:db                  (assoc db ::spec/selected-credential credential
-                                      ::spec/deployment updated-deployment)
-       ::cimi-api-fx/search [client "serviceOffers" {:$filter filter :$select "id"} callback-data]})))
+                           (dispatch [::set-deployment
+                                      (assoc updated-deployment :serviceOffers service-offers-ids)]))]
+      (cond-> {:db (assoc db ::spec/selected-credential credential
+                             ::spec/deployment updated-deployment)}
+              cloud-filter (assoc ::cimi-api-fx/search [client "serviceOffers"
+                                                        {:$filter filter, :$select "id"}
+                                                        callback-data])))))
 
 
 (reg-event-db
@@ -145,6 +147,7 @@
                                      ::spec/connectors nil
                                      ::spec/data-clouds nil)
          ::cimi-api-fx/add [client "deployments" data add-depl-callback]}))))
+
 
 (reg-event-fx
   ::get-credentials

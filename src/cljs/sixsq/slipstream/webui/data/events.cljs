@@ -1,6 +1,5 @@
 (ns sixsq.slipstream.webui.data.events
   (:require
-    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.data.effects :as fx]
@@ -8,17 +7,27 @@
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
-
     [taoensso.timbre :as log]))
 
 
+(defn fetch-data-cofx
+  [credentials client time-period-filter cloud-filter data-queries]
+  (if (empty? credentials)
+    {}
+    {::fx/fetch-data [client time-period-filter cloud-filter (vals data-queries)
+                      #(dispatch [::set-data %1 %2])]}))
 
 
-(reg-event-db
+(reg-event-fx
   ::set-time-period
-  (fn [db [_ time-period]]
-    (assoc db ::spec/time-period time-period
-              ::spec/time-period-filter (utils/create-time-period-filter time-period))))
+  (fn [{{:keys [::client-spec/client
+                ::spec/cloud-filter
+                ::spec/credentials
+                ::spec/data-queries] :as db} :db} [_ time-period]]
+    (let [time-period-filter (utils/create-time-period-filter time-period)]
+      (merge {:db (assoc db ::spec/time-period time-period
+                           ::spec/time-period-filter time-period-filter)}
+            (fetch-data-cofx credentials client time-period-filter cloud-filter data-queries)))))
 
 
 (reg-event-db
@@ -41,12 +50,10 @@
                 ::spec/data-queries] :as db} :db} [_ {:keys [credentials]}]]
     (let [cloud-filter (utils/create-cloud-filter credentials)]
       (when client
-        (cond-> {:db (assoc db ::spec/credentials credentials
-                               ::spec/cloud-filter cloud-filter
-                               ::spec/data nil)}
-                (not-empty credentials) (assoc ::fx/fetch-data
-                                               [client time-period-filter cloud-filter (vals data-queries)
-                                                #(dispatch [::set-data %1 %2])]))))))
+        (merge {:db (assoc db ::spec/credentials credentials
+                              ::spec/cloud-filter cloud-filter
+                              ::spec/data nil)}
+               (fetch-data-cofx credentials client time-period-filter cloud-filter data-queries))))))
 
 
 (reg-event-fx
