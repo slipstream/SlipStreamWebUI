@@ -29,7 +29,8 @@
 
 (reg-sub
   ::global-deployment-parameters
-  ::deployment-detail-spec/global-deployment-parameters)
+  (fn [db]
+    (::deployment-detail-spec/global-deployment-parameters db)))
 
 (reg-sub
   ::node-parameters-modal

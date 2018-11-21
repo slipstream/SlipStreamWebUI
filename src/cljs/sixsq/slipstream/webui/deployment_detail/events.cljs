@@ -1,5 +1,6 @@
 (ns sixsq.slipstream.webui.deployment-detail.events
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
@@ -9,8 +10,7 @@
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.general :as general-utils]
     [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [taoensso.timbre :as log]))
 
 
 (reg-event-db
@@ -62,7 +62,8 @@
 (reg-event-db
   ::set-deployment-parameters
   (fn [db [_ resources]]
-    (assoc db ::spec/global-deployment-parameters (get resources :deploymentParameters []))))
+    (assoc db ::spec/global-deployment-parameters
+              (into {} (map (juxt :name identity) (get resources :deploymentParameters []))))))
 
 
 (reg-event-fx

@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.cimi.spec :as cimi]
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
+    [sixsq.slipstream.webui.data.spec :as data]
     [sixsq.slipstream.webui.deployment.spec :as deployment]
     [sixsq.slipstream.webui.docs.spec :as docs]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
@@ -23,11 +24,13 @@
 
 
 (s/def ::db (s/merge ::application/db
+                     ::appstore/db
                      ::authn/db
                      ::cimi/db
                      ::cimi-detail/db
                      ::client/db
                      ::dashboard/db
+                     ::data/db
                      ::docs/db
                      ::i18n/db
                      ::legacy-application/db
@@ -36,8 +39,7 @@
                      ::messages/db
                      ::nuvlabox/db
                      ::nuvlabox-detail/db
-                     ::usage/db
-                     ::appstore/db))
+                     ::usage/db))
 
 
 (def default-db
@@ -46,6 +48,7 @@
          authn/defaults
          cimi/defaults
          cimi-detail/defaults
+         data/defaults
          deployment/defaults
          client/defaults
          dashboard/defaults

@@ -7,9 +7,10 @@ target
 .rebel_readline_history
 .lein-*
 
-resources/public/css/version.css
 resources/public/css/codemirror.css
+resources/public/css/foldgutter.css
 resources/public/css/react-datepicker.min.css
+resources/public/css/version.css
 
 resources/public/js
 

@@ -1,4 +1,14 @@
-(ns sixsq.slipstream.webui.appstore.utils)
+(ns sixsq.slipstream.webui.appstore.utils
+  (:require [clojure.set :refer [map-invert]]))
+
+
+(def next-steps {"data"        "credentials"
+                 "credentials" "size"
+                 "size"        "parameters"
+                 "parameters"  "summary"
+                 "summary"     nil})
+
+(def previous-steps (map-invert next-steps))
 
 
 (defn matches-parameter-name?

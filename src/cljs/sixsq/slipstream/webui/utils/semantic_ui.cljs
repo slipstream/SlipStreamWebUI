@@ -3,18 +3,18 @@
    namespace has no real functionality; it just keeps Cursive from complaining
    about undefined symbols."
   (:require
-    ["react-codemirror2" :as code-mirror]
-    ["codemirror/mode/javascript/javascript"]
-    ["codemirror/mode/python/python"]
-    ["codemirror/mode/clojure/clojure"]
-    ["codemirror/mode/shell/shell"]
     ["codemirror/addon/edit/closebrackets"]
     ["codemirror/addon/edit/matchbrackets"]
-    ["codemirror/addon/selection/active-line"]
-    ["codemirror/addon/fold/indent-fold"]
+    ["codemirror/addon/fold/brace-fold"]
     ["codemirror/addon/fold/foldcode"]
     ["codemirror/addon/fold/foldgutter"]
-    ["codemirror/addon/fold/brace-fold"]
+    ["codemirror/addon/fold/indent-fold"]
+    ["codemirror/addon/selection/active-line"]
+    ["codemirror/mode/clojure/clojure"]
+    ["codemirror/mode/javascript/javascript"]
+    ["codemirror/mode/python/python"]
+    ["codemirror/mode/shell/shell"]
+    ["react-codemirror2" :as code-mirror]
     ["react-copy-to-clipboard" :as copy-to-clipboard]
     ["react-datepicker" :as date-picker]
     ["react-markdown" :as react-markdown]
@@ -128,6 +128,7 @@
 (def Modal (reagent/adapt-react-class semantic/Modal))
 (def ModalActions (reagent/adapt-react-class semantic/ModalActions))
 (def ModalContent (reagent/adapt-react-class semantic/ModalContent))
+(def ModalDescription (reagent/adapt-react-class semantic/ModalDescription))
 (def ModalHeader (reagent/adapt-react-class semantic/ModalHeader))
 
 (def Pagination (reagent/adapt-react-class semantic/Pagination))

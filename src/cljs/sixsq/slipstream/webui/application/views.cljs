@@ -5,6 +5,9 @@
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
+    [sixsq.slipstream.webui.application.utils :as utils]
+    [sixsq.slipstream.webui.appstore.events :as appstore-events]
+    [sixsq.slipstream.webui.appstore.views :as appstore-views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -12,31 +15,12 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
+    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
+    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.application.utils :as utils]
-    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
-    [sixsq.slipstream.webui.appstore.views :as appstore-views]
-    [sixsq.slipstream.webui.appstore.events :as appstore-events]))
-
-
-(defn category-icon
-  [category]
-  (case category
-    "PROJECT" "folder"
-    "APPLICATION" "sitemap"
-    "IMAGE" "file"
-    "COMPONENT" "microchip"
-    "question circle"))
-
-
-(defn meta-category-icon
-  [category]
-  (if (= "PROJECT" category)
-    "folder open"
-    (category-icon category)))
+    [taoensso.timbre :as log]))
 
 
 (defn refresh-button
@@ -64,7 +48,7 @@
                      {:name      (@tr [:deploy])
                       :icon-name "play"
                       :disabled  deploy-disabled?
-                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module)])}]
+                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module) "credentials"])}]
 
                     [uix/MenuItemWithIcon
                      {:name      (@tr [:add])
@@ -154,7 +138,7 @@
 
 (defn kw->icon-name
   [kw]
-  (-> kw name str/upper-case category-icon))
+  (-> kw name str/upper-case utils/category-icon))
 
 
 (defn pane
@@ -208,7 +192,7 @@
 (defn format-module [{:keys [type name description] :as module}]
   (when module
     (let [on-click #(dispatch [::main-events/push-breadcrumb name])
-          icon-name (category-icon type)]
+          icon-name (utils/category-icon type)]
       [ui/ListItem {:on-click on-click}
        [ui/ListIcon {:name           icon-name
                      :size           "large"
@@ -230,7 +214,7 @@
    :subtitle    path
    :description description
    :logo        logoURL
-   :icon        (meta-category-icon type)
+   :icon        (utils/meta-category-icon type)
    :acl         acl})
 
 
@@ -272,7 +256,9 @@
      (vec (concat [ui/ListSA {:divided   true
                               :relaxed   true
                               :selection true}]
-                  (map format-module module-children)))]))
+                  (map (fn [{:keys [id] :as module}]
+                         ^{:key id}
+                         [format-module module]) module-children)))]))
 
 
 (defn parameter-table-row
@@ -403,7 +389,7 @@
       (vec (concat [ui/Container {:fluid true}
                     [control-bar]
                     [add-modal]
-                    [appstore-views/deploy-modal]
+                    [appstore-views/deploy-modal false]
                     [format-error @data]]
                    (when (and @data (not (instance? js/Error @data)))
                      (let [{:keys [children content]} @data

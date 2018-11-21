@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.webui.deployment.events
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
-    [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
+    [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.deployment.spec :as spec]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [taoensso.timbre :as log]))
 
 
 (reg-event-db

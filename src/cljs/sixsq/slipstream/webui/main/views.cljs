@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.dashboard.views]
+    [sixsq.slipstream.webui.data.views]
     [sixsq.slipstream.webui.deployment.views]
     [sixsq.slipstream.webui.docs.views]
     [sixsq.slipstream.webui.history.events :as history-events]
