@@ -25,7 +25,8 @@
 
 (reg-sub
   ::events
-  ::deployment-detail-spec/events)
+  (fn [db]
+    (::deployment-detail-spec/events db)))
 
 (reg-sub
   ::global-deployment-parameters

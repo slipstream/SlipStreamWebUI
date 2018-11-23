@@ -134,7 +134,7 @@
       {::cimi-api-fx/search [client
                              "events"
                              (general-utils/prepare-params query-params)
-                             #(dispatch [::set-events %])]})))
+                             #(dispatch [::set-events (:events %)])]})))
 
 
 (reg-event-db

@@ -16,7 +16,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn ^:export set-runUUID
@@ -143,15 +144,15 @@
     (fn []
       (let [global-params (vals @deployment-parameters)]
         [cc/collapsible-segment (@tr [:global-parameters])
-        [ui/Segment style/autoscroll-x
-         [ui/Table style/single-line
-          [ui/TableHeader
-           [ui/TableRow
-            [ui/TableHeaderCell [:span (@tr [:name])]]
-            [ui/TableHeaderCell [:span (@tr [:value])]]]]
-          (when-not (empty? global-params)
-            (vec (concat [ui/TableBody]
-                         (map parameter-to-row global-params))))]]]))))
+         [ui/Segment style/autoscroll-x
+          [ui/Table style/single-line
+           [ui/TableHeader
+            [ui/TableRow
+             [ui/TableHeaderCell [:span (@tr [:name])]]
+             [ui/TableHeaderCell [:span (@tr [:value])]]]]
+           (when-not (empty? global-params)
+             (vec (concat [ui/TableBody]
+                          (map parameter-to-row global-params))))]]]))))
 
 (defn node-parameters-section
   []
@@ -232,7 +233,7 @@
   (let [tr (subscribe [::i18n-subs/tr])
         events (subscribe [::deployment-detail-subs/events])]
     (fn []
-      (let [events (-> @events :events events-table-info)]
+      (let [events (events-table-info @events)]
         [cc/collapsible-segment
          (@tr [:events])
          [events-table events]]))))
@@ -388,6 +389,67 @@
    [stop-button]
    [service-link-button]])
 
+(def deployment-states ["Provisioning" "Executing" "SendingReports" "Ready" "Done"])
+
+(def states-map (into {} (map-indexed (fn [i state] [state i]) deployment-states)))
+
+(def steps [["Provisioning" "Provisioning" "Starting system"]
+            ["Executing" "Executing" "Executing recipies"]
+            ["Reporting" "SendingReports" "Gathering for posterity"]
+            ["Ready" "Ready" "All systems go ready"]])
+
+(defn event-get-timestamp
+  [event]
+  (-> event :timestamp time/parse-iso8601))
+
+(defn step-items
+  [locale active-state-index events-map [title state description]]
+  (let [event-state (get events-map state)
+        state-index (get states-map state)
+        is-state-active? (= active-state-index state-index)
+        is-state-completed? (> active-state-index state-index)]
+    {:key         state
+     :title       title
+     :description (str description
+                       (cond
+                         is-state-active? (str ". Running for " (time/delta-humanize
+                                                                  (event-get-timestamp event-state)
+                                                                  locale))
+                         is-state-completed? (str ". Took " (time/delta-humanize
+                                                              (event-get-timestamp event-state)
+                                                              (some->> (inc state-index)
+                                                                       (nth deployment-states)
+                                                                       (get events-map)
+                                                                       event-get-timestamp)
+                                                              locale))))
+     :icon        (cond
+                    is-state-completed? "check"
+                    is-state-active? "rocket"
+                    :else "ellipsis horizontal")
+     :active      is-state-active?
+     :disabled    (< active-state-index state-index)}))
+
+(defn extract-steps
+  [events]
+  (let [locale (subscribe [::i18n-subs/locale])
+        events-dev [
+                    {:severity "medium", :id "event/7ebb6b3b-cc7a-45db-a4ba-adb01dc2e6a3", :type "state", :content {:resource {:href "deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50"}, :state "Ready"}, :timestamp "2018-11-21T18:47:26.797Z"}
+                    {:severity "medium", :id "event/7aa2f88f-d589-4ccf-b98d-11b11e3a2c4f", :type "state", :content {:resource {:href "deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50"}, :state "SendingReports"}, :timestamp "2018-11-21T18:47:25.670Z"}
+                    {:severity "medium", :id "event/8ae764bc-d0ae-4941-89b1-0ac17b016158", :type "state", :content {:resource {:href "deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50"}, :state "Executing"}, :timestamp "2018-11-21T18:47:00.670Z"}
+                    {:severity "medium", :id "event/84995f33-8bb3-45a3-8001-ec47215282cb", :type "action", :content {:resource {:href "deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50"}, :state "starting deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50 with async job/5d1e60cf-e303-4f61-93a1-fbe0733dd04c"}, :timestamp "2018-11-21T18:44:36.397Z"}
+                    {:severity "medium", :id "event/b21b5b53-63f3-46d0-a846-db090bedafd8", :type "action", :content {:resource {:href "deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50"}, :state "deployment/55976d06-bfff-4a91-a5d5-4efe0bb67c50 created"}, :timestamp "2018-11-21T18:44:18.805Z"}]
+        state-events (filter #(-> % :type (= "state")) events-dev)
+        events-map (into {} (map (juxt (comp :state :content) identity) events-dev))
+        active-state-index (or (some->> state-events first :content :state (get states-map)) 0)]
+    (map (partial step-items @locale active-state-index events-map) steps)))
+
+(defn progession-section
+  []
+  (let [events (subscribe [::deployment-detail-subs/events])]
+    [ui/StepGroup {:fluid  true,
+                   :widths (count steps)
+                   :items  (extract-steps @events)}]))
+
 
 (defn deployment-detail
   [resource-id]
@@ -399,6 +461,7 @@
        [ui/Container {:fluid true}
         [menu]
         [metadata-section]
+        [progession-section]
         [summary-section]
         [global-parameters-section]
         [events-section]
