@@ -1,47 +1,53 @@
 (ns sixsq.slipstream.webui.deployment-detail.subs
   (:require
     [re-frame.core :refer [reg-sub]]
-    [sixsq.slipstream.webui.deployment-detail.spec :as deployment-detail-spec]))
+    [sixsq.slipstream.webui.deployment-detail.spec :as spec]))
 
 
 (reg-sub
   ::runUUID
   (fn [db]
-    (::deployment-detail-spec/runUUID db)))
+    (::spec/runUUID db)))
 
 (reg-sub
   ::reports
-  ::deployment-detail-spec/reports)
+  ::spec/reports)
 
 (reg-sub
   ::loading?
-  ::deployment-detail-spec/loading?)
+  ::spec/loading?)
 
 
 (reg-sub
   ::deployment
-  ::deployment-detail-spec/deployment)
+  ::spec/deployment)
 
 
 (reg-sub
   ::events
-  ::deployment-detail-spec/events)
+  (fn [db]
+    (::spec/events db)))
+
+(reg-sub
+  ::force-refresh-events-steps
+  (fn [db]
+    (::spec/force-refresh-events-steps db)))
 
 (reg-sub
   ::global-deployment-parameters
   (fn [db]
-    (::deployment-detail-spec/global-deployment-parameters db)))
+    (::spec/global-deployment-parameters db)))
 
 (reg-sub
   ::node-parameters-modal
   (fn [db]
-    (::deployment-detail-spec/node-parameters-modal db)))
+    (::spec/node-parameters-modal db)))
 
 (reg-sub
   ::node-parameters
-  ::deployment-detail-spec/node-parameters)
+  ::spec/node-parameters)
 
 (reg-sub
   ::summary-nodes-parameters
   (fn [db]
-    (::deployment-detail-spec/summary-nodes-parameters db)))
+    (::spec/summary-nodes-parameters db)))

@@ -119,7 +119,8 @@
 (reg-event-db
   ::set-events
   (fn [db [_ events]]
-    (assoc db ::spec/events events)))
+    (assoc db ::spec/events events
+              ::spec/force-refresh-events-steps (random-uuid))))
 
 
 (reg-event-fx
@@ -134,7 +135,7 @@
       {::cimi-api-fx/search [client
                              "events"
                              (general-utils/prepare-params query-params)
-                             #(dispatch [::set-events %])]})))
+                             #(dispatch [::set-events (:events %)])]})))
 
 
 (reg-event-db

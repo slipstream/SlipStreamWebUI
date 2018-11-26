@@ -2,10 +2,9 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as r]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
-    [sixsq.slipstream.webui.deployment-detail.subs :as deployment-detail-subs]
+    [sixsq.slipstream.webui.deployment-detail.events :as events]
+    [sixsq.slipstream.webui.deployment-detail.subs :as subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -16,12 +15,12 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.time :as time]))
 
 
 (defn ^:export set-runUUID
   [uuid]                                                    ;Used by old UI
-  (dispatch [::deployment-detail-events/set-runUUID uuid]))
+  (dispatch [::events/set-runUUID uuid]))
 
 
 (defn nodes-list                                            ;FIXME
@@ -35,27 +34,27 @@
              {:action    :start
               :id        :deployment-detail-get-deployment
               :frequency 30000
-              :event     [::deployment-detail-events/get-deployment resource-id]}])
+              :event     [::events/get-deployment resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-get-summary-nodes-parameters
               :frequency 30000
-              :event     [::deployment-detail-events/get-summary-nodes-parameters resource-id (nodes-list)]}])
+              :event     [::events/get-summary-nodes-parameters resource-id (nodes-list)]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-reports
               :frequency 30000
-              :event     [::deployment-detail-events/get-reports resource-id]}])
+              :event     [::events/get-reports resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-deployment-parameters
               :frequency 20000
-              :event     [::deployment-detail-events/get-global-deployment-parameters resource-id]}])
+              :event     [::events/get-global-deployment-parameters resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-events
               :frequency 30000
-              :event     [::deployment-detail-events/get-events resource-id]}]))
+              :event     [::events/get-events resource-id]}]))
 
 
 (def deployment-summary-keys #{:created
@@ -105,8 +104,8 @@
 
 (defn metadata-section
   []
-  (let [deployment (subscribe [::deployment-detail-subs/deployment])
-        deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
+  (let [deployment (subscribe [::subs/deployment])
+        deployment-parameters (subscribe [::subs/global-deployment-parameters])]
     (fn []
       (let [summary-info (-> (select-keys @deployment deployment-summary-keys)
                              (merge (select-keys (:module @deployment) #{:name :path :type})))
@@ -139,29 +138,29 @@
 (defn global-parameters-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
+        deployment-parameters (subscribe [::subs/global-deployment-parameters])]
     (fn []
       (let [global-params (vals @deployment-parameters)]
         [cc/collapsible-segment (@tr [:global-parameters])
-        [ui/Segment style/autoscroll-x
-         [ui/Table style/single-line
-          [ui/TableHeader
-           [ui/TableRow
-            [ui/TableHeaderCell [:span (@tr [:name])]]
-            [ui/TableHeaderCell [:span (@tr [:value])]]]]
-          (when-not (empty? global-params)
-            (vec (concat [ui/TableBody]
-                         (map parameter-to-row global-params))))]]]))))
+         [ui/Segment style/autoscroll-x
+          [ui/Table style/single-line
+           [ui/TableHeader
+            [ui/TableRow
+             [ui/TableHeaderCell [:span (@tr [:name])]]
+             [ui/TableHeaderCell [:span (@tr [:value])]]]]
+           (when-not (empty? global-params)
+             (vec (concat [ui/TableBody]
+                          (map parameter-to-row global-params))))]]]))))
 
 (defn node-parameters-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        node-parameters (subscribe [::deployment-detail-subs/node-parameters])]
+        node-parameters (subscribe [::subs/node-parameters])]
     (dispatch [::main-events/action-interval
                {:action    :start
                 :id        :deployment-detail-get-node-parameters
                 :frequency 5000
-                :event     [::deployment-detail-events/get-node-parameters]}])
+                :event     [::events/get-node-parameters]}])
     (fn []
       [ui/Table style/single-line
        [ui/TableHeader
@@ -178,7 +177,7 @@
               (let [label (str/join " " [component created])]
                 (if (= state "ready")
                   [:a {:style    {:cursor "pointer"}
-                       :on-click #(dispatch [::deployment-detail-events/download-report id])} label]
+                       :on-click #(dispatch [::events/download-report id])} label]
                   label))])
 
 
@@ -230,16 +229,16 @@
 (defn events-section
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        events (subscribe [::deployment-detail-subs/events])]
+        events (subscribe [::subs/events])]
     (fn []
-      (let [events (-> @events :events events-table-info)]
+      (let [events (events-table-info @events)]
         [cc/collapsible-segment
          (@tr [:events])
          [events-table events]]))))
 
 (defn reports-list-view
   []
-  (let [reports (subscribe [::deployment-detail-subs/reports])]
+  (let [reports (subscribe [::subs/reports])]
     (if (seq @reports)
       (vec (concat [:ul] (mapv report-item (:externalObjects @reports))))
       [:p "Reports will be displayed as soon as available. No need to refresh."])))
@@ -247,13 +246,13 @@
 
 (defn reports-list                                          ; Used by old UI
   []
-  (let [runUUID (subscribe [::deployment-detail-subs/runUUID])]
+  (let [runUUID (subscribe [::subs/runUUID])]
     (when-not (str/blank? @runUUID)
       (dispatch [::main-events/action-interval
                  {:action    :start
                   :id        :deployment-detail-reports
                   :frequency 30000
-                  :event     [::deployment-detail-events/get-reports @runUUID]}]))
+                  :event     [::events/get-reports @runUUID]}]))
     [reports-list-view]))
 
 
@@ -269,14 +268,14 @@
 (defn refresh-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::deployment-detail-subs/loading?])
-        deployment (subscribe [::deployment-detail-subs/deployment])]
+        loading? (subscribe [::subs/loading?])
+        deployment (subscribe [::subs/deployment])]
     (fn []
       [uix/MenuItemWithIcon
        {:name      (@tr [:refresh])
         :icon-name "refresh"
         :loading?  @loading?
-        :on-click  #(dispatch [::deployment-detail-events/get-deployment (:id @deployment)])}])))
+        :on-click  #(dispatch [::events/get-deployment (:id @deployment)])}])))
 
 
 (defn stop-button
@@ -284,7 +283,7 @@
    delete when confirmed."
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        deployment (subscribe [::deployment-detail-subs/deployment])]
+        deployment (subscribe [::subs/deployment])]
     (fn []
       (when-not (empty?
                   (filter #(= "http://schemas.dmtf.org/cimi/2/action/stop" (:rel %))
@@ -295,13 +294,13 @@
          "stop"
          (@tr [:stop])
          [:p (@tr [:are-you-sure?])]
-         #(dispatch [::deployment-detail-events/stop-deployment (:id @deployment)])
+         #(dispatch [::events/stop-deployment (:id @deployment)])
          (constantly nil)]))))
 
 
 (defn service-link-button
   []
-  (let [deployment-parameters (subscribe [::deployment-detail-subs/global-deployment-parameters])]
+  (let [deployment-parameters (subscribe [::subs/global-deployment-parameters])]
     (fn []
       (let [link (-> @deployment-parameters (get "ss:url.service") :value)]
         (when link
@@ -314,7 +313,7 @@
 
 (defn node-card
   [node-name]
-  (let [summary-nodes-parameters (subscribe [::deployment-detail-subs/summary-nodes-parameters])
+  (let [summary-nodes-parameters (subscribe [::subs/summary-nodes-parameters])
         node-params (get @summary-nodes-parameters node-name [])
         params-by-name (into {} (map (juxt :name identity) node-params))
         service-url (get-in params-by-name ["url.service" :value])
@@ -337,14 +336,14 @@
           [:a {:href ssh-url} ssh-url]])
        (when ssh-password
          [:div (str "password: " (when ssh-password "••••••"))
-          [ui/Popup {:trigger  (r/as-element [ui/CopyToClipboard {:text ssh-password}
-                                              [:a [ui/Icon {:name "clipboard outline"}]]])
+          [ui/Popup {:trigger  (reagent/as-element [ui/CopyToClipboard {:text ssh-password}
+                                                    [:a [ui/Icon {:name "clipboard outline"}]]])
                      :position "top center"}
            "copy to clipboard"]])
        (when custom-state
          [:div custom-state])
        [:div [:a {:href     "#apache.1"
-                  :on-click #(dispatch [::deployment-detail-events/show-node-parameters-modal node-name])}
+                  :on-click #(dispatch [::events/show-node-parameters-modal node-name])}
               "details"]]
        (when (= complete "Ready")
          [:div {:align "right"} [ui/Icon {:name "check"}]])]]]))
@@ -362,10 +361,10 @@
 (defn node-parameters-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        node-name (subscribe [::deployment-detail-subs/node-parameters-modal])
-        deployment (subscribe [::deployment-detail-subs/deployment])]
+        node-name (subscribe [::subs/node-parameters-modal])
+        deployment (subscribe [::subs/deployment])]
     (fn []
-      (let [hide-fn #(do (dispatch [::deployment-detail-events/close-node-parameters-modal])
+      (let [hide-fn #(do (dispatch [::events/close-node-parameters-modal])
                          (automatic-refresh (:id @deployment)))]
         [ui/Modal {:open       (boolean @node-name)
                    :close-icon true
@@ -389,9 +388,72 @@
    [service-link-button]])
 
 
+(def deployment-states ["Provisioning" "Executing" "SendingReports" "Ready" "Done"])
+
+(def states-map (into {} (map-indexed (fn [i state] [state i]) deployment-states)))
+
+(def steps [["Provisioning" "Provisioning" "Starting system"]
+            ["Executing" "Executing" "Executing recipies"]
+            ["Reporting" "SendingReports" "Gathering for posterity"]
+            ["Ready" "Ready" "All systems go ready"]])
+
+
+(defn event-get-timestamp
+  [event]
+  (-> event :timestamp time/parse-iso8601))
+
+
+(defn step-items
+  [locale active-state-index events-map [title state description]]
+  (let [event-state (get events-map state)
+        state-index (get states-map state)
+        is-state-active? (= active-state-index state-index)
+        is-state-completed? (> active-state-index state-index)]
+    {:key         state
+     :title       title
+     :description (str description
+                       (cond
+                         is-state-active? (str ". Running for " (time/delta-humanize
+                                                                  (event-get-timestamp event-state)
+                                                                  locale))
+                         is-state-completed? (str ". Took " (time/delta-humanize
+                                                              (event-get-timestamp event-state)
+                                                              (some->> (inc state-index)
+                                                                       (nth deployment-states)
+                                                                       (get events-map)
+                                                                       event-get-timestamp)
+                                                              locale))))
+     :icon        (cond
+                    is-state-completed? "check"
+                    is-state-active? "rocket"
+                    :else "ellipsis horizontal")
+     :active      is-state-active?
+     :disabled    (< active-state-index state-index)}))
+
+
+(defn extract-steps
+  [events locale]
+  (let [state-events (filter #(-> % :type (= "state")) events)
+        events-map (into {} (map (juxt (comp :state :content) identity) events))
+        active-state-index (or (some->> state-events first :content :state (get states-map)) 0)]
+    (map (partial step-items locale active-state-index events-map) steps)))
+
+
+(defn progession-section
+  []
+  (let [events (subscribe [::subs/events])
+        force-refresh (subscribe [::subs/force-refresh-events-steps])
+        locale (subscribe [::i18n-subs/locale])]
+    ^{:key @force-refresh}
+    [ui/StepGroup {:key    @force-refresh
+                   :fluid  true
+                   :widths (count steps)
+                   :items  (extract-steps @events @locale)}]))
+
+
 (defn deployment-detail
   [resource-id]
-  (let [deployment (subscribe [::deployment-detail-subs/deployment])]
+  (let [deployment (subscribe [::subs/deployment])]
     (automatic-refresh resource-id)
     (fn [resource-id]
       [ui/Segment (merge style/basic
@@ -399,6 +461,7 @@
        [ui/Container {:fluid true}
         [menu]
         [metadata-section]
+        [progession-section]
         [summary-section]
         [global-parameters-section]
         [events-section]

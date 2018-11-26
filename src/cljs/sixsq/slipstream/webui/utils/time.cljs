@@ -82,6 +82,15 @@
    (.asMinutes (delta-duration start end))))
 
 
+(defn delta-humanize
+  "Returns the difference in the given date-time instances in natural language
+   unless another locale is given."
+  ([start locale]
+   (delta-humanize start (now) locale))
+  ([start end locale]
+   (-> (delta-duration start end) .clone (.locale locale) .humanize)))
+
+
 (defn delta-milliseconds
   "Returns the difference in the given date-time instances in milliseconds."
   ([start]
