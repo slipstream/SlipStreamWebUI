@@ -1,6 +1,7 @@
 (ns sixsq.slipstream.webui.deployment-detail.spec
   (:require
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [reagent.core :as reagent]))
 
 (s/def ::runUUID (s/nilable string?))                       ; Used by old UI
 
@@ -20,6 +21,8 @@
 
 (s/def ::summary-nodes-parameters any?)
 
+(s/def ::force-refresh-events-steps string?)
+
 
 (s/def ::db (s/keys :req [::runUUID
                           ::reports
@@ -29,7 +32,8 @@
                           ::events
                           ::node-parameters-modal
                           ::node-parameters
-                          ::summary-nodes-parameters]))
+                          ::summary-nodes-parameters
+                          ::force-refresh-events-steps]))
 
 
 (def defaults {::runUUID                      nil
@@ -40,4 +44,5 @@
                ::events                       nil
                ::node-parameters-modal        nil
                ::node-parameters              nil
-               ::summary-nodes-parameters     nil})
+               ::summary-nodes-parameters     nil
+               ::force-refresh-events-steps   "force-refresh"})
