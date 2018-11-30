@@ -28,24 +28,35 @@
   (fn [db]
     (::spec/events db)))
 
+
+(reg-sub
+  ::jobs
+  (fn [db]
+    (::spec/jobs db)))
+
+
 (reg-sub
   ::force-refresh-events-steps
   (fn [db]
     (::spec/force-refresh-events-steps db)))
+
 
 (reg-sub
   ::global-deployment-parameters
   (fn [db]
     (::spec/global-deployment-parameters db)))
 
+
 (reg-sub
   ::node-parameters-modal
   (fn [db]
     (::spec/node-parameters-modal db)))
 
+
 (reg-sub
   ::node-parameters
   ::spec/node-parameters)
+
 
 (reg-sub
   ::summary-nodes-parameters

@@ -55,7 +55,12 @@
              {:action    :start
               :id        :deployment-detail-events
               :frequency 30000
-              :event     [::events/get-events resource-id]}]))
+              :event     [::events/get-events resource-id]}])
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-detail-jobs
+              :frequency 30000
+              :event     [::events/get-jobs resource-id]}]))
 
 
 (def deployment-summary-keys #{:created
@@ -241,6 +246,46 @@
         [cc/collapsible-segment
          (@tr [:events])
          [events-table events]]))))
+
+
+(defn job-map-to-row
+  [{:keys [id timeOfStatusChange state progress returnCode statusMessage] :as job}]
+  [ui/TableRow
+   [ui/TableCell (format-event-id id)]
+   [ui/TableCell timeOfStatusChange]
+   [ui/TableCell state]
+   [ui/TableCell progress]
+   [ui/TableCell returnCode]
+   [ui/TableCell statusMessage]])
+
+
+(defn jobs-table
+  [jobs]
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn [jobs]
+      [ui/Segment style/autoscroll-x
+       [ui/Table style/single-line
+        [ui/TableHeader
+         [ui/TableRow
+          [ui/TableHeaderCell [:span (@tr [:job])]]
+          [ui/TableHeaderCell [:span (@tr [:timestamp])]]
+          [ui/TableHeaderCell [:span (@tr [:state])]]
+          [ui/TableHeaderCell [:span (@tr [:progress])]]
+          [ui/TableHeaderCell [:span (@tr [:return-code])]]
+          [ui/TableHeaderCell [:span (@tr [:message])]]]]
+        (vec (concat [ui/TableBody]
+                     (map job-map-to-row jobs)))]])))
+
+
+(defn jobs-section
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        jobs (subscribe [::subs/jobs])]
+    (fn []
+      (let [jobs @jobs]
+        [cc/collapsible-segment
+         (@tr [:job])
+         [jobs-table jobs]]))))
 
 (defn reports-list-view
   []
@@ -471,6 +516,7 @@
         [summary-section]
         [global-parameters-section]
         [events-section]
+        [jobs-section]
         [reports-section resource-id]
         [node-parameters-modal]
         ]])))
