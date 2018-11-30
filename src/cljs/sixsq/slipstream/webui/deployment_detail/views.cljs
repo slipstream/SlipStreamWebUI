@@ -1,5 +1,6 @@
 (ns sixsq.slipstream.webui.deployment-detail.views
   (:require
+    [clojure.pprint :refer [cl-format]]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
@@ -199,12 +200,17 @@
     [history/link (str "cimi/" id) tag]))
 
 
+(defn format-delta-time
+  [delta-time]
+  (cl-format nil "~,2F" delta-time))
+
+
 (defn event-map-to-row
   [{:keys [id content timestamp type delta-time] :as evt}]
   [ui/TableRow
    [ui/TableCell (format-event-id id)]
    [ui/TableCell timestamp]
-   [ui/TableCell delta-time]
+   [ui/TableCell (format-delta-time delta-time)]
    [ui/TableCell type]
    [ui/TableCell (:state content)]])
 
