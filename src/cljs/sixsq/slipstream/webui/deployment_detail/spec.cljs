@@ -15,6 +15,8 @@
 
 (s/def ::events any?)
 
+(s/def ::jobs any?)
+
 (s/def ::node-parameters-modal (s/nilable string?))
 
 (s/def ::node-parameters any?)
@@ -30,6 +32,7 @@
                           ::deployment
                           ::global-deployment-parameters
                           ::events
+                          ::jobs
                           ::node-parameters-modal
                           ::node-parameters
                           ::summary-nodes-parameters
@@ -42,6 +45,7 @@
                ::deployment                   nil
                ::global-deployment-parameters nil
                ::events                       nil
+               ::jobs                         nil
                ::node-parameters-modal        nil
                ::node-parameters              nil
                ::summary-nodes-parameters     nil

@@ -139,6 +139,28 @@
 
 
 (reg-event-db
+  ::set-jobs
+  (fn [db [_ jobs]]
+    (assoc db ::spec/jobs jobs
+              ::spec/force-refresh-events-steps (random-uuid))))
+
+
+(reg-event-fx
+  ::get-jobs
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ href]]
+    (let [filter-str (str "targetResource/href='" href "'")
+          order-by-str "timeOfStatusChange:desc"
+          select-str "id, timeOfStatusChange, state, targetResource, returnCode, progress, statusMessage"
+          query-params {:$filter  filter-str
+                        :$orderby order-by-str
+                        :$select  select-str}]
+      {::cimi-api-fx/search [client
+                             "jobs"
+                             (general-utils/prepare-params query-params)
+                             #(dispatch [::set-jobs (:jobs %)])]})))
+
+
+(reg-event-db
   ::set-node-parameters
   (fn [db [_ node-parameters]]
     (assoc db ::spec/node-parameters node-parameters)))
