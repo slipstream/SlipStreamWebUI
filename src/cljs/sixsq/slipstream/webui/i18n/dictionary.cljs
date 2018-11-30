@@ -250,7 +250,7 @@
         :previous-step          "étape précédente"
         :process                "traiter"
         :profile                "profil utilisateur"
-        :progress               "progrès"
+        :progress               "progression"
         :project                "projet"
         :quota                  "quota"
         :refresh                "actualiser"
