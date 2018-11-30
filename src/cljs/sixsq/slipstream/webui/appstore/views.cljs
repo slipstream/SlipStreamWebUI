@@ -1,10 +1,12 @@
 (ns sixsq.slipstream.webui.appstore.views
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.appstore.events :as appstore-events]
     [sixsq.slipstream.webui.appstore.subs :as subs]
     [sixsq.slipstream.webui.appstore.utils :as utils]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
@@ -14,9 +16,7 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]
-    [sixsq.slipstream.webui.history.views :as history]))
+    [taoensso.timbre :as log]))
 
 
 (defn refresh-button
