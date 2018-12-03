@@ -108,6 +108,15 @@
                           :overflow      "hidden"}} (format-parameter-value key value)]])
 
 
+(defn visible-state
+  [state ss-state]
+  (let [lower-state (str/lower-case state)]
+    (case state
+      "STARTED" (or ss-state lower-state)
+      "STOPPED" (or ss-state lower-state)
+      lower-state)))
+
+
 (defn metadata-section
   []
   (let [deployment (subscribe [::subs/deployment])
@@ -117,12 +126,13 @@
                              (merge (select-keys (:module @deployment) #{:name :path :type})))
             icon (-> @deployment :module :type deployment-detail-utils/category-icon)
             rows (map tuple-to-row summary-info)
-            ss-state (-> @deployment-parameters (get "ss:state" {}) :value)]
+            ss-state (-> @deployment-parameters (get "ss:state" {}) :value)
+            state (:state @deployment)]
         [cc/metadata
          (cond-> {:title       (module-name @deployment)
                   :description (:startTime summary-info)
                   :icon        icon}
-                 ss-state (assoc :subtitle ss-state))
+                 ss-state (assoc :subtitle (visible-state state ss-state)))
          rows]))))
 
 
