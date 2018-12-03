@@ -45,8 +45,8 @@
                    (resource-details/format-operations [refresh-button] @module (:baseURI @cep) {})
 
                    [[uix/MenuItemWithIcon
-                     {:name      (@tr [:deploy])
-                      :icon-name "play"
+                     {:name      (@tr [:launch])
+                      :icon-name "rocket"
                       :disabled  deploy-disabled?
                       :on-click  #(dispatch [::appstore-events/create-deployment (:id @module) "credentials"])}]
 

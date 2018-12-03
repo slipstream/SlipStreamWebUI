@@ -161,7 +161,7 @@
          "upload" "cloud upload"
          "describe" "info"
          "ready" "check"
-         "start" "play"
+         "start" "rocket"
          "stop" "stop"
          "cog")
        (@tr [:execute-action] [label])
