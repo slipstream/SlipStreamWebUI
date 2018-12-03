@@ -156,11 +156,15 @@
 
 (defn deployment-data
   []
-  (let [data-clouds (subscribe [::subs/data-clouds])]
-    (vec (concat [ui/ListSA {:divided   true
-                             :relaxed   true
-                             :selection true}]
-                 (mapv data-clouds-list-item @data-clouds)))))
+  (let [tr (subscribe [::i18n-subs/tr])
+        data-clouds (subscribe [::subs/data-clouds])]
+    [ui/Segment {:basic true}
+     (if (seq @data-clouds)
+       (vec (concat [ui/ListSA {:divided   true
+                                :relaxed   true
+                                :selection true}]
+                    (mapv data-clouds-list-item @data-clouds)))
+       [ui/Message {:error true} (@tr [:no-data-location])])]))
 
 
 (defn as-form-input
@@ -188,7 +192,8 @@
 
 (defn deployment-params
   []
-  (let [deployment (subscribe [::subs/deployment])
+  (let [tr (subscribe [::i18n-subs/tr])
+        deployment (subscribe [::subs/deployment])
         selected-credential (subscribe [::subs/selected-credential])]
     (let [is-not-docker? (not= (:type @selected-credential) "cloud-cred-docker")
           params-to-filter (cond-> #{"credential.id"}
@@ -198,10 +203,10 @@
                      :content
                      :inputParameters
                      (remove-input-params params-to-filter))]
-      (if (pos? (count params))
+      (if (seq params)
         (vec (concat [ui/Form]
                      (map as-form-input params)))
-        [ui/Message {:success true} "Nothing to do, next step"]))))
+        [ui/Message {:success true} (@tr [:no-input-parameters])]))))
 
 
 (defn credential-list-item
@@ -221,11 +226,18 @@
   []
   (dispatch [::appstore-events/get-credentials])
   (fn []
-    (let [credentials (subscribe [::subs/credentials])]
-      (vec (concat [ui/ListSA {:divided   true
-                               :relaxed   true
-                               :selection true}]
-                   (mapv credential-list-item @credentials))))))
+    (let [tr (subscribe [::i18n-subs/tr])
+          loading? (subscribe [::subs/loading-credentials?])
+          credentials (subscribe [::subs/credentials])]
+      [ui/Segment {:loading @loading?
+                   :basic   true}
+       (if (seq @credentials)
+         (vec (concat [ui/ListSA {:divided   true
+                                  :relaxed   true
+                                  :selection true}]
+                      (mapv credential-list-item @credentials)))
+         [ui/Message {:error true} (@tr [:no-credentials])])])))
+
 
 (defn deployment-step
   [name icon]
@@ -264,7 +276,7 @@
       (let [hide-fn #(dispatch [::appstore-events/close-deploy-modal])
             submit-fn #(dispatch [::appstore-events/edit-deployment])
             next-fn #(dispatch [::appstore-events/next-step])
-            pervious-fn #(dispatch [::appstore-events/previous-step])]
+            previous-fn #(dispatch [::appstore-events/previous-step])]
 
         [ui/Modal {:open       @visible?
                    :close-icon true
@@ -295,7 +307,7 @@
                        :disabled (not (:id @deployment))}]
           [uix/Button {:disabled (previous-disabled? @step-id show-data?)
                        :text     (@tr [:previous-step]),
-                       :on-click pervious-fn}]
+                       :on-click previous-fn}]
           (if (not= @step-id "summary")
             [uix/Button {:disabled (next-disabled? @step-id
                                                    @selected-cloud

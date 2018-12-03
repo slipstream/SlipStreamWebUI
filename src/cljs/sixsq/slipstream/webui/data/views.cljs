@@ -94,11 +94,18 @@
 
 (defn application-list
   []
-  (let [applications (subscribe [::subs/applications])]
-    (vec (concat [ui/ListSA {:divided   true
-                             :relaxed   true
-                             :selection true}]
-                 (mapv application-list-item @applications)))))
+  (let [tr (subscribe [::i18n-subs/tr])
+        applications (subscribe [::subs/applications])
+        loading? (subscribe [::subs/loading-applications?])]
+    [ui/Segment {:loading @loading?
+                 :basic   true}
+     (if (seq @applications)
+       (vec (concat [ui/ListSA {:divided   true
+                                :relaxed   true
+                                :selection true}]
+                    (mapv application-list-item @applications)))
+       [ui/Message {:error true} (@tr [:no-apps])])]))
+
 
 (defn application-select-modal
   []
@@ -110,7 +117,7 @@
                    :close-icon true
                    :on-close   hide-fn}
 
-         [ui/ModalHeader [ui/Icon {:name "sitemap"}] (@tr [:select-application])]
+         [ui/ModalHeader [ui/Icon {:name "sitemap"}] "\u00a0" (@tr [:select-application])]
 
          [ui/ModalContent {:scrolling true}
           [ui/ModalDescription

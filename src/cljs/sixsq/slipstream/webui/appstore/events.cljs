@@ -10,8 +10,7 @@
     [sixsq.slipstream.webui.data.utils :as data-utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-db
@@ -73,8 +72,9 @@
 (reg-event-db
   ::set-credentials
   (fn [db [_ credentials]]
-    (assoc db ::spec/credentials credentials
-              ::spec/loading-credentials? false)))
+    (cond-> (assoc db ::spec/credentials credentials
+                      ::spec/loading-credentials? false)
+            (= 1 (count credentials)) (assoc ::spec/selected-credential (first credentials)))))
 
 
 (reg-event-fx
@@ -212,13 +212,21 @@
     (assoc db ::spec/connectors (into {} (map (juxt :id identity) connectors)))))
 
 
+(defn set-cloud-and-filter
+  [db cloud]
+  (assoc db ::spec/selected-cloud cloud
+            ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')")))
+
+
 (reg-event-fx
   ::set-data-clouds
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ data-clouds-response]]
     (let [buckets (get-in data-clouds-response [:aggregations (keyword "terms:connector/href") :buckets])
           clouds (map :key buckets)
           filter (apply data-utils/join-or (map #(str "id='" % "'") clouds))]
-      {:db                  (assoc db ::spec/data-clouds buckets)
+
+      {:db                  (cond-> (assoc db ::spec/data-clouds buckets)
+                                    (= 1 (count clouds)) (set-cloud-and-filter (first clouds)))
        ::cimi-api-fx/search [client "connectors"
                              {:$filter filter
                               :$select "id, name, description, cloudServiceType"} #(dispatch [::set-connectors %])]})))
@@ -243,8 +251,7 @@
 (reg-event-db
   ::set-cloud-filter
   (fn [db [_ cloud]]
-    (assoc db ::spec/selected-cloud cloud
-              ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')"))))
+    (set-cloud-and-filter db cloud)))
 
 
 (reg-event-db
