@@ -10,6 +10,7 @@
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
     [sixsq.slipstream.webui.data.spec :as data]
+    [sixsq.slipstream.webui.deployment-dialog.spec :as deployment-dialog]
     [sixsq.slipstream.webui.deployment.spec :as deployment]
     [sixsq.slipstream.webui.docs.spec :as docs]
     [sixsq.slipstream.webui.i18n.spec :as i18n]
@@ -30,6 +31,8 @@
                      ::cimi-detail/db
                      ::client/db
                      ::dashboard/db
+                     ::deployment/db
+                     ::deployment-dialog/db
                      ::data/db
                      ::docs/db
                      ::i18n/db
@@ -50,6 +53,7 @@
          cimi-detail/defaults
          data/defaults
          deployment/defaults
+         deployment-dialog/defaults
          client/defaults
          dashboard/defaults
          docs/defaults
