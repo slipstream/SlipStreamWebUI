@@ -61,7 +61,7 @@
      [ui/Button {:fluid    true
                  :primary  true
                  :on-click #(dispatch [::appstore-events/create-deployment id "credentials"])}
-      (@tr [:deploy])]]))
+      (@tr [:launch])]]))
 
 
 (defn deployment-templates-cards-group
@@ -270,7 +270,7 @@
                    :close-icon true
                    :on-close   hide-fn}
 
-         [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:deploy]) " \u2014 " (get-in @deployment [:module :path])]
+         [ui/ModalHeader [ui/Icon {:name "rocket"}] (@tr [:launch]) " \u2014 " (get-in @deployment [:module :path])]
 
          [ui/ModalContent {:scrolling true}
           [ui/ModalDescription {:style {:height "30em"}}
@@ -302,7 +302,7 @@
                                                    @selected-credential)
                          :text     (@tr [:next-step]), :primary true,
                          :on-click next-fn}]
-            [uix/Button {:text     (@tr [:deploy]), :primary true,
+            [uix/Button {:text     (@tr [:launch]), :primary true,
                          :on-click submit-fn}])]]))))
 
 (defn deployment-template-resources

@@ -110,7 +110,7 @@
                    :close-icon true
                    :on-close   hide-fn}
 
-         [ui/ModalHeader [ui/Icon {:name "play"}] (@tr [:select-application])]
+         [ui/ModalHeader [ui/Icon {:name "sitemap"}] (@tr [:select-application])]
 
          [ui/ModalContent {:scrolling true}
           [ui/ModalDescription
