@@ -9,15 +9,16 @@
 
 (defn cloud-list-item
   [{:keys [key active on-click-fn header description doc_count]}]
-  ^{:key key}
-  [ui/ListItem (cond-> {:active active}
-                       on-click-fn (assoc :on-click on-click-fn))
-   [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
-   [ui/ListContent
-    [ui/ListHeader header]
-    (when description
-      [ui/ListDescription description])
-    [:span (str "Number of data objects: " (or doc_count ""))]]])
+  (let [tr (subscribe [::i18n-subs/tr])]
+    ^{:key key}
+    [ui/ListItem (cond-> {:active active}
+                         on-click-fn (assoc :on-click on-click-fn))
+     [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
+     [ui/ListContent
+      [ui/ListHeader header]
+      (when description
+        [ui/ListDescription description])
+      [:span (@tr [:object-count] [(or doc_count "...")])]]]))
 
 
 (defn summary-list-item

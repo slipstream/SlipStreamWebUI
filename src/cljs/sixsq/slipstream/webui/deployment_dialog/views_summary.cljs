@@ -53,6 +53,8 @@
             [ui/TableCell doc_count]])
          ]]
 
-       (vec (concat [ui/ListSA]
+       (vec (concat [ui/ListSA {:divided   true
+                                :relaxed   true
+                                :selection true}]
                     (mapv (fn [step-id] (get-in @step-states [step-id :summary])) spec/steps)))
        ])))
