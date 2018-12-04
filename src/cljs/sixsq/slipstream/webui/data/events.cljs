@@ -7,14 +7,16 @@
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as s]
+    [clojure.string :as str]))
 
 
 (defn fetch-data-cofx
-  [credentials client time-period-filter cloud-filter data-queries]
+  [credentials client time-period-filter cloud-filter full-text-search data-queries]
   (if (empty? credentials)
     {}
-    {::fx/fetch-data [client time-period-filter cloud-filter (vals data-queries)
+    {::fx/fetch-data [client time-period-filter cloud-filter full-text-search (vals data-queries)
                       #(dispatch [::set-data %1 %2])]}))
 
 
@@ -23,12 +25,25 @@
   (fn [{{:keys [::client-spec/client
                 ::spec/cloud-filter
                 ::spec/credentials
-                ::spec/data-queries] :as db} :db} [_ time-period]]
+                ::spec/data-queries
+                ::spec/full-text-search] :as db} :db} [_ time-period]]
     (let [time-period-filter (utils/create-time-period-filter time-period)]
       (merge {:db (assoc db ::spec/time-period time-period
-                           ::spec/time-period-filter time-period-filter)}
-            (fetch-data-cofx credentials client time-period-filter cloud-filter data-queries)))))
+                            ::spec/time-period-filter time-period-filter)}
+             (fetch-data-cofx credentials client time-period-filter cloud-filter full-text-search data-queries)))))
 
+
+(reg-event-fx
+  ::set-full-text-search
+  (fn [{{:keys [::client-spec/client
+                ::spec/cloud-filter
+                ::spec/credentials
+                ::spec/data-queries
+                ::spec/time-period-filter] :as db} :db} [_ full-text-search]]
+    (let [full-text-query (when (and full-text-search (not (str/blank? full-text-search)))
+                            (str "fulltext=='" full-text-search "*'"))]
+      (merge {:db (assoc db ::spec/full-text-search full-text-query)}
+             (fetch-data-cofx credentials client time-period-filter cloud-filter full-text-query data-queries)))))
 
 (reg-event-db
   ::set-service-offers
@@ -47,13 +62,14 @@
   ::set-credentials
   (fn [{{:keys [::client-spec/client
                 ::spec/time-period-filter
-                ::spec/data-queries] :as db} :db} [_ {:keys [credentials]}]]
+                ::spec/data-queries
+                ::spec/full-text-search] :as db} :db} [_ {:keys [credentials]}]]
     (let [cloud-filter (utils/create-cloud-filter credentials)]
       (when client
         (merge {:db (assoc db ::spec/credentials credentials
                               ::spec/cloud-filter cloud-filter
                               ::spec/data nil)}
-               (fetch-data-cofx credentials client time-period-filter cloud-filter data-queries))))))
+               (fetch-data-cofx credentials client time-period-filter cloud-filter full-text-search data-queries))))))
 
 
 (reg-event-fx

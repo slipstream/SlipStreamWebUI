@@ -25,6 +25,8 @@
 
 (s/def ::data-queries any?)
 
+(s/def ::full-text-search (s/nilable string?))
+
 (s/def ::data any?)
 
 (s/def ::db (s/keys :req [::time-period
@@ -37,6 +39,7 @@
                           ::applications
                           ::content-type-filter
                           ::data-queries
+                          ::full-text-search
                           ::data
                           ]))
 
@@ -79,5 +82,6 @@
                ::applications                nil
                ::content-type-filter         nil
                ::data-queries                data-queries
+               ::full-text-search            nil
                ::data                        nil
                })
