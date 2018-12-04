@@ -10,22 +10,24 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
-(defn summary-item
+(defn summary-row
   []
   (let [tr (subscribe [::i18n-subs/tr])
         filtered-params (subscribe [::subs/filtered-input-parameters])
+        completed? (subscribe [::subs/parameters-completed?])
 
-        header (@tr [:parameters])
         description (str "Number of parameters: " (count @filtered-params))
         on-click-fn #(dispatch [::events/set-active-step :parameters])]
 
     ^{:key "parameters"}
-    [ui/ListItem {:active   false
+    [ui/TableRow {:active   false
                   :on-click on-click-fn}
-     [ui/ListIcon {:name "list alternate outline", :size "large", :vertical-align "middle"}]
-     [ui/ListContent
-      [ui/ListHeader header]
-      [ui/ListDescription description]]]))
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "list alternate outline", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:parameters])]
+     [ui/TableCell [:div [:span description]]]]))
 
 
 (defn as-form-input

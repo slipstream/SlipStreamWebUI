@@ -26,15 +26,28 @@
    :description description})
 
 
-(defn summary-item
+(defn summary-row
   []
-  (let [selected-credential (subscribe [::subs/selected-credential])
+  (let [tr (subscribe [::i18n-subs/tr])
+        selected-credential (subscribe [::subs/selected-credential])
+        completed? (subscribe [::subs/credentials-completed?])
 
-        options (merge (item-options @selected-credential)
-                       {:key         :credentials
-                        :active      false
-                        :on-click-fn #(dispatch [::events/set-active-step :credentials])})]
-    [cred-list-item options]))
+        {:keys [header description]} (item-options @selected-credential)
+
+        on-click-fn #(dispatch [::events/set-active-step :credentials])]
+
+    ^{:key "credentials"}
+    [ui/TableRow {:active   false
+                  :on-click on-click-fn}
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "key", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:credentials])]
+     [ui/TableCell [:div
+                    [:span header]
+                    [:br]
+                    [:span description]]]]))
 
 
 (defn list-item

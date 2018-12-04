@@ -38,6 +38,35 @@
                       :doc_count   doc_count}]))
 
 
+(defn summary-row
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        data-clouds (subscribe [::subs/data-clouds])
+        selected-cloud (subscribe [::subs/selected-cloud])
+        connectors (subscribe [::subs/connectors])
+        completed? (subscribe [::subs/data-completed?])
+
+        {:keys [key doc_count]} (first (filter (fn [m] (= @selected-cloud (:key m))) @data-clouds))
+        {:keys [name description]} (get @connectors key)
+
+        on-click-fn #(dispatch [::events/set-active-step :data])]
+
+    ^{:key "data"}
+    [ui/TableRow {:active   false
+                  :on-click on-click-fn}
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "database", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:data])]
+     [ui/TableCell [:div
+                    [:span (or name key)]
+                    [:br]
+                    [:span description]
+                    [:br]
+                    [:span (@tr [:object-count] [(or doc_count "...")])]]]]))
+
+
 (defn list-item
   [{:keys [key doc_count]}]
   (let [selected-cloud (subscribe [::subs/selected-cloud])

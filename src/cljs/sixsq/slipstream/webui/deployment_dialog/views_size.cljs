@@ -8,24 +8,30 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
-(defn summary-item
+(defn summary-row
   []
   (let [tr (subscribe [::i18n-subs/tr])
         size (subscribe [::subs/size])
+        completed? (subscribe [::subs/size-completed?])
 
         {:keys [cpu ram disk]} @size
 
-        header (@tr [:size])
-        description (str "CPU: " cpu ",  RAM:" ram " MB,  DISK: " disk " GB")
         on-click-fn #(dispatch [::events/set-active-step :size])]
 
     ^{:key "size"}
-    [ui/ListItem {:active   false
+    [ui/TableRow {:active   false
                   :on-click on-click-fn}
-     [ui/ListIcon {:name "expand arrows alternate", :size "large", :vertical-align "middle"}]
-     [ui/ListContent
-      [ui/ListHeader header]
-      [ui/ListDescription description]]]))
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "expand arrows alternate", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:size])]
+     [ui/TableCell [:div
+                    [:span "CPU: " cpu]
+                    [:br]
+                    [:span "RAM: " ram " MB"]
+                    [:br]
+                    [:span "DISK: " disk " GB"]]]]))
 
 
 (defn input-size
