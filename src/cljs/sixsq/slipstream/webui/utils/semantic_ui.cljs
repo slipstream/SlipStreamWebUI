@@ -157,7 +157,9 @@
 (def StatisticValue (reagent/adapt-react-class semantic/StatisticValue))
 
 (def Step (reagent/adapt-react-class semantic/Step))
+(def StepContent (reagent/adapt-react-class semantic/StepContent))
 (def StepGroup (reagent/adapt-react-class semantic/StepGroup))
+(def StepTitle (reagent/adapt-react-class semantic/StepTitle))
 
 (def Tab (reagent/adapt-react-class semantic/Tab))
 (def TabPane (reagent/adapt-react-class semantic/TabPane))

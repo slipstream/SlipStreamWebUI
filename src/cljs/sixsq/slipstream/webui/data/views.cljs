@@ -3,10 +3,10 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.application.utils :as application-utils]
-    [sixsq.slipstream.webui.appstore.events :as appstore-events]
-    [sixsq.slipstream.webui.appstore.views :as appstore-views]
     [sixsq.slipstream.webui.data.events :as events]
     [sixsq.slipstream.webui.data.subs :as subs]
+    [sixsq.slipstream.webui.deployment-dialog.events :as deployment-dialog-events]
+    [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
@@ -89,7 +89,7 @@
   ^{:key id}
   [ui/ListItem {:on-click #(do
                              (dispatch [::events/close-application-select-modal])
-                             (dispatch [::appstore-events/create-deployment id "data"]))}
+                             (dispatch [::deployment-dialog-events/create-deployment id :data]))}
    [ui/ListIcon {:name (application-utils/category-icon type), :size "large", :vertical-align "middle"}]
    [ui/ListContent
     [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
@@ -160,7 +160,7 @@
   [ui/Container {:fluid true}
    [control-bar]
    [application-select-modal]
-   [appstore-views/deploy-modal true]
+   [deployment-dialog-views/deploy-modal true]
    [queries-cards-group]])
 
 

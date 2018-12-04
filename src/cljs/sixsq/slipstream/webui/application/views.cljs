@@ -6,9 +6,9 @@
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [sixsq.slipstream.webui.appstore.events :as appstore-events]
-    [sixsq.slipstream.webui.appstore.views :as appstore-views]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.deployment-dialog.events :as deployment-dialog-events]
+    [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
@@ -19,8 +19,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn refresh-button
@@ -48,7 +47,7 @@
                      {:name      (@tr [:launch])
                       :icon-name "rocket"
                       :disabled  deploy-disabled?
-                      :on-click  #(dispatch [::appstore-events/create-deployment (:id @module) "credentials"])}]
+                      :on-click  #(dispatch [::deployment-dialog-events/create-deployment (:id @module) :credentials])}]
 
                     [uix/MenuItemWithIcon
                      {:name      (@tr [:add])
@@ -389,7 +388,7 @@
       (vec (concat [ui/Container {:fluid true}
                     [control-bar]
                     [add-modal]
-                    [appstore-views/deploy-modal false]
+                    [deployment-dialog-views/deploy-modal false]
                     [format-error @data]]
                    (when (and @data (not (instance? js/Error @data)))
                      (let [{:keys [children content]} @data
