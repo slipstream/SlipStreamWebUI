@@ -85,7 +85,7 @@
   ^{:key id}
   [ui/ListItem {:on-click #(do
                              (dispatch [::events/close-application-select-modal])
-                             (dispatch [::deployment-dialog-events/create-deployment id "data"]))}
+                             (dispatch [::deployment-dialog-events/create-deployment id :data]))}
    [ui/ListIcon {:name (application-utils/category-icon type), :size "large", :vertical-align "middle"}]
    [ui/ListContent
     [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]

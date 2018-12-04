@@ -17,10 +17,19 @@
 (defn deployment-step-state
   [{:keys [step-id completed? icon] :as step-state}]
   (let [tr (subscribe [::i18n-subs/tr])
-        active-step (subscribe [::subs/active-step])]
+        active-step (subscribe [::subs/active-step])
+        size-completed? (subscribe [::subs/size-completed?])
+        credentials-completed? (subscribe [::subs/credentials-completed?])
+        parameters-completed? (subscribe [::subs/parameters-completed?])
+        data-completed? (subscribe [::subs/data-completed?])]
     [ui/Step {:link      true
               :on-click  #(dispatch [::events/set-active-step step-id])
-              :completed completed?
+              :completed (case step-id
+                           :data @data-completed?
+                           :size @size-completed?
+                           :credentials @credentials-completed?
+                           :parameters @parameters-completed?
+                           completed?)
               :active    (= step-id @active-step)}
      [ui/Icon {:name icon}]
      [ui/StepContent
@@ -43,10 +52,13 @@
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::subs/deploy-modal-visible?])
         deployment (subscribe [::subs/deployment])
+        loading? (subscribe [::subs/loading-deployment?])
         active-step (subscribe [::subs/active-step])
         step-states (subscribe [::subs/step-states])]
     (fn [show-data?]
-      (let [hide-fn #(dispatch [::events/close-deploy-modal])
+      (let [ready? (and (not @loading?) @deployment)
+            module-name (-> @deployment :module :name)
+            hide-fn #(dispatch [::events/close-deploy-modal])
             submit-fn #(dispatch [::events/edit-deployment])
             visible-steps (if show-data? spec/steps (rest spec/steps))]
 
@@ -56,19 +68,24 @@
 
          [ui/ModalHeader
           [ui/Icon {:name "rocket", :size "large"}]
-          "\u00a0"
-          (get-in @deployment [:module :name])]
+          (if ready?
+            (str "\u00a0" module-name)
+            "\u2026")]
 
          [ui/ModalContent {:scrolling true}
-          [ui/ModalDescription {:style {:height "30em"}}
+          [ui/ModalDescription
 
            (vec (concat [ui/StepGroup {:size "mini", :fluid true}]
                         (->> visible-steps
                              (map #(get @step-states %))
                              (mapv deployment-step-state))))
 
-           [ui/Segment {:basic true, :style {:padding 0}}
-            [step-content @active-step]]]]
+           [ui/Segment {:loading (not ready?)
+                        :basic   true
+                        :style   {:padding 0
+                                  :height  "25em"}}
+            (if ready?
+              [step-content @active-step])]]]
 
          [ui/ModalActions
           [uix/Button {:text     (@tr [:cancel])
@@ -76,5 +93,5 @@
                        :disabled (not (:id @deployment))}]
           [uix/Button {:text     (@tr [:launch])
                        :primary  true
-                       :disabled (not= @active-step :summary)
+                       :disabled (or (not @deployment) (not= @active-step :summary))
                        :on-click submit-fn}]]]))))

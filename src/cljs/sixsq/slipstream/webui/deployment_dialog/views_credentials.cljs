@@ -52,13 +52,12 @@
 
 (defn content
   []
-  (dispatch [::events/get-credentials])
   (fn []
     (let [tr (subscribe [::i18n-subs/tr])
           credentials (subscribe [::subs/credentials])]
 
       ;; When there's only one credential automatically select it.
-      (when (= 1 (count @credentials))
+      #_(when (= 1 (count @credentials))
         (dispatch [::events/set-selected-credential
                    (first @credentials)
                    (summary-list-item (item-options (first @credentials)))]))

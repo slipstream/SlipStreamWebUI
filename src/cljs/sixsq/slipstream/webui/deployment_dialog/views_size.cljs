@@ -9,8 +9,12 @@
 
 
 (defn summary-item
-  [_ {:keys [cpu ram disk] :as size}]
+  []
   (let [tr (subscribe [::i18n-subs/tr])
+        size (subscribe [::subs/size])
+
+        {:keys [cpu ram disk]} @size
+
         header (@tr [:size])
         description (str "CPU: " cpu ",  RAM:" ram " MB,  DISK: " disk " GB")
         on-click-fn #(dispatch [::events/set-active-step :size])]
@@ -27,20 +31,18 @@
 (defn input-size
   [name property-key]
   (let [deployment (subscribe [::subs/deployment])
-        size (select-keys (get-in @deployment [:module :content])
-                          #{:cpu :ram :disk})]
+        size (subscribe [::subs/size])]
     ^{:key (str (:id @deployment) "-" name)}
     [ui/FormInput {:type          "number",
                    :label         name,
-                   :default-value (get-in @deployment [:module :content property-key]),
+                   :default-value (get @size property-key),
                    :on-blur       (ui-callback/input-callback
                                     (fn [new-value]
-                                      (let [new-int (int new-value)
-                                            new-size (assoc size property-key new-int)]
+                                      (let [new-int (int new-value)]
                                         (dispatch
                                           [::events/set-deployment
                                            (assoc-in @deployment [:module :content property-key] new-int)])
-                                        (dispatch [::events/set-size-summary (summary-item {} new-size)]))))}]))
+                                        (dispatch [::events/set-size-summary [summary-item]]))))}]))
 
 
 (defn content

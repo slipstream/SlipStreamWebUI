@@ -19,8 +19,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn refresh-button
@@ -48,7 +47,7 @@
                      {:name      (@tr [:launch])
                       :icon-name "rocket"
                       :disabled  deploy-disabled?
-                      :on-click  #(dispatch [::deployment-dialog-events/create-deployment (:id @module) "credentials"])}]
+                      :on-click  #(dispatch [::deployment-dialog-events/create-deployment (:id @module) :credentials])}]
 
                     [uix/MenuItemWithIcon
                      {:name      (@tr [:add])

@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.response :as response]))
+    [sixsq.slipstream.webui.utils.response :as response]
+    [taoensso.timbre :as log]))
 
 
 (reg-event-fx
@@ -25,6 +26,9 @@
 (reg-event-db
   ::set-credentials
   (fn [db [_ credentials]]
+    (when (= 1 (count credentials))
+      (dispatch [::set-selected-credential (first credentials)]))
+
     (assoc db ::spec/credentials credentials
               ::spec/loading-credentials? false)))
 
@@ -75,7 +79,7 @@
   ::create-deployment
   (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id first-step]]
     (when client
-      (when (= "data" first-step)
+      (when (= :data first-step)
         (dispatch [::get-service-offers-by-cred]))
       (let [data (if (str/starts-with? id "module/")
                    {:deploymentTemplate {:module {:href id}}}
@@ -95,7 +99,7 @@
         {:db               (assoc db ::spec/loading-deployment? true
                                      ::spec/selected-credential nil
                                      ::spec/deploy-modal-visible? true
-                                     ::spec/active-step (or first-step "data")
+                                     ::spec/active-step (or first-step :data)
                                      ::spec/cloud-filter nil
                                      ::spec/selected-cloud nil
                                      ::spec/connectors nil
@@ -168,6 +172,7 @@
 
 (defn set-cloud-and-filter
   [db cloud]
+  (dispatch [::get-credentials])
   (assoc db ::spec/selected-cloud cloud
             ::spec/cloud-filter (str "(connector/href='" cloud "' or connector/href='connector/" cloud "')")))
 
