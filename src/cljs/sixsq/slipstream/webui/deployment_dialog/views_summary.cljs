@@ -8,6 +8,18 @@
     [sixsq.slipstream.webui.deployment-dialog.spec :as spec]))
 
 
+(defn application-list-item
+  [{:keys [header description]}]
+  ^{:key "application"}
+  [ui/ListItem {:active   false
+                :disabled true}
+   [ui/ListIcon {:name "sitemap", :size "large", :vertical-align "middle"}]
+   [ui/ListContent
+    [ui/ListHeader header]
+    (when description
+      [ui/ListDescription description])]])
+
+
 (defn content
   []
   (let [deployment (subscribe [::subs/deployment])
@@ -27,12 +39,6 @@
       [:div
        [ui/Table
         [ui/TableBody
-         [ui/TableRow
-          [ui/TableCell "Application Name"]
-          [ui/TableCell (or name (-> module :path (str/split #"/") last))]]
-         [ui/TableRow
-          [ui/TableCell "Application Path"]
-          [ui/TableCell (:path module)]]
          (when cred-id
            [ui/TableRow
             [ui/TableCell "Credential"]
@@ -55,6 +61,8 @@
 
        (vec (concat [ui/ListSA {:divided   true
                                 :relaxed   true
-                                :selection true}]
+                                :selection true}
+                     [application-list-item {:header      (or name (-> module :path (str/split #"/") last))
+                                             :description (:path module)}]]
                     (mapv (fn [step-id] (get-in @step-states [step-id :summary])) spec/steps)))
        ])))
