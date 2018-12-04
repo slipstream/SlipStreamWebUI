@@ -10,7 +10,8 @@
     [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.response :as response]))
+    [sixsq.slipstream.webui.utils.response :as response]
+    [taoensso.timbre :as log]))
 
 
 (reg-event-fx
@@ -25,9 +26,8 @@
 (reg-event-db
   ::set-credentials
   (fn [db [_ credentials]]
-    (cond-> (assoc db ::spec/credentials credentials
-                      ::spec/loading-credentials? false)
-            (= 1 (count credentials)) (assoc ::spec/selected-credential (first credentials)))))
+    (assoc db ::spec/credentials credentials
+              ::spec/loading-credentials? false)))
 
 
 (reg-event-fx
@@ -36,14 +36,17 @@
                 ::spec/deployment
                 ::data-spec/time-period-filter
                 ::spec/cloud-filter
-                ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential}]]
+                ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential} summary-item]]
     (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
           filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch [::set-deployment
                                       (assoc updated-deployment :serviceOffers service-offers-ids)]))]
-      (cond-> {:db (assoc db ::spec/selected-credential credential
-                             ::spec/deployment updated-deployment)}
+      (log/error summary-item)
+      (cond-> {:db (-> db
+                       (assoc ::spec/selected-credential credential
+                              ::spec/deployment updated-deployment)
+                       (assoc-in [::spec/step-states :credentials :summary] summary-item))}
               cloud-filter (assoc ::cimi-api-fx/search [client "serviceOffers"
                                                         {:$filter filter, :$select "id"}
                                                         callback-data])))))
@@ -193,6 +196,7 @@
                 ::data-spec/content-type-filter
                 ::data-spec/credentials] :as db} :db} _]
     (when client
+
       (let [filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)]
         (-> {:db db}
             (assoc ::cimi-api-fx/search
@@ -208,3 +212,15 @@
     (-> db
         (set-cloud-and-filter cloud)
         (assoc-in [::spec/step-states :data :summary] summary-item))))
+
+
+(reg-event-db
+  ::set-size-summary
+  (fn [db [_ summary-item]]
+    (assoc-in db [::spec/step-states :size :summary] summary-item)))
+
+
+(reg-event-db
+  ::set-parameters-summary
+  (fn [db [_ summary-item]]
+    (assoc-in db [::spec/step-states :parameters :summary] summary-item)))

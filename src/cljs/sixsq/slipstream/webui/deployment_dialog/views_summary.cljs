@@ -9,60 +9,27 @@
 
 
 (defn application-list-item
-  [{:keys [header description]}]
-  ^{:key "application"}
-  [ui/ListItem {:active   false
-                :disabled true}
-   [ui/ListIcon {:name "sitemap", :size "large", :vertical-align "middle"}]
-   [ui/ListContent
-    [ui/ListHeader header]
-    (when description
-      [ui/ListDescription description])]])
+  [_ {:keys [name module] :as deployment}]
+  (let [header (or name (-> module :path (str/split #"/") last))
+        description (:path module)]
+
+    ^{:key "application"}
+    [ui/ListItem {:active   false
+                  :disabled true}
+     [ui/ListIcon {:name "sitemap", :size "large", :vertical-align "middle"}]
+     [ui/ListContent
+      [ui/ListHeader header]
+      (when description
+        [ui/ListDescription description])]]))
 
 
 (defn content
   []
   (let [deployment (subscribe [::subs/deployment])
-        data-clouds (subscribe [::subs/data-clouds])
-        selected-cloud (subscribe [::subs/selected-cloud])
-        selected-credential (subscribe [::subs/selected-credential])
-        connectors (subscribe [::subs/connectors])
         step-states (subscribe [::subs/step-states])]
-    (let [{:keys [name module]} @deployment
-          {:keys [connector-id doc_count]} (first (filter #(= @selected-cloud (:key %)) @data-clouds))
-          {cred-id          :id
-           cred-name        :name
-           cred-description :description} @selected-credential
-          {connector-name        :name
-           connector-description :description} (get @connectors connector-id)]
 
-      [:div
-       [ui/Table
-        [ui/TableBody
-         (when cred-id
-           [ui/TableRow
-            [ui/TableCell "Credential"]
-            [ui/TableCell (or cred-name (history/link (str "cimi/" cred-id) cred-id))
-             (when cred-description
-               [:br]
-               [:p cred-description])]])
-         (when connector-id
-           [ui/TableRow
-            [ui/TableCell "Selected Cloud"]
-            [ui/TableCell (or connector-name (history/link (str "cimi/" connector-id) connector-id))
-             (when connector-description
-               [:br]
-               [:p connector-description])]])
-         (when doc_count
-           [ui/TableRow
-            [ui/TableCell "Number of Selected Objects"]
-            [ui/TableCell doc_count]])
-         ]]
-
-       (vec (concat [ui/ListSA {:divided   true
-                                :relaxed   true
-                                :selection true}
-                     [application-list-item {:header      (or name (-> module :path (str/split #"/") last))
-                                             :description (:path module)}]]
-                    (mapv (fn [step-id] (get-in @step-states [step-id :summary])) spec/steps)))
-       ])))
+    (vec (concat [ui/ListSA {:divided   true
+                             :relaxed   true
+                             :selection true}
+                  [application-list-item {} @deployment]]
+                 (mapv (fn [step-id] (get-in @step-states [step-id :summary])) spec/steps)))))

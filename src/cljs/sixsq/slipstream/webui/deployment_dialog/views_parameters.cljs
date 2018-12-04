@@ -10,6 +10,22 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
+(defn summary-item
+  [params]
+  (let [tr (subscribe [::i18n-subs/tr])
+        header (@tr [:parameters])
+        description (str "Number of parameters: " (count params))
+        on-click-fn #(dispatch [::events/set-active-step :parameters])]
+
+    ^{:key "parameters"}
+    [ui/ListItem {:active   false
+                  :on-click on-click-fn}
+     [ui/ListIcon {:name "list alternate outline", :size "large", :vertical-align "middle"}]
+     [ui/ListContent
+      [ui/ListHeader header]
+      [ui/ListDescription description]]]))
+
+
 (defn as-form-input
   [{:keys [parameter description value] :as param}]
   (let [deployment (subscribe [::subs/deployment])]
@@ -46,6 +62,10 @@
                      :content
                      :inputParameters
                      (remove-input-params params-to-filter))]
+
+      ;; Set the summary value.
+      (dispatch [::events/set-parameters-summary [summary-item params]])
+
       (if (seq params)
         (vec (concat [ui/Form]
                      (map as-form-input params)))
