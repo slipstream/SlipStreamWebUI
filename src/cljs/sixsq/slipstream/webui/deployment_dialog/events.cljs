@@ -10,8 +10,7 @@
     [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-fx
@@ -42,7 +41,6 @@
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch [::set-deployment
                                       (assoc updated-deployment :serviceOffers service-offers-ids)]))]
-      (log/error summary-item)
       (cond-> {:db (-> db
                        (assoc ::spec/selected-credential credential
                               ::spec/deployment updated-deployment)

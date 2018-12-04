@@ -73,7 +73,7 @@
                ::active-step           :data
                ::step-states           {:data        {:step-id    :data
                                                       :loading?   false
-                                                      :completed? true
+                                                      :completed? false
                                                       :icon       "database"
                                                       :summary    nil
                                                       :data       nil}

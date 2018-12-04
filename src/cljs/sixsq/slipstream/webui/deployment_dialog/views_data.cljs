@@ -13,7 +13,7 @@
     ^{:key key}
     [ui/ListItem (cond-> {:active active}
                          on-click-fn (assoc :on-click on-click-fn))
-     [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
+     [ui/ListIcon {:name "database", :size "large", :vertical-align "middle"}]
      [ui/ListContent
       [ui/ListHeader header]
       (when description
