@@ -7,21 +7,44 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
+(defn cloud-list-item
+  [{:keys [key active on-click-fn header description doc_count]}]
+  ^{:key key}
+  [ui/ListItem (cond-> {:active active}
+                       on-click-fn (assoc :on-click on-click-fn))
+   [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
+   [ui/ListContent
+    [ui/ListHeader header]
+    (when description
+      [ui/ListDescription description])
+    [:span (str "Number of data objects: " (or doc_count ""))]]])
+
+
+(defn summary-list-item
+  [{:keys [header description doc_count]}]
+  [cloud-list-item {:key         :data
+                    :active      false
+                    :on-click-fn #(dispatch [::events/set-active-step :data])
+                    :header      header
+                    :description description
+                    :doc_count   doc_count}])
+
 
 (defn list-item
   [{:keys [key doc_count]}]
   (let [selected-cloud (subscribe [::subs/selected-cloud])
         connectors (subscribe [::subs/connectors])
         {:keys [name description]} (get @connectors key)]
-    ^{:key key}
-    [ui/ListItem {:active   (= key @selected-cloud)
-                  :on-click #(dispatch [::events/set-cloud-filter key])}
-     [ui/ListIcon {:name "cloud", :size "large", :vertical-align "middle"}]
-     [ui/ListContent
-      [ui/ListHeader (or name key)]
-      (when description
-        [ui/ListDescription description])
-      [:span (str "Number of data objects: " (or doc_count ""))]]]))
+
+    (let [options {:key         key
+                   :active      (= key @selected-cloud)
+                   :header      (or name key)
+                   :description description
+                   :doc_count   doc_count}
+          summary-item [summary-list-item options]
+          on-click-fn #(dispatch [::events/set-cloud-filter key summary-item])]
+
+      [cloud-list-item (assoc options :on-click-fn on-click-fn)])))
 
 
 (defn content

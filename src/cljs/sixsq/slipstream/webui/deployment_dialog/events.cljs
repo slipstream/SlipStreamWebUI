@@ -201,7 +201,10 @@
                                             :$aggregation "terms:connector/href"}
                     #(dispatch [::set-data-clouds %])]))))))
 
+
 (reg-event-db
   ::set-cloud-filter
-  (fn [db [_ cloud]]
-    (set-cloud-and-filter db cloud)))
+  (fn [db [_ cloud summary-item]]
+    (-> db
+        (set-cloud-and-filter cloud)
+        (assoc-in [::spec/step-states :data :summary] summary-item))))

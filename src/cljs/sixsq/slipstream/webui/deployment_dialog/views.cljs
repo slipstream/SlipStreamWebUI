@@ -76,5 +76,5 @@
                        :disabled (not (:id @deployment))}]
           [uix/Button {:text     (@tr [:launch])
                        :primary  true
-                       :disabled (not= @active-step "summary")
+                       :disabled (not= @active-step :summary)
                        :on-click submit-fn}]]]))))
