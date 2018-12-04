@@ -10,8 +10,7 @@
     [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-fx
@@ -39,16 +38,14 @@
                 ::spec/deployment
                 ::data-spec/time-period-filter
                 ::spec/cloud-filter
-                ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential} summary-item]]
+                ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential}]]
     (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
           filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch [::set-deployment
                                       (assoc updated-deployment :serviceOffers service-offers-ids)]))]
-      (cond-> {:db (-> db
-                       (assoc ::spec/selected-credential credential
-                              ::spec/deployment updated-deployment)
-                       (assoc-in [::spec/step-states :credentials :summary] summary-item))}
+      (cond-> {:db (assoc db ::spec/selected-credential credential
+                             ::spec/deployment updated-deployment)}
               cloud-filter (assoc ::cimi-api-fx/search [client "serviceOffers"
                                                         {:$filter filter, :$select "id"}
                                                         callback-data])))))
@@ -95,11 +92,14 @@
                                                 :content message
                                                 :type    :error}])
                                     (dispatch [::close-deploy-modal]))
-                                  (dispatch [::get-deployment (:resource-id response)])))]
+                                  (do
+                                    (dispatch [::get-credentials])
+                                    (dispatch [::get-deployment (:resource-id response)]))))]
         {:db               (assoc db ::spec/loading-deployment? true
                                      ::spec/selected-credential nil
                                      ::spec/deploy-modal-visible? true
                                      ::spec/active-step (or first-step :data)
+                                     ::spec/data-step-active? (= first-step :data)
                                      ::spec/cloud-filter nil
                                      ::spec/selected-cloud nil
                                      ::spec/connectors nil
@@ -211,19 +211,5 @@
 
 (reg-event-db
   ::set-cloud-filter
-  (fn [db [_ cloud summary-item]]
-    (-> db
-        (set-cloud-and-filter cloud)
-        (assoc-in [::spec/step-states :data :summary] summary-item))))
-
-
-(reg-event-db
-  ::set-size-summary
-  (fn [db [_ summary-item]]
-    (assoc-in db [::spec/step-states :size :summary] summary-item)))
-
-
-(reg-event-db
-  ::set-parameters-summary
-  (fn [db [_ summary-item]]
-    (assoc-in db [::spec/step-states :parameters :summary] summary-item)))
+  (fn [db [_ cloud]]
+    (set-cloud-and-filter db cloud)))

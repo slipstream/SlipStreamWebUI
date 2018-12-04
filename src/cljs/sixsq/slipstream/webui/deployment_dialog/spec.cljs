@@ -26,20 +26,12 @@
 
 (s/def ::loading? boolean?)
 
-(s/def ::completed? boolean?)
-
 (s/def ::icon string?)
 
-(s/def ::summary any?)
-
-(s/def ::data any?)
-
 (s/def ::step-state (s/keys :req-un [::step-id
-                                     ::loading?
-                                     ::completed?
-                                     ::icon
-                                     ::summary
-                                     ::data]))
+                                     ::icon]))
+
+(s/def ::data-step-active? boolean?)
 
 (s/def ::step-states (s/map-of ::step-id ::step-state))
 
@@ -56,6 +48,7 @@
                           ::connectors
 
                           ::active-step
+                          ::data-step-active?
                           ::step-states]))
 
 
@@ -71,33 +64,14 @@
                ::connectors            nil
 
                ::active-step           :data
-               ::step-states           {:data        {:step-id    :data
-                                                      :loading?   false
-                                                      :completed? false
-                                                      :icon       "database"
-                                                      :summary    nil
-                                                      :data       nil}
-                                        :credentials {:step-id    :credentials
-                                                      :loading?   false
-                                                      :completed? false
-                                                      :icon       "key"
-                                                      :summary    nil
-                                                      :data       nil}
-                                        :size        {:step-id    :size
-                                                      :loading?   false
-                                                      :completed? false
-                                                      :icon       "expand arrows alternate"
-                                                      :summary    nil
-                                                      :data       nil}
-                                        :parameters  {:step-id    :parameters
-                                                      :loading?   false
-                                                      :completed? false
-                                                      :icon       "list alternate outline"
-                                                      :summary    nil
-                                                      :data       nil}
-                                        :summary     {:step-id    :summary
-                                                      :loading?   false
-                                                      :completed? false
-                                                      :icon       "info"
-                                                      :summary    nil
-                                                      :data       nil}}})
+               ::data-step-active      true
+               ::step-states           {:data        {:step-id :data
+                                                      :icon    "database"}
+                                        :credentials {:step-id :credentials
+                                                      :icon    "key"}
+                                        :size        {:step-id :size
+                                                      :icon    "expand arrows alternate"}
+                                        :parameters  {:step-id :parameters
+                                                      :icon    "list alternate outline"}
+                                        :summary     {:step-id :summary
+                                                      :icon    "info"}}})

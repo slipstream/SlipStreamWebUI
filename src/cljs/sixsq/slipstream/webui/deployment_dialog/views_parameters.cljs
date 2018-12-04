@@ -10,20 +10,24 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
-(defn summary-item
-  [params]
+(defn summary-row
+  []
   (let [tr (subscribe [::i18n-subs/tr])
-        header (@tr [:parameters])
-        description (str "Number of parameters: " (count params))
+        filtered-params (subscribe [::subs/filtered-input-parameters])
+        completed? (subscribe [::subs/parameters-completed?])
+
+        description (str "Number of parameters: " (count @filtered-params))
         on-click-fn #(dispatch [::events/set-active-step :parameters])]
 
     ^{:key "parameters"}
-    [ui/ListItem {:active   false
+    [ui/TableRow {:active   false
                   :on-click on-click-fn}
-     [ui/ListIcon {:name "list alternate outline", :size "large", :vertical-align "middle"}]
-     [ui/ListContent
-      [ui/ListHeader header]
-      [ui/ListDescription description]]]))
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "list alternate outline", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:parameters])]
+     [ui/TableCell [:div [:span description]]]]))
 
 
 (defn as-form-input
@@ -44,29 +48,12 @@
                             (dispatch [::events/set-deployment updated-deployment]))))}]]))
 
 
-(defn remove-input-params
-  [collection set-params-to-remove]
-  (remove #(set-params-to-remove (:parameter %)) collection))
-
-
 (defn content
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        deployment (subscribe [::subs/deployment])
-        selected-credential (subscribe [::subs/selected-credential])]
-    (let [is-not-docker? (not= (:type @selected-credential) "cloud-cred-docker")
-          params-to-filter (cond-> #{"credential.id"}
-                                   is-not-docker? (conj "cloud.node.publish.ports"))
-          params (-> @deployment
-                     :module
-                     :content
-                     :inputParameters
-                     (remove-input-params params-to-filter))]
+        filtered-params (subscribe [::subs/filtered-input-parameters])]
 
-      ;; Set the summary value.
-      (dispatch [::events/set-parameters-summary [summary-item params]])
-
-      (if (seq params)
-        (vec (concat [ui/Form]
-                     (map as-form-input params)))
-        [ui/Message {:success true} (@tr [:no-input-parameters])]))))
+    (if (seq @filtered-params)
+      (vec (concat [ui/Form]
+                   (map as-form-input @filtered-params)))
+      [ui/Message {:success true} (@tr [:no-input-parameters])])))

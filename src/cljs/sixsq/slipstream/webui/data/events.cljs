@@ -1,5 +1,7 @@
 (ns sixsq.slipstream.webui.data.events
   (:require
+    [clojure.string :as s]
+    [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
@@ -7,9 +9,7 @@
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
-    [taoensso.timbre :as log]
-    [clojure.string :as s]
-    [clojure.string :as str]))
+    [taoensso.timbre :as log]))
 
 
 (defn fetch-data-cofx

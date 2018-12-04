@@ -21,14 +21,50 @@
       [:span (@tr [:object-count] [(or doc_count "...")])]]]))
 
 
-(defn summary-list-item
-  [{:keys [header description doc_count]}]
-  [cloud-list-item {:key         :data
-                    :active      false
-                    :on-click-fn #(dispatch [::events/set-active-step :data])
-                    :header      header
-                    :description description
-                    :doc_count   doc_count}])
+(defn summary-item
+  []
+  (let [data-clouds (subscribe [::subs/data-clouds])
+        selected-cloud (subscribe [::subs/selected-cloud])
+        connectors (subscribe [::subs/connectors])
+
+        {:keys [key doc_count]} (first (filter (fn [m] (= @selected-cloud (:key m))) @data-clouds))
+        {:keys [name description]} (get @connectors key)]
+
+    [cloud-list-item {:key         :data
+                      :active      false
+                      :on-click-fn #(dispatch [::events/set-active-step :data])
+                      :header      (or name key)
+                      :description description
+                      :doc_count   doc_count}]))
+
+
+(defn summary-row
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        data-clouds (subscribe [::subs/data-clouds])
+        selected-cloud (subscribe [::subs/selected-cloud])
+        connectors (subscribe [::subs/connectors])
+        completed? (subscribe [::subs/data-completed?])
+
+        {:keys [key doc_count]} (first (filter (fn [m] (= @selected-cloud (:key m))) @data-clouds))
+        {:keys [name description]} (get @connectors key)
+
+        on-click-fn #(dispatch [::events/set-active-step :data])]
+
+    ^{:key "data"}
+    [ui/TableRow {:active   false
+                  :on-click on-click-fn}
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "database", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:data])]
+     [ui/TableCell [:div
+                    [:span (or name key)]
+                    [:br]
+                    [:span description]
+                    [:br]
+                    [:span (@tr [:object-count] [(or doc_count "...")])]]]]))
 
 
 (defn list-item
@@ -42,8 +78,7 @@
                    :header      (or name key)
                    :description description
                    :doc_count   doc_count}
-          summary-item [summary-list-item options]
-          on-click-fn #(dispatch [::events/set-cloud-filter key summary-item])]
+          on-click-fn #(dispatch [::events/set-cloud-filter key])]
 
       [cloud-list-item (assoc options :on-click-fn on-click-fn)])))
 

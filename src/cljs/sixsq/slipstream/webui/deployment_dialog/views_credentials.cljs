@@ -26,13 +26,28 @@
    :description description})
 
 
-(defn summary-list-item
-  [{:keys [header description]}]
-  [cred-list-item {:key         :credentials
-                   :active      false
-                   :on-click-fn #(dispatch [::events/set-active-step :credentials])
-                   :header      header
-                   :description description}])
+(defn summary-row
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        selected-credential (subscribe [::subs/selected-credential])
+        completed? (subscribe [::subs/credentials-completed?])
+
+        {:keys [header description]} (item-options @selected-credential)
+
+        on-click-fn #(dispatch [::events/set-active-step :credentials])]
+
+    ^{:key "credentials"}
+    [ui/TableRow {:active   false
+                  :on-click on-click-fn}
+     [ui/TableCell {:collapsing true}
+      (if @completed?
+        [ui/Icon {:name "key", :size "large", :vertical-align "middle"}]
+        [ui/Icon {:name "warning sign", :size "large", :color "red"}])]
+     [ui/TableCell {:collapsing true} (@tr [:credentials])]
+     [ui/TableCell [:div
+                    [:span header]
+                    [:br]
+                    [:span description]]]]))
 
 
 (defn list-item
@@ -42,10 +57,7 @@
     (let [{selected-id :id} @selected-credential
 
           options (assoc (item-options credential) :active (= id selected-id))
-
-          summary-item [cred-list-item options]
-
-          on-click-fn #(dispatch [::events/set-selected-credential credential summary-item])]
+          on-click-fn #(dispatch [::events/set-selected-credential credential])]
 
       [cred-list-item (assoc options :on-click-fn on-click-fn)])))
 
@@ -55,12 +67,6 @@
   (fn []
     (let [tr (subscribe [::i18n-subs/tr])
           credentials (subscribe [::subs/credentials])]
-
-      ;; When there's only one credential automatically select it.
-      #_(when (= 1 (count @credentials))
-        (dispatch [::events/set-selected-credential
-                   (first @credentials)
-                   (summary-list-item (item-options (first @credentials)))]))
 
       (if (seq @credentials)
         (vec (concat [ui/ListSA {:divided   true
