@@ -35,8 +35,15 @@
 
 
 (reg-sub
-  ::step-id
-  ::spec/step-id)
+  ::active-step
+  (fn [db]
+    (::spec/active-step db)))
+
+
+(reg-sub
+  ::step-states
+  (fn [db]
+    (::spec/step-states db)))
 
 
 (reg-sub

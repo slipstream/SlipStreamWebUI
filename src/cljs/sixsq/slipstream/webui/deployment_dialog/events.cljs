@@ -50,9 +50,9 @@
 
 
 (reg-event-db
-  ::set-step-id
-  (fn [db [_ step-id]]
-    (assoc db ::spec/step-id step-id)))
+  ::set-active-step
+  (fn [db [_ active-step]]
+    (assoc db ::spec/active-step active-step)))
 
 
 (reg-event-db
@@ -94,7 +94,7 @@
         {:db               (assoc db ::spec/loading-deployment? true
                                      ::spec/selected-credential nil
                                      ::spec/deploy-modal-visible? true
-                                     ::spec/step-id (or first-step "data")
+                                     ::spec/active-step (or first-step "data")
                                      ::spec/cloud-filter nil
                                      ::spec/selected-cloud nil
                                      ::spec/connectors nil
@@ -205,16 +205,3 @@
   ::set-cloud-filter
   (fn [db [_ cloud]]
     (set-cloud-and-filter db cloud)))
-
-
-(reg-event-db
-  ::next-step
-  (fn [{:keys [::spec/step-id] :as db} _]
-    (let []
-      (assoc db ::spec/step-id (get utils/next-steps step-id)))))
-
-(reg-event-db
-  ::previous-step
-  (fn [{:keys [::spec/step-id] :as db} _]
-    (let []
-      (assoc db ::spec/step-id (get utils/previous-steps step-id)))))
