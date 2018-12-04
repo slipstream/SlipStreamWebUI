@@ -38,3 +38,21 @@
        (assoc-in deployment [:module :content :inputParameters])))
 
 
+(defn params-to-remove-fn
+  "Creates a function (based on the credential) to identify input parameters
+   that should be removed from the UI."
+  [selected-credential]
+  (let [is-not-docker? (not= (:type selected-credential) "cloud-cred-docker")]
+    (cond-> #{"credential.id"}
+            is-not-docker? (conj "cloud.node.publish.ports"))))
+
+
+(defn remove-input-params
+  "Removes the input parameters from the collection that are identified by the
+   remove-param? function."
+  [collection remove-param?]
+  (remove #(remove-param? (:parameter %)) collection))
+
+
+
+

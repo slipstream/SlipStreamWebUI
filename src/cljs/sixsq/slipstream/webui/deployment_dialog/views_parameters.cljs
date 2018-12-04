@@ -44,24 +44,17 @@
                             (dispatch [::events/set-deployment updated-deployment]))))}]]))
 
 
-(defn remove-input-params
-  [collection set-params-to-remove]
-  (remove #(set-params-to-remove (:parameter %)) collection))
-
-
 (defn content
   []
   (let [tr (subscribe [::i18n-subs/tr])
         deployment (subscribe [::subs/deployment])
         selected-credential (subscribe [::subs/selected-credential])]
-    (let [is-not-docker? (not= (:type @selected-credential) "cloud-cred-docker")
-          params-to-filter (cond-> #{"credential.id"}
-                                   is-not-docker? (conj "cloud.node.publish.ports"))
+    (let [remove-param? (utils/params-to-remove-fn @selected-credential)
           params (-> @deployment
                      :module
                      :content
                      :inputParameters
-                     (remove-input-params params-to-filter))]
+                     (utils/remove-input-params remove-param?))]
 
       ;; Set the summary value.
       (dispatch [::events/set-parameters-summary [summary-item params]])

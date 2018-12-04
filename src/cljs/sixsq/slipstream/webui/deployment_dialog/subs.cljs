@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [reg-sub subscribe]]
     [sixsq.slipstream.webui.deployment-dialog.spec :as spec]
-    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
     [clojure.string :as str]))
 
 
@@ -97,20 +97,6 @@
     (boolean selected-credential)))
 
 
-;; FIXME: Put this into a utils namespace.
-(defn params-to-remove-fn
-  [selected-credential]
-  (let [is-not-docker? (not= (:type selected-credential) "cloud-cred-docker")]
-    (cond-> #{"credential.id"}
-            is-not-docker? (conj "cloud.node.publish.ports"))))
-
-
-;; FIXME: Put this into a utils namespace.
-(defn remove-input-params
-  [collection remove-param?]
-  (remove #(remove-param? (:parameter %)) collection))
-
-
 (reg-sub
   ::parameters-completed?
   (fn [_ _]
@@ -118,7 +104,7 @@
      (subscribe [::selected-credential])])
   (fn [[deployment selected-credential] _]
     (let [all-params (-> deployment :module :content :inputParameters)
-          filtered-params (remove-input-params all-params (params-to-remove-fn selected-credential))]
+          filtered-params (utils/remove-input-params all-params (utils/params-to-remove-fn selected-credential))]
       (every? #(not (str/blank? (:value %))) filtered-params))))
 
 

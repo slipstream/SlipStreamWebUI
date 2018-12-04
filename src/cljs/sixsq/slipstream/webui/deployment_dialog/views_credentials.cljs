@@ -56,12 +56,6 @@
     (let [tr (subscribe [::i18n-subs/tr])
           credentials (subscribe [::subs/credentials])]
 
-      ;; When there's only one credential automatically select it.
-      #_(when (= 1 (count @credentials))
-        (dispatch [::events/set-selected-credential
-                   (first @credentials)
-                   (summary-list-item (item-options (first @credentials)))]))
-
       (if (seq @credentials)
         (vec (concat [ui/ListSA {:divided   true
                                  :relaxed   true
