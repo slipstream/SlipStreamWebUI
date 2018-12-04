@@ -12,7 +12,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.time :as time]))
+    [sixsq.slipstream.webui.utils.time :as time]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn refresh []
@@ -35,8 +36,8 @@
         locale (subscribe [::i18n-subs/locale])]
     (fn []
       (let [[time-start time-end] @time-period]
-        [ui/Form {:widths "equal"}
-         [ui/FormGroup
+        [ui/Form
+         [ui/FormGroup {:widths 3}
           [ui/FormField
            ;; FIXME: Find a better way to set the field width.
            [ui/DatePicker {:custom-input     (reagent/as-element [ui/Input {:label (@tr [:from])
@@ -69,7 +70,10 @@
                            :locale           @locale
                            :fixed-height     true
                            :date-format      "LLL"
-                           :on-change        #(dispatch [::events/set-time-period [time-start %]])}]]]]))))
+                           :on-change        #(dispatch [::events/set-time-period [time-start %]])}]]
+          [ui/FormInput {:placeholder (@tr [:search])
+                         :icon        "search"
+                         :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]]))))
 
 
 (defn control-bar []

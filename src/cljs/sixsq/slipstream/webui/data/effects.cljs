@@ -11,11 +11,11 @@
 
 (reg-fx
   ::fetch-data
-  (fn [[client time-period-filter cloud-filter data-queries callback]]
+  (fn [[client time-period-filter cloud-filter full-text-search data-queries callback]]
     (go
       (when client
         (doseq [{:keys [id query-data]} data-queries]
-          (let [filter (utils/join-and time-period-filter cloud-filter query-data)]
+          (let [filter (utils/join-and time-period-filter cloud-filter full-text-search query-data)]
             (callback id (<! (cimi/search client
                                           "serviceOffers"
                                           {:$filter      filter
