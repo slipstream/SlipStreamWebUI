@@ -21,14 +21,21 @@
       [:span (@tr [:object-count] [(or doc_count "...")])]]]))
 
 
-(defn summary-list-item
-  [{:keys [header description doc_count]}]
-  [cloud-list-item {:key         :data
-                    :active      false
-                    :on-click-fn #(dispatch [::events/set-active-step :data])
-                    :header      header
-                    :description description
-                    :doc_count   doc_count}])
+(defn summary-item
+  []
+  (let [data-clouds (subscribe [::subs/data-clouds])
+        selected-cloud (subscribe [::subs/selected-cloud])
+        connectors (subscribe [::subs/connectors])
+
+        {:keys [key doc_count]} (first (filter (fn [m] (= @selected-cloud (:key m))) @data-clouds))
+        {:keys [name description]} (get @connectors key)]
+
+    [cloud-list-item {:key         :data
+                      :active      false
+                      :on-click-fn #(dispatch [::events/set-active-step :data])
+                      :header      (or name key)
+                      :description description
+                      :doc_count   doc_count}]))
 
 
 (defn list-item
@@ -42,8 +49,7 @@
                    :header      (or name key)
                    :description description
                    :doc_count   doc_count}
-          summary-item [summary-list-item options]
-          on-click-fn #(dispatch [::events/set-cloud-filter key summary-item])]
+          on-click-fn #(dispatch [::events/set-cloud-filter key])]
 
       [cloud-list-item (assoc options :on-click-fn on-click-fn)])))
 

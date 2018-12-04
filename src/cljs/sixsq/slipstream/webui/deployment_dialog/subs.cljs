@@ -1,9 +1,9 @@
 (ns sixsq.slipstream.webui.deployment-dialog.subs
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [reg-sub subscribe]]
     [sixsq.slipstream.webui.deployment-dialog.spec :as spec]
-    [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.deployment-dialog.utils :as utils]))
 
 
 (reg-sub
@@ -34,13 +34,20 @@
 
 (reg-sub
   ::credentials
-  ::spec/credentials)
+  (fn [db]
+    (::spec/credentials db)))
 
 
 (reg-sub
   ::active-step
   (fn [db]
     (::spec/active-step db)))
+
+
+(reg-sub
+  ::data-step-active?
+  (fn [db]
+    (::spec/data-step-active? db)))
 
 
 (reg-sub
@@ -98,14 +105,20 @@
 
 
 (reg-sub
-  ::parameters-completed?
+  ::filtered-input-parameters
   (fn [_ _]
     [(subscribe [::deployment])
      (subscribe [::selected-credential])])
   (fn [[deployment selected-credential] _]
-    (let [all-params (-> deployment :module :content :inputParameters)
-          filtered-params (utils/remove-input-params all-params (utils/params-to-remove-fn selected-credential))]
-      (every? #(not (str/blank? (:value %))) filtered-params))))
+    (let [all-params (-> deployment :module :content :inputParameters)]
+      (utils/remove-input-params all-params (utils/params-to-remove-fn selected-credential)))))
+
+
+(reg-sub
+  ::parameters-completed?
+  :<- [::filtered-input-parameters]
+  (fn [filtered-params _]
+    (every? #(not (str/blank? (:value %))) filtered-params)))
 
 
 (reg-sub

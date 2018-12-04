@@ -41,8 +41,7 @@
                                       (let [new-int (int new-value)]
                                         (dispatch
                                           [::events/set-deployment
-                                           (assoc-in @deployment [:module :content property-key] new-int)])
-                                        (dispatch [::events/set-size-summary [summary-item]]))))}]))
+                                           (assoc-in @deployment [:module :content property-key] new-int)]))))}]))
 
 
 (defn content

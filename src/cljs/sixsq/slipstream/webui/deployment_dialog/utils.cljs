@@ -1,14 +1,4 @@
-(ns sixsq.slipstream.webui.deployment-dialog.utils
-  (:require [clojure.set :refer [map-invert]]))
-
-
-(def next-steps {"data"        "credentials"
-                 "credentials" "size"
-                 "size"        "parameters"
-                 "parameters"  "summary"
-                 "summary"     nil})
-
-(def previous-steps (map-invert next-steps))
+(ns sixsq.slipstream.webui.deployment-dialog.utils)
 
 
 (defn matches-parameter-name?

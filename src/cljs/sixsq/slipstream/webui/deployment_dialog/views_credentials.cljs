@@ -26,13 +26,15 @@
    :description description})
 
 
-(defn summary-list-item
-  [{:keys [header description]}]
-  [cred-list-item {:key         :credentials
-                   :active      false
-                   :on-click-fn #(dispatch [::events/set-active-step :credentials])
-                   :header      header
-                   :description description}])
+(defn summary-item
+  []
+  (let [selected-credential (subscribe [::subs/selected-credential])
+
+        options (merge (item-options @selected-credential)
+                       {:key         :credentials
+                        :active      false
+                        :on-click-fn #(dispatch [::events/set-active-step :credentials])})]
+    [cred-list-item options]))
 
 
 (defn list-item
@@ -42,10 +44,7 @@
     (let [{selected-id :id} @selected-credential
 
           options (assoc (item-options credential) :active (= id selected-id))
-
-          summary-item [cred-list-item options]
-
-          on-click-fn #(dispatch [::events/set-selected-credential credential summary-item])]
+          on-click-fn #(dispatch [::events/set-selected-credential credential])]
 
       [cred-list-item (assoc options :on-click-fn on-click-fn)])))
 

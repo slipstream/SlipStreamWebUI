@@ -3,14 +3,19 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.deployment-dialog.subs :as subs]
-    [sixsq.slipstream.webui.history.views :as history]
-    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.deployment-dialog.spec :as spec]))
+    [sixsq.slipstream.webui.deployment-dialog.views-credentials :as credentials-step]
+    [sixsq.slipstream.webui.deployment-dialog.views-data :as data-step]
+    [sixsq.slipstream.webui.deployment-dialog.views-parameters :as parameters-step]
+    [sixsq.slipstream.webui.deployment-dialog.views-size :as size-step]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
 
 (defn application-list-item
-  [_ {:keys [name module] :as deployment}]
-  (let [header (or name (-> module :path (str/split #"/") last))
+  []
+  (let [deployment (subscribe [::subs/deployment])
+
+        {:keys [name module]} @deployment
+        header (or name (-> module :path (str/split #"/") last))
         description (:path module)]
 
     ^{:key "application"}
@@ -25,11 +30,13 @@
 
 (defn content
   []
-  (let [deployment (subscribe [::subs/deployment])
-        step-states (subscribe [::subs/step-states])]
-
-    (vec (concat [ui/ListSA {:divided   true
-                             :relaxed   true
-                             :selection true}
-                  [application-list-item {} @deployment]]
-                 (mapv (fn [step-id] (get-in @step-states [step-id :summary])) spec/steps)))))
+  (let [data-step-active? (subscribe [::subs/data-step-active?])]
+    [ui/ListSA {:divided   true
+                :relaxed   true
+                :selection true}
+     [application-list-item]
+     (when @data-step-active?
+       [data-step/summary-item])
+     [credentials-step/summary-item]
+     [size-step/summary-item]
+     [parameters-step/summary-item]]))

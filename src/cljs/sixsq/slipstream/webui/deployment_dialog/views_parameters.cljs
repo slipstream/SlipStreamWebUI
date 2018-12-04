@@ -11,10 +11,12 @@
 
 
 (defn summary-item
-  [params]
+  []
   (let [tr (subscribe [::i18n-subs/tr])
+        filtered-params (subscribe [::subs/filtered-input-parameters])
+
         header (@tr [:parameters])
-        description (str "Number of parameters: " (count params))
+        description (str "Number of parameters: " (count @filtered-params))
         on-click-fn #(dispatch [::events/set-active-step :parameters])]
 
     ^{:key "parameters"}
@@ -47,19 +49,9 @@
 (defn content
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        deployment (subscribe [::subs/deployment])
-        selected-credential (subscribe [::subs/selected-credential])]
-    (let [remove-param? (utils/params-to-remove-fn @selected-credential)
-          params (-> @deployment
-                     :module
-                     :content
-                     :inputParameters
-                     (utils/remove-input-params remove-param?))]
+        filtered-params (subscribe [::subs/filtered-input-parameters])]
 
-      ;; Set the summary value.
-      (dispatch [::events/set-parameters-summary [summary-item params]])
-
-      (if (seq params)
-        (vec (concat [ui/Form]
-                     (map as-form-input params)))
-        [ui/Message {:success true} (@tr [:no-input-parameters])]))))
+    (if (seq @filtered-params)
+      (vec (concat [ui/Form]
+                   (map as-form-input @filtered-params)))
+      [ui/Message {:success true} (@tr [:no-input-parameters])])))

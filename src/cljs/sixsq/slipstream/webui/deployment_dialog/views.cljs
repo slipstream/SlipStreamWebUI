@@ -1,14 +1,14 @@
 (ns sixsq.slipstream.webui.deployment-dialog.views
   (:require
     [re-frame.core :refer [dispatch subscribe]]
+    [sixsq.slipstream.webui.deployment-dialog.events :as events]
+    [sixsq.slipstream.webui.deployment-dialog.spec :as spec]
+    [sixsq.slipstream.webui.deployment-dialog.subs :as subs]
     [sixsq.slipstream.webui.deployment-dialog.views-credentials :as credentials-step]
     [sixsq.slipstream.webui.deployment-dialog.views-data :as data-step]
     [sixsq.slipstream.webui.deployment-dialog.views-parameters :as parameters-step]
     [sixsq.slipstream.webui.deployment-dialog.views-size :as size-step]
     [sixsq.slipstream.webui.deployment-dialog.views-summary :as summary-step]
-    [sixsq.slipstream.webui.deployment-dialog.events :as events]
-    [sixsq.slipstream.webui.deployment-dialog.spec :as spec]
-    [sixsq.slipstream.webui.deployment-dialog.subs :as subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
@@ -54,13 +54,25 @@
         deployment (subscribe [::subs/deployment])
         loading? (subscribe [::subs/loading-deployment?])
         active-step (subscribe [::subs/active-step])
-        step-states (subscribe [::subs/step-states])]
+        data-step-active? (subscribe [::subs/data-step-active?])
+        step-states (subscribe [::subs/step-states])
+
+        data-completed? (subscribe [::subs/data-completed?])
+        credentials-completed? (subscribe [::subs/credentials-completed?])
+        size-completed? (subscribe [::subs/size-completed?])
+        parameters-completed? (subscribe [::subs/parameters-completed?])]
     (fn [show-data?]
       (let [ready? (and (not @loading?) @deployment)
             module-name (-> @deployment :module :name)
             hide-fn #(dispatch [::events/close-deploy-modal])
             submit-fn #(dispatch [::events/edit-deployment])
-            visible-steps (if show-data? spec/steps (rest spec/steps))]
+            visible-steps (if show-data? spec/steps (rest spec/steps))
+
+            launch-disabled? (or (not @deployment)
+                                 (and (not @data-completed?) @data-step-active?)
+                                 (not @credentials-completed?)
+                                 (not @size-completed?)
+                                 (not @parameters-completed?))]
 
         [ui/Modal {:open       @visible?
                    :close-icon true
@@ -93,5 +105,5 @@
                        :disabled (not (:id @deployment))}]
           [uix/Button {:text     (@tr [:launch])
                        :primary  true
-                       :disabled (or (not @deployment) (not= @active-step :summary))
+                       :disabled launch-disabled?
                        :on-click submit-fn}]]]))))
