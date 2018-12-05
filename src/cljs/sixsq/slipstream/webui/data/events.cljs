@@ -41,7 +41,7 @@
                 ::spec/data-queries
                 ::spec/time-period-filter] :as db} :db} [_ full-text-search]]
     (let [full-text-query (when (and full-text-search (not (str/blank? full-text-search)))
-                            (str "fulltext=='" full-text-search "*'"))]
+                            (str "name=='" full-text-search "*'"))]
       (merge {:db (assoc db ::spec/full-text-search full-text-query)}
              (fetch-data-cofx credentials client time-period-filter cloud-filter full-text-query data-queries)))))
 

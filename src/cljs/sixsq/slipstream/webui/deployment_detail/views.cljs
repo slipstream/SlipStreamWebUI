@@ -34,32 +34,32 @@
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-get-deployment
-              :frequency 30000
+              :frequency 10000
               :event     [::events/get-deployment resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-get-summary-nodes-parameters
-              :frequency 30000
+              :frequency 10000
               :event     [::events/get-summary-nodes-parameters resource-id (nodes-list)]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-reports
-              :frequency 30000
+              :frequency 10000
               :event     [::events/get-reports resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-deployment-parameters
-              :frequency 20000
+              :frequency 10000
               :event     [::events/get-global-deployment-parameters resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-events
-              :frequency 30000
+              :frequency 10000
               :event     [::events/get-events resource-id]}])
   (dispatch [::main-events/action-interval
              {:action    :start
               :id        :deployment-detail-jobs
-              :frequency 30000
+              :frequency 10000
               :event     [::events/get-jobs resource-id]}]))
 
 
