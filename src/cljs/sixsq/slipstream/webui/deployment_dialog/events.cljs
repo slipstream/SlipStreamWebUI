@@ -43,11 +43,13 @@
           filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch [::set-deployment
-                                      (assoc updated-deployment :serviceOffers service-offers-ids)]))]
+                                      (-> updated-deployment
+                                          (assoc :serviceOffers service-offers-ids)
+                                          (assoc-in [:module :content :mounts] (utils/service-offers->mounts %)))]))]
       (cond-> {:db (assoc db ::spec/selected-credential credential
                              ::spec/deployment updated-deployment)}
               cloud-filter (assoc ::cimi-api-fx/search [client "serviceOffers"
-                                                        {:$filter filter, :$select "id"}
+                                                        {:$filter filter, :$select "id, resource:bucket"}
                                                         callback-data])))))
 
 

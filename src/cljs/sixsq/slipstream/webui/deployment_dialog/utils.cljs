@@ -45,4 +45,10 @@
 
 
 
-
+(defn service-offers->mounts
+  [service-offers]
+  (->> service-offers
+       :serviceOffers
+       (map (keyword "resource:bucket"))
+       distinct
+       (map #(str "type=volume,src=" % ",dst=/mnt/" % ",readonly"))))
