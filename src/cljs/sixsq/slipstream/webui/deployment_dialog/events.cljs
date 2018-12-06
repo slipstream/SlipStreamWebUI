@@ -49,7 +49,7 @@
       (cond-> {:db (assoc db ::spec/selected-credential credential
                              ::spec/deployment updated-deployment)}
               cloud-filter (assoc ::cimi-api-fx/search [client "serviceOffers"
-                                                        {:$filter filter, :$select "id, resource:bucket"}
+                                                        {:$filter filter, :$select "id, data:bucket, data:nfsIP, data:nfsDevice"}
                                                         callback-data])))))
 
 
