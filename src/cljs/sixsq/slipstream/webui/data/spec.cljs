@@ -50,25 +50,25 @@
   {"data-query/feCapture-ionMessage" {:id                "data-query/feCapture-ionMessage"
                                       :name              "feCapture & ionMessage"
                                       :description       "Query that selects data and metadata for signals coming from the frontend receiver."
-                                      :query-data        "resource:type='DATA' and resource:bucket^='gnss' and (data:contentType='application/x-ionMessage' or data:contentType='application/x-feCapture')"
+                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and (data:contentType='application/x-ionMessage' or data:contentType='application/x-feCapture')"
                                       :query-application "dataAcceptContentTypes='application/x-ionMessage' and dataAcceptContentTypes='application/x-feCapture'"}
 
    "data-query/feCapture"            {:id                "data-query/feCapture"
                                       :name              "feCapture"
                                       :description       "Query that selects data feCapture only."
-                                      :query-data        "resource:type='DATA' and resource:bucket^='gnss' and data:contentType='application/x-feCapture'"
+                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-feCapture'"
                                       :query-application "dataAcceptContentTypes='application/x-feCapture'"}
 
    "data-query/ionMessage"           {:id                "data-query/ionMessage"
                                       :name              "ionMessage"
                                       :description       "Query that selects data ionMessage only."
-                                      :query-data        "resource:type='DATA' and resource:bucket^='gnss' and data:contentType='application/x-ionMessage'"
+                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-ionMessage'"
                                       :query-application "dataAcceptContentTypes='application/x-ionMessage'"}
 
    "data-query/sdrData"              {:id                "data-query/sdrData"
                                       :name              "sdrData"
                                       :description       "Query that selects data sdrData only."
-                                      :query-data        "resource:type='DATA' and resource:bucket^='gnss' and data:contentType='application/x-sdrData'"
+                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-sdrData'"
                                       :query-application "dataAcceptContentTypes='application/x-sdrData'"}})
 
 ;; FIXME: Make default dates use current date.

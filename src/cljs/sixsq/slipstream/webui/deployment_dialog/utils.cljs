@@ -45,4 +45,16 @@
 
 
 
-
+(defn service-offers->mounts
+  [service-offers]
+  (->> service-offers
+       :serviceOffers
+       (map (fn [service-offer]
+              [((keyword "data:nfsIP") service-offer)
+               ((keyword "data:nfsDevice") service-offer)
+               ((keyword "data:bucket") service-offer)]))
+       distinct
+       (map (fn [[ip device bucket]]
+              (str "type=volume,volume-opt=o=addr=" ip
+                   ",volume-opt=device=:" device
+                   ",volume-opt=type=nfs,dst=/mnt/" bucket)))))
