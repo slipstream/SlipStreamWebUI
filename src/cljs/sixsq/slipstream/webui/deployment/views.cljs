@@ -3,62 +3,63 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
-    [sixsq.slipstream.webui.deployment.events :as deployment-events]
-    [sixsq.slipstream.webui.deployment.subs :as deployment-subs]
+    [sixsq.slipstream.webui.deployment.events :as events]
+    [sixsq.slipstream.webui.deployment.subs :as subs]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general-utils]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.time :as time]
     [taoensso.timbre :as log]))
 
 
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
-        active-only? (subscribe [::deployment-subs/active-only?])]
-    [ui/Form {:on-key-press (partial forms/on-return-key
-                                     #(dispatch [::deployment-events/get-deployments]))}
-
-     [ui/FormGroup
-      [ui/FormField
-       ^{:key (str "activeOnly:" @active-only?)}
-       [ui/Checkbox {:defaultChecked @active-only?
-                     :toggle         true
-                     :fitted         true
-                     :label          (@tr [:active?])
-                     :on-change      (ui-callback/checked
-                                       #(dispatch [::deployment-events/set-active-only? %]))}]]]]))
+        active-only? (subscribe [::subs/active-only?])]
+    ^{:key (str "activeOnly:" @active-only?)}
+    [ui/Checkbox {:defaultChecked @active-only?
+                  :toggle         true
+                  :fitted         true
+                  :label          (@tr [:active?])
+                  :on-change      (ui-callback/checked
+                                    #(dispatch [::events/set-active-only? %]))}]))
 
 
 (defn refresh-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::deployment-subs/loading?])]
+        loading? (subscribe [::subs/loading?])]
     [uix/MenuItemWithIcon
      {:name      (@tr [:refresh])
       :icon-name "refresh"
       :loading?  @loading?
-      :on-click  #(dispatch [::deployment-events/get-deployments])}]))
+      :on-click  #(dispatch [::events/get-deployments])}]))
 
 
 (defn menu-bar
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        view (subscribe [::subs/view])]
     (fn []
       [:div
        [ui/Menu {:attached "top", :borderless true}
         [refresh-button]
         [ui/MenuMenu {:position "right"}
-         [ui/MenuItem
-          [ui/Input {:placeholder (@tr [:search])
-                     :icon        "search"
-                     :on-change   (ui-callback/input-callback #(dispatch [::deployment-events/set-full-text-search %]))
-                     }]]]]
+         #_[ui/MenuItem                                     ;FIXME use fulltext when available
+            [ui/Input {:placeholder (@tr [:search])
+                       :icon        "search"
+                       :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]
+         [ui/MenuItem {:icon     "grid layout"
+                       :active   (= @view "cards")
+                       :on-click #(dispatch [::events/set-view "cards"])}]
+         [ui/MenuItem {:icon     "table"
+                       :active   (= @view "table")
+                       :on-click #(dispatch [::events/set-view "table"])}]]]
 
        [ui/Segment {:attached "bottom"}
         [control-bar]]])))
@@ -70,20 +71,27 @@
     [history/link (str href) tag]))
 
 
-(defn row-fn [{:keys [id state module acl] :as deployment}]
-  (let [deployments-creds-map (subscribe [::deployment-subs/deployments-creds-map])
-        deployments-service-url-map (subscribe [::deployment-subs/deployments-service-url-map])
-        service-url (get @deployments-service-url-map id)]
+(defn row-fn
+  [{:keys [id state module] :as deployment}]
+  (let [deployments-creds-map (subscribe [::subs/deployments-creds-map])
+        deployments-service-url-map (subscribe [::subs/deployments-service-url-map])
+        creds-name (subscribe [::subs/creds-name-map])
+        service-url (get @deployments-service-url-map id)
+        creds-ids (get @deployments-creds-map id [])]
     ^{:key id}
     [ui/TableRow
      [ui/TableCell [format-href id]]
+     [ui/TableCell {:style {:overflow      "hidden",
+                            :text-overflow "ellipsis",
+                            :max-width     "20ch"}} (:name module)]
      [ui/TableCell state]
-     [ui/TableCell "-"]                                     ;FIXME virtual machine mapping not available for cimi deployment
-     [ui/TableCell (when service-url [:a {:href service-url :target "_blank", :rel "noreferrer"} service-url])]
-     [ui/TableCell (:name module)]
-     [ui/TableCell (:created deployment)]                   ;FIXME should be start time but not available in cimi deployment
-     [ui/TableCell (str/join ", " (get @deployments-creds-map id ""))] ;FIXME
-     [ui/TableCell (get-in acl [:owner :principal])]]))
+     [ui/TableCell (when service-url
+                     [:a {:href service-url, :target "_blank", :rel "noreferrer"}
+                      [ui/Icon {:name "external"}]])]
+     [ui/TableCell (-> deployment :created time/parse-iso8601 time/ago)]
+     [ui/TableCell {:style {:overflow      "hidden",
+                            :text-overflow "ellipsis",
+                            :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]]))
 
 
 (defn vertical-data-table
@@ -98,51 +106,89 @@
        [ui/TableHeader
         [ui/TableRow
          [ui/TableHeaderCell (@tr [:id])]
-         [ui/TableHeaderCell (@tr [:status])]
-         [ui/TableHeaderCell (@tr [:vms])]
-         [ui/TableHeaderCell (@tr [:url])]
          [ui/TableHeaderCell (@tr [:module])]
-         [ui/TableHeaderCell (@tr [:start])]
-         [ui/TableHeaderCell (@tr [:cloud])]
-         [ui/TableHeaderCell (@tr [:username])]]]
+         [ui/TableHeaderCell (@tr [:status])]
+         [ui/TableHeaderCell (@tr [:url])]
+         [ui/TableHeaderCell (@tr [:created])]
+         [ui/TableHeaderCell (@tr [:cloud])]]]
        (vec (concat [ui/TableBody]
                     (map row-fn deployments-list)))])))
 
 
-(defn deployments-display
-  [deployments]
+(defn card-fn
+  [{:keys [id state module] :as deployment}]
   (let [tr (subscribe [::i18n-subs/tr])
-        loading? (subscribe [::deployment-subs/loading?])]
-    (fn [deployments]
-      (let [deployments-list (get deployments :deployments [])]
-        [ui/Segment (merge style/basic
-                           {:class-name "webui-x-autoscroll"
-                            :loading    @loading?})
+        deployments-creds-map (subscribe [::subs/deployments-creds-map])
+        deployments-service-url-map (subscribe [::subs/deployments-service-url-map])
+        creds-name (subscribe [::subs/creds-name-map])
+        service-url (get @deployments-service-url-map id)
+        creds-ids (get @deployments-creds-map id [])
+        logoURL (:logoURL module)
+        cred-info (str/join ", " (map #(get @creds-name % %) creds-ids))]
+    ^{:key id}
+    [ui/Card
+     [ui/Image {:src   (or logoURL "")
+                :style {:width      "auto"
+                        :height     "100px"
+                        :object-fit "contain"}}]
+     [ui/CardContent
+      [ui/Segment (merge style/basic {:floated "right"}) [ui/Loader {:active (= state "STOPPED") :indeterminate true}]]
+      [ui/CardHeader {:style {:word-wrap "break-word"}}
+       [:span
+        (:name module) "\u00a0"
+        (when service-url
+          [:a {:href service-url, :target "_blank", :rel "noreferrer"}
+           [ui/Icon {:name "external"}]])]]
+      [ui/CardMeta (str (@tr [:created]) " " (-> deployment :created time/parse-iso8601 time/ago))]
+      [ui/CardDescription
+       (when-not (str/blank? cred-info)
+         [:div
+          [ui/Icon {:name "key"}]
+          cred-info])
+       ]]
+     [ui/CardContent {:extra true} [history/link id (@tr [:details])]]])
+  )
 
-         [ui/MenuItem
-          [ui/Statistic {:size "tiny"}
-           [ui/StatisticValue (str (count deployments-list) "/" (get deployments :count "-"))]
-           [ui/StatisticLabel (@tr [:results])]]]
+(defn cards-data-table
+  [deployments-list]
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn [deployments-list]
+      (vec (concat [ui/CardGroup]
+                   (map card-fn deployments-list))))))
 
-         [vertical-data-table deployments-list]]))))
+
+(defn deployments-display
+  [deployments-list]
+  (let [tr (subscribe [::i18n-subs/tr])
+        loading? (subscribe [::subs/loading?])
+        view (subscribe [::subs/view])]
+    (fn [deployments-list]
+      [ui/Segment (merge style/basic
+                         {:loading @loading?})
+       (if (= @view "cards")
+         [cards-data-table deployments-list]
+         [vertical-data-table deployments-list])])))
 
 
 (defn deployments-main
   []
-  (let [elements-per-page (subscribe [::deployment-subs/elements-per-page])
-        page (subscribe [::deployment-subs/page])
-        deployments (subscribe [::deployment-subs/deployments])]
+  (let [elements-per-page (subscribe [::subs/elements-per-page])
+        page (subscribe [::subs/page])
+        deployments (subscribe [::subs/deployments])
+        tr (subscribe [::i18n-subs/tr])]
     (fn []
-      (let [total-pages (general-utils/total-pages (get @deployments :count 0) @elements-per-page)]
+      (let [total-pages (general-utils/total-pages (get @deployments :count 0) @elements-per-page)
+            deployments-list (get @deployments :deployments [])]
         [ui/Container {:fluid true}
          [menu-bar]
          [ui/Segment style/basic
-          [deployments-display @deployments]]
+          [deployments-display deployments-list]]
+         [ui/Label "Found" [ui/LabelDetail (get @deployments :count "-")]]
          (when (> total-pages 1)
            [uix/Pagination
             {:totalPages   total-pages
              :activePage   @page
-             :onPageChange (ui-callback/callback :activePage #(dispatch [::deployment-events/set-page %]))}])]))))
+             :onPageChange (ui-callback/callback :activePage #(dispatch [::events/set-page %]))}])]))))
 
 
 (defn deployment-resources
@@ -160,5 +206,5 @@
 
 (defmethod panel/render :deployment
   [path]
-  (dispatch [::deployment-events/get-deployments])
+  (dispatch [::events/get-deployments])
   [deployment-resources])

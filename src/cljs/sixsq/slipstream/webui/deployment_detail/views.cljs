@@ -123,7 +123,8 @@
         deployment-parameters (subscribe [::subs/global-deployment-parameters])]
     (fn []
       (let [summary-info (-> (select-keys @deployment deployment-summary-keys)
-                             (merge (select-keys (:module @deployment) #{:name :path :type})))
+                             (merge (select-keys (:module @deployment) #{:name :path :type})
+                                    {:owner (-> @deployment :acl :owner :principal)}))
             icon (-> @deployment :module :type deployment-detail-utils/category-icon)
             rows (map tuple-to-row summary-info)
             ss-state (-> @deployment-parameters (get "ss:state" {}) :value)

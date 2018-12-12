@@ -21,6 +21,27 @@
 
 
 (reg-event-fx
+  ::set-creds-ids
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ credentials-ids]]
+    (let [filter-creds-ids (str/join " or " (map #(str "id='" % "'") credentials-ids))
+          query-params {:$filter (str/join " and " [filter-creds-ids "name!=null"])
+                        :$select "id, name"}
+          callback (fn [response]
+                     (when-not (instance? js/Error response)
+                       (dispatch [::set-creds-name-map (->> response
+                                                            :credentials
+                                                            (map (juxt :id :name))
+                                                            (into {}))])))]
+      {::cimi-api-fx/search [client "credentials" query-params callback]})))
+
+
+(reg-event-db
+  ::set-creds-name-map
+  (fn [db [_ creds-name-map]]
+    (assoc db ::spec/creds-name-map creds-name-map)))
+
+
+(reg-event-fx
   ::set-deployments
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ deployments]]
     (let [deployments-resource-ids (->> deployments :deployments (map :id))
@@ -31,7 +52,9 @@
           callback (fn [response]
                      (when-not (instance? js/Error response)
                        (let [deployment-params (->> response :deploymentParameters (group-by :name))
-                             deployments-creds-map (->> (get deployment-params "credential.id")
+                             credentials-params (get deployment-params "credential.id")
+                             credentials-ids (->> credentials-params (map :value) distinct)
+                             deployments-creds-map (->> credentials-params
                                                         (group-by (comp :href :deployment))
                                                         (map (fn [[k param-list]]
                                                                [k (->> param-list (map :value) set)]))
@@ -40,6 +63,7 @@
                                                               (map (juxt (comp :href :deployment) :value))
                                                               (into {}))]
                          (dispatch [::set-deployments-creds-map deployments-creds-map])
+                         (dispatch [::set-creds-ids credentials-ids])
                          (dispatch [::set-deployments-service-url-map deployments-service-url-map]))))]
       (cond-> {:db (assoc db ::spec/loading? false
                              ::spec/deployments deployments)}
@@ -105,3 +129,8 @@
                               (assoc ::spec/page 1))
      ::cimi-api-fx/search [client "deployments" (get-query-params full-text-search active-only? page elements-per-page)
                            #(dispatch [::set-deployments %])]}))
+
+(reg-event-db
+  ::set-view
+  (fn [db [_ view-type]]
+    (assoc db ::spec/view view-type)))
