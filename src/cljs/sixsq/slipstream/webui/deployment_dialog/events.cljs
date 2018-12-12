@@ -143,7 +143,7 @@
                                                   :content message
                                                   :type    :success}]
                                  (dispatch [::messages-events/add success-msg])
-                                 (dispatch [::history-evts/navigate id]))))]
+                                 (dispatch [::history-evts/navigate "deployment"]))))]
         {:db                     (assoc db ::spec/deploy-modal-visible? false)
          ::cimi-api-fx/operation [client id "http://schemas.dmtf.org/cimi/2/action/start" start-callback]}))))
 
