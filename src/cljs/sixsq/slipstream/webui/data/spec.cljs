@@ -48,11 +48,9 @@
                           ::selected-dataset-ids
                           ]))
 
-(def default-time-period [(time/parse-iso8601 "2018-10-01T00:00:00.00Z")
-                          (time/parse-iso8601 "2018-11-15T00:00:00.00Z")])
+(def default-time-period [(time/days-before 30)
+                          (time/days-before 0)])
 
-
-;; FIXME: Make default dates use current date.
 (def defaults {::time-period                 default-time-period
                ::time-period-filter          (utils/create-time-period-filter default-time-period)
                ::service-offers              nil
