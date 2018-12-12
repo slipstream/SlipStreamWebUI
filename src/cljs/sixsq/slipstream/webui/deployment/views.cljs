@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.deployment.subs :as subs]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.general :as general-utils]
@@ -16,6 +17,19 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.time :as time]
     [taoensso.timbre :as log]))
+
+
+
+(defn deployment-active?
+  [state ss-state]
+  (or (str/ends-with? state "ING")
+      (and (= state "STARTED")
+           (not (#{"DONE" "ABORTED" "READY"} ss-state)))))
+
+
+(defn deployment-state
+  [state ss-state]
+  (or (when (= state "STARTED") ss-state) state))
 
 
 (defn control-bar []
@@ -43,8 +57,7 @@
 
 (defn menu-bar
   []
-  (let [tr (subscribe [::i18n-subs/tr])
-        view (subscribe [::subs/view])]
+  (let [view (subscribe [::subs/view])]
     (fn []
       [:div
        [ui/Menu {:attached "top", :borderless true}
@@ -75,6 +88,8 @@
   [{:keys [id state module] :as deployment}]
   (let [deployments-creds-map (subscribe [::subs/deployments-creds-map])
         deployments-service-url-map (subscribe [::subs/deployments-service-url-map])
+        deployments-ss-state-map (subscribe [::subs/deployments-ss-state-map])
+        ss-state (some->> id (get @deployments-ss-state-map) str/upper-case)
         creds-name (subscribe [::subs/creds-name-map])
         service-url (get @deployments-service-url-map id)
         creds-ids (get @deployments-creds-map id [])]
@@ -84,7 +99,7 @@
      [ui/TableCell {:style {:overflow      "hidden",
                             :text-overflow "ellipsis",
                             :max-width     "20ch"}} (:name module)]
-     [ui/TableCell state]
+     [ui/TableCell (deployment-state state ss-state)]
      [ui/TableCell (when service-url
                      [:a {:href service-url, :target "_blank", :rel "noreferrer"}
                       [ui/Icon {:name "external"}]])]
@@ -92,6 +107,7 @@
      [ui/TableCell {:style {:overflow      "hidden",
                             :text-overflow "ellipsis",
                             :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]]))
+
 
 
 (defn vertical-data-table
@@ -120,8 +136,10 @@
   (let [tr (subscribe [::i18n-subs/tr])
         deployments-creds-map (subscribe [::subs/deployments-creds-map])
         deployments-service-url-map (subscribe [::subs/deployments-service-url-map])
+        deployments-ss-state-map (subscribe [::subs/deployments-ss-state-map])
         creds-name (subscribe [::subs/creds-name-map])
         service-url (get @deployments-service-url-map id)
+        ss-state (some->> id (get @deployments-ss-state-map) str/upper-case)
         creds-ids (get @deployments-creds-map id [])
         logoURL (:logoURL module)
         cred-info (str/join ", " (map #(get @creds-name % %) creds-ids))]
@@ -132,7 +150,10 @@
                         :height     "100px"
                         :object-fit "contain"}}]
      [ui/CardContent
-      [ui/Segment (merge style/basic {:floated "right"}) [ui/Loader {:active (= state "STOPPED") :indeterminate true}]]
+      [ui/Segment (merge style/basic {:floated "right"})
+       [:p (deployment-state state ss-state)]
+       [ui/Loader {:active        (deployment-active? state ss-state)
+                   :indeterminate true}]]
       [ui/CardHeader {:style {:word-wrap "break-word"}}
        [:span
         (:name module) "\u00a0"
@@ -144,10 +165,9 @@
        (when-not (str/blank? cred-info)
          [:div
           [ui/Icon {:name "key"}]
-          cred-info])
-       ]]
-     [ui/CardContent {:extra true} [history/link id (@tr [:details])]]])
-  )
+          cred-info])]]
+     [ui/CardContent {:extra true} [history/link id (@tr [:details])]]]))
+
 
 (defn cards-data-table
   [deployments-list]
@@ -206,5 +226,9 @@
 
 (defmethod panel/render :deployment
   [path]
-  (dispatch [::events/get-deployments])
+  (dispatch [::main-events/action-interval
+             {:action    :start
+              :id        :deployment-get-deployments
+              :frequency 20000
+              :event     [::events/get-deployments]}])
   [deployment-resources])

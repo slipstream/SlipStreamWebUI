@@ -41,6 +41,12 @@
 
 
 (reg-sub
+  ::deployments-ss-state-map
+  (fn [db]
+    (::spec/deployments-ss-state-map db)))
+
+
+(reg-sub
   ::active-only?
   (fn [db]
     (::spec/active-only? db)))

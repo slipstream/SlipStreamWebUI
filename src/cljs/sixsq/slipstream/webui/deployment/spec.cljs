@@ -14,6 +14,8 @@
 
 (s/def ::deployments-service-url-map any?)
 
+(s/def ::deployments-ss-state-map any?)
+
 (s/def ::page int?)
 
 (s/def ::elements-per-page int?)
@@ -32,6 +34,7 @@
                           ::active-only?
                           ::deployments-creds-map
                           ::deployments-service-url-map
+                          ::deployments-ss-state-map
                           ::creds-name-map
                           ::view]))
 
@@ -43,5 +46,6 @@
                ::deployments                 nil
                ::deployments-creds-map       {}
                ::deployments-service-url-map {}
+               ::deployments-ss-state-map    {}
                ::creds-name-map              {}
                ::view                        "cards"})

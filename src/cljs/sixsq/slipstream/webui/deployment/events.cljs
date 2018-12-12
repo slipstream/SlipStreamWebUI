@@ -20,6 +20,12 @@
     (assoc db ::spec/deployments-service-url-map deployments-service-url-map)))
 
 
+(reg-event-db
+  ::set-deployments-ss-state-map
+  (fn [db [_ deployments-ss-state-map]]
+    (assoc db ::spec/deployments-ss-state-map deployments-ss-state-map)))
+
+
 (reg-event-fx
   ::set-creds-ids
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ credentials-ids]]
@@ -47,7 +53,8 @@
     (let [deployments-resource-ids (->> deployments :deployments (map :id))
           filter-deps-ids (str/join " or " (map #(str "deployment/href='" % "'") deployments-resource-ids))
           query-params {:$filter (str "(" filter-deps-ids
-                                      ") and (name='credential.id' or name='ss:url.service') and value!=null")
+                                      ") and (name='credential.id' or name='ss:url.service' or name='ss:state')"
+                                      " and value!=null")
                         :$select "id, deployment, name, value"}
           callback (fn [response]
                      (when-not (instance? js/Error response)
@@ -61,10 +68,14 @@
                                                         (into {}))
                              deployments-service-url-map (->> (get deployment-params "ss:url.service")
                                                               (map (juxt (comp :href :deployment) :value))
-                                                              (into {}))]
+                                                              (into {}))
+                             deployments-ss-state-map (->> (get deployment-params "ss:state")
+                                                           (map (juxt (comp :href :deployment) :value))
+                                                           (into {}))]
                          (dispatch [::set-deployments-creds-map deployments-creds-map])
                          (dispatch [::set-creds-ids credentials-ids])
-                         (dispatch [::set-deployments-service-url-map deployments-service-url-map]))))]
+                         (dispatch [::set-deployments-service-url-map deployments-service-url-map])
+                         (dispatch [::set-deployments-ss-state-map deployments-ss-state-map]))))]
       (cond-> {:db (assoc db ::spec/loading? false
                              ::spec/deployments deployments)}
               (not-empty deployments-resource-ids) (assoc ::cimi-api-fx/search
