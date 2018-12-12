@@ -1,6 +1,5 @@
 (ns sixsq.slipstream.webui.data.events
   (:require
-    [clojure.string :as s]
     [clojure.string :as str]
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
@@ -8,8 +7,7 @@
     [sixsq.slipstream.webui.data.effects :as fx]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.spec :as spec]
-    [sixsq.slipstream.webui.data.utils :as utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.data.utils :as utils]))
 
 
 (defn fetch-data-cofx
@@ -95,14 +93,11 @@
                 ::spec/data-queries
                 ::spec/datasets] :as db} :db} _]
     (let [selected-data-queries (vals (filter (fn [[k v]] (boolean (datasets k))) data-queries))
-          _ (log/error selected-data-queries)
-          query-application (apply utils/join-and (map :query-application selected-data-queries))
-          query-data (apply utils/join-or (map :query-data selected-data-queries))]
-      (log/error query-application)
-      (log/error query-data)
+          query-application (apply utils/join-and (map (keyword "dataset:applicationFilter") selected-data-queries))
+          query-objects (apply utils/join-or (map (keyword "dataset:objectFilter") selected-data-queries))]
       {:db                  (assoc db ::spec/application-select-visible? true
                                       ::spec/loading-applications? true
-                                      ::spec/content-type-filter query-data)
+                                      ::spec/content-type-filter query-objects)
        ::cimi-api-fx/search [client "modules" {:$filter query-application}
                              #(dispatch [::set-applications %])]
        })))
