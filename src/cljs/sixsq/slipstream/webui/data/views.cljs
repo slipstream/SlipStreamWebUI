@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.data.subs :as subs]
     [sixsq.slipstream.webui.deployment-dialog.events :as deployment-dialog-events]
     [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
+    [sixsq.slipstream.webui.deployment-dialog.subs :as deployment-dialog-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
@@ -105,10 +106,7 @@
 (defn application-list-item
   [{:keys [id name description type created] :as application}]
   (let [selected-application-id (subscribe [::subs/selected-application-id])]
-    (let [old-on-click-fn #(do
-                             (dispatch [::events/close-application-select-modal])
-                             (dispatch [::deployment-dialog-events/create-deployment id :data]))
-          on-click-fn #(dispatch [::events/set-selected-application-id id])]
+    (let [on-click-fn #(dispatch [::events/set-selected-application-id id])]
       ^{:key id}
       [ui/ListItem {:active   (and @selected-application-id (= id @selected-application-id))
                     :on-click on-click-fn}
@@ -133,16 +131,35 @@
        [ui/Message {:error true} (@tr [:no-apps])])]))
 
 
-(defn application-select-modal
+(defn launch-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
         visible? (subscribe [::subs/application-select-visible?])
-        selected-application-id (subscribe [::subs/selected-application-id])]
+        selected-application-id (subscribe [::subs/selected-application-id])
+
+        data-step-active? (subscribe [::deployment-dialog-subs/data-step-active?])
+
+        deployment (subscribe [::deployment-dialog-subs/deployment])
+        data-completed? (subscribe [::deployment-dialog-subs/data-completed?])
+        credentials-completed? (subscribe [::deployment-dialog-subs/credentials-completed?])
+        size-completed? (subscribe [::deployment-dialog-subs/size-completed?])
+        parameters-completed? (subscribe [::deployment-dialog-subs/parameters-completed?])]
     (fn []
       (let [hide-fn #(dispatch [::events/close-application-select-modal])
             configure-fn (fn [id] (do
                                     (dispatch [::events/close-application-select-modal])
-                                    (dispatch [::deployment-dialog-events/create-deployment id :data])))]
+                                    (dispatch [::deployment-dialog-events/create-deployment id :data])))
+
+            launch-fn (fn [id] (do
+                                 (dispatch [::events/close-application-select-modal])
+                                 (dispatch [::deployment-dialog-events/edit-deployment])))
+
+            launch-disabled? (or (not @deployment)
+                                 (and (not @data-completed?) @data-step-active?)
+                                 (not @credentials-completed?)
+                                 (not @size-completed?)
+                                 (not @parameters-completed?))]
+
         [ui/Modal {:open       @visible?
                    :close-icon true
                    :on-close   hide-fn}
@@ -158,9 +175,63 @@
                       :on-click #(configure-fn @selected-application-id)}
            [ui/Icon {:name "settings"}]
            (@tr [:configure])]
-          [ui/Button {:disabled true #_(nil? @selected-application-id)
+          [ui/Button {:disabled (nil? @selected-application-id)
                       :primary  true
                       :on-click #()}
+           [ui/Icon {:name     "rocket"
+                     :disabled launch-disabled?
+                     :on-click launch-fn}]
+           (@tr [:launch])]]]))))
+
+
+(defn application-select-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        visible? (subscribe [::subs/application-select-visible?])
+        selected-application-id (subscribe [::subs/selected-application-id])
+
+        data-step-active? (subscribe [::deployment-dialog-subs/data-step-active?])
+
+        deployment (subscribe [::deployment-dialog-subs/deployment])
+        data-completed? (subscribe [::deployment-dialog-subs/data-completed?])
+        credentials-completed? (subscribe [::deployment-dialog-subs/credentials-completed?])
+        size-completed? (subscribe [::deployment-dialog-subs/size-completed?])
+        parameters-completed? (subscribe [::deployment-dialog-subs/parameters-completed?])]
+    (fn []
+      (let [hide-fn #(dispatch [::events/close-application-select-modal])
+            configure-fn (fn [id] (do
+                                    (dispatch [::events/close-application-select-modal])
+                                    (dispatch [::deployment-dialog-events/create-deployment id :data])))
+
+            launch-fn (fn [id] (do
+                                 (dispatch [::events/close-application-select-modal])
+                                 (dispatch [::deployment-dialog-events/edit-deployment])))
+
+            launch-disabled? (or (not @deployment)
+                                 (and (not @data-completed?) @data-step-active?)
+                                 (not @credentials-completed?)
+                                 (not @size-completed?)
+                                 (not @parameters-completed?))]
+
+        [ui/Modal {:open       @visible?
+                   :close-icon true
+                   :on-close   hide-fn}
+
+         [ui/ModalHeader [ui/Icon {:name "sitemap"}] "\u00a0" (@tr [:select-application])]
+
+         [ui/ModalContent {:scrolling true}
+          [ui/ModalDescription
+           [application-list]]]
+         [ui/ModalActions
+          [ui/Button {:disabled (nil? @selected-application-id)
+                      :primary  true
+                      :on-click #(configure-fn @selected-application-id)}
+           [ui/Icon {:name "settings"}]
+           (@tr [:configure])]
+          [ui/Button {:disabled (or (nil? @selected-application-id)
+                                    launch-disabled?)
+                      :primary  true
+                      :on-click launch-fn}
            [ui/Icon {:name "rocket"}]
            (@tr [:launch])]]]))))
 

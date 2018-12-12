@@ -6,7 +6,7 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.data.effects :as fx]
     [sixsq.slipstream.webui.data.spec :as spec]
-    [sixsq.slipstream.webui.data.spec :as spec]
+    [sixsq.slipstream.webui.deployment-dialog.events :as dialog-events]
     [sixsq.slipstream.webui.data.utils :as utils]))
 
 
@@ -91,6 +91,7 @@
 (reg-event-db
   ::set-selected-application-id
   (fn [db [_ application-id]]
+    (dispatch [::dialog-events/create-deployment application-id :data true])
     (assoc db ::spec/selected-application-id application-id)))
 
 
