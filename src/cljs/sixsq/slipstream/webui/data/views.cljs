@@ -5,9 +5,10 @@
     [sixsq.slipstream.webui.application.utils :as application-utils]
     [sixsq.slipstream.webui.data.events :as events]
     [sixsq.slipstream.webui.data.subs :as subs]
+    [sixsq.slipstream.webui.data.utils :as utils]
     [sixsq.slipstream.webui.deployment-dialog.events :as deployment-dialog-events]
-    [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
     [sixsq.slipstream.webui.deployment-dialog.subs :as deployment-dialog-subs]
+    [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
@@ -237,7 +238,7 @@
 
 
 (defn format-dataset-title
-  [{:keys [id name] :as data-query}]
+  [{:keys [id name] :as dataset}]
   (let [datasets (subscribe [::subs/selected-dataset-ids])
         selected? (@datasets id)]
     [ui/CardHeader {:style {:word-wrap "break-word"}}
@@ -247,19 +248,35 @@
                                 :color  "blue"}])]))
 
 
-(defn format-data-query
-  [{:keys [id description] :as data-query}]
+(defn format-dataset
+  [{:keys [id description] :as dataset}]
   (let [tr (subscribe [::i18n-subs/tr])
-        data (subscribe [::subs/data])
-        count (get @data id "...")]
+        counts (subscribe [::subs/counts])
+        sizes (subscribe [::subs/sizes])
+        count (get @counts id "...")
+        size (get @sizes id "...")]
     ^{:key id}
     [ui/Card {:on-click #(dispatch [::events/toggle-dataset-id id])}
      [ui/CardContent
-      [format-dataset-title data-query]
+      [format-dataset-title dataset]
       [ui/CardDescription description]]
      [ui/CardContent {:extra true}
-      [ui/Icon {:name "file"}]
-      [:span count " " (@tr [:objects])]]]))
+      [ui/Label
+       [ui/Icon {:name "file"}]
+       [:span (str count " " (@tr [:objects]))]]
+      [ui/Label
+       [ui/Icon {:name "expand arrows alternate"}]
+       [:span (utils/format-bytes size)]]
+      #_[ui/ListSA {:horizontal true
+                    :divided    false}
+         [ui/ListItem
+          [ui/ListIcon {:name "file"}]
+          [ui/ListContent
+           [:span (str count " " (@tr [:objects]))]]]
+         [ui/ListItem
+          [ui/ListIcon {:name "expand arrows alternate"}]
+          [ui/ListContent
+           [:span size " bytes"]]]]]]))
 
 
 (defn queries-cards-group
@@ -269,8 +286,8 @@
     [ui/Segment style/basic
      (if (seq @datasets)
        (vec (concat [ui/CardGroup]
-                    (map (fn [data-query]
-                           [format-data-query data-query])
+                    (map (fn [dataset]
+                           [format-dataset dataset])
                          (vals @datasets))))
        [ui/Header {:as "h1"} (@tr [:no-datasets])])]))
 

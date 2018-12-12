@@ -41,9 +41,15 @@
 
 
 (reg-sub
-  ::data
+  ::counts
   (fn [db]
-    (::spec/data db)))
+    (::spec/counts db)))
+
+
+(reg-sub
+  ::sizes
+  (fn [db]
+    (::spec/sizes db)))
 
 
 (reg-sub

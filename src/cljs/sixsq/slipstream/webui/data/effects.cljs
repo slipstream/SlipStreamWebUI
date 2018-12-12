@@ -5,8 +5,7 @@
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.data.utils :as utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.data.utils :as utils]))
 
 
 (reg-fx
@@ -21,4 +20,4 @@
                                           "serviceOffers"
                                           {:$filter      filter
                                            :$last        0
-                                           :$aggregation "count:id"})))))))))
+                                           :$aggregation "count:id, sum:data:bytes"})))))))))

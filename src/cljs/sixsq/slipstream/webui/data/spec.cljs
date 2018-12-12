@@ -25,11 +25,11 @@
 
 (s/def ::selected-application-id (s/nilable string?))
 
-(s/def ::data-queries any?)
-
 (s/def ::full-text-search (s/nilable string?))
 
-(s/def ::data any?)
+(s/def ::counts any?)
+
+(s/def ::sizes any?)
 
 (s/def ::datasets (s/map-of string? map?))
 
@@ -45,7 +45,8 @@
                           ::applications
                           ::content-type-filter
                           ::full-text-search
-                          ::data
+                          ::counts
+                          ::sizes
                           ::datasets
                           ::selected-dataset-ids
                           ]))
@@ -63,7 +64,8 @@
                ::applications                nil
                ::content-type-filter         nil
                ::full-text-search            nil
-               ::data                        nil
+               ::counts                      nil
+               ::sizes                       nil
                ::datasets                    {}
                ::selected-dataset-ids        #{}
                })

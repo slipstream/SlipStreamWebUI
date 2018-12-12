@@ -14,8 +14,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [sixsq.slipstream.webui.utils.time :as time]
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
     [taoensso.timbre :as log]))
 
 

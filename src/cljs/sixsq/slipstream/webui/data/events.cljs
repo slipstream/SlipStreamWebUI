@@ -6,8 +6,8 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.data.effects :as fx]
     [sixsq.slipstream.webui.data.spec :as spec]
-    [sixsq.slipstream.webui.deployment-dialog.events :as dialog-events]
-    [sixsq.slipstream.webui.data.utils :as utils]))
+    [sixsq.slipstream.webui.data.utils :as utils]
+    [sixsq.slipstream.webui.deployment-dialog.events :as dialog-events]))
 
 
 (defn fetch-data-cofx
@@ -53,8 +53,11 @@
 (reg-event-db
   ::set-data
   (fn [db [_ dataset-id response]]
-    (let [doc-count (get-in response [:aggregations :count:id :value])]
-      (update db ::spec/data assoc dataset-id doc-count))))
+    (let [doc-count (get-in response [:aggregations :count:id :value])
+          total-bytes (get-in response [:aggregations :sum:data:bytes :value])]
+      (-> db
+          (update ::spec/counts assoc dataset-id doc-count)
+          (update ::spec/sizes assoc dataset-id total-bytes)))))
 
 
 (reg-event-fx
@@ -67,7 +70,8 @@
       (when client
         (merge {:db (assoc db ::spec/credentials credentials
                               ::spec/cloud-filter cloud-filter
-                              ::spec/data nil)}
+                              ::spec/counts nil
+                              ::spec/sizes nil)}
                (fetch-data-cofx credentials client time-period-filter cloud-filter full-text-search datasets))))))
 
 
@@ -130,7 +134,8 @@
       (assoc db ::spec/datasets datasets))
     (let [datasets (into {} (map (juxt :id identity) serviceOffers))]
       (when client
-        (merge {:db (assoc db ::spec/data nil
+        (merge {:db (assoc db ::spec/counts nil
+                              ::spec/sizes nil
                               ::spec/datasets datasets)}
                (fetch-data-cofx credentials client time-period-filter cloud-filter full-text-search datasets))))))
 
