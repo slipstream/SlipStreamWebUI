@@ -135,9 +135,6 @@
   (let [datasets (subscribe [::subs/datasets])
         selected? (@datasets id)]
     [ui/CardHeader {:style {:word-wrap "break-word"}}
-     #_[ui/Checkbox {:radio   true
-                     :checked selected?}]
-     "\u2002"
      (or name id)
      (when selected? [ui/Label {:corner true
                                 :icon   "pin"
@@ -145,7 +142,7 @@
 
 
 (defn format-data-query
-  [{:keys [id name description] :as data-query}]
+  [{:keys [id description] :as data-query}]
   (let [tr (subscribe [::i18n-subs/tr])
         data (subscribe [::subs/data])
         count (get @data id "...")]
