@@ -35,12 +35,6 @@
 
 
 (reg-sub
-  ::data-queries
-  (fn [db]
-    (::spec/data-queries db)))
-
-
-(reg-sub
   ::data
   (fn [db]
     (::spec/data db)))
@@ -50,3 +44,9 @@
   ::datasets
   (fn [db]
     (::spec/datasets db)))
+
+
+(reg-sub
+  ::selected-dataset-ids
+  (fn [db]
+    (::spec/selected-dataset-ids db)))

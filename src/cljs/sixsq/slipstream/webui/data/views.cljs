@@ -16,14 +16,28 @@
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
-(defn refresh []
+(defn refresh-credentials []
   (dispatch [::events/get-credentials]))
+
+
+(defn refresh-datasets []
+  (dispatch [::events/get-datasets]))
+
+
+(defn refresh-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [uix/MenuItemWithIcon
+       {:name      (@tr [:refresh])
+        :icon-name "refresh"
+        :on-click  #(dispatch [::events/get-datasets])}])))
 
 
 (defn process-button
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        datasets (subscribe [::subs/datasets])]
+        datasets (subscribe [::subs/selected-dataset-ids])]
     (fn []
       [uix/MenuItemWithIcon
        {:name      (@tr [:process])
@@ -81,6 +95,7 @@
 (defn control-bar []
   [:div
    [ui/Menu {:attached "top", :borderless true}
+    [refresh-button]
     [process-button]]
    [ui/Segment {:attached "bottom"}
     [search-header]]])
@@ -132,7 +147,7 @@
 
 (defn format-dataset-title
   [{:keys [id name] :as data-query}]
-  (let [datasets (subscribe [::subs/datasets])
+  (let [datasets (subscribe [::subs/selected-dataset-ids])
         selected? (@datasets id)]
     [ui/CardHeader {:style {:word-wrap "break-word"}}
      (or name id)
@@ -147,7 +162,7 @@
         data (subscribe [::subs/data])
         count (get @data id "...")]
     ^{:key id}
-    [ui/Card {:on-click #(dispatch [::events/toggle-dataset id])}
+    [ui/Card {:on-click #(dispatch [::events/toggle-dataset-id id])}
      [ui/CardContent
       [format-dataset-title data-query]
       [ui/CardDescription description]]
@@ -158,12 +173,15 @@
 
 (defn queries-cards-group
   []
-  (let [data-queries (subscribe [::subs/data-queries])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        datasets (subscribe [::subs/datasets])]
     [ui/Segment style/basic
-     (vec (concat [ui/CardGroup]
-                  (map (fn [data-query]
-                         [format-data-query data-query])
-                       (vals @data-queries))))]))
+     (if (seq @datasets)
+       (vec (concat [ui/CardGroup]
+                    (map (fn [data-query]
+                           [format-data-query data-query])
+                         (vals @datasets))))
+       [ui/Header {:as "h1"} (@tr [:no-datasets])])]))
 
 
 (defn service-offer-resources
@@ -177,5 +195,9 @@
 
 (defmethod panel/render :data
   [path]
-  (refresh)
+
+  ;; FIXME: find a better way to initialize credentials and datasets
+  (refresh-credentials)
+  (refresh-datasets)
+
   [service-offer-resources])

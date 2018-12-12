@@ -29,7 +29,9 @@
 
 (s/def ::data any?)
 
-(s/def ::datasets (s/coll-of string? :kind set?))
+(s/def ::datasets (s/map-of string? map?))
+
+(s/def ::selected-dataset-ids (s/coll-of string? :kind set?))
 
 (s/def ::db (s/keys :req [::time-period
                           ::time-period-filter
@@ -40,39 +42,15 @@
                           ::loading-applications?
                           ::applications
                           ::content-type-filter
-                          ::data-queries
                           ::full-text-search
                           ::data
                           ::datasets
+                          ::selected-dataset-ids
                           ]))
 
 (def default-time-period [(time/parse-iso8601 "2018-10-01T00:00:00.00Z")
                           (time/parse-iso8601 "2018-11-15T00:00:00.00Z")])
 
-(def data-queries
-  {"data-query/feCapture-ionMessage" {:id                "data-query/feCapture-ionMessage"
-                                      :name              "feCapture & ionMessage"
-                                      :description       "Query that selects data and metadata for signals coming from the frontend receiver."
-                                      (keyword "dataset:objectFilter")        "resource:type='DATA' and data:bucket^='gnss' and (data:contentType='application/x-ionMessage' or data:contentType='application/x-feCapture')"
-                                      (keyword "dataset:applicationFilter") "dataAcceptContentTypes='application/x-ionMessage' and dataAcceptContentTypes='application/x-feCapture'"}
-
-   "data-query/feCapture"            {:id                "data-query/feCapture"
-                                      :name              "feCapture"
-                                      :description       "Query that selects data feCapture only."
-                                      (keyword "dataset:objectFilter")        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-feCapture'"
-                                      (keyword "dataset:applicationFilter") "dataAcceptContentTypes='application/x-feCapture'"}
-
-   "data-query/ionMessage"           {:id                "data-query/ionMessage"
-                                      :name              "ionMessage"
-                                      :description       "Query that selects data ionMessage only."
-                                      (keyword "dataset:objectFilter")        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-ionMessage'"
-                                      (keyword "dataset:applicationFilter") "dataAcceptContentTypes='application/x-ionMessage'"}
-
-   "data-query/sdrData"              {:id                "data-query/sdrData"
-                                      :name              "sdrData"
-                                      :description       "Query that selects data sdrData only."
-                                      (keyword "dataset:objectFilter")        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-sdrData'"
-                                      (keyword "dataset:applicationFilter") "dataAcceptContentTypes='application/x-sdrData'"}})
 
 ;; FIXME: Make default dates use current date.
 (def defaults {::time-period                 default-time-period
@@ -84,8 +62,8 @@
                ::loading-applications?       false
                ::applications                nil
                ::content-type-filter         nil
-               ::data-queries                data-queries
                ::full-text-search            nil
                ::data                        nil
-               ::datasets                    #{}
+               ::datasets                    {}
+               ::selected-dataset-ids        #{}
                })
