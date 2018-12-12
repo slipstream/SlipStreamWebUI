@@ -28,7 +28,7 @@
       [uix/MenuItemWithIcon
        {:name      (@tr [:process])
         :disabled  (not (seq @datasets))
-        :icon-name "calculator"
+        :icon-name "cog"
         :on-click  #(dispatch [::events/open-application-select-modal])}])))
 
 
@@ -132,11 +132,16 @@
 
 (defn format-dataset-title
   [{:keys [id name] :as data-query}]
-  (let [on-change-fn (ui-callback/callback :checked #(dispatch [(if % ::events/add-dataset ::events/remove-dataset) id]))]
+  (let [datasets (subscribe [::subs/datasets])
+        selected? (@datasets id)]
     [ui/CardHeader {:style {:word-wrap "break-word"}}
-     [ui/Checkbox {:on-change on-change-fn}]
+     #_[ui/Checkbox {:radio   true
+                     :checked selected?}]
      "\u2002"
-     (or name id)]))
+     (or name id)
+     (when selected? [ui/Label {:corner true
+                                :icon   "pin"
+                                :color  "blue"}])]))
 
 
 (defn format-data-query
@@ -145,15 +150,13 @@
         data (subscribe [::subs/data])
         count (get @data id "...")]
     ^{:key id}
-    [ui/Card
+    [ui/Card {:on-click #(dispatch [::events/toggle-dataset id])}
      [ui/CardContent
       [format-dataset-title data-query]
-      [ui/CardMeta description]
-      [ui/CardDescription {:style {:word-wrap "break-word"}} (@tr [:count]) ": " count]]
-     [ui/Button {:fluid    true
-                 :primary  true
-                 :on-click #(dispatch [::events/open-application-select-modal id])}
-      (@tr [:process])]]))
+      [ui/CardDescription description]]
+     [ui/CardContent {:extra true}
+      [ui/Icon {:name "file"}]
+      [:span count " " (@tr [:objects])]]]))
 
 
 (defn queries-cards-group

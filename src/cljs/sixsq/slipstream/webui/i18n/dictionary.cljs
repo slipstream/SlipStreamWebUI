@@ -98,6 +98,7 @@
         :nuvlabox                 "NuvlaBox"
         :nuvlabox-ctrl            "edge control"
         :object-count             "Number of data objects: %1"
+        :objects                  "objects"
         :offset                   "offset"
         :order                    "order"
         :output-parameters        "output parameters"
@@ -256,7 +257,9 @@
         :nuvlabox               "NuvlaBox"
         :nuvlabox-ctrl          "contrôle de bord"
         :object-count           "Nombre d'objets de données : %1"
-        :offset                 "décalage"
+        :objects                "objets"
+        :offset
+                                "décalage"
         :order                  "ordonner"
         :output-parameters      "paramètres de sortie"
         :parameters             "paramètres"
