@@ -35,6 +35,12 @@
 
 
 (reg-sub
+  ::selected-application-id
+  (fn [db]
+    (::spec/selected-application-id db)))
+
+
+(reg-sub
   ::data
   (fn [db]
     (::spec/data db)))

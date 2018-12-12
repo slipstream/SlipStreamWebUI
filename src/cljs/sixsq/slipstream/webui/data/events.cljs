@@ -88,6 +88,12 @@
               ::spec/loading-applications? false)))
 
 
+(reg-event-db
+  ::set-selected-application-id
+  (fn [db [_ application-id]]
+    (assoc db ::spec/selected-application-id application-id)))
+
+
 (reg-event-fx
   ::open-application-select-modal
   (fn [{{:keys [::client-spec/client
@@ -98,6 +104,7 @@
           query-objects (apply utils/join-or (map (keyword "dataset:objectFilter") selected-datasets))]
       {:db                  (assoc db ::spec/application-select-visible? true
                                       ::spec/loading-applications? true
+                                      ::spec/selected-application-id nil
                                       ::spec/content-type-filter query-objects)
        ::cimi-api-fx/search [client "modules" {:$filter query-application}
                              #(dispatch [::set-applications %])]})))

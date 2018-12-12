@@ -23,6 +23,8 @@
 
 (s/def ::applications (s/nilable (s/coll-of any? :kind vector?)))
 
+(s/def ::selected-application-id (s/nilable string?))
+
 (s/def ::data-queries any?)
 
 (s/def ::full-text-search (s/nilable string?))

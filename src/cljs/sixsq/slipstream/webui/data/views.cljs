@@ -13,7 +13,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [taoensso.timbre :as log]))
 
 
 (defn refresh-credentials []
@@ -103,14 +104,18 @@
 
 (defn application-list-item
   [{:keys [id name description type created] :as application}]
-  ^{:key id}
-  [ui/ListItem {:on-click #(do
+  (let [selected-application-id (subscribe [::subs/selected-application-id])]
+    (let [old-on-click-fn #(do
                              (dispatch [::events/close-application-select-modal])
-                             (dispatch [::deployment-dialog-events/create-deployment id :data]))}
-   [ui/ListIcon {:name (application-utils/category-icon type), :size "large", :vertical-align "middle"}]
-   [ui/ListContent
-    [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
-    (or description "")]])
+                             (dispatch [::deployment-dialog-events/create-deployment id :data]))
+          on-click-fn #(dispatch [::events/set-selected-application-id id])]
+      ^{:key id}
+      [ui/ListItem {:active   (and @selected-application-id (= id @selected-application-id))
+                    :on-click on-click-fn}
+       [ui/ListIcon {:name (application-utils/category-icon type), :size "large"}]
+       [ui/ListContent
+        [ui/ListHeader (str (or name id) " (" (time/ago (time/parse-iso8601 created)) ")")]
+        (or description "")]])))
 
 
 (defn application-list
@@ -131,9 +136,13 @@
 (defn application-select-modal
   []
   (let [tr (subscribe [::i18n-subs/tr])
-        visible? (subscribe [::subs/application-select-visible?])]
+        visible? (subscribe [::subs/application-select-visible?])
+        selected-application-id (subscribe [::subs/selected-application-id])]
     (fn []
-      (let [hide-fn #(dispatch [::events/close-application-select-modal])]
+      (let [hide-fn #(dispatch [::events/close-application-select-modal])
+            configure-fn (fn [id] (do
+                                    (dispatch [::events/close-application-select-modal])
+                                    (dispatch [::deployment-dialog-events/create-deployment id :data])))]
         [ui/Modal {:open       @visible?
                    :close-icon true
                    :on-close   hide-fn}
@@ -142,7 +151,18 @@
 
          [ui/ModalContent {:scrolling true}
           [ui/ModalDescription
-           [application-list]]]]))))
+           [application-list]]]
+         [ui/ModalActions
+          [ui/Button {:disabled (nil? @selected-application-id)
+                      :primary  true
+                      :on-click #(configure-fn @selected-application-id)}
+           [ui/Icon {:name "settings"}]
+           (@tr [:configure])]
+          [ui/Button {:disabled true #_(nil? @selected-application-id)
+                      :primary  true
+                      :on-click #()}
+           [ui/Icon {:name "rocket"}]
+           (@tr [:launch])]]]))))
 
 
 (defn format-dataset-title
