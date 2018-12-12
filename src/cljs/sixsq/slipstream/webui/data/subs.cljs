@@ -44,3 +44,9 @@
   ::data
   (fn [db]
     (::spec/data db)))
+
+
+(reg-sub
+  ::datasets
+  (fn [db]
+    (::spec/datasets db)))

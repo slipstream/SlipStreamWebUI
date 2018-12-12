@@ -20,14 +20,16 @@
   (dispatch [::events/get-credentials]))
 
 
-(defn refresh-button
+(defn process-button
   []
-  (let [tr (subscribe [::i18n-subs/tr])]
+  (let [tr (subscribe [::i18n-subs/tr])
+        datasets (subscribe [::subs/datasets])]
     (fn []
       [uix/MenuItemWithIcon
-       {:name      (@tr [:refresh])
-        :icon-name "refresh"
-        :on-click  refresh}])))
+       {:name      (@tr [:process])
+        :disabled  (not (seq @datasets))
+        :icon-name "calculator"
+        :on-click  #(dispatch [::events/open-application-select-modal])}])))
 
 
 (defn search-header []
@@ -79,7 +81,7 @@
 (defn control-bar []
   [:div
    [ui/Menu {:attached "top", :borderless true}
-    [refresh-button]]
+    [process-button]]
    [ui/Segment {:attached "bottom"}
     [search-header]]])
 
@@ -128,6 +130,15 @@
            [application-list]]]]))))
 
 
+(defn format-dataset-title
+  [{:keys [id name] :as data-query}]
+  (let [on-change-fn (ui-callback/callback :checked #(dispatch [(if % ::events/add-dataset ::events/remove-dataset) id]))]
+    [ui/CardHeader {:style {:word-wrap "break-word"}}
+     [ui/Checkbox {:on-change on-change-fn}]
+     "\u2002"
+     (or name id)]))
+
+
 (defn format-data-query
   [{:keys [id name description] :as data-query}]
   (let [tr (subscribe [::i18n-subs/tr])
@@ -136,7 +147,7 @@
     ^{:key id}
     [ui/Card
      [ui/CardContent
-      [ui/CardHeader {:style {:word-wrap "break-word"}} (or name id)]
+      [format-dataset-title data-query]
       [ui/CardMeta description]
       [ui/CardDescription {:style {:word-wrap "break-word"}} (@tr [:count]) ": " count]]
      [ui/Button {:fluid    true

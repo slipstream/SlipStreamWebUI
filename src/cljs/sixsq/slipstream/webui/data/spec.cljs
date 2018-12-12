@@ -29,6 +29,8 @@
 
 (s/def ::data any?)
 
+(s/def ::datasets (s/coll-of string? :kind set?))
+
 (s/def ::db (s/keys :req [::time-period
                           ::time-period-filter
                           ::service-offers
@@ -41,6 +43,7 @@
                           ::data-queries
                           ::full-text-search
                           ::data
+                          ::datasets
                           ]))
 
 (def default-time-period [(time/parse-iso8601 "2018-10-01T00:00:00.00Z")
@@ -84,4 +87,5 @@
                ::data-queries                data-queries
                ::full-text-search            nil
                ::data                        nil
+               ::datasets                    #{}
                })

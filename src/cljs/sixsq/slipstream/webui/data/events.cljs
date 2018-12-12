@@ -92,8 +92,10 @@
 (reg-event-fx
   ::open-application-select-modal
   (fn [{{:keys [::client-spec/client
-                ::spec/data-queries] :as db} :db} [_ data-query-id]]
-    (let [{:keys [query-data query-application]} (get data-queries data-query-id)]
+                ::spec/data-queries
+                ::spec/datasets] :as db} :db} [_ data-query-id]]
+    (let [selected-data-queries (filter (fn [[k v]] (boolean (datasets k))) )
+          {:keys [query-data query-application]} (get data-queries data-query-id)]
       {:db                  (assoc db ::spec/application-select-visible? true
                                       ::spec/loading-applications? true
                                       ::spec/content-type-filter query-data)
@@ -107,4 +109,20 @@
   (fn [db _]
     (assoc db ::spec/applications nil
               ::spec/application-select-visible? false)))
+
+
+(reg-event-db
+  ::add-dataset
+  (fn [{:keys [::spec/datasets] :as db} [_ id]]
+    (log/error "adding dataset" id datasets)
+    (assoc db ::spec/datasets (conj datasets id))))
+
+
+(reg-event-db
+  ::remove-dataset
+  (fn [{:keys [::spec/datasets] :as db} [_ id]]
+    (log/error "removing dataset" id datasets)
+    (assoc db ::spec/datasets (disj datasets id))))
+
+
 
