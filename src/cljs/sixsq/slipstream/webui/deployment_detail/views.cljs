@@ -453,10 +453,10 @@
 
 (def states-map (into {} (map-indexed (fn [i state] [state i]) deployment-states)))
 
-(def steps [["Provisioning" "Provisioning" "Starting system"]
-            ["Executing" "Executing" "Executing recipies"]
+(def steps [["Provisioning" "Provisioning" "Starting systems"]
+            ["Executing" "Executing" "Executing recipes"]
             ["Reporting" "SendingReports" "Gathering for posterity"]
-            ["Ready" "Ready" "All systems go ready"]])
+            ["Ready" "Ready" "Ready, all systems go"]])
 
 
 (defn event-get-timestamp
