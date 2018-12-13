@@ -7,6 +7,7 @@
     [sixsq.slipstream.webui.deployment.events :as events]
     [sixsq.slipstream.webui.deployment.subs :as subs]
     [sixsq.slipstream.webui.history.views :as history]
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
@@ -16,9 +17,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]
-    [reagent.core :as reagent]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 
@@ -58,13 +57,16 @@
 
 
 (defn stop-button
-  [deployment]
+  [deployment options]
   (let [tr (subscribe [::i18n-subs/tr])]
     (when (deployment-detail-utils/stop-action? deployment)
       [:span {:style    {:cursor "pointer"}
               :on-click #(dispatch [::events/stop-deployment (:id deployment)])}
-       [ui/Icon {:name "stop"}]
-       (@tr [:stop])])))
+       [ui/Button (merge {:size "small"
+                          :icon    "stop"
+                          :content (@tr [:stop])
+                          :primary true}
+                         options)]])))
 
 
 (defn menu-bar
@@ -73,18 +75,18 @@
     (fn []
       [:div
        [ui/Menu {:attached "top", :borderless true}
-        [refresh-button]
+        #_[ui/MenuItem                                     ;FIXME use fulltext when available
+           [ui/Input {:placeholder (@tr [:search])
+                      :icon        "search"
+                      :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]
+        [ui/MenuItem {:icon     "grid layout"
+                      :active   (= @view "cards")
+                      :on-click #(dispatch [::events/set-view "cards"])}]
+        [ui/MenuItem {:icon     "table"
+                      :active   (= @view "table")
+                      :on-click #(dispatch [::events/set-view "table"])}]
         [ui/MenuMenu {:position "right"}
-         #_[ui/MenuItem                                     ;FIXME use fulltext when available
-            [ui/Input {:placeholder (@tr [:search])
-                       :icon        "search"
-                       :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]
-         [ui/MenuItem {:icon     "grid layout"
-                       :active   (= @view "cards")
-                       :on-click #(dispatch [::events/set-view "cards"])}]
-         [ui/MenuItem {:icon     "table"
-                       :active   (= @view "table")
-                       :on-click #(dispatch [::events/set-view "table"])}]]]
+         [refresh-button]]]
 
        [ui/Segment {:attached "bottom"}
         [control-bar]]])))
@@ -163,7 +165,10 @@
                 :style {:width      "auto"
                         :height     "100px"
                         :object-fit "contain"}}]
-     [ui/CardContent
+     [ui/CardContent {:href     id
+                      :on-click (fn [event]
+                                  (dispatch [::history-events/navigate id])
+                                  (.preventDefault event))}
       [ui/Segment (merge style/basic {:floated "right"})
        [:p (deployment-state state ss-state)]
        [ui/Loader {:active        (deployment-active? state ss-state)
@@ -180,10 +185,8 @@
          [:div
           [ui/Icon {:name "key"}]
           cred-info])]]
-     [ui/CardContent {:extra true}
-      [history/link id (@tr [:details])]
-      [:span {:style {:float "right"}}
-       [stop-button deployment]]]]))
+     [stop-button deployment {:fluid true}]
+     ]))
 
 
 (defn cards-data-table

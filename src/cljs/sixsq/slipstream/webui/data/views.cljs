@@ -15,8 +15,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn refresh-credentials []
@@ -46,6 +45,7 @@
        {:name      (@tr [:process])
         :disabled  (not (seq @datasets))
         :icon-name "cog"
+        :position  "left"
         :on-click  #(dispatch [::events/open-application-select-modal])}])))
 
 
@@ -98,8 +98,9 @@
 (defn control-bar []
   [:div
    [ui/Menu {:attached "top", :borderless true}
-    [refresh-button]
-    [process-button]]
+    [process-button]
+    [ui/MenuMenu {:position "right"}
+     [refresh-button]]]
    [ui/Segment {:attached "bottom"}
     [search-header]]])
 
@@ -245,7 +246,8 @@
      (or name id)
      (when selected? [ui/Label {:corner true
                                 :icon   "pin"
-                                :color  "blue"}])]))
+                                :color  "blue"
+                                :style  {:z-index 0}}])]))
 
 
 (defn format-dataset
@@ -266,17 +268,7 @@
        [:span (str count " " (@tr [:objects]))]]
       [ui/Label
        [ui/Icon {:name "expand arrows alternate"}]
-       [:span (utils/format-bytes size)]]
-      #_[ui/ListSA {:horizontal true
-                    :divided    false}
-         [ui/ListItem
-          [ui/ListIcon {:name "file"}]
-          [ui/ListContent
-           [:span (str count " " (@tr [:objects]))]]]
-         [ui/ListItem
-          [ui/ListIcon {:name "expand arrows alternate"}]
-          [ui/ListContent
-           [:span size " bytes"]]]]]]))
+       [:span (utils/format-bytes size)]]]]))
 
 
 (defn queries-cards-group
@@ -285,11 +277,19 @@
         datasets (subscribe [::subs/datasets])]
     [ui/Segment style/basic
      (if (seq @datasets)
+       [ui/Message {:info true}
+        [ui/MessageHeader
+         [ui/Icon {:name "pin"}]
+         (@tr [:select-datasets])]]
+       [ui/Message {:warning true}
+        [ui/MessageHeader
+         [ui/Icon {:name "warning sign"}]
+         (@tr [:no-datasets])]])
+     (when (seq @datasets)
        (vec (concat [ui/CardGroup]
                     (map (fn [dataset]
                            [format-dataset dataset])
-                         (vals @datasets))))
-       [ui/Header {:as "h1"} (@tr [:no-datasets])])]))
+                         (vals @datasets)))))]))
 
 
 (defn service-offer-resources

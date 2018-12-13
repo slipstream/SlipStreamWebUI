@@ -72,6 +72,7 @@
         [uix/MenuItemWithIcon
          {:name      (@tr [:refresh])
           :icon-name "refresh"
+          :position  "right"
           :loading?  @loading?
           :on-click  #(dispatch [::dashboard-events/get-statistics])}]]
        (when-not @loading?

@@ -26,14 +26,13 @@
 
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])]
-    [:div
-     [ui/Menu {:attached "top", :borderless true}
-      [refresh-button]
-      [ui/MenuMenu {:position "right"}
-       [ui/MenuItem
-        [ui/Input {:placeholder (@tr [:search])
-                   :icon        "search"
-                   :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]]]]))
+    [ui/Menu {:attached "top", :borderless true}
+     [ui/MenuItem
+      [ui/Input {:placeholder (@tr [:search])
+                 :icon        "search"
+                 :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]
+     [ui/MenuMenu {:position "right"}
+      [refresh-button]]]))
 
 
 (defn format-deployment-template
