@@ -7,7 +7,8 @@
     [sixsq.slipstream.webui.data.effects :as fx]
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
-    [sixsq.slipstream.webui.deployment-dialog.events :as dialog-events]))
+    [sixsq.slipstream.webui.deployment-dialog.events :as dialog-events]
+    [sixsq.slipstream.webui.deployment-dialog.spec :as dialog-spec]))
 
 
 (defn fetch-data-cofx
@@ -92,11 +93,16 @@
               ::spec/loading-applications? false)))
 
 
-(reg-event-db
+(reg-event-fx
   ::set-selected-application-id
-  (fn [db [_ application-id]]
+  (fn [{{:keys [::client-spec/client
+                ::dialog-spec/deployment] :as db} :db} [_ application-id]]
+
     (dispatch [::dialog-events/create-deployment application-id :data true])
-    (assoc db ::spec/selected-application-id application-id)))
+
+    (cond-> {:db (assoc db ::spec/selected-application-id application-id)}
+            (:id deployment) (assoc ::cimi-api-fx/delete [client (:id deployment)
+                                                          #(dispatch [::dialog-events/set-deployment nil])]))))
 
 
 (reg-event-fx
@@ -115,11 +121,14 @@
                              #(dispatch [::set-applications %])]})))
 
 
-(reg-event-db
+(reg-event-fx
   ::close-application-select-modal
-  (fn [db _]
-    (assoc db ::spec/applications nil
-              ::spec/application-select-visible? false)))
+  (fn [{{:keys [::client-spec/client
+                ::dialog-spec/deployment] :as db} :db} _]
+    (cond-> {:db (assoc db ::spec/applications nil
+                           ::spec/application-select-visible? false)}
+            (:id deployment) (assoc ::cimi-api-fx/delete [client (:id deployment)
+                                                          #(dispatch [::dialog-events/set-deployment nil])]))))
 
 
 (reg-event-fx
