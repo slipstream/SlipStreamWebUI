@@ -41,6 +41,24 @@
 
 
 (reg-sub
+  ::deployments-ss-state-map
+  (fn [db]
+    (::spec/deployments-ss-state-map db)))
+
+
+(reg-sub
   ::active-only?
   (fn [db]
     (::spec/active-only? db)))
+
+
+(reg-sub
+  ::creds-name-map
+  (fn [db]
+    (::spec/creds-name-map db)))
+
+
+(reg-sub
+  ::view
+  (fn [db]
+    (::spec/view db)))

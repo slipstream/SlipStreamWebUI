@@ -76,7 +76,7 @@
 
 (reg-event-fx
   ::create-deployment
-  (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id first-step]]
+  (fn [{{:keys [::client-spec/client] :as db} :db :as cofx} [_ id first-step do-not-open-modal?]]
     (when client
       (when (= :data first-step)
         (dispatch [::get-service-offers-by-cred]))
@@ -99,7 +99,7 @@
                                     (dispatch [::get-deployment (:resource-id response)]))))]
         {:db               (assoc db ::spec/loading-deployment? true
                                      ::spec/selected-credential nil
-                                     ::spec/deploy-modal-visible? true
+                                     ::spec/deploy-modal-visible? (not (boolean do-not-open-modal?))
                                      ::spec/active-step (or first-step :data)
                                      ::spec/data-step-active? (= first-step :data)
                                      ::spec/cloud-filter nil
@@ -143,7 +143,7 @@
                                                   :content message
                                                   :type    :success}]
                                  (dispatch [::messages-events/add success-msg])
-                                 (dispatch [::history-evts/navigate id]))))]
+                                 (dispatch [::history-evts/navigate "deployment"]))))]
         {:db                     (assoc db ::spec/deploy-modal-visible? false)
          ::cimi-api-fx/operation [client id "http://schemas.dmtf.org/cimi/2/action/start" start-callback]}))))
 

@@ -23,6 +23,7 @@
         [uix/MenuItemWithIcon
          {:name      (@tr [:refresh])
           :icon-name "refresh"
+          :position  "right"
           :on-click  #(dispatch [::quota-events/get-quotas])}]]])))
 
 

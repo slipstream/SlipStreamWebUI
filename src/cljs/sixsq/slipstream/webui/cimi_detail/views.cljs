@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.utils.resource-details :as details]
+    [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]))
 
 
@@ -17,11 +18,12 @@
         loading? (subscribe [::cimi-detail-subs/loading?])
         resource-id (subscribe [::cimi-detail-subs/resource-id])]
     (fn []
-      [uix/MenuItemWithIcon
-       {:name      (@tr [:refresh])
-        :icon-name "refresh"
-        :loading?  @loading?
-        :on-click  #(dispatch [::cimi-detail-events/get @resource-id])}])))
+      [ui/MenuMenu {:position "right"}
+       [uix/MenuItemWithIcon
+        {:name      (@tr [:refresh])
+         :icon-name "refresh"
+         :loading?  @loading?
+         :on-click  #(dispatch [::cimi-detail-events/get @resource-id])}]])))
 
 
 (defn path->resource-id

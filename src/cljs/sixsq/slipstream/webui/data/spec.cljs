@@ -23,11 +23,17 @@
 
 (s/def ::applications (s/nilable (s/coll-of any? :kind vector?)))
 
-(s/def ::data-queries any?)
+(s/def ::selected-application-id (s/nilable string?))
 
 (s/def ::full-text-search (s/nilable string?))
 
-(s/def ::data any?)
+(s/def ::counts any?)
+
+(s/def ::sizes any?)
+
+(s/def ::datasets (s/map-of string? map?))
+
+(s/def ::selected-dataset-ids (s/coll-of string? :kind set?))
 
 (s/def ::db (s/keys :req [::time-period
                           ::time-period-filter
@@ -38,40 +44,16 @@
                           ::loading-applications?
                           ::applications
                           ::content-type-filter
-                          ::data-queries
                           ::full-text-search
-                          ::data
+                          ::counts
+                          ::sizes
+                          ::datasets
+                          ::selected-dataset-ids
                           ]))
 
-(def default-time-period [(time/parse-iso8601 "2018-10-01T00:00:00.00Z")
-                          (time/parse-iso8601 "2018-11-15T00:00:00.00Z")])
+(def default-time-period [(time/days-before 30)
+                          (time/days-before 0)])
 
-(def data-queries
-  {"data-query/feCapture-ionMessage" {:id                "data-query/feCapture-ionMessage"
-                                      :name              "feCapture & ionMessage"
-                                      :description       "Query that selects data and metadata for signals coming from the frontend receiver."
-                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and (data:contentType='application/x-ionMessage' or data:contentType='application/x-feCapture')"
-                                      :query-application "dataAcceptContentTypes='application/x-ionMessage' and dataAcceptContentTypes='application/x-feCapture'"}
-
-   "data-query/feCapture"            {:id                "data-query/feCapture"
-                                      :name              "feCapture"
-                                      :description       "Query that selects data feCapture only."
-                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-feCapture'"
-                                      :query-application "dataAcceptContentTypes='application/x-feCapture'"}
-
-   "data-query/ionMessage"           {:id                "data-query/ionMessage"
-                                      :name              "ionMessage"
-                                      :description       "Query that selects data ionMessage only."
-                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-ionMessage'"
-                                      :query-application "dataAcceptContentTypes='application/x-ionMessage'"}
-
-   "data-query/sdrData"              {:id                "data-query/sdrData"
-                                      :name              "sdrData"
-                                      :description       "Query that selects data sdrData only."
-                                      :query-data        "resource:type='DATA' and data:bucket^='gnss' and data:contentType='application/x-sdrData'"
-                                      :query-application "dataAcceptContentTypes='application/x-sdrData'"}})
-
-;; FIXME: Make default dates use current date.
 (def defaults {::time-period                 default-time-period
                ::time-period-filter          (utils/create-time-period-filter default-time-period)
                ::service-offers              nil
@@ -81,7 +63,9 @@
                ::loading-applications?       false
                ::applications                nil
                ::content-type-filter         nil
-               ::data-queries                data-queries
                ::full-text-search            nil
-               ::data                        nil
+               ::counts                      nil
+               ::sizes                       nil
+               ::datasets                    {}
+               ::selected-dataset-ids        #{}
                })

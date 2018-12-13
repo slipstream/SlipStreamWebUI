@@ -259,7 +259,9 @@
 (defn detail-menu
   [refresh-button data baseURI description]
   (vec (concat [ui/Menu {:borderless true}]
-               (format-operations refresh-button data baseURI description))))
+               (format-operations nil data baseURI description)
+               [refresh-button]
+               )))
 
 
 (defn resource-detail

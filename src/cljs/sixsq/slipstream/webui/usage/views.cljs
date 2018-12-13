@@ -317,8 +317,8 @@
     [:div
      [ui/Menu {:attached "top", :borderless true}
       [uix/MenuItemWithIcon
-       {:name      (@tr [:refresh])
-        :icon-name "refresh"
+       {:name      (@tr [:search])
+        :icon-name "search"
         :on-click  (fn []
                      (dispatch [::usage-events/fetch-data]))}]
       (when @results

@@ -35,12 +35,30 @@
 
 
 (reg-sub
-  ::data-queries
+  ::selected-application-id
   (fn [db]
-    (::spec/data-queries db)))
+    (::spec/selected-application-id db)))
 
 
 (reg-sub
-  ::data
+  ::counts
   (fn [db]
-    (::spec/data db)))
+    (::spec/counts db)))
+
+
+(reg-sub
+  ::sizes
+  (fn [db]
+    (::spec/sizes db)))
+
+
+(reg-sub
+  ::datasets
+  (fn [db]
+    (::spec/datasets db)))
+
+
+(reg-sub
+  ::selected-dataset-ids
+  (fn [db]
+    (::spec/selected-dataset-ids db)))

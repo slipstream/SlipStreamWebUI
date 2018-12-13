@@ -16,3 +16,11 @@
     "IMAGE" "file"
     "COMPONENT" "microchip"
     "question circle"))
+
+
+(defn stop-action?
+  [deployment]
+  (boolean
+    (not-empty
+     (filter #(= "http://schemas.dmtf.org/cimi/2/action/stop" (:rel %))
+             (get-in deployment [:operations])))))

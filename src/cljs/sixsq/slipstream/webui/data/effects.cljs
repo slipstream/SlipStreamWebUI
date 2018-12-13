@@ -5,19 +5,19 @@
     [cljs.core.async :refer [<!]]
     [re-frame.core :refer [dispatch reg-fx]]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.webui.data.utils :as utils]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.data.utils :as utils]))
 
 
 (reg-fx
   ::fetch-data
-  (fn [[client time-period-filter cloud-filter full-text-search data-queries callback]]
+  (fn [[client time-period-filter cloud-filter full-text-search datasets callback]]
     (go
       (when client
-        (doseq [{:keys [id query-data]} data-queries]
-          (let [filter (utils/join-and time-period-filter cloud-filter full-text-search query-data)]
+        (doseq [{:keys [id] :as dataset} datasets]
+          (let [objectFilter (get dataset (keyword "dataset:objectFilter"))
+                filter (utils/join-and time-period-filter cloud-filter full-text-search objectFilter)]
             (callback id (<! (cimi/search client
                                           "serviceOffers"
                                           {:$filter      filter
                                            :$last        0
-                                           :$aggregation "count:id"})))))))))
+                                           :$aggregation "count:id, sum:data:bytes"})))))))))

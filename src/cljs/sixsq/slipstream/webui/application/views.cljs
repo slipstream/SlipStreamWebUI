@@ -26,11 +26,12 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn []
-      [uix/MenuItemWithIcon
-       {:name      (@tr [:refresh])
-        :icon-name "refresh"
-        :loading?  false                                    ;; FIXME: Add loading flag for module.
-        :on-click  #(dispatch [::application-events/get-module])}])))
+      [ui/MenuMenu {:position "right"}
+       [uix/MenuItemWithIcon
+        {:name      (@tr [:refresh])
+         :icon-name "refresh"
+         :loading?  false                                   ;; FIXME: Add loading flag for module.
+         :on-click  #(dispatch [::application-events/get-module])}]])))
 
 
 (defn control-bar []
@@ -41,7 +42,7 @@
           deploy-disabled? (= "PROJECT" (:type @module))]
       (vec (concat [ui/Menu {:borderless true}]
 
-                   (resource-details/format-operations [refresh-button] @module (:baseURI @cep) {})
+                   (resource-details/format-operations nil @module (:baseURI @cep) {})
 
                    [[uix/MenuItemWithIcon
                      {:name      (@tr [:launch])
@@ -53,7 +54,8 @@
                      {:name      (@tr [:add])
                       :icon-name "add"
                       :disabled  add-disabled?
-                      :on-click  #(dispatch [::application-events/open-add-modal])}]])))))
+                      :on-click  #(dispatch [::application-events/open-add-modal])}]
+                    [refresh-button]])))))
 
 
 (defn form-input-callback

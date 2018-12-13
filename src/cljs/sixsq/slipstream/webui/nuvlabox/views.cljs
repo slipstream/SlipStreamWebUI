@@ -70,6 +70,7 @@
        {:name      (@tr [:refresh])
         :icon-name "refresh"
         :loading?  @loading?
+        :position "right"
         :disabled  false #_(nil? @selected-id)
         :on-click  (fn []
                      (dispatch [::nuvlabox-events/fetch-health-info])
