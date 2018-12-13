@@ -4,8 +4,9 @@
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
+    [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.deployment.spec :as spec]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-db
@@ -100,8 +101,7 @@
                 ::spec/active-only?
                 ::spec/page
                 ::spec/elements-per-page] :as db} :db} _]
-    {:db                  (assoc db ::spec/loading? true)
-     ::cimi-api-fx/search [client "deployments" (get-query-params full-text-search active-only? page elements-per-page)
+    {::cimi-api-fx/search [client "deployments" (get-query-params full-text-search active-only? page elements-per-page)
                            #(dispatch [::set-deployments %])]}))
 
 
@@ -145,3 +145,17 @@
   ::set-view
   (fn [db [_ view-type]]
     (assoc db ::spec/view view-type)))
+
+
+(reg-event-fx
+  ::stop-deployment
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ href]]
+    {::cimi-api-fx/operation [client href "http://schemas.dmtf.org/cimi/2/action/stop"
+                              #(if (instance? js/Error %)
+                                 (let [{:keys [status message]} (response/parse-ex-info %)]
+                                   (dispatch [::messages-events/add
+                                              {:header  (cond-> (str "error stopping deployment " href)
+                                                                status (str " (" status ")"))
+                                               :content message
+                                               :type    :error}]))
+                                 (dispatch [::get-deployments]))]}))

@@ -347,10 +347,8 @@
   (let [tr (subscribe [::i18n-subs/tr])
         deployment (subscribe [::subs/deployment])]
     (fn []
-      (when-not (empty?
-                  (filter #(= "http://schemas.dmtf.org/cimi/2/action/stop" (:rel %))
-                          (get-in @deployment [:operations])))
-
+      (when (deployment-detail-utils/stop-action? @deployment)
+        ^{:key (:id deployment)}
         [resource-details/action-button-icon
          (@tr [:stop])
          "stop"
@@ -444,10 +442,11 @@
 
 (defn menu
   []
-  [ui/Menu {:borderless true}
-   [refresh-button]
-   [stop-button]
-   [service-link-button]])
+  (let [deployment (subscribe [::subs/deployment])]
+    [ui/Menu {:borderless true}
+    [refresh-button]
+    [stop-button @deployment]
+    [service-link-button]]))
 
 
 (def deployment-states ["Provisioning" "Executing" "SendingReports" "Ready" "Done"])
@@ -518,6 +517,7 @@
   (let [deployment (subscribe [::subs/deployment])]
     (automatic-refresh resource-id)
     (fn [resource-id]
+      ^{:key resource-id}
       [ui/Segment (merge style/basic
                          {:loading (not= resource-id (:id @deployment))})
        [ui/Container {:fluid true}

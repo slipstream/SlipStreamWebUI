@@ -3,6 +3,7 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
+    [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.deployment.events :as events]
     [sixsq.slipstream.webui.deployment.subs :as subs]
     [sixsq.slipstream.webui.history.views :as history]
@@ -16,7 +17,8 @@
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [reagent.core :as reagent]))
 
 
 
@@ -53,6 +55,19 @@
       :icon-name "refresh"
       :loading?  @loading?
       :on-click  #(dispatch [::events/get-deployments])}]))
+
+
+(defn stop-button
+  [deployment]
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (when (deployment-detail-utils/stop-action? deployment)
+      [ui/Popup {:content  (@tr [:stop])
+                 :size     "tiny"
+                 :position "top center"
+                 :trigger  (reagent/as-element
+                             [ui/Icon {:name     "stop"
+                                       :style    {:cursor "pointer"}
+                                       :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}])))
 
 
 (defn menu-bar
@@ -106,7 +121,8 @@
      [ui/TableCell (-> deployment :created time/parse-iso8601 time/ago)]
      [ui/TableCell {:style {:overflow      "hidden",
                             :text-overflow "ellipsis",
-                            :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]]))
+                            :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]
+     [ui/TableCell [stop-button deployment]]]))
 
 
 
@@ -126,7 +142,8 @@
          [ui/TableHeaderCell (@tr [:status])]
          [ui/TableHeaderCell (@tr [:url])]
          [ui/TableHeaderCell (@tr [:created])]
-         [ui/TableHeaderCell (@tr [:cloud])]]]
+         [ui/TableHeaderCell (@tr [:cloud])]
+         [ui/TableHeaderCell (@tr [:actions])]]]
        (vec (concat [ui/TableBody]
                     (map row-fn deployments-list)))])))
 
@@ -166,7 +183,10 @@
          [:div
           [ui/Icon {:name "key"}]
           cred-info])]]
-     [ui/CardContent {:extra true} [history/link id (@tr [:details])]]]))
+     [ui/CardContent {:extra true}
+      [history/link id (@tr [:details])]
+      [:span {:style {:float "right"}}
+       [stop-button deployment]]]]))
 
 
 (defn cards-data-table
