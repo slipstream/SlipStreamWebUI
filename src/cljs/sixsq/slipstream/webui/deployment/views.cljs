@@ -61,13 +61,10 @@
   [deployment]
   (let [tr (subscribe [::i18n-subs/tr])]
     (when (deployment-detail-utils/stop-action? deployment)
-      [ui/Popup {:content  (@tr [:stop])
-                 :size     "tiny"
-                 :position "top center"
-                 :trigger  (reagent/as-element
-                             [ui/Icon {:name     "stop"
-                                       :style    {:cursor "pointer"}
-                                       :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}])))
+      [:span {:style    {:cursor "pointer"}
+              :on-click #(dispatch [::events/stop-deployment (:id deployment)])}
+       [ui/Icon {:name "stop"}]
+       (@tr [:stop])])))
 
 
 (defn menu-bar
