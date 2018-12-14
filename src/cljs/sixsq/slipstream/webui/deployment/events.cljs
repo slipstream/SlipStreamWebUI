@@ -30,16 +30,17 @@
 (reg-event-fx
   ::set-creds-ids
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ credentials-ids]]
-    (let [filter-creds-ids (str/join " or " (map #(str "id='" % "'") credentials-ids))
-          query-params {:$filter (str/join " and " [filter-creds-ids "name!=null"])
-                        :$select "id, name"}
-          callback (fn [response]
-                     (when-not (instance? js/Error response)
-                       (dispatch [::set-creds-name-map (->> response
-                                                            :credentials
-                                                            (map (juxt :id :name))
-                                                            (into {}))])))]
-      {::cimi-api-fx/search [client "credentials" query-params callback]})))
+    (when (not-empty credentials-ids)
+      (let [filter-creds-ids (str/join " or " (map #(str "id='" % "'") credentials-ids))
+           query-params {:$filter (str/join " and " [filter-creds-ids "name!=null"])
+                         :$select "id, name"}
+           callback (fn [response]
+                      (when-not (instance? js/Error response)
+                        (dispatch [::set-creds-name-map (->> response
+                                                             :credentials
+                                                             (map (juxt :id :name))
+                                                             (into {}))])))]
+       {::cimi-api-fx/search [client "credentials" query-params callback]}))))
 
 
 (reg-event-db

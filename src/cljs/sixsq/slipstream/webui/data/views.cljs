@@ -147,7 +147,9 @@
         size-completed? (subscribe [::deployment-dialog-subs/size-completed?])
         parameters-completed? (subscribe [::deployment-dialog-subs/parameters-completed?])]
     (fn []
-      (let [hide-fn #(dispatch [::events/close-application-select-modal])
+      (let [hide-fn #(do
+                       (dispatch [::events/close-application-select-modal])
+                       (dispatch [::events/delete-deployment]))
             configure-fn (fn [id] (do
                                     (dispatch [::events/close-application-select-modal])
                                     (dispatch [::deployment-dialog-events/create-deployment id :data])))
@@ -200,7 +202,9 @@
         size-completed? (subscribe [::deployment-dialog-subs/size-completed?])
         parameters-completed? (subscribe [::deployment-dialog-subs/parameters-completed?])]
     (fn []
-      (let [hide-fn #(dispatch [::events/close-application-select-modal])
+      (let [hide-fn #(do
+                       (dispatch [::events/close-application-select-modal])
+                       (dispatch [::events/delete-deployment]))
             configure-fn (fn [id] (do
                                     (dispatch [::events/close-application-select-modal])
                                     (dispatch [::deployment-dialog-events/create-deployment id :data])))
@@ -278,13 +282,11 @@
     [ui/Segment style/basic
      (if (seq @datasets)
        [ui/Message {:info true}
-        [ui/MessageHeader
-         [ui/Icon {:name "pin"}]
-         (@tr [:select-datasets])]]
+        [ui/Icon {:name "pin"}]
+        (@tr [:select-datasets])]
        [ui/Message {:warning true}
-        [ui/MessageHeader
-         [ui/Icon {:name "warning sign"}]
-         (@tr [:no-datasets])]])
+        [ui/Icon {:name "warning sign"}]
+        (@tr [:no-datasets])])
      (when (seq @datasets)
        (vec (concat [ui/CardGroup]
                     (map (fn [dataset]

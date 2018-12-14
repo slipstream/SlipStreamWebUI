@@ -125,10 +125,14 @@
   ::close-application-select-modal
   (fn [{{:keys [::client-spec/client
                 ::dialog-spec/deployment] :as db} :db} _]
-    (cond-> {:db (assoc db ::spec/applications nil
-                           ::spec/application-select-visible? false)}
-            (:id deployment) (assoc ::cimi-api-fx/delete [client (:id deployment)
-                                                          #(dispatch [::dialog-events/set-deployment nil])]))))
+    {:db (assoc db ::spec/applications nil
+                   ::spec/application-select-visible? false)}))
+
+(reg-event-fx
+  ::delete-deployment
+  (fn [{{:keys [::client-spec/client
+                ::dialog-spec/deployment] :as db} :db} _]
+    {::cimi-api-fx/delete [client (:id deployment) #(dispatch [::dialog-events/set-deployment nil])]}))
 
 
 (reg-event-fx

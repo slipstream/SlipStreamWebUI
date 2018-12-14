@@ -17,7 +17,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [reagent.core :as reagent]))
 
 
 
@@ -57,16 +58,17 @@
 
 
 (defn stop-button
-  [deployment options]
+  [deployment]
   (let [tr (subscribe [::i18n-subs/tr])]
-    (when (deployment-detail-utils/stop-action? deployment)
-      [:span {:style    {:cursor "pointer"}
-              :on-click #(dispatch [::events/stop-deployment (:id deployment)])}
-       [ui/Button (merge {:size "small"
-                          :icon    "stop"
-                          :content (@tr [:stop])
-                          :primary true}
-                         options)]])))
+    [ui/Popup {:content (@tr [:stop])
+               :size "tiny"
+               :position "top center"
+               :trigger (reagent/as-element
+                          [ui/Icon {:name     "close"
+                                    :style    {:cursor "pointer"}
+                                    :color    "red"
+                                    :size     "large"
+                                    :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}]))
 
 
 (defn menu-bar
@@ -75,7 +77,7 @@
     (fn []
       [:div
        [ui/Menu {:attached "top", :borderless true}
-        #_[ui/MenuItem                                     ;FIXME use fulltext when available
+        #_[ui/MenuItem                                      ;FIXME use fulltext when available
            [ui/Input {:placeholder (@tr [:search])
                       :icon        "search"
                       :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]
@@ -121,7 +123,8 @@
      [ui/TableCell {:style {:overflow      "hidden",
                             :text-overflow "ellipsis",
                             :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]
-     [ui/TableCell [stop-button deployment]]]))
+     [ui/TableCell (when (deployment-detail-utils/stop-action? deployment)
+                     [stop-button deployment])]]))
 
 
 
@@ -161,40 +164,54 @@
         cred-info (str/join ", " (map #(get @creds-name % %) creds-ids))]
     ^{:key id}
     [ui/Card
-     [ui/Image {:src   (or logoURL "")
-                :style {:width      "auto"
-                        :height     "100px"
-                        :object-fit "contain"}}]
+     [ui/Image {:src      (or logoURL "")
+                :bordered true
+                :style    {:width      "auto"
+                           :height     "100px"
+                           :padding    "20px"
+                           :object-fit "contain"}}]
+
      [ui/CardContent {:href     id
                       :on-click (fn [event]
                                   (dispatch [::history-events/navigate id])
                                   (.preventDefault event))}
+
+      (when (deployment-detail-utils/stop-action? deployment)
+        [ui/Label {:as :a :corner true :size "small"} [stop-button deployment]])
+
+
       [ui/Segment (merge style/basic {:floated "right"})
        [:p (deployment-state state ss-state)]
        [ui/Loader {:active        (deployment-active? state ss-state)
                    :indeterminate true}]]
-      [ui/CardHeader {:style {:word-wrap "break-word"}}
-       [:span
-        (:name module) "\u00a0"
-        (when service-url
-          [:a {:href service-url, :target "_blank", :rel "noreferrer"}
-           [ui/Icon {:name "external"}]])]]
+
+      [ui/CardHeader [:span [:p {:style {:overflow      "hidden",
+                                         :text-overflow "ellipsis",
+                                         :max-width     "20ch"}} (:name module)]]]
+
       [ui/CardMeta (str (@tr [:created]) " " (-> deployment :created time/parse-iso8601 time/ago))]
-      [ui/CardDescription
-       (when-not (str/blank? cred-info)
-         [:div
-          [ui/Icon {:name "key"}]
-          cred-info])]]
-     [stop-button deployment {:fluid true}]
-     ]))
+
+      [ui/CardDescription (when-not (str/blank? cred-info)
+                            [:div [ui/Icon {:name "key"}] cred-info])]]
+     (when service-url
+       [ui/Button {:color   "green"
+                   :icon    "external"
+                   :content "URL"
+                   :fluid   true
+                   :href    service-url
+                   :target  "_blank"
+                   :rel     "noreferrer"}])]))
 
 
 (defn cards-data-table
   [deployments-list]
   (let [tr (subscribe [::i18n-subs/tr])]
     (fn [deployments-list]
-      (vec (concat [ui/CardGroup]
-                   (map card-fn deployments-list))))))
+      [:div [ui/Message {:info true}
+             [ui/Icon {:name "info"}]
+             (@tr [:click-for-depl-details])]
+       (vec (concat [ui/CardGroup]
+                    (map card-fn deployments-list)))])))
 
 
 (defn deployments-display

@@ -4,6 +4,7 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
+    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.deployment-detail.events :as events]
     [sixsq.slipstream.webui.deployment-detail.subs :as subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
@@ -333,29 +334,12 @@
         loading? (subscribe [::subs/loading?])
         deployment (subscribe [::subs/deployment])]
     (fn []
-      [uix/MenuItemWithIcon
-       {:name      (@tr [:refresh])
-        :icon-name "refresh"
-        :loading?  @loading?
-        :on-click  #(dispatch [::events/get-deployment (:id @deployment)])}])))
-
-
-(defn stop-button
-  "Creates a button that will bring up a delete dialog and will execute the
-   delete when confirmed."
-  []
-  (let [tr (subscribe [::i18n-subs/tr])
-        deployment (subscribe [::subs/deployment])]
-    (fn []
-      (when (deployment-detail-utils/stop-action? @deployment)
-        ^{:key (:id deployment)}
-        [resource-details/action-button-icon
-         (@tr [:stop])
-         "stop"
-         (@tr [:stop])
-         [:p (@tr [:are-you-sure?])]
-         #(dispatch [::events/stop-deployment (:id @deployment)])
-         (constantly nil)]))))
+      [ui/MenuMenu {:position "right"}
+       [uix/MenuItemWithIcon
+        {:name      (@tr [:refresh])
+         :icon-name "refresh"
+         :loading?  @loading?
+         :on-click  #(dispatch [::events/get-deployment (:id @deployment)])}]])))
 
 
 (defn service-link-button
@@ -365,7 +349,7 @@
       (let [link (-> @deployment-parameters (get "ss:url.service") :value)]
         (when link
           [uix/MenuItemWithIcon
-           {:name      (general/truncate link)
+           {:name      (general/truncate link 35)
             :icon-name "external"
             :position  "right"
             :on-click  #(dispatch [::main-events/open-link link])}])))))
@@ -442,11 +426,14 @@
 
 (defn menu
   []
-  (let [deployment (subscribe [::subs/deployment])]
-    [ui/Menu {:borderless true}
-    [refresh-button]
-    [stop-button @deployment]
-    [service-link-button]]))
+  (let [deployment (subscribe [::subs/deployment])
+        cep (subscribe [::cimi-subs/cloud-entry-point])]
+    (vec (concat [ui/Menu {:borderless true}]
+
+                 (resource-details/format-operations nil @deployment (:baseURI @cep) {})
+
+                 [[service-link-button]
+                  [refresh-button]]))))
 
 
 (def deployment-states ["Provisioning" "Executing" "SendingReports" "Ready" "Done"])
