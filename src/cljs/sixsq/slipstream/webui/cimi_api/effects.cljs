@@ -45,7 +45,12 @@
   ::edit
   (fn [[client resource-id data callback]]
     (go
-      (callback (<! (cimi/edit client resource-id data))))))
+      (<! (cimi/edit client resource-id data))
+
+      ;; This is done to get a fully updated resource.  If the return
+      ;; value of edit is used, then, for example, the operations are
+      ;; not updated.
+      (callback (<! (cimi/get client resource-id))))))
 
 (reg-fx
   ::add

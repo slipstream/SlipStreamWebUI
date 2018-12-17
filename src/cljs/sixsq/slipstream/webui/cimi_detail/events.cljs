@@ -8,12 +8,9 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [taoensso.timbre :as log]))
-
-
-(defn operation-name [op-uri]
-  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
 
 
 (reg-event-fx
@@ -52,7 +49,7 @@
                      (get tpl-resource-key)
                      :href)
           describe-operation (->> operations
-                                  (filter #(= (-> % :rel operation-name) "describe"))
+                                  (filter #(= (-> % :rel general/operation-name) "describe"))
                                   first
                                   :rel)]
       (log/info (:id resource))
@@ -71,6 +68,7 @@
   ::set-description
   (fn [db [_ description]]
     (assoc db ::cimi-detail-spec/description description)))
+
 
 (reg-event-fx
   ::delete
@@ -94,6 +92,7 @@
                                   (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]
        })))
 
+
 (reg-event-fx
   ::edit
   (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id data]]
@@ -107,6 +106,7 @@
                                             :content message
                                             :type    :error}]))
                               (dispatch [::set-resource %]))]})))
+
 
 (reg-event-fx
   ::operation

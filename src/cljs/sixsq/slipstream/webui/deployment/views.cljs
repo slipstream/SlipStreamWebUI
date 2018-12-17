@@ -2,12 +2,13 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
+    [reagent.core :as reagent]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
+    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.deployment.events :as events]
     [sixsq.slipstream.webui.deployment.subs :as subs]
-    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
@@ -17,9 +18,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [reagent.core :as reagent]))
-
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn deployment-active?
@@ -60,15 +59,15 @@
 (defn stop-button
   [deployment]
   (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Popup {:content (@tr [:stop])
-               :size "tiny"
+    [ui/Popup {:content  (@tr [:stop])
+               :size     "tiny"
                :position "top center"
-               :trigger (reagent/as-element
-                          [ui/Icon {:name     "close"
-                                    :style    {:cursor "pointer"}
-                                    :color    "red"
-                                    :size     "large"
-                                    :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}]))
+               :trigger  (reagent/as-element
+                           [ui/Icon {:name     "close"
+                                     :style    {:cursor "pointer"}
+                                     :color    "red"
+                                     :size     "large"
+                                     :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}]))
 
 
 (defn menu-bar
@@ -171,13 +170,16 @@
                            :padding    "20px"
                            :object-fit "contain"}}]
 
+     (when (deployment-detail-utils/stop-action? deployment)
+       [ui/Label {:corner true
+                  :size   "small"} [stop-button deployment]])
+
      [ui/CardContent {:href     id
                       :on-click (fn [event]
                                   (dispatch [::history-events/navigate id])
                                   (.preventDefault event))}
 
-      (when (deployment-detail-utils/stop-action? deployment)
-        [ui/Label {:as :a :corner true :size "small"} [stop-button deployment]])
+
 
 
       [ui/Segment (merge style/basic {:floated "right"})

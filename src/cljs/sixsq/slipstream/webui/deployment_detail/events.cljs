@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.main.effects :as main-fx]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.general :as general-utils]
+    [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
     [taoensso.timbre :as log]))
 
@@ -58,6 +59,7 @@
   (fn [db [_ resource]]
     (assoc db ::spec/loading? false
               ::spec/deployment resource)))
+
 
 (reg-event-db
   ::set-deployment-parameters
@@ -238,3 +240,66 @@
                                "deploymentParameters"
                                (general-utils/prepare-params query-params)
                                #(dispatch [::set-summary-nodes-parameters (:deploymentParameters %)])]}))))
+
+
+;;
+;; events used for cimi operations
+;;
+;; FIXME: These have been copied from the CIMI detail page.  Refactor to reduce duplication.
+;;
+
+(reg-event-fx
+  ::delete
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id]]
+    (when client
+      {::cimi-api-fx/delete [client resource-id
+                             #(if (instance? js/Error %)
+                                (let [{:keys [status message]} (response/parse-ex-info %)]
+                                  (dispatch [::messages-events/add
+                                             {:header  (cond-> (str "error deleting " resource-id)
+                                                               status (str " (" status ")"))
+                                              :content message
+                                              :type    :error}]))
+                                (let [{:keys [status message]} (response/parse %)]
+                                  (dispatch [::messages-events/add
+                                             {:header  (cond-> (str "deleted " resource-id)
+                                                               status (str " (" status ")"))
+                                              :content message
+                                              :type    :success}])
+                                  (dispatch [::history-events/navigate "deployment"])))]
+       })))
+
+
+(reg-event-fx
+  ::edit
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id data]]
+    (when client
+      {::cimi-api-fx/edit [client resource-id data
+                           #(if (instance? js/Error %)
+                              (let [{:keys [status message]} (response/parse-ex-info %)]
+                                (dispatch [::messages-events/add
+                                           {:header  (cond-> (str "error editing " resource-id)
+                                                             status (str " (" status ")"))
+                                            :content message
+                                            :type    :error}]))
+                              (dispatch [::set-deployment %]))]})))
+
+
+(reg-event-fx
+  ::operation
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ resource-id operation]]
+    {::cimi-api-fx/operation [client resource-id operation
+                              #(let [op (second (re-matches #"(?:.*/)?(.*)" operation))]
+                                 (if (instance? js/Error %)
+                                   (let [{:keys [status message]} (response/parse-ex-info %)]
+                                     (dispatch [::messages-events/add
+                                                {:header  (cond-> (str "error executing operation " op)
+                                                                  status (str " (" status ")"))
+                                                 :content message
+                                                 :type    :error}]))
+                                   (let [{:keys [status message]} (response/parse %)]
+                                     (dispatch [::messages-events/add
+                                                {:header  (cond-> (str "success executing operation " op)
+                                                                  status (str " (" status ")"))
+                                                 :content message
+                                                 :type    :success}]))))]}))
