@@ -17,10 +17,11 @@
 */
 .webui-logo {
     width: 100%;
-    background-image: url('../images/cubic-logo.png') !important;
     background-repeat: no-repeat !important;
     background-position: center center !important;
     background-size: contain !important;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 

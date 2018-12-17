@@ -43,8 +43,10 @@
     [ui/MenuItem {:aria-label (@tr [:welcome])
                   :on-click   #(navigate "welcome")}
      [ui/Image {:alt      "logo"
-                :src      "/images/cubic-logo.png"
+                :src      "/images/nuvla-logo.png"
                 :size     "tiny"
+                :style    {:margin-top    "10px"
+                           :margin-bottom "10px"}
                 :centered true}]]))
 
 
