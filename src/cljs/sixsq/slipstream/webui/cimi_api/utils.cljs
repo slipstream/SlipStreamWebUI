@@ -63,7 +63,7 @@
                  :hidden         hidden
                  :icon           icon
                  :order          order
-                 :default-values (remove-common-attrs tpl)
+                 :default-values tpl
                  :description    description}])
 
 

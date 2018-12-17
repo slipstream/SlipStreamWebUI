@@ -11,9 +11,9 @@
 (defn metadata-section
   [{:keys [id name] :as document}]
   [cc/metadata
-   {:title       name
-    :subtitle    id
-    :icon        "book"}])
+   {:title    name
+    :subtitle id
+    :icon     "book"}])
 
 
 (defn description-section
@@ -24,8 +24,10 @@
        [ui/ReactMarkdown {:source description}]])))
 
 
-(defn row-attribute-fn [{:keys [name description type namespace uri providerMandatory consumerMandatory mutable
-                                consumerWritable displayName help group order hidden sensitive vscope] :as entry}]
+(defn row-attribute-fn [{:keys [name description type namespace uri
+                                providerMandatory consumerMandatory mutable templateMutable consumerWritable
+                                displayName help group order hidden sensitive vscope] :as entry
+                         :or {templateMutable false}}]
   (let [characteristics [["displayName" displayName]
                          ["help" help]
                          ["order" order]
@@ -33,6 +35,7 @@
                          ["consumerWritable" consumerWritable]
                          ["providerMandatory" providerMandatory]
                          ["consumerMandatory" consumerMandatory]
+                         ["templateMutable" templateMutable]
                          ["group" group]
                          ["hidden" hidden]
                          ["sensitive" sensitive]
@@ -53,12 +56,8 @@
 
 
 (defn attributes-table
-  [document]
-  (let [tr (subscribe [::i18n-subs/tr])
-        attributes (:attributes document)
-        vscope (:vscope document)
-        attributes-with-vscope (map (fn [{:keys [name] :as attribute}]
-                                      (assoc attribute :vscope (get vscope (keyword name)))) attributes)]
+  [{:keys [attributes] :as document}]
+  (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Segment (merge style/basic
                        {:class-name "webui-x-autoscroll"})
 
@@ -75,7 +74,7 @@
         [ui/TableHeaderCell (@tr [:characteristics-value])]
         ]]
       (vec (concat [ui/TableBody]
-                   (mapcat row-attribute-fn (sort-by :name attributes-with-vscope))))]]))
+                   (mapcat row-attribute-fn (sort-by :name attributes))))]]))
 
 
 (defn row-action-fn [{:keys [name description uri method inputMessage outputMessage] :as entry}]

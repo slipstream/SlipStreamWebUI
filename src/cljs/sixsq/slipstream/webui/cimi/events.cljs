@@ -255,9 +255,8 @@
           tpl (get-in collections-templates-cache [resource-type :templates template-id-key])
           default-values-map (->> (:default-values tpl) (map (fn [[k v]] [k {:data v}])) (into {}))
           description-with-defaults (merge-with merge params-desc default-values-map)
-          description-filtered (cimi-api-utils/filter-params-desc (dissoc description-with-defaults :acl))
           template (-> tpl
-                       (assoc :params-desc description-filtered)
+                       (assoc :params-desc description-with-defaults)
                        (dissoc :default-values))]
       (-> db
           (update-in [::cimi-spec/collections-templates-cache resource-type :loaded] inc)

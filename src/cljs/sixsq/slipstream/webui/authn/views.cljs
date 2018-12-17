@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.authn.utils :as u]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -15,6 +16,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.form-fields-resource-metadata :as forms]
     [taoensso.timbre :as log]))
 
 
@@ -64,17 +66,28 @@
   (let [cep (subscribe [::cimi-subs/cloud-entry-point])
         server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])
         form-id (subscribe [::authn-subs/form-id])
-        tr (subscribe [::i18n-subs/tr])]
+        tr (subscribe [::i18n-subs/tr])
+        method (u/select-method-by-id @form-id methods)
+        fake-resource {:resourceURI (-> method :params-desc :resourceURI :data)
+                       :resourceMetadata (-> method :params-desc :resourceMetadata :data)}
+        _ (log/warn "fake-resource" fake-resource)
+        resourceMetadataOnly (subscribe [::docs-subs/document fake-resource])]
     (fn [methods collections-kw]
       (let [dropdown? (> (count methods) 1)
-            method (u/select-method-by-id @form-id methods)
-
+            _ (log/warn "resourceMetadataOnly " @resourceMetadataOnly)
             {:keys [baseURI collection-href]} @cep
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
             inputs-method (conj (->> method u/ordered-params (filter u/keep-visible-params))
                                 [:href {:displayName "href" :data @form-id :type "hidden"}]
                                 [:redirectURI {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])
-
+            new-inputs-method (->>
+                                (:attributes @resourceMetadataOnly)
+                                (filter (fn [{:keys [consumerWritable mutable group] :as attr}]
+                                          (and consumerWritable mutable (not (#{"metadata" "acl"} group)))))
+                                (sort-by :order))
+            ;_ (log/error "inputs-method: " inputs-method)
+            ;_ (log/error "new-inputs-method: " new-inputs-method)
+            ;_ (log/error "METHOD " method)
             dropdown-options (map dropdown-method-option methods)]
 
         (log/infof "creating authentication form: %s %s" (name collections-kw) @form-id)
@@ -92,7 +105,7 @@
                                :close-on-blur true
                                :on-change     (ui-callback/dropdown ::authn-events/set-form-id)}])]
 
-                          (mapv form-component inputs-method)
+                          (mapv (partial forms/form-field #() @form-id) new-inputs-method)
                           (when (= "internal" (:method method))
                             (reset-password tr))))]))))))
 
