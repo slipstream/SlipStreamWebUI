@@ -128,3 +128,11 @@
 (defn resource-id->uuid
   [resource-id]
   (-> resource-id (str/split #"/") second))
+
+
+;;
+;; cimi
+;;
+
+(defn operation-name [op-uri]
+  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))

@@ -8,12 +8,12 @@
     [sixsq.slipstream.webui.deployment-detail.events :as events]
     [sixsq.slipstream.webui.deployment-detail.subs :as subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
+    [sixsq.slipstream.webui.deployment-detail.views-operations :as operations]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.general :as general]
-    [sixsq.slipstream.webui.utils.resource-details :as resource-details]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
@@ -430,7 +430,7 @@
         cep (subscribe [::cimi-subs/cloud-entry-point])]
     (vec (concat [ui/Menu {:borderless true}]
 
-                 (resource-details/format-operations nil @deployment (:baseURI @cep) {})
+                 (operations/format-operations nil @deployment (:baseURI @cep) {})
 
                  [[service-link-button]
                   [refresh-button]]))))
