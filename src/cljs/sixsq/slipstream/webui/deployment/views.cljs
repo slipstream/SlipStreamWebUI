@@ -242,7 +242,7 @@
          [menu-bar]
          [ui/Segment style/basic
           [deployments-display deployments-list]]
-         [ui/Label "Found" [ui/LabelDetail (get @deployments :count "-")]]
+         [ui/Label (@tr [:total]) [ui/LabelDetail (get @deployments :count "-")]]
          (when (> total-pages 1)
            [uix/Pagination
             {:totalPages   total-pages

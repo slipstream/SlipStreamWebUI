@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.client.subs :as client-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
@@ -60,7 +61,8 @@
 
 (defn vms-table
   []
-  (let [virtual-machines (subscribe [::dashboard-subs/virtual-machines])
+  (let [tr (subscribe [::i18n-subs/tr])
+        virtual-machines (subscribe [::dashboard-subs/virtual-machines])
         headers ["ID" "State" "IP" "CPU" "RAM [MB]" "DISK [GB]" "Instance type" "Cloud Instance ID" "Cloud" "Owner"]
         page (subscribe [::dashboard-subs/page])
         total-pages (subscribe [::dashboard-subs/total-pages])
@@ -93,7 +95,7 @@
           [ui/TableFooter
            [ui/TableRow
             [ui/TableHeaderCell {:col-span (str 3)}
-             [ui/Label "Found" [ui/LabelDetail vms-count]]]
+             [ui/Label (@tr [:total]) [ui/LabelDetail vms-count]]]
             [ui/TableHeaderCell {:textAlign "right"
                                  :col-span  (str (- (count headers) 3))}
              [uix/Pagination
