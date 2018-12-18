@@ -23,13 +23,13 @@
   :<- [::documents]
   (fn [documents [_ {:keys [resourceMetadata resourceURI] :as resource}]]
     (if-let [resourceMetadatas (-> documents vals seq)]
-      (do (log/error "NO DISPATCH!!!!" resourceMetadatas)
-          (if resourceMetadata
-            (get documents resourceMetadata)
-            (some->> resourceMetadatas
-                     (filter #(= (:name %) (some-> resourceURI (str/split #"/") last)))
-                     first)))
+      (do                                                   ;(log/error "NO DISPATCH!!!!" resourceMetadatas)
+        (if resourceMetadata
+          (get documents resourceMetadata)
+          (some->> resourceMetadatas
+                   (filter #(= (:name %) (some-> resourceURI (str/split #"/") last)))
+                   first)))
       (do
-        (log/error "DISPATCH!!!!")
+        ;(log/error "DISPATCH!!!!")
         (dispatch [::events/get-documents])))))
 

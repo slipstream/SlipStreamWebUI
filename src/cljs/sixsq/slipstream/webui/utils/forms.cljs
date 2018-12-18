@@ -49,8 +49,10 @@
   (let [update-data-fn (partial update-data form-data-atom)
         form-component-fn (partial new-ff/form-field update-data-fn id)
         attributes (->> (:attributes resourceMetadata)
-                        (filter (fn [{:keys [consumerWritable mutable group] :as attr}]
-                                  (and consumerWritable mutable (not (#{"acl"} group)))))
+                        (filter (fn [{:keys [consumerWritable consumerMandatory] :as attribute}]
+                                  (or consumerWritable
+                                      (and (not consumerWritable)
+                                           consumerMandatory))))
                         (sort-by :order))]
     (mapv form-component-fn attributes)))
 
@@ -87,13 +89,14 @@
                    :onClose   on-cancel
                    :closeIcon true}
          [ui/ModalHeader (@tr [:create])]
-         [ui/ModalContent {:scrolling true}
-          (vec (concat [ui/Form]
-                       [[template-selector
-                         (partial update-data form-data)
-                         selected-id
-                         templates]]
-                       (template-form form-data selected-template @resourceMetadata)))]
+         [ui/ModalContent
+          [ui/ModalDescription
+           (vec (concat [ui/Form]
+                        [[template-selector
+                          (partial update-data form-data)
+                          selected-id
+                          templates]]
+                        (template-form form-data selected-template @resourceMetadata)))]]
          [ui/ModalActions
           [uix/Button
            {:text     (@tr [:cancel])

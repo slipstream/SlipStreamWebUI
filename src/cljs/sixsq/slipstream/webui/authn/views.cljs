@@ -44,8 +44,8 @@
 
 
 (defn dropdown-method-option
-  [{:keys [id label] :as method}]
-  {:key id, :text label, :value id})
+  [{:keys [id name] :as method}]
+  {:key id, :text name, :value id})
 
 
 (defn reset-password [tr]
@@ -70,14 +70,17 @@
     (fn [methods collections-kw]
       (let [dropdown? (> (count methods) 1)
             method (u/select-method-by-id @form-id methods)
-            resourceMetadataOnly (subscribe [::docs-subs/document method])
+            resourceMetadata (subscribe [::docs-subs/document method])
             {:keys [baseURI collection-href]} @cep
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
-            inputs-method (->>
-                            (:attributes @resourceMetadataOnly)
-                            (filter (fn [{:keys [consumerWritable mutable group] :as attr}]
-                                      (and consumerWritable mutable (not (#{"metadata" "acl"} group)))))
-                            (sort-by :order))
+            inputs-method (conj
+                            (->> (:attributes @resourceMetadata)
+                                (filter (fn [{:keys [consumerWritable consumerMandatory group] :as attribute}]
+                                          (and (not (#{"metadata" "acl"} group))
+                                               consumerWritable)))
+                                (sort-by :order))
+                            {:name "href" :vscope {:value @form-id} :hidden true}
+                            {:name "redirectURI" :vscope {:value @server-redirect-uri} :hidden true})
             dropdown-options (map dropdown-method-option methods)]
 
         (log/infof "creating authentication form: %s %s" (name collections-kw) @form-id)

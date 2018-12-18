@@ -26,18 +26,17 @@
 
 (defmethod form-field :default
   [update-fn form-id {:keys [name displayName help hidden sensitive vscope
-                             consumerMandatory consumerWritable] :as param}]
-  (log/error param)
-  ^{:key displayName}
+                             consumerMandatory consumerWritable] :as attribute}]
+  ^{:key name}
   [ui/FormField {:required consumerMandatory}
-   [:label displayName nbsp (help-popup help)]
+   (when-not hidden [:label displayName nbsp (help-popup help)])
    [ui/Input
-    {:type      (cond
-                  sensitive "password"
-                  hidden "hidden"
-                  :else "text")
-     :name      (or displayName name)
-     :default-value (or (:value vscope) (:default vscope) "")
-     :read-only (not consumerWritable)
-     :fluid     true
-     :on-change (ui-callback/value #(update-fn form-id name %))}]])
+    (cond-> {:type          (if sensitive "password" "text")
+             :name          (or displayName name)
+             :default-value (or (:value vscope) (:default vscope) "")
+             :read-only     (not consumerWritable)
+             :on-change     (ui-callback/value #(update-fn form-id name %))}
+            hidden (assoc :style {:display "none"})
+            )]])
+
+
