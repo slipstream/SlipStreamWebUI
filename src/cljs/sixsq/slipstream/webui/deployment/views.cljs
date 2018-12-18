@@ -57,7 +57,7 @@
       :on-click  #(dispatch [::events/get-deployments])}]))
 
 
-(defn corner-button
+(defn action-button
   [popup-text icon-name event-kw deployment-id]
   (let [tr (subscribe [::i18n-subs/tr])]
     [ui/Popup {:content  (@tr [popup-text])
@@ -73,12 +73,12 @@
 
 (defn stop-button
   [{:keys [id] :as deployment}]
-  [corner-button :stop "close" ::events/stop-deployment id])
+  [action-button :stop "close" ::events/stop-deployment id])
 
 
 (defn delete-button
   [{:keys [id] :as deployment}]
-  [corner-button :delete "trash" ::deployment-detail-events/delete id])
+  [action-button :delete "trash" ::deployment-detail-events/delete id])
 
 
 (defn menu-bar
