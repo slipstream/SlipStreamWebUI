@@ -1,7 +1,8 @@
 (ns sixsq.slipstream.webui.docs.subs
   (:require
-    [re-frame.core :refer [reg-sub]]
+    [re-frame.core :refer [reg-sub dispatch]]
     [sixsq.slipstream.webui.docs.spec :as spec]
+    [sixsq.slipstream.webui.docs.events :as events]
     [clojure.string :as str]
     [taoensso.timbre :as log]))
 
@@ -21,12 +22,14 @@
   ::document
   :<- [::documents]
   (fn [documents [_ {:keys [resourceMetadata resourceURI] :as resource}]]
-    (log/error resourceMetadata)
-    (log/error documents)
-    (if resourceMetadata
-      (some-> documents seq (get resourceMetadata))
-      (some->> documents
-               vals
-               seq
-               (filter #(= (:name %) (some-> resourceURI (str/split #"/") last)))
-               first))))
+    (if-let [resourceMetadatas (-> documents vals seq)]
+      (do (log/error "NO DISPATCH!!!!" resourceMetadatas)
+          (if resourceMetadata
+            (get documents resourceMetadata)
+            (some->> resourceMetadatas
+                     (filter #(= (:name %) (some-> resourceURI (str/split #"/") last)))
+                     first)))
+      (do
+        (log/error "DISPATCH!!!!")
+        (dispatch [::events/get-documents])))))
+

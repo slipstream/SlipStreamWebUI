@@ -2,7 +2,8 @@
   (:require
     [re-frame.core :refer [dispatch reg-sub]]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
-    [sixsq.slipstream.webui.cimi.spec :as cimi-spec]))
+    [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
+    [taoensso.timbre :as log]))
 
 
 (reg-sub
@@ -54,22 +55,13 @@
   ::collection-templates
   :<- [::collections-templates-cache]
   (fn [collections-templates-cache [_ template-href]]
-    (when (contains? collections-templates-cache template-href)
-      (let [templates-info (template-href collections-templates-cache)]
-        (when (neg-int? (:loaded templates-info))
-          (dispatch [::cimi-events/get-templates (name template-href)]))
-        templates-info))))
-
-
-(reg-sub
-  ::collection-templates-loading?
-  :<- [::collections-templates-cache]
-  (fn [collections-templates-cache [_ template-href]]
-    (when (contains? collections-templates-cache template-href)
-      (let [templates-info (template-href collections-templates-cache)
-            loaded (:loaded templates-info)
-            total (:total templates-info)]
-        (or (neg-int? loaded) (< loaded total))))))
+    ;(log/error "subscription" template-href)
+    (if-let [templates-info (template-href collections-templates-cache)]
+      (do
+        ;(log/error "::collection-templates " templates-info)
+        templates-info
+          )
+      (dispatch [::cimi-events/get-templates template-href]))))
 
 
 (reg-sub

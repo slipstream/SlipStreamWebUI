@@ -27,6 +27,7 @@
 (defmethod form-field :default
   [update-fn form-id {:keys [name displayName help hidden sensitive vscope
                              consumerMandatory consumerWritable] :as param}]
+  (log/error param)
   ^{:key displayName}
   [ui/FormField {:required consumerMandatory}
    [:label displayName nbsp (help-popup help)]

@@ -66,28 +66,18 @@
   (let [cep (subscribe [::cimi-subs/cloud-entry-point])
         server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])
         form-id (subscribe [::authn-subs/form-id])
-        tr (subscribe [::i18n-subs/tr])
-        method (u/select-method-by-id @form-id methods)
-        fake-resource {:resourceURI (-> method :params-desc :resourceURI :data)
-                       :resourceMetadata (-> method :params-desc :resourceMetadata :data)}
-        _ (log/warn "fake-resource" fake-resource)
-        resourceMetadataOnly (subscribe [::docs-subs/document fake-resource])]
+        tr (subscribe [::i18n-subs/tr])]
     (fn [methods collections-kw]
       (let [dropdown? (> (count methods) 1)
-            _ (log/warn "resourceMetadataOnly " @resourceMetadataOnly)
+            method (u/select-method-by-id @form-id methods)
+            resourceMetadataOnly (subscribe [::docs-subs/document method])
             {:keys [baseURI collection-href]} @cep
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
-            inputs-method (conj (->> method u/ordered-params (filter u/keep-visible-params))
-                                [:href {:displayName "href" :data @form-id :type "hidden"}]
-                                [:redirectURI {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])
-            new-inputs-method (->>
-                                (:attributes @resourceMetadataOnly)
-                                (filter (fn [{:keys [consumerWritable mutable group] :as attr}]
-                                          (and consumerWritable mutable (not (#{"metadata" "acl"} group)))))
-                                (sort-by :order))
-            ;_ (log/error "inputs-method: " inputs-method)
-            ;_ (log/error "new-inputs-method: " new-inputs-method)
-            ;_ (log/error "METHOD " method)
+            inputs-method (->>
+                            (:attributes @resourceMetadataOnly)
+                            (filter (fn [{:keys [consumerWritable mutable group] :as attr}]
+                                      (and consumerWritable mutable (not (#{"metadata" "acl"} group)))))
+                            (sort-by :order))
             dropdown-options (map dropdown-method-option methods)]
 
         (log/infof "creating authentication form: %s %s" (name collections-kw) @form-id)
@@ -105,7 +95,7 @@
                                :close-on-blur true
                                :on-change     (ui-callback/dropdown ::authn-events/set-form-id)}])]
 
-                          (mapv (partial forms/form-field #() @form-id) new-inputs-method)
+                          (mapv (partial forms/form-field #() @form-id) inputs-method)
                           (when (= "internal" (:method method))
                             (reset-password tr))))]))))))
 
@@ -158,8 +148,8 @@
 (defn authn-form-container
   "Container that holds all of the authentication (login or sign up) forms."
   [collection-kw failed-kw method-form-fn]
-  (let [template-href (cimi-utils/template-href collection-kw)
-        templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
+  (let [template-href (cimi-utils/collection-template-href collection-kw)
+        templates (subscribe [::cimi-subs/collection-templates template-href])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])
         selected-method-group (subscribe [::authn-subs/selected-method-group])]
@@ -325,7 +315,7 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])
         user (subscribe [::authn-subs/user])
-        template-href (cimi-utils/template-href :user)
+        template-href (cimi-utils/collection-template-href :user)
         user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
     (let [profile-fn #(history-utils/navigate "profile")
           sign-out-fn (fn []

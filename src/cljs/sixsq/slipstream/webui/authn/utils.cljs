@@ -62,4 +62,4 @@
    :group (or :method) value. Returns a vector of tuples [group-key
    authn-methods]."
   [templates]
-  (->> templates :templates vals (remove :hidden) order-and-group vec))
+  (->> templates vals (remove :hidden) order-and-group vec))

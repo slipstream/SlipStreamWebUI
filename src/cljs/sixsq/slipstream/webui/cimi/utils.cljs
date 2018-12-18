@@ -4,6 +4,7 @@
 
 (def template-suffix "-template")
 
+
 (defn collection-href-map
   "Creates a map from the CloudEntryPoint that maps the resource collection
    key (as a keyword) to the href for the collection (as a string)."
@@ -23,20 +24,21 @@
                   collection-href-map
                   (map (juxt second first))))))
 
+
 (defn collections-template-map
   "Creates a map with only templates collections href as key and nil as a value."
   [cep]
   (into {} (->> cep
                 collection-href-map
                 (filter #(-> % second (str/ends-with? template-suffix)))
-                (map (juxt #(-> % second keyword) (constantly {:templates {}
-                                                               :total     0
-                                                               :loaded    -1}))))))
+                (map (juxt #(-> % second keyword) (constantly nil))))))
 
-(defn template-href
+
+(defn collection-template-href
   "Returns the collection template href for the collection href."
   [collection-href]
-  (-> collection-href name (str template-suffix)))
+  (-> collection-href name (str template-suffix) keyword))
+
 
 (defn template-resource-key
   "Returns the collection keyword for the template resource associated with

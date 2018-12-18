@@ -3,10 +3,13 @@
     [re-frame.core :refer [subscribe]]
     [reagent.core :as reagent]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
+    [sixsq.slipstream.webui.utils.form-fields-resource-metadata :as new-ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [taoensso.timbre :as log]))
 
 
 (defn on-return-key
@@ -28,16 +31,9 @@
 
 
 (defn ordered-params
-  "Extracts and orders the parameter descriptions for rendering the form.
-   Returns a tuple with two ordered parameter groups. The first contains the
-   list of hidden parameters; the second contains the list of visible ones."
-  [method]
-  (let [params (->> method
-                    :params-desc
-                    seq
-                    (sort-by (fn [[_ {:keys [order]}]] order))
-                    (group-by (fn [[k v]] (hidden? v))))]
-    [(get params true) (get params false)]))
+  "Orders the parameter of resource metadata for rendering the form."
+  [resource-metadata]
+  (sort-by :order resource-metadata))
 
 
 (defn update-data [form-data-atom form-id param value]
@@ -48,12 +44,15 @@
       (reset! form-data-atom data))))
 
 
-(defn template-form
-  [form-data-atom {:keys [id] :as description}]
-  (let [[hidden-params visible-params] (ordered-params description)
-        update-data-fn (partial update-data form-data-atom)
-        form-component-fn (partial ff/form-field update-data-fn id)]
-    (mapv form-component-fn (concat hidden-params visible-params))))
+(defn template-form                                         ;; FIXME: filter should be a reusable function
+  [form-data-atom {:keys [id] :as template} resourceMetadata]
+  (let [update-data-fn (partial update-data form-data-atom)
+        form-component-fn (partial new-ff/form-field update-data-fn id)
+        attributes (->> (:attributes resourceMetadata)
+                        (filter (fn [{:keys [consumerWritable mutable group] :as attr}]
+                                  (and consumerWritable mutable (not (#{"acl"} group)))))
+                        (sort-by :order))]
+    (mapv form-component-fn attributes)))
 
 
 (defn descriptions->options [descriptions]
@@ -80,10 +79,10 @@
         form-data (reagent/atom nil)]
     (fn [show? templates on-submit on-cancel]
       (when (nil? @selected-id)
-        (reset! selected-id (:id (first (sort-by :id templates))))
+        (reset! selected-id (:id (first templates)))
         (update-data form-data @selected-id nil nil))
-      (let [templates (sort-by :id templates)
-            selected-description (first (filter #(= @selected-id (:id %)) templates))]
+      (let [selected-template (first (filter #(= @selected-id (:id %)) templates))
+            resourceMetadata (subscribe [::docs-subs/document selected-template])]
         [ui/Modal {:open      show?
                    :onClose   on-cancel
                    :closeIcon true}
@@ -94,7 +93,7 @@
                          (partial update-data form-data)
                          selected-id
                          templates]]
-                       (template-form form-data selected-description)))]
+                       (template-form form-data selected-template @resourceMetadata)))]
          [ui/ModalActions
           [uix/Button
            {:text     (@tr [:cancel])
@@ -108,7 +107,8 @@
 (defn form-container-inner-modal-single
   [show? template on-submit on-cancel]
   (let [tr (subscribe [::i18n-subs/tr])
-        form-data (reagent/atom nil)]
+        form-data (reagent/atom nil)
+        resourceMetadata (subscribe [::docs-subs/document template])]
     (fn [show? template on-submit on-cancel]
       (update-data form-data (:id template) nil nil)
       [ui/Modal {:open      show?
@@ -117,7 +117,7 @@
        [ui/ModalHeader (@tr [:create])]
        [ui/ModalContent {:scrolling true}
         (vec (concat [ui/Form]
-                     (template-form form-data template)))]
+                     (template-form form-data template @resourceMetadata)))]
        [ui/ModalActions
         [uix/Button
          {:text     (@tr [:cancel])
