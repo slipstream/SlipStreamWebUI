@@ -36,7 +36,6 @@
              :default-value (or (:value vscope) (:default vscope) "")
              :read-only     (not consumerWritable)
              :on-change     (ui-callback/value #(update-fn form-id name %))}
-            hidden (assoc :style {:display "none"})
-            )]])
+            hidden (assoc :style {:display "none"}))]])
 
 

@@ -18,18 +18,20 @@
   (fn [db]
     (::spec/documents db)))
 
+
 (reg-sub
   ::document
   :<- [::documents]
-  (fn [documents [_ {:keys [resourceMetadata resourceURI] :as resource}]]
-    (if-let [resourceMetadatas (-> documents vals seq)]
-      (do                                                   ;(log/error "NO DISPATCH!!!!" resourceMetadatas)
-        (if resourceMetadata
-          (get documents resourceMetadata)
-          (some->> resourceMetadatas
-                   (filter #(= (:name %) (some-> resourceURI (str/split #"/") last)))
-                   first)))
-      (do
-        ;(log/error "DISPATCH!!!!")
-        (dispatch [::events/get-documents])))))
+  (fn [documents [_ {:keys [id resourceMetadata resourceURI] :as resource}]]
+    (if-let [resourceMetadataSeq (-> documents vals seq)]
+      (cond
+        resourceMetadata (get documents resourceMetadata)
+        (re-find #"-template/" (str id)) (->> resourceMetadataSeq
+                                              (filter #(= (:id %) (str "resource-metadata/"
+                                                                       (str/replace id #"/" "-"))))
+                                              first)
+        :else (->> resourceMetadataSeq
+                   (filter #(= (:name %) (-> resourceURI str (str/split #"/") last)))
+                   first))
+      (dispatch [::events/get-documents]))))
 
