@@ -3,6 +3,7 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
+    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.deployment.events :as events]
@@ -56,18 +57,28 @@
       :on-click  #(dispatch [::events/get-deployments])}]))
 
 
-(defn stop-button
-  [deployment]
+(defn corner-button
+  [popup-text icon-name event-kw deployment-id]
   (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Popup {:content  (@tr [:stop])
+    [ui/Popup {:content  (@tr [popup-text])
                :size     "tiny"
                :position "top center"
                :trigger  (reagent/as-element
-                           [ui/Icon {:name     "close"
+                           [ui/Icon {:name     icon-name
                                      :style    {:cursor "pointer"}
                                      :color    "red"
                                      :size     "large"
-                                     :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}]))
+                                     :on-click #(dispatch [event-kw deployment-id])}])}]))
+
+
+(defn stop-button
+  [{:keys [id] :as deployment}]
+  [corner-button :stop "close" ::events/stop-deployment id])
+
+
+(defn delete-button
+  [{:keys [id] :as deployment}]
+  [corner-button :delete "trash" ::deployment-detail-events/delete id])
 
 
 (defn menu-bar
@@ -122,8 +133,9 @@
      [ui/TableCell {:style {:overflow      "hidden",
                             :text-overflow "ellipsis",
                             :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]
-     [ui/TableCell (when (deployment-detail-utils/stop-action? deployment)
-                     [stop-button deployment])]]))
+     [ui/TableCell (cond
+                     (deployment-detail-utils/stop-action? deployment) [stop-button deployment]
+                     (deployment-detail-utils/delete-action? deployment) [delete-button deployment])]]))
 
 
 
@@ -170,9 +182,11 @@
                            :padding    "20px"
                            :object-fit "contain"}}]
 
-     (when (deployment-detail-utils/stop-action? deployment)
-       [ui/Label {:corner true
-                  :size   "small"} [stop-button deployment]])
+     (cond
+       (deployment-detail-utils/stop-action? deployment) [ui/Label {:corner true, :size "small"}
+                                                          [stop-button deployment]]
+       (deployment-detail-utils/delete-action? deployment) [ui/Label {:corner true, :size "small"}
+                                                            [delete-button deployment]])
 
      [ui/CardContent {:href     id
                       :on-click (fn [event]

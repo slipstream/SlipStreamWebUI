@@ -487,7 +487,7 @@
     (map (partial step-items locale active-state-index events-map) steps)))
 
 
-(defn progession-section
+(defn progression-section
   []
   (let [events (subscribe [::subs/events])
         force-refresh (subscribe [::subs/force-refresh-events-steps])
@@ -510,7 +510,7 @@
        [ui/Container {:fluid true}
         [menu]
         [metadata-section]
-        [progession-section]
+        [progression-section]
         [summary-section]
         [global-parameters-section]
         [events-section]
