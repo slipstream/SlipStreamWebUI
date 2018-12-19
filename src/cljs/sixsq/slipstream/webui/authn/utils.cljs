@@ -18,19 +18,6 @@
        (group-by #(or (:group %) (:method %)))))
 
 
-(defn hidden? [{:keys [type] :as param-desc}]
-  (= "hidden" type))
-
-
-(defn ordered-params
-  "Extracts and orders the parameter descriptions for rendering the form."
-  [method]
-  (->> method
-       :params-desc
-       seq
-       (sort-by (fn [[_ {:keys [order]}]] order))))
-
-
 (defn keep-visible-params
   "Keeps the form parameters that should be shown to the user. It removes all
    readOnly parameters along with :name and :description."

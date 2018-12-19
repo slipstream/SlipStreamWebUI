@@ -53,6 +53,7 @@
                                   first
                                   :rel)]
       (log/info (:id resource))
+      (log/warn "tpl-resource-key" tpl-resource-key)
       (cond-> {:db (assoc db ::cimi-detail-spec/loading? false
                              ::cimi-detail-spec/resource-id (:id resource)
                              ::cimi-detail-spec/resource resource
@@ -89,8 +90,7 @@
                                                                status (str " (" status ")"))
                                               :content message
                                               :type    :success}])
-                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]
-       })))
+                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]})))
 
 
 (reg-event-fx

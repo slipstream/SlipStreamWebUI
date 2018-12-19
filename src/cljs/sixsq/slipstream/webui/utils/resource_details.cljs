@@ -87,7 +87,7 @@
         [hidden-params visible-params] (form-utils/ordered-params description-with-data)
         update-data-fn (partial update-data text)
         form-component-fn (partial ff/form-field update-data-fn nil)]
-    (mapv form-component-fn (concat hidden-params visible-params))))
+    (mapv form-component-fn [] (concat hidden-params visible-params))))
 
 
 (defn edit-button
@@ -236,19 +236,21 @@
 
 
 (defn data-to-tuple-fn
-  [params-desc]
-  (juxt
-    (comp strip-attr-ns first)
-    second
-    #(get-in params-desc [(keyword (first %)) :displayName])
-    #(get-in params-desc [(keyword (first %)) :description])))
+  [attributes]
+  (fn [[field-name field-value]]
+    (let [attributes-map (->> attributes (map (juxt #(-> % :name keyword) identity)) (into {}))]
+
+      [(strip-attr-ns field-name)
+       field-value
+       (-> attributes-map field-name :displayName)
+       (-> attributes-map field-name :description)])))
 
 
 (defn group-table-sui
-  [group-data {:keys [params-desc] :as description}]
+  [group-data {:keys [attributes] :as description}]
   (let [data (sort-by first group-data)]
     (table/definition-table (->> data
-                                 (map (data-to-tuple-fn params-desc))
+                                 (map (data-to-tuple-fn attributes))
                                  (map tuple-to-row)))))
 
 

@@ -16,7 +16,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [sixsq.slipstream.webui.utils.form-fields-resource-metadata :as forms]
+    [sixsq.slipstream.webui.utils.form-fields :as forms]
     [taoensso.timbre :as log]))
 
 

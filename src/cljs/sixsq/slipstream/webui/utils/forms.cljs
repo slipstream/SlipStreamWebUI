@@ -5,7 +5,6 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
-    [sixsq.slipstream.webui.utils.form-fields-resource-metadata :as new-ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
@@ -22,12 +21,6 @@
       (some-> js/document .-activeElement .blur)
       (catch :default _ nil))
     (f)))
-
-
-(defn hidden?
-  "Determines if the given parameter description describes a hidden field."
-  [{:keys [type] :as param-desc}]
-  (= "hidden" type))
 
 
 (defn ordered-params
@@ -47,7 +40,7 @@
 (defn template-form                                         ;; FIXME: filter should be a reusable function
   [form-data-atom {:keys [id] :as template} resourceMetadata]
   (let [update-data-fn (partial update-data form-data-atom)
-        form-component-fn (partial new-ff/form-field update-data-fn id)
+        form-component-fn (partial ff/form-field update-data-fn id)
         attributes (->> (:attributes resourceMetadata)
                         (filter (fn [{:keys [consumerWritable consumerMandatory] :as attribute}]
                                   (or consumerWritable

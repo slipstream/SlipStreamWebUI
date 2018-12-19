@@ -46,27 +46,6 @@
   (str baseURI relative-url))
 
 
-(defn keep-param-desc? [[k {:keys [type readOnly]}]]
-  (and (not readOnly) (not= "map" type) (not= "list" type)))
-
-
-(defn filter-params-desc [desc]
-  (into {} (filter keep-param-desc? desc)))
-
-
-(defn prepare-template
-  [{:keys [id name method description group hidden icon order] :as tpl}]
-  [(keyword id) {:id             id
-                 :label          name
-                 :method         method
-                 :group          group
-                 :hidden         hidden
-                 :icon           icon
-                 :order          order
-                 :default-values tpl
-                 :description    description}])
-
-
 (defn login-form-fields [{:keys [params-desc] :as tpl}]
   (->> params-desc
        keys

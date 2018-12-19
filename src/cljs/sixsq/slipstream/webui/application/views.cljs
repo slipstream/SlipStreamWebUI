@@ -42,7 +42,7 @@
           deploy-disabled? (= "PROJECT" (:type @module))]
       (vec (concat [ui/Menu {:borderless true}]
 
-                   (resource-details/format-operations nil @module (:baseURI @cep) {})
+                   (resource-details/format-operations nil @module (:baseURI @cep) nil)
 
                    [[uix/MenuItemWithIcon
                      {:name      (@tr [:launch])

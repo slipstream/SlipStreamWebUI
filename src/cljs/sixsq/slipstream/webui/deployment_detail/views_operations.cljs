@@ -4,7 +4,7 @@
     [sixsq.slipstream.webui.deployment-detail.events :as events]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.resource-details :as resource-details]
-    ))
+    [taoensso.timbre :as log]))
 
 
 ;; Explicit keys have been added to the operation buttons to avoid react
