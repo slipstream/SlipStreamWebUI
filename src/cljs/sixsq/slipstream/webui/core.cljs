@@ -9,7 +9,9 @@
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.config :as config]
     [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
+    [sixsq.slipstream.webui.data.views :as data-views]
     [sixsq.slipstream.webui.db.events :as db-events]
+    [sixsq.slipstream.webui.deployment.views :as deployment-views]
     [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.dnd.utils :as dnd-utils]
     [sixsq.slipstream.webui.history.events :as history-events]
@@ -55,6 +57,9 @@
                                                          (dispatch-sync [::authn-events/redirect-uri "/dashboard"])))
   (render-component-when-present "dashboard-tab" dashboard-views/vms-deployments)
   (render-component-when-present "usage" usage-views/usage)
+  (render-component-when-present "slipstream-usage" usage-views/usage)
+  (render-component-when-present "slipstream-data" data-views/service-offer-resources)
+  (render-component-when-present "slipstream-deployment" deployment-views/deployment-resources)
   (render-component-when-present "deployment-detail-reports" deployment-detail-views/reports-list))
 
 
