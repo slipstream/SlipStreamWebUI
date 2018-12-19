@@ -44,7 +44,7 @@
           callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
                            (dispatch [::set-deployment
                                       (-> updated-deployment
-                                          (assoc :serviceOffers service-offers-ids)
+                                          (assoc :serviceOffers (utils/service-offer-ids->map service-offers-ids))
                                           (assoc-in [:module :content :mounts] (utils/service-offers->mounts %)))]))]
       (cond-> {:db (assoc db ::spec/selected-credential credential
                              ::spec/deployment updated-deployment)}
