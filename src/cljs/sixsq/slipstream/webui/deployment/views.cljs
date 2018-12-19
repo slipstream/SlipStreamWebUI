@@ -2,12 +2,14 @@
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
-    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
+    [reagent.core :as reagent]
+    [sixsq.slipstream.webui.deployment-detail.events :as deployment-detail-events]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
+    [sixsq.slipstream.webui.deployment-detail.views :as deployment-detail-views]
     [sixsq.slipstream.webui.deployment.events :as events]
     [sixsq.slipstream.webui.deployment.subs :as subs]
-    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.history.events :as history-events]
+    [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.events :as main-events]
     [sixsq.slipstream.webui.main.subs :as main-subs]
@@ -17,9 +19,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [reagent.core :as reagent]))
-
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn deployment-active?
@@ -57,18 +57,28 @@
       :on-click  #(dispatch [::events/get-deployments])}]))
 
 
-(defn stop-button
-  [deployment]
+(defn action-button
+  [popup-text icon-name event-kw deployment-id]
   (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Popup {:content (@tr [:stop])
-               :size "tiny"
+    [ui/Popup {:content  (@tr [popup-text])
+               :size     "tiny"
                :position "top center"
-               :trigger (reagent/as-element
-                          [ui/Icon {:name     "close"
-                                    :style    {:cursor "pointer"}
-                                    :color    "red"
-                                    :size     "large"
-                                    :on-click #(dispatch [::events/stop-deployment (:id deployment)])}])}]))
+               :trigger  (reagent/as-element
+                           [ui/Icon {:name     icon-name
+                                     :style    {:cursor "pointer"}
+                                     :color    "red"
+                                     :size     "large"
+                                     :on-click #(dispatch [event-kw deployment-id])}])}]))
+
+
+(defn stop-button
+  [{:keys [id] :as deployment}]
+  [action-button :stop "close" ::events/stop-deployment id])
+
+
+(defn delete-button
+  [{:keys [id] :as deployment}]
+  [action-button :delete "trash" ::deployment-detail-events/delete id])
 
 
 (defn menu-bar
@@ -123,8 +133,9 @@
      [ui/TableCell {:style {:overflow      "hidden",
                             :text-overflow "ellipsis",
                             :max-width     "20ch"}} (str/join ", " (map #(get @creds-name % %) creds-ids))]
-     [ui/TableCell (when (deployment-detail-utils/stop-action? deployment)
-                     [stop-button deployment])]]))
+     [ui/TableCell (cond
+                     (deployment-detail-utils/stop-action? deployment) [stop-button deployment]
+                     (deployment-detail-utils/delete-action? deployment) [delete-button deployment])]]))
 
 
 
@@ -171,13 +182,18 @@
                            :padding    "20px"
                            :object-fit "contain"}}]
 
+     (cond
+       (deployment-detail-utils/stop-action? deployment) [ui/Label {:corner true, :size "small"}
+                                                          [stop-button deployment]]
+       (deployment-detail-utils/delete-action? deployment) [ui/Label {:corner true, :size "small"}
+                                                            [delete-button deployment]])
+
      [ui/CardContent {:href     id
                       :on-click (fn [event]
                                   (dispatch [::history-events/navigate id])
                                   (.preventDefault event))}
 
-      (when (deployment-detail-utils/stop-action? deployment)
-        [ui/Label {:as :a :corner true :size "small"} [stop-button deployment]])
+
 
 
       [ui/Segment (merge style/basic {:floated "right"})
@@ -240,7 +256,7 @@
          [menu-bar]
          [ui/Segment style/basic
           [deployments-display deployments-list]]
-         [ui/Label "Found" [ui/LabelDetail (get @deployments :count "-")]]
+         [ui/Label (@tr [:total]) [ui/LabelDetail (get @deployments :count "-")]]
          (when (> total-pages 1)
            [uix/Pagination
             {:totalPages   total-pages

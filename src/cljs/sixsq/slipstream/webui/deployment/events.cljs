@@ -4,8 +4,8 @@
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
-    [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.deployment.spec :as spec]
+    [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.response :as response]))
 
 

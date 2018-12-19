@@ -170,10 +170,6 @@
        (constantly nil)])))
 
 
-(defn operation-name [op-uri]
-  (second (re-matches #"^(?:.*/)?(.+)$" op-uri)))
-
-
 ;; Explicit keys have been added to the operation buttons to avoid react
 ;; errors for duplicate keys, which may happen when the data contains :key.
 ;; It is probably a bad idea to have a first argument that can be a map
@@ -186,7 +182,7 @@
 
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
-  (let [ops (map (juxt #(operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
+  (let [ops (map (juxt #(general/operation-name (:rel %)) #(str baseURI (:href %)) :rel) operations)]
     (vec (concat [refresh-button] (map (partial operation-button data description) ops)))))
 
 

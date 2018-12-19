@@ -9,6 +9,7 @@
     [sixsq.slipstream.webui.client.subs :as client-subs]
     [sixsq.slipstream.webui.dashboard.events :as dashboard-events]
     [sixsq.slipstream.webui.dashboard.subs :as dashboard-subs]
+    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
@@ -165,7 +166,8 @@
 
 (defn deployments-table
   []
-  (let [deployments (subscribe [::dashboard-subs/deployments])
+  (let [tr (subscribe [::i18n-subs/tr])
+        deployments (subscribe [::dashboard-subs/deployments])
         headers ["" "ID" "Application / Component" "Service URL" "State" "VMs"
                  "Start Time [UTC]" "Clouds" "Tags" "User" ""]
         page (subscribe [::dashboard-subs/page])
@@ -211,7 +213,7 @@
           [ui/TableFooter
            [ui/TableRow
             [ui/TableHeaderCell {:col-span (str 3)}
-             [ui/Label "Found" [ui/LabelDetail deployments-count]]]
+             [ui/Label (@tr [:total]) [ui/LabelDetail deployments-count]]]
             [ui/TableHeaderCell {:textAlign "right"
                                  :col-span  (str (- (count headers) 3))}
              [uix/Pagination
