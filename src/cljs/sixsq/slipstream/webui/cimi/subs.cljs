@@ -2,8 +2,7 @@
   (:require
     [re-frame.core :refer [dispatch reg-sub]]
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
-    [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.cimi.spec :as cimi-spec]))
 
 
 (reg-sub
@@ -55,13 +54,10 @@
   ::collection-templates
   :<- [::collections-templates-cache]
   (fn [collections-templates-cache [_ template-href]]
-    ;(log/error "subscription" template-href)
-    (if-let [templates-info (template-href collections-templates-cache)]
-      (do
-        ;(log/error "::collection-templates " templates-info)
+    (when (contains? collections-templates-cache template-href)
+      (if-let [templates-info (template-href collections-templates-cache)]
         templates-info
-          )
-      (dispatch [::cimi-events/get-templates template-href]))))
+        (dispatch [::cimi-events/get-templates template-href])))))
 
 
 (reg-sub
