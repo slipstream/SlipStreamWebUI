@@ -41,19 +41,6 @@
                              #(dispatch [::set-reports %])]})))
 
 
-(reg-event-fx
-  ::download-report
-  (fn [{{:keys [::client-spec/client] :as db} :db} [_ id]]
-    {::cimi-api-fx/operation [client id "http://sixsq.com/slipstream/1/action/download"
-                              #(dispatch [::download (:uri %)])]}))
-
-
-(reg-event-fx
-  ::download
-  (fn [_ [_ uri]]
-    {::main-fx/open-new-window [uri]}))
-
-
 (reg-event-db
   ::set-deployment
   (fn [db [_ resource]]
