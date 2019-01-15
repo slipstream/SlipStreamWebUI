@@ -75,10 +75,10 @@
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
             inputs-method (conj
                             (->> (:attributes @resourceMetadata)
-                                (filter (fn [{:keys [consumerWritable consumerMandatory group] :as attribute}]
-                                          (and (not (#{"metadata" "acl"} group))
-                                               consumerWritable)))
-                                (sort-by :order))
+                                 (filter (fn [{:keys [consumerWritable consumerMandatory group] :as attribute}]
+                                           (and (not (#{"metadata" "acl"} group))
+                                                consumerWritable)))
+                                 (sort-by :order))
                             {:name "href" :vscope {:value @form-id} :hidden true}
                             {:name "redirectURI" :vscope {:value @server-redirect-uri} :hidden true})
             dropdown-options (map dropdown-method-option methods)]
@@ -88,7 +88,8 @@
           (concat
             [ui/Form {:id (or @form-id "authn-form-placeholder-id"), :action post-uri, :method "post"}]
 
-            [(vec (concat [ui/Segment {:style {:height "35ex"}}
+            [(vec (concat [ui/Segment {:style {:height     "35ex"
+                                               :overflow-y "auto"}}
                            (when dropdown?
                              [ui/FormDropdown
                               {:options       dropdown-options
