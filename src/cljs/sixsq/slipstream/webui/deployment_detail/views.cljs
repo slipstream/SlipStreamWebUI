@@ -191,12 +191,17 @@
 
 (defn report-item
   [{:keys [id component created state] :as report}]
-  ^{:key id} [:li
-              (let [label (str/join " " [component created])]
-                (if (= state "ready")
-                  [:a {:style    {:cursor "pointer"}
-                       :on-click #(dispatch [::events/download-report id])} label]
-                  label))])
+  (let [cep (subscribe [::cimi-subs/cloud-entry-point])
+        {:keys [baseURI]} @cep]
+    (when baseURI
+      ^{:key id} [:li
+                  (let [label (str/join " " [component created])]
+                    (if (= state "ready")
+                      ;; FIXME: The download URLs should be taken from operations rather than constructed like this.
+                      [:a {:style    {:cursor "pointer"}
+                           :download true
+                           :href     (str baseURI id "/download")} label]
+                      label))])))
 
 
 (def event-fields #{:id :content :timestamp :type})
