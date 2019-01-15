@@ -48,6 +48,7 @@
   "Temporary implementation to convert the list of service offer IDs into a
    map with an empty list of datasets."
   [service-offer-ids]
+  ;; FIXME: This sets the list of datasets to nil.  Recover the correct info and set.
   (let [service-offer-id-keywords (map keyword service-offer-ids)]
     (into {} (map vector service-offer-id-keywords (repeat nil)))))
 
