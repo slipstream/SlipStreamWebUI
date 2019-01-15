@@ -23,15 +23,15 @@
   ::document
   :<- [::documents]
   (fn [documents [_ {:keys [id resourceMetadata resourceURI] :as resource}]]
-    (if-let [resourceMetadataSeq (-> documents vals seq)]
-      (cond
-        resourceMetadata (get documents resourceMetadata)
-        (re-find #"-template/" (str id)) (->> resourceMetadataSeq
-                                              (filter #(= (:id %) (str "resource-metadata/"
-                                                                       (str/replace id #"/" "-"))))
-                                              first)
-        :else (->> resourceMetadataSeq
-                   (filter #(= (:name %) (-> resourceURI str (str/split #"/") last)))
-                   first))
+    (log/error id resourceMetadata resourceURI)
+    (if (seq documents)
+      (let [resource-metadata-id (cond
+                                   resourceMetadata resourceMetadata
+                                   (re-find #"-template/" (str id)) (->> (str/replace id #"/" "-")
+                                                                         (str "resource-metadata/"))
+                                   :else (let [collection-name (-> resourceURI str (str/split #"/") last)]
+                                           (str "resource-metadata/" collection-name)))]
+        (log/error "search for metadata id:" resource-metadata-id (sort (keys documents)))
+        (get documents "resource-metadata/credential-template-api-key" #_resource-metadata-id))
       (dispatch [::events/get-documents]))))
 
