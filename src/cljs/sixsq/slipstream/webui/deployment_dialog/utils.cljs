@@ -1,5 +1,4 @@
-(ns sixsq.slipstream.webui.deployment-dialog.utils
-  (:require [taoensso.timbre :as log]))
+(ns sixsq.slipstream.webui.deployment-dialog.utils)
 
 
 (defn matches-parameter-name?

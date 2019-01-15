@@ -10,8 +10,7 @@
     [sixsq.slipstream.webui.deployment-dialog.utils :as utils]
     [sixsq.slipstream.webui.history.events :as history-evts]
     [sixsq.slipstream.webui.messages.events :as messages-events]
-    [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-fx
@@ -63,7 +62,6 @@
 (reg-event-db
   ::set-deployment
   (fn [db [_ deployment]]
-    (log/error "SETTING DEPLOYMENT" (with-out-str (cljs.pprint/pprint deployment)))
     (assoc db ::spec/deployment deployment
               ::spec/loading-deployment? false)))
 
