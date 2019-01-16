@@ -23,6 +23,7 @@
     "chart.js": "^2.7.3",
     "codemirror": "^5.41.0",
     "create-react-class": "15.6.3",
+    "license-checker": "^25.0.1",
     "moment": "^2.22.2",
     "react": "16.5.2",
     "react-chartjs-2": "^2.7.4",
