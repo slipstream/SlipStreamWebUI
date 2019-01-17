@@ -49,11 +49,10 @@
   to vector of origin datasets"
   [dataset-map acc]
   (if (empty? dataset-map)
-    acc                                                     ;;exit recursion
+    acc                                                     ;; exit recursion
     (let [dataset-id (first (keys dataset-map))
           serviceOffers (dataset-id dataset-map)
-          dataset-id-key->str (fn[k] (subs (str dataset-id) 1))
-          ]
+          dataset-id-key->str (fn [k] (subs (str dataset-id) 1))]
       (if (empty? serviceOffers)
         (invert-dataset-map (dissoc dataset-map dataset-id) acc)
         (let [service-offer-id (first serviceOffers)]

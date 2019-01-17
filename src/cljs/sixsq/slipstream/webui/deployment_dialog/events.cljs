@@ -41,7 +41,7 @@
                 ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential}]]
     (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
           filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
-          selected-keys (vec (map keyword (::data-spec/selected-dataset-ids db)))
+          selected-keys (map keyword (::data-spec/selected-dataset-ids db))
           datasets-map (select-keys (::data-spec/service-offers-by-dataset db) selected-keys)
 
           callback-data #(dispatch [::set-deployment

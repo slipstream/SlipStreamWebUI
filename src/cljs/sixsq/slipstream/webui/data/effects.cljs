@@ -19,5 +19,5 @@
             (callback id (<! (cimi/search client
                                           "serviceOffers"
                                           {:$filter      filter
-                                           :$select        "id"
+                                           :$select      "id"
                                            :$aggregation "count:id, sum:data:bytes"})))))))))
