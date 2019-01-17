@@ -44,13 +44,26 @@
   (remove #(remove-param? (:parameter %)) collection))
 
 
-(defn service-offer-ids->map
-  "Temporary implementation to convert the list of service offer IDs into a
-   map with an empty list of datasets."
-  [service-offer-ids]
-  ;; FIXME: This sets the list of datasets to nil.  Recover the correct info and set.
-  (let [service-offer-id-keywords (map keyword service-offer-ids)]
-    (into {} (map vector service-offer-id-keywords (repeat nil)))))
+(defn invert-dataset-map
+  "Takes maps from dataset->serviceOffers and returns map of service-offer-ids
+  to vector of origin datasets"
+  [dataset-map acc]
+  (if (empty? dataset-map)
+    acc                                                     ;;exit recursion
+    (let [dataset-id (first (keys dataset-map))
+          serviceOffers (dataset-id dataset-map)
+          dataset-id-key->str (fn[k] (subs (str dataset-id) 1))
+          ]
+      (if (empty? serviceOffers)
+        (invert-dataset-map (dissoc dataset-map dataset-id) acc)
+        (let [service-offer-id (first serviceOffers)]
+          (if ((keyword service-offer-id) acc)
+            (invert-dataset-map
+              (assoc dataset-map dataset-id (vec (drop 1 serviceOffers)))
+              (update acc (keyword service-offer-id) conj (dataset-id-key->str dataset-id)))
+            (invert-dataset-map
+              (assoc dataset-map dataset-id (vec (drop 1 serviceOffers)))
+              (assoc acc (keyword service-offer-id) (vector (dataset-id-key->str dataset-id))))))))))
 
 
 (defn service-offers->mounts
