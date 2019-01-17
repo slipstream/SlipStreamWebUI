@@ -44,6 +44,12 @@
   (remove #(remove-param? (:parameter %)) collection))
 
 
+(defn kw->str
+  "Convert a keyword to a string, retaining any namespace."
+  [kw]
+  (subs (str kw) 1))
+
+
 (defn invert-dataset-map
   "Takes maps from dataset->serviceOffers and returns map of service-offer-ids
   to vector of origin datasets"
@@ -51,18 +57,17 @@
   (if (empty? dataset-map)
     acc                                                     ;; exit recursion
     (let [dataset-id (first (keys dataset-map))
-          serviceOffers (dataset-id dataset-map)
-          dataset-id-key->str (fn [k] (subs (str dataset-id) 1))]
+          serviceOffers (dataset-id dataset-map)]
       (if (empty? serviceOffers)
         (invert-dataset-map (dissoc dataset-map dataset-id) acc)
         (let [service-offer-id (first serviceOffers)]
           (if ((keyword service-offer-id) acc)
             (invert-dataset-map
               (assoc dataset-map dataset-id (vec (drop 1 serviceOffers)))
-              (update acc (keyword service-offer-id) conj (dataset-id-key->str dataset-id)))
+              (update acc (keyword service-offer-id) conj (kw->str dataset-id)))
             (invert-dataset-map
               (assoc dataset-map dataset-id (vec (drop 1 serviceOffers)))
-              (assoc acc (keyword service-offer-id) (vector (dataset-id-key->str dataset-id))))))))))
+              (assoc acc (keyword service-offer-id) (vector (kw->str dataset-id))))))))))
 
 
 (defn service-offers->mounts
