@@ -44,13 +44,10 @@
   (remove #(remove-param? (:parameter %)) collection))
 
 
-(defn service-offer-ids->map
-  "Temporary implementation to convert the list of service offer IDs into a
-   map with an empty list of datasets."
-  [service-offer-ids]
-  ;; FIXME: This sets the list of datasets to nil.  Recover the correct info and set.
-  (let [service-offer-id-keywords (map keyword service-offer-ids)]
-    (into {} (map vector service-offer-id-keywords (repeat nil)))))
+(defn kw->str
+  "Convert a keyword to a string, retaining any namespace."
+  [kw]
+  (subs (str kw) 1))
 
 
 (defn service-offers->mounts
@@ -66,3 +63,29 @@
               (str "type=volume,volume-opt=o=addr=" ip
                    ",volume-opt=device=:" device
                    ",volume-opt=type=nfs,dst=/mnt/" bucket)))))
+
+;;
+;; may want to consider the following implementation for invert-dataset-map
+;;
+
+(defn conj-dataset
+  "Inserts 'dataset' into the list of datasets for the key 'offer' in the map
+   result."
+  [dataset-id result offer-id]
+  (update-in result [(keyword offer-id)] conj dataset-id))
+
+
+(defn entry-reducer
+  "Merges into 'result' the inversion of a single entry in the dataset map."
+  [result [dataset-kw offer-ids]]
+  (let [f (->> dataset-kw
+               kw->str
+               (partial conj-dataset))]
+    (reduce f result offer-ids)))
+
+
+(defn invert-dataset-map
+  [dataset-map]
+  (reduce entry-reducer {} dataset-map))
+
+
