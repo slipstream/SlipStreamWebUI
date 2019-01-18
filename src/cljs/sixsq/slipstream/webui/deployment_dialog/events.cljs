@@ -46,7 +46,7 @@
 
           callback-data #(dispatch [::set-deployment
                                       (-> updated-deployment
-                                          (assoc :serviceOffers (utils/invert-dataset-map datasets-map {}))
+                                          (assoc :serviceOffers (utils/invert-dataset-map datasets-map))
                                           (assoc-in [:module :content :mounts] (utils/service-offers->mounts %)))])]
       (cond-> {:db (assoc db ::spec/selected-credential credential
                              ::spec/deployment updated-deployment)}
