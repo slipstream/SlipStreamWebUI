@@ -33,6 +33,8 @@
 
 (s/def ::datasets (s/map-of string? map?))
 
+(s/def ::service-offers-by-dataset (s/map-of string? vector?))
+
 (s/def ::selected-dataset-ids (s/coll-of string? :kind set?))
 
 (s/def ::db (s/keys :req [::time-period
@@ -48,6 +50,7 @@
                           ::counts
                           ::sizes
                           ::datasets
+                          ::service-offers-by-dataset
                           ::selected-dataset-ids
                           ]))
 
@@ -67,5 +70,6 @@
                ::counts                      nil
                ::sizes                       nil
                ::datasets                    {}
+               ::service-offers-by-dataset   {}
                ::selected-dataset-ids        #{}
                })
