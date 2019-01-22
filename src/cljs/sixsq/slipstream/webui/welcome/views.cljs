@@ -5,6 +5,7 @@
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
+    [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
 
@@ -27,7 +28,8 @@
 (defmethod panel/render :welcome
   [path]
   (let [tr (subscribe [::i18n-subs/tr])
-        is-admin? (subscribe [::authn-subs/is-admin?])]
+        is-admin? (subscribe [::authn-subs/is-admin?])
+        iframe? (subscribe [::main-subs/iframe?])]
     [ui/Container {:textAlign "center"
                    :fluid     true
                    :class     "webui-welcome-background"}
@@ -39,14 +41,15 @@
       (@tr [:welcome-detail])]
 
      [ui/CardGroup {:centered true}
-      [card :dashboard :welcome-dashboard-desc "dashboard" "dashboard"]
-      [card :quota :welcome-quota-desc "balance scale" "quota"]
-      [card :usage :welcome-usage-desc "history" "usage"]
+      (when-not @iframe? [card :dashboard :welcome-dashboard-desc "dashboard" "dashboard"])
+      (when-not @iframe? [card :quota :welcome-quota-desc "balance scale" "quota"])
+      (when-not @iframe? [card :usage :welcome-usage-desc "history" "usage"])
       ;[card :appstore :welcome-appstore-desc "certificate" "appstore"]
       [card :deployment :welcome-deployment-desc "cloud" "deployment"]
-      [card :application :welcome-application-desc "sitemap" "application"]
-      [card :nuvlabox-ctrl :welcome-nuvlabox-desc "desktop" "nuvlabox"]
-      (when @is-admin? [card :metrics :welcome-metrics-desc "bar chart" "metrics"])
-      [card :documentation :welcome-docs-desc "book" "documentation"]
-      [card :cimi :welcome-cimi-desc "code" "cimi"]
+      (when-not @iframe? [card :application :welcome-application-desc "sitemap" "application"])
+      [card :data :welcome-data-desc "database" "data"]
+      (when-not @iframe? [card :nuvlabox-ctrl :welcome-nuvlabox-desc "desktop" "nuvlabox"])
+      (when (and @is-admin? (not @iframe?)) [card :metrics :welcome-metrics-desc "bar chart" "metrics"])
+      (when-not @iframe? [card :documentation :welcome-docs-desc "book" "documentation"])
+      (when-not @iframe? [card :cimi :welcome-cimi-desc "code" "cimi"])
       ]]))

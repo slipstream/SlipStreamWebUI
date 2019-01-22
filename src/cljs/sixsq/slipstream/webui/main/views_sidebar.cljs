@@ -55,7 +55,8 @@
    application."
   []
   (let [show? (subscribe [::main-subs/sidebar-open?])
-        is-admin? (subscribe [::authn-subs/is-admin?])]
+        is-admin? (subscribe [::authn-subs/is-admin?])
+        iframe? (subscribe [::main-subs/iframe?])]
 
     [ui/Sidebar {:as        ui/MenuRaw
                  :className "medium thin"
@@ -70,14 +71,14 @@
                 :compact  true
                 :inverted true}
        [logo-item]
-       [item :dashboard "dashboard" "dashboard"]
-       [item :quota "quota" "balance scale"]
-       [item :usage "usage" "history"]
+       (when-not @iframe? [item :dashboard "dashboard" "dashboard"])
+       (when-not @iframe? [item :quota "quota" "balance scale"])
+       (when-not @iframe? [item :usage "usage" "history"])
        [item :deployment "deployment" "cloud"]
-       [item :application "application" "sitemap"]
-       [item :appstore "appstore" "play"]
+       (when-not @iframe? [item :application "application" "sitemap"])
+       (when-not @iframe? [item :appstore "appstore" "play"])
        [item :data "data" "database"]
-       [item :nuvlabox-ctrl "nuvlabox" "desktop"]
-       (when @is-admin? [item :metrics "metrics" "bar chart"])
-       [item :documentation "documentation" "book"]
-       [item :cimi "cimi" "code"]]]]))
+       (when-not @iframe? [item :nuvlabox-ctrl "nuvlabox" "desktop"])
+       (when (and @is-admin? (not @iframe?)) [item :metrics "metrics" "bar chart"])
+       (when-not @iframe? [item :documentation "documentation" "book"])
+       (when-not @iframe? [item :cimi "cimi" "code"])]]]))
