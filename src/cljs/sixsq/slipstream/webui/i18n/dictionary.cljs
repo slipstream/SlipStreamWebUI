@@ -91,6 +91,7 @@
         :more-info                "More information..."
         :name                     "name"
         :next-step                "next step"
+        :no                       "no"
         :no-account?              "No account?"
         :no-apps                  "no matching applications"
         :no-credentials           "no credentials for selected infrastructure"
@@ -175,6 +176,7 @@
         :welcome-application-desc "Manage apps, components and images. Collaborate, share and explore one-click deployable applications"
         :welcome-nuvlabox-desc    "Add IoT and edge management. Control all your NuvlaBoxes from one place"
         :welcome-metrics-desc     "View a wealth of metrics giving you real insights on the health of the system"
+        :yes                      "yes"
         :yesterday                "yesterday"}
 
    :fr {:lang                   "français"
@@ -257,6 +259,7 @@
         :more-info              "Plus d'informations"
         :name                   "nom"
         :next-step              "étape suivante"
+        :no                     "non"
         :no-account?            "Pas de compte ?"
         :no-apps                "pas d'applications correspondantes"
         :no-credentials         "pas d'informations d'identifcation pour l'infrastructure sélectionné"
@@ -327,4 +330,5 @@
         :welcome                "bienvenue"
         :welcome-cimi-desc      "Parcourir les ressources CIMI sur le serveur."
         :welcome-detail         "La solution complète pour gérer votre continuum multi-cloud et edge"
+        :yes                    "oui"
         :yesterday              "hier"}})

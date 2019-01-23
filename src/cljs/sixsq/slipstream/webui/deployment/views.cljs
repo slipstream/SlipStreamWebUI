@@ -60,15 +60,22 @@
 (defn action-button
   [popup-text icon-name event-kw deployment-id]
   (let [tr (subscribe [::i18n-subs/tr])]
-    [ui/Popup {:content  (@tr [popup-text])
-               :size     "tiny"
-               :position "top center"
-               :trigger  (reagent/as-element
-                           [ui/Icon {:name     icon-name
-                                     :style    {:cursor "pointer"}
-                                     :color    "red"
-                                     :size     "large"
-                                     :on-click #(dispatch [event-kw deployment-id])}])}]))
+    [ui/Modal
+     {:trigger (reagent/as-element
+                 [:div
+                  [ui/Popup {:content  (@tr [popup-text])
+                             :size     "tiny"
+                             :position "top center"
+                             :trigger  (reagent/as-element
+                                         [ui/Icon {:name  icon-name
+                                                   :style {:cursor "pointer"}
+                                                   :color "red"
+                                                   :size  "large"}])}]])
+      :header  (@tr [popup-text])
+      :content (@tr [:are-you-sure?])
+      :actions [{:key "cancel", :content (@tr [:cancel])}
+                {:key     "yes", :content (@tr [:yes]), :positive true,
+                 :onClick #(dispatch [event-kw deployment-id])}]}]))
 
 
 (defn stop-button
