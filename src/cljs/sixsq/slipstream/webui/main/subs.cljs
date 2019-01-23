@@ -1,29 +1,34 @@
 (ns sixsq.slipstream.webui.main.subs
   (:require
     [re-frame.core :refer [reg-sub]]
-    [sixsq.slipstream.webui.main.spec :as main-spec]))
+    [sixsq.slipstream.webui.main.spec :as spec]))
+
+
+(reg-sub
+  ::iframe?
+  ::spec/iframe?)
 
 
 (reg-sub
   ::device
-  ::main-spec/device)
+  ::spec/device)
 
 
 (reg-sub
   ::sidebar-open?
-  ::main-spec/sidebar-open?)
+  ::spec/sidebar-open?)
 
 
 (reg-sub
   ::visible?
-  ::main-spec/visible?)
+  ::spec/visible?)
 
 
 (reg-sub
   ::nav-path
-  ::main-spec/nav-path)
+  ::spec/nav-path)
 
 
 (reg-sub
   ::nav-query-params
-  ::main-spec/nav-query-params)
+  ::spec/nav-query-params)
