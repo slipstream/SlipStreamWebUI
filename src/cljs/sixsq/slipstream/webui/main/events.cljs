@@ -14,6 +14,7 @@
     (let [location (.-location js/window)
           parent-location (.-location (.-parent js/window))
           iframe? (and location parent-location (not= location parent-location))]
+      (log/info "running within iframe?" iframe?)
       (assoc db ::spec/iframe? iframe?))))
 
 
