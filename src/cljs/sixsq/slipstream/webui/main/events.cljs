@@ -72,7 +72,6 @@
 (reg-event-fx
   ::trim-breadcrumb
   (fn [{{:keys [::spec/nav-path] :as db} :db} [_ index]]
-    (log/error ::spec/nav-path)
     {::history-fx/navigate [(str/join "/" (take (inc index) nav-path))]}))
 
 (reg-event-fx
