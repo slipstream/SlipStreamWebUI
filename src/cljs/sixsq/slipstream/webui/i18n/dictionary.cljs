@@ -91,6 +91,7 @@
         :more-info                "More information..."
         :name                     "name"
         :next-step                "next step"
+        :no                       "no"
         :no-account?              "No account?"
         :no-apps                  "no matching applications"
         :no-credentials           "no credentials for selected infrastructure"
@@ -167,6 +168,7 @@
         :welcome-cimi-desc        "Browse the CIMI resources on the server."
         :welcome-detail           "Complete solution to manage your multi-cloud to edge continuum"
         :welcome-dashboard-desc   "One glance to understand at once all that matters"
+        :welcome-data-desc        "View and process datasets"
         :welcome-docs-desc        "Learn about the CIMI resources using the API documentation."
         :welcome-quota-desc       "View and control consumption on all credentials"
         :welcome-usage-desc       "Understand past and historical usage"
@@ -175,6 +177,7 @@
         :welcome-application-desc "Manage apps, components and images. Collaborate, share and explore one-click deployable applications"
         :welcome-nuvlabox-desc    "Add IoT and edge management. Control all your NuvlaBoxes from one place"
         :welcome-metrics-desc     "View a wealth of metrics giving you real insights on the health of the system"
+        :yes                      "yes"
         :yesterday                "yesterday"}
 
    :fr {:lang                   "français"
@@ -257,6 +260,7 @@
         :more-info              "Plus d'informations"
         :name                   "nom"
         :next-step              "étape suivante"
+        :no                     "non"
         :no-account?            "Pas de compte ?"
         :no-apps                "pas d'applications correspondantes"
         :no-credentials         "pas d'informations d'identifcation pour l'infrastructure sélectionné"
@@ -325,6 +329,8 @@
         :value                  "valeur"
         :vms                    "VMs"
         :welcome                "bienvenue"
-        :welcome-cimi-desc      "Parcourir les ressources CIMI sur le serveur."
+        :welcome-cimi-desc      "Parcourir les ressources CIMI sur le serveur"
+        :welcome-data-desc      "Voir et traiter les jeux de données"
         :welcome-detail         "La solution complète pour gérer votre continuum multi-cloud et edge"
+        :yes                    "oui"
         :yesterday              "hier"}})

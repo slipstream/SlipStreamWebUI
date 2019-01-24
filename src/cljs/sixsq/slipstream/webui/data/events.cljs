@@ -55,10 +55,12 @@
   ::set-data
   (fn [db [_ dataset-id response]]
     (let [doc-count (get-in response [:aggregations :count:id :value])
-          total-bytes (get-in response [:aggregations :sum:data:bytes :value])]
+          total-bytes (get-in response [:aggregations :sum:data:bytes :value])
+          service-offer-ids (mapv :id (:serviceOffers response))]
       (-> db
           (update ::spec/counts assoc dataset-id doc-count)
-          (update ::spec/sizes assoc dataset-id total-bytes)))))
+          (update ::spec/sizes assoc dataset-id total-bytes)
+          (update ::spec/service-offers-by-dataset assoc (keyword dataset-id) service-offer-ids)))))
 
 
 (reg-event-fx

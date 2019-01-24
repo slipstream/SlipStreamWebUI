@@ -41,11 +41,13 @@
                 ::data-spec/content-type-filter] :as db} :db} [_ {:keys [id] :as credential}]]
     (let [updated-deployment (utils/update-parameter-in-deployment "credential.id" id deployment)
           filter (data-utils/join-and time-period-filter cloud-filter content-type-filter)
-          callback-data #(when-let [service-offers-ids (seq (map :id (:serviceOffers %)))]
-                           (dispatch [::set-deployment
+          selected-keys (map keyword (::data-spec/selected-dataset-ids db))
+          datasets-map (select-keys (::data-spec/service-offers-by-dataset db) selected-keys)
+
+          callback-data #(dispatch [::set-deployment
                                       (-> updated-deployment
-                                          (assoc :serviceOffers (utils/service-offer-ids->map service-offers-ids))
-                                          (assoc-in [:module :content :mounts] (utils/service-offers->mounts %)))]))]
+                                          (assoc :serviceOffers (utils/invert-dataset-map datasets-map))
+                                          (assoc-in [:module :content :mounts] (utils/service-offers->mounts %)))])]
       (cond-> {:db (assoc db ::spec/selected-credential credential
                              ::spec/deployment updated-deployment)}
               cloud-filter (assoc ::cimi-api-fx/search [client "serviceOffers"

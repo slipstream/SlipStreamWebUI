@@ -87,6 +87,7 @@
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
   (dispatch-sync [::cimi-events/get-cloud-entry-point])
   (dispatch-sync [::authn-events/initialize])
+  (dispatch-sync [::main-events/check-iframe])
   (visibility-watcher)
   (dnd-utils/disable-browser-dnd)
   (routes/routes)
