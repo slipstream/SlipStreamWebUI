@@ -5,7 +5,8 @@
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.style :as style]))
+    [sixsq.slipstream.webui.utils.style :as style]
+    [sixsq.slipstream.webui.utils.form-fields :as ff]))
 
 
 (defn metadata-section
@@ -129,6 +130,16 @@
        [actions-table document]])))
 
 
+(defn preview-section
+  [document]
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn [document]
+      [cc/collapsible-segment (@tr [:preview])
+       (vec (concat [ui/Form]
+                    (mapv (partial ff/form-field #() nil)
+                          (->> document :attributes (sort-by :order)))))])))
+
+
 (defn docs-detail
   [resource-id]
   (let [documents (subscribe [::docs-subs/documents])]
@@ -138,4 +149,5 @@
          [metadata-section document]
          [description-section document]
          [attributes-section document]
+         [preview-section document]
          [actions-section document]]))))

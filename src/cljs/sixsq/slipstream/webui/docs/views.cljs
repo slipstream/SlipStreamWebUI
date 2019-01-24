@@ -35,7 +35,8 @@
      (when @documents
        [:div
         [ui/Table
-         {:compact     "very"
+         {:style       {:cursor "pointer"}
+          :compact     "very"
           :single-line true
           :padded      false
           :unstackable true
