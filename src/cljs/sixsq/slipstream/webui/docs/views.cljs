@@ -22,6 +22,14 @@
                           :overflow      "hidden"
                           :text-overflow "ellipsis"}} (:description entry)]])
 
+(defn documents-intro
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [:div [ui/Message {:info true}
+             [ui/Icon {:name "info"}]
+             (@tr [:documentation-intro])]])))
+
 
 (defn documents-table
   []
@@ -51,6 +59,7 @@
 (defn documents-view
   []
   [ui/Container {:fluid true}
+   [documents-intro]
    [documents-table]])
 
 
