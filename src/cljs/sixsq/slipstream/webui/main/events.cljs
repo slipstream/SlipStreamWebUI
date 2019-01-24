@@ -66,13 +66,14 @@
 (reg-event-fx
   ::push-breadcrumb
   (fn [{{:keys [::spec/nav-path] :as db} :db} [_ path-element]]
-    {::history-fx/navigate [(str/join "/" (conj ::spec/nav-path path-element))]}))
+    {::history-fx/navigate [(str/join "/" (conj nav-path path-element))]}))
 
 
 (reg-event-fx
   ::trim-breadcrumb
   (fn [{{:keys [::spec/nav-path] :as db} :db} [_ index]]
-    {::history-fx/navigate [(str/join "/" (take (inc index) ::spec/nav-path))]}))
+    (log/error ::spec/nav-path)
+    {::history-fx/navigate [(str/join "/" (take (inc index) nav-path))]}))
 
 (reg-event-fx
   ::open-link
