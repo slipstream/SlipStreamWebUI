@@ -1,8 +1,9 @@
 (ns sixsq.slipstream.webui.about.views
   (:require
     [clojure.string :as str]
-    [re-frame.core :refer [subscribe]]
+    [re-frame.core :refer [dispatch subscribe]]
 
+    [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.panel :as panel]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]))
@@ -28,12 +29,14 @@
                  :src      "../images/by_sixsq_mark_red_on_transparent_128px.png"}]]
      [ui/ListSA
       [ui/ListItem (@tr [:version-number]) ": " [:span#release-version "v"]]
-      [ui/ListItem [:a {:href "https://sixsq.com/slipstream"} "Product information"]]
+      [ui/ListItem [:a {:href "https://sixsq.com/slipstream"} (str/capitalize (@tr [:product-info ]))]]
       [ui/ListItem [:a {:href "https://ssdocs.sixsq.com/en/latest/tutorials/index.html"}
                     (str/capitalize (@tr [:tutorials]))]
        " " (@tr [:and]) " "
-       [:a {:href "https://ssdocs.sixsq.com/en/latest/administrator_guide/index.html"}
-        (@tr [:tech-doc])]]
+      [:a {:on-click #(dispatch
+                        [::history-events/navigate "documentation"])
+           :style    {:cursor "pointer"}}
+       (@tr [:tech-doc])]]
       [ui/ListItem [:a {:href "https://ssapi.sixsq.com"}
                     (@tr [:api-doc])]]
       [ui/ListItem [:a {:href "https://sixsq.com/personae"} (@tr [:personae-desc])]]

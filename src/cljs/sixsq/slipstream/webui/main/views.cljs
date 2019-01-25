@@ -75,7 +75,7 @@
   []
   [:footer.webui-footer
    [:div.webui-footer-left
-    [:span "© 2018, SixSq Sàrl"]]
+    [:span "© 2019, SixSq Sàrl"]]
    [:div.webui-footer-centre
     [:a {:on-click #(dispatch
                       [::history-events/navigate "about"])
