@@ -8,7 +8,9 @@
     [sixsq.slipstream.webui.data.spec :as spec]
     [sixsq.slipstream.webui.data.utils :as utils]
     [sixsq.slipstream.webui.deployment-dialog.events :as dialog-events]
-    [sixsq.slipstream.webui.deployment-dialog.spec :as dialog-spec]))
+    [sixsq.slipstream.webui.deployment-dialog.spec :as dialog-spec]
+    [sixsq.slipstream.webui.messages.events :as messages-events]
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (defn fetch-data-cofx
@@ -169,3 +171,39 @@
   (fn [{:keys [::spec/selected-dataset-ids] :as db} [_ id]]
     (let [f (if (get selected-dataset-ids id) disj conj)]
       (assoc db ::spec/selected-dataset-ids (f selected-dataset-ids id)))))
+
+
+(reg-event-db
+  ::open-create-dataset
+  (fn [db _]
+    (assoc db ::spec/create-dataset-visible? true)))
+
+(reg-event-db
+  ::close-create-dataset
+  (fn [db _]
+    (assoc db ::spec/create-dataset-visible? false)))
+
+(reg-event-fx
+  ::create-dataset
+  (fn [{{:keys [::client-spec/client] :as db} :db} [_ {:keys [name description type]}]]
+    (let [object-filter (str "resource:type='DATA' and data:bucket^='gnss' and data:contentType='"
+                             type "'")
+          application-filter (str "dataAcceptContentTypes='" type "'")
+          dataset-resource {:name                      name
+                            :description               description
+                            :dataset:objectFilter      object-filter
+                            :dataset:applicationFilter application-filter
+                            :resource:type             "DATASET"
+                            :connector                 {:href "connector/gnss-swarm"}}
+          add-dataset-callback (fn [response]
+                                 (if (instance? js/Error response)
+                                   (let [{:keys [status message]} (response/parse-ex-info response)]
+                                     (dispatch [::messages-events/add
+                                                {:header  (cond-> (str "error create dataset")
+                                                                  status (str " (" status ")"))
+                                                 :content message
+                                                 :type    :error}]))
+                                   (do
+                                     (dispatch [::get-datasets])
+                                     (dispatch [::close-create-dataset]))))]
+      {::cimi-api-fx/add [client "serviceOffers" dataset-resource add-dataset-callback]})))

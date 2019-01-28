@@ -37,6 +37,8 @@
 
 (s/def ::selected-dataset-ids (s/coll-of string? :kind set?))
 
+(s/def ::create-dataset-visible? boolean?)
+
 (s/def ::db (s/keys :req [::time-period
                           ::time-period-filter
                           ::service-offers
@@ -52,6 +54,7 @@
                           ::datasets
                           ::service-offers-by-dataset
                           ::selected-dataset-ids
+                          ::create-dataset-visible?
                           ]))
 
 (def default-time-period [(time/days-before 30)
@@ -72,4 +75,5 @@
                ::datasets                    {}
                ::service-offers-by-dataset   {}
                ::selected-dataset-ids        #{}
+               ::create-dataset-visible?     false
                })

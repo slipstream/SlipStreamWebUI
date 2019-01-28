@@ -15,7 +15,9 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 
 (defn refresh-credentials []
@@ -47,6 +49,16 @@
         :icon-name "cog"
         :position  "left"
         :on-click  #(dispatch [::events/open-application-select-modal])}])))
+
+
+(defn add-dataset-button
+  []
+  (let [tr (subscribe [::i18n-subs/tr])]
+    (fn []
+      [uix/MenuItemWithIcon
+       {:name      (@tr [:add])
+        :icon-name "plus"
+        :on-click  #(dispatch [::events/open-create-dataset])}])))
 
 
 (defn search-header []
@@ -95,9 +107,59 @@
                          :on-change   (ui-callback/input-callback #(dispatch [::events/set-full-text-search %]))}]]]))))
 
 
+(defn create-dataset-modal
+  []
+  (let [tr (subscribe [::i18n-subs/tr])
+        visible? (subscribe [::subs/create-dataset-visible?])
+        types (reagent/atom ["application/x-ionMessage"
+                             "application/x-sdrData"
+                             "application/x-feCapture"])
+        dataset (reagent/atom {})]
+    (fn []
+      (log/warn @types)
+      (let [hide-fn #(dispatch [::events/close-create-dataset])]
+
+        [ui/Modal {:open       @visible?
+                   :close-icon true
+                   :on-close   hide-fn}
+
+         [ui/ModalHeader [ui/Icon {:name "add"}] "\u00a0" (@tr [:create-dataset])]
+
+         [ui/ModalContent {:scrolling true}
+          [ui/ModalDescription
+           [ui/Form
+            [ui/FormInput {:label         (@tr [:name])
+                           :required      true
+                           :default-value (or (:name @dataset) "")
+                           :on-change     (ui-callback/value #(swap! dataset assoc :name %))}]
+            [ui/FormInput {:label         (@tr [:description])
+                           :required      true
+                           :default-value (or (:description @dataset) "")
+                           :on-change     (ui-callback/value #(swap! dataset assoc :description %))}]
+            [ui/FormDropdown {:label           (@tr [:type])
+                              :required        true
+                              :default-value   (or (:type @dataset) "")
+                              :selection       true
+                              :search          true
+                              :allow-additions true
+                              :on-add-item     (ui-callback/value #(swap! types conj %))
+                              :options         (map (fn [type] {:key   type
+                                                                :value type
+                                                                :text  type}) @types)
+                              :on-change       (ui-callback/value #(swap! dataset assoc :type %))}]]]]
+         [ui/ModalActions
+          (log/warn (vals @dataset))
+          [ui/Button {:on-click hide-fn} (@tr [:cancel])]
+          [ui/Button {:on-click #(dispatch [::events/create-dataset @dataset])
+                      :positive true
+                      :disabled (< (-> @dataset vals count) 3)}
+           (@tr [:create])]]]))))
+
+
 (defn control-bar []
   [:div
    [ui/Menu {:attached "top", :borderless true}
+    [add-dataset-button]
     [process-button]
     [ui/MenuMenu {:position "right"}
      [refresh-button]]]
@@ -300,6 +362,7 @@
    [control-bar]
    [application-select-modal]
    [deployment-dialog-views/deploy-modal true]
+   [create-dataset-modal]
    [queries-cards-group]])
 
 

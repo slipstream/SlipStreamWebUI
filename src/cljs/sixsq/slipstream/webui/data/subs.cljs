@@ -62,3 +62,9 @@
   ::selected-dataset-ids
   (fn [db]
     (::spec/selected-dataset-ids db)))
+
+
+(reg-sub
+  ::create-dataset-visible?
+  (fn [db]
+    (::spec/create-dataset-visible? db)))
