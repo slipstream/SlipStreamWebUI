@@ -1,31 +1,40 @@
 (ns sixsq.slipstream.webui.application.subs
   (:require
     [re-frame.core :refer [reg-sub]]
-    [sixsq.slipstream.webui.application.spec :as application-spec]))
+    [sixsq.slipstream.webui.application.spec :as spec]))
 
 
 (reg-sub
   ::completed?
-  ::application-spec/completed?)
+  ::spec/completed?)
 
 
 (reg-sub
   ::module
-  ::application-spec/module)
+  ::spec/module)
 
 
 (reg-sub
   ::add-modal-visible?
-  ::application-spec/add-modal-visible?)
+  ::spec/add-modal-visible?)
 
 
 (reg-sub
   ::add-data
-  ::application-spec/add-data)
+  ::spec/add-data)
 
 
 (reg-sub
   ::active-tab
-  ::application-spec/active-tab)
+  ::spec/active-tab)
+
+(reg-sub
+  ::add-modal-step
+  (fn [db]
+    (::spec/add-modal-step db)))
 
 
+(reg-sub
+  ::active-tab-application
+  (fn [db]
+    (::spec/active-tab-application db)))

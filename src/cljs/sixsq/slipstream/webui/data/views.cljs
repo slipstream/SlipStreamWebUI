@@ -15,9 +15,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]))
 
 
 (defn refresh-credentials []
@@ -116,7 +114,6 @@
                              "application/x-feCapture"])
         dataset (reagent/atom {})]
     (fn []
-      (log/warn @types)
       (let [hide-fn #(dispatch [::events/close-create-dataset])]
 
         [ui/Modal {:open       @visible?
@@ -148,7 +145,6 @@
                                                                 :text  type}) @types)
                               :on-change       (ui-callback/value #(swap! dataset assoc :type %))}]]]]
          [ui/ModalActions
-          (log/warn (vals @dataset))
           [ui/Button {:on-click hide-fn} (@tr [:cancel])]
           [ui/Button {:on-click #(dispatch [::events/create-dataset @dataset])
                       :positive true

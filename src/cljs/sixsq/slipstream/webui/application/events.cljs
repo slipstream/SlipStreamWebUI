@@ -29,7 +29,8 @@
   ::close-add-modal
   (fn [db _]
     (assoc db ::spec/add-modal-visible? false
-              ::spec/add-data nil)))
+              ::spec/add-data nil
+              ::spec/add-modal-step :select)))
 
 
 
@@ -91,3 +92,14 @@
   (fn [db [_ active-tab]]
     (assoc db ::spec/active-tab active-tab)))
 
+
+(reg-event-db
+  ::set-add-modal-step
+  (fn [db [_ step]]
+    (assoc db ::spec/add-modal-step step)))
+
+
+(reg-event-db
+  ::set-active-tab-application
+  (fn [db [_ active-tab]]
+    (assoc db ::spec/active-tab-application active-tab)))

@@ -13,18 +13,26 @@
 
 (s/def ::active-tab keyword?)
 
+(s/def ::active-tab-application keyword?)
+
 (s/def ::add-data (s/nilable map?))
+
+(s/def ::add-modal-step keyword?)
 
 (s/def ::db (s/keys :req [::completed?
                           ::module-path
                           ::module
                           ::add-modal-visible?
                           ::active-tab
-                          ::add-data]))
+                          ::add-data
+                          ::add-modal-step
+                          ::active-tab-application]))
 
-(def defaults {::completed?                    true
-               ::module-path                   nil
-               ::module                        nil
-               ::add-modal-visible?            false
-               ::active-tab                    :project
-               ::add-data                      nil})
+(def defaults {::completed?             true
+               ::module-path            nil
+               ::module                 nil
+               ::add-modal-visible?     false
+               ::active-tab             :project
+               ::add-data               nil
+               ::add-modal-step         :select
+               ::active-tab-application :general})

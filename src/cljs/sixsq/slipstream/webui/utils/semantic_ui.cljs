@@ -98,7 +98,7 @@
 (def Input (reagent/adapt-react-class semantic/Input))
 
 (def Header (reagent/adapt-react-class semantic/Header))
-;;(def HeaderContent (reagent/adapt-react-class semantic/HeaderContent))
+(def HeaderContent (reagent/adapt-react-class semantic/HeaderContent))
 (def HeaderSubheader (reagent/adapt-react-class semantic/HeaderSubheader))
 
 (def Label (reagent/adapt-react-class semantic/Label))
