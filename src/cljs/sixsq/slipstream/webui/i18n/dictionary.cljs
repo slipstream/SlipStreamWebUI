@@ -9,7 +9,6 @@
 
         :about                    "about"
         :about-subtitle           "This software is brought to you"
-        :access-service           "access service"
         :active?                  "active only?"
         :actions                  "actions"
         :add                      "add"
@@ -184,7 +183,6 @@
    :fr {:lang                   "français"
 
         :add                    "ajouter"
-        :access-service         "accéder au service"
         :actions                "actions"
         :active?                "uniquement actif ?"
         :aggregation            "aggréger"
