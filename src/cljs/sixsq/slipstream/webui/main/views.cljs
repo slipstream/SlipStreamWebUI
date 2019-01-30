@@ -120,7 +120,8 @@
 (defn app []
   (fn []
     (let [show? (subscribe [::main-subs/sidebar-open?])
-          cep (subscribe [::cimi-subs/cloud-entry-point])]
+          cep (subscribe [::cimi-subs/cloud-entry-point])
+          iframe? (subscribe [::main-subs/iframe?])]
       (if @cep
           [ui/Responsive {:as            "div"
                           :fire-on-mount true
@@ -133,5 +134,5 @@
                                    @show? (assoc :className "sidebar-visible"))
               [header]
               [contents]
-              [footer]]]]]
+              (when-not @iframe? [footer])]]]]
           [ui/Container [ui/Loader {:active true :size "massive"}]]))))
