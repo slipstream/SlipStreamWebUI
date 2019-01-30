@@ -1,53 +1,53 @@
-(ns sixsq.slipstream.webui.cimi.subs
+(ns sixsq.slipstream.webui.api.subs
   (:require
     [re-frame.core :refer [dispatch reg-sub]]
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
-    [sixsq.slipstream.webui.cimi.spec :as cimi-spec]))
+    [sixsq.slipstream.webui.api.events :as api-events]
+    [sixsq.slipstream.webui.api.spec :as api-spec]))
 
 
 (reg-sub
   ::query-params
-  ::cimi-spec/query-params)
+  ::api-spec/query-params)
 
 
 (reg-sub
   ::aggregations
-  ::cimi-spec/aggregations)
+  ::api-spec/aggregations)
 
 
 (reg-sub
   ::collection
-  ::cimi-spec/collection)
+  ::api-spec/collection)
 
 
 (reg-sub
   ::collection-name
-  ::cimi-spec/collection-name)
+  ::api-spec/collection-name)
 
 
 (reg-sub
   ::selected-fields
-  ::cimi-spec/selected-fields)
+  ::api-spec/selected-fields)
 
 
 (reg-sub
   ::available-fields
-  ::cimi-spec/available-fields)
+  ::api-spec/available-fields)
 
 
 (reg-sub
   ::cloud-entry-point
-  ::cimi-spec/cloud-entry-point)
+  ::api-spec/cloud-entry-point)
 
 
 (reg-sub
   ::show-add-modal?
-  ::cimi-spec/show-add-modal?)
+  ::api-spec/show-add-modal?)
 
 
 (reg-sub
   ::collections-templates-cache
-  ::cimi-spec/collections-templates-cache)
+  ::api-spec/collections-templates-cache)
 
 
 (reg-sub
@@ -57,7 +57,7 @@
     (when (contains? collections-templates-cache template-href)
       (let [templates-info (template-href collections-templates-cache)]
         (when (neg-int? (:loaded templates-info))
-          (dispatch [::cimi-events/get-templates (name template-href)]))
+          (dispatch [::api-events/get-templates (name template-href)]))
         templates-info))))
 
 
@@ -74,4 +74,4 @@
 
 (reg-sub
   ::loading?
-  ::cimi-spec/loading?)
+  ::api-spec/loading?)

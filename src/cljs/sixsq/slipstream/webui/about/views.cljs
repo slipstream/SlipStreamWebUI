@@ -31,13 +31,10 @@
       [ui/ListItem (@tr [:version-number]) ": " [:span#release-version "v"]]
       [ui/ListItem [:a {:href "https://sixsq.com/slipstream"} (str/capitalize (@tr [:product-info ]))]]
       [ui/ListItem [:a {:href "https://ssdocs.sixsq.com/en/latest/tutorials/index.html"}
-                    (str/capitalize (@tr [:tutorials]))]
-       " " (@tr [:and]) " "
-      [:a {:on-click #(dispatch
-                        [::history-events/navigate "documentation"])
-           :style    {:cursor "pointer"}}
-       (@tr [:tech-doc])]]
-      [ui/ListItem [:a {:href "https://ssapi.sixsq.com"}
+                    (str/capitalize (@tr [:tutorials]))]]
+      [ui/ListItem [:a {:on-click #(dispatch
+                                     [::history-events/navigate "documentation"])
+                        :style    {:cursor "pointer"}}
                     (@tr [:api-doc])]]
       [ui/ListItem [:a {:href "https://sixsq.com/personae"} (@tr [:personae-desc])]]
       [ui/ListItem [:a {:href "https://ssdocs.sixsq.com/en/latest/release_notes/index.html"}

@@ -5,7 +5,7 @@
     [reagent.core :as r]
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.views :as authn-views]
-    [sixsq.slipstream.webui.cimi.events :as cimi-events]
+    [sixsq.slipstream.webui.api.events :as api-events]
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.config :as config]
     [sixsq.slipstream.webui.dashboard.views :as dashboard-views]
@@ -85,7 +85,7 @@
   (dev-setup)
   (dispatch-sync [::db-events/initialize-db])
   (dispatch-sync [::client-events/initialize @SLIPSTREAM_URL])
-  (dispatch-sync [::cimi-events/get-cloud-entry-point])
+  (dispatch-sync [::api-events/get-cloud-entry-point])
   (dispatch-sync [::authn-events/initialize])
   (dispatch-sync [::main-events/check-iframe])
   (visibility-watcher)

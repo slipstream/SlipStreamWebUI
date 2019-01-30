@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.cimi-detail.spec
+(ns sixsq.slipstream.webui.api-detail.spec
   (:require
     [clojure.spec.alpha :as s]))
 

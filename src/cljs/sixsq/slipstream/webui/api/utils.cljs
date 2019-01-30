@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.cimi.utils
+(ns sixsq.slipstream.webui.api.utils
   (:require [clojure.string :as str]))
 
 
