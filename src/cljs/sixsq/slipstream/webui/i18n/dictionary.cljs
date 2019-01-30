@@ -9,6 +9,7 @@
 
         :about                    "about"
         :about-subtitle           "This software is brought to you"
+        :access-deployment        "access deployment"
         :active?                  "active only?"
         :actions                  "actions"
         :add                      "add"
@@ -182,9 +183,12 @@
 
    :fr {:lang                   "français"
 
-        :add                    "ajouter"
+        :about                  "à propos"
+        :about-subtitle         "Ce logiciel vous est fournit"
+        :access-deployment      "accéder déploiement"
         :actions                "actions"
         :active?                "uniquement actif ?"
+        :add                    "ajouter"
         :aggregation            "aggréger"
         :all-users              "tous les utilisateurs"
         :all-credentials        "toutes les informations d'identification"

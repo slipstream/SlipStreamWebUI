@@ -219,7 +219,7 @@
      (when service-url
        [ui/Button {:color   "green"
                    :icon    "external"
-                   :content "URL"
+                   :content (@tr [:access-deployment])
                    :fluid   true
                    :href    service-url
                    :target  "_blank"
