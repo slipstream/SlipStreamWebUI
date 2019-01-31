@@ -6,7 +6,7 @@
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [sixsq.slipstream.webui.api.subs :as api-subs]
+    [sixsq.slipstream.webui.cimi.subs :as api-subs]
     [sixsq.slipstream.webui.deployment-dialog.events :as deployment-dialog-events]
     [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
     [sixsq.slipstream.webui.history.views :as history]

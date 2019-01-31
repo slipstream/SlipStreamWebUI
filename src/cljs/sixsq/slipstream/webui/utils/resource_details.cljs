@@ -4,7 +4,7 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [sixsq.slipstream.webui.api-detail.events :as api-detail-events]
+    [sixsq.slipstream.webui.cimi-detail.events :as api-detail-events]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.form-fields :as ff]

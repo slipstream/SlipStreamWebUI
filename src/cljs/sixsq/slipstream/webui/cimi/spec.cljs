@@ -1,4 +1,4 @@
-(ns sixsq.slipstream.webui.api.spec
+(ns sixsq.slipstream.webui.cimi.spec
   (:require-macros [sixsq.slipstream.webui.utils.spec :refer [only-keys]])
   (:require
     [clojure.spec.alpha :as s]))

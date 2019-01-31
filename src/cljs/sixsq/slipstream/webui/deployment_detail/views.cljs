@@ -4,7 +4,7 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.api.subs :as api-subs]
+    [sixsq.slipstream.webui.cimi.subs :as api-subs]
     [sixsq.slipstream.webui.deployment-detail.events :as events]
     [sixsq.slipstream.webui.deployment-detail.subs :as subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]

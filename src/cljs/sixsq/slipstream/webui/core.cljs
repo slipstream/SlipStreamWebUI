@@ -5,7 +5,7 @@
     [reagent.core :as r]
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.views :as authn-views]
-    [sixsq.slipstream.webui.api.events :as api-events]
+    [sixsq.slipstream.webui.cimi.events :as api-events]
     [sixsq.slipstream.webui.client.events :as client-events]
     [sixsq.slipstream.webui.config :as config]
     [sixsq.slipstream.webui.dashboard.views :as dashboard-views]

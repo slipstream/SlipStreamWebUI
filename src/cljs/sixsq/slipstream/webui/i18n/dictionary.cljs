@@ -10,7 +10,6 @@
         :about                    "about"
         :about-subtitle           "This software is brought to you"
         :access-deployment        "access deployment"
-        :active?                  "active only?"
         :actions                  "actions"
         :active?                  "active only?"
         :add                      "add"
@@ -184,8 +183,6 @@
         :yesterday                "yesterday"}
 
    :fr {:lang                     "français"
-
-<<<<<<< HEAD
         :about                  "à propos"
         :about-subtitle         "Ce logiciel vous est fournit"
         :access-deployment      "accéder déploiement"
