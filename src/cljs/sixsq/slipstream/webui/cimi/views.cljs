@@ -10,6 +10,7 @@
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -24,7 +25,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.form-fields :as ff]))
 
 
 (defn id-selector-formatter [entry]
@@ -318,53 +320,125 @@
                       (dispatch [::cimi-events/set-selected-fields @selections]))}]]])))
 
 
+(defn resource-editor
+  [form-id value-atom & {:keys [resource-meta default-mode] :or {resource-meta {}, default-mode :form}}]
+  (let [mode (reagent/atom default-mode)
+        json-error? (reagent/atom false)
+        check-json-fn (fn [success-action-fn]
+                        (try
+                          @value-atom
+                          (reset! json-error? false)
+                          (success-action-fn)
+                          (catch js/Object e
+                            (reset! json-error? e)
+                            (reset! mode :json))))]
+    (fn [form-id value-atom & {:keys [resource-meta default-mode] :or {resource-meta {}, default-mode :form}}]
+      ^{:key form-id}
+      [:div
+       [ui/Menu {:icon true, :attached "top"}
+        (vec (concat
+               [ui/MenuMenu {:position "right"}]
+               (map (fn [[mode-kw icon]]
+                      [ui/MenuItem
+                       {:active   (= mode-kw @mode),
+                        :on-click (partial check-json-fn #(reset! mode mode-kw))}
+                       [ui/Icon {:name icon}]])
+                    [[:form "list"], [:json "code"]])
+               [(when @json-error?
+                  [ui/MenuItem [ui/Label
+                                "Invalid JSON!!!"
+                                [ui/LabelDetail (str (.-name @json-error?) " "
+                                                     (.-message @json-error?))]]])]))]
+       [ui/Segment {:attached "bottom"}
+        (case @mode
+          :form (vec (concat
+                       [ui/Form]
+                       (mapv
+                         (fn [attribute-meta]
+                           (let [param-kw (-> attribute-meta :name keyword)
+                                 new-value (-> @value-atom general/json->edn param-kw)]
+                             (ff/form-field
+                               (fn [form-id param-name param-value]
+                                 (reset! value-atom (-> @value-atom
+                                                        general/json->edn
+                                                        (assoc (keyword param-name) param-value)
+                                                        general/edn->json)))
+                               nil
+                               (cond-> attribute-meta
+                                       new-value (assoc-in [:vscope :value] new-value)))))
+                         (some->> resource-meta :attributes (sort-by :order)))))
+          :json [ui/CodeMirror {:value     @value-atom
+                                :on-change (fn [editor data value]
+                                             (reset! value-atom value))
+                                :options   {:mode                "application/json"
+                                            :line-numbers        true
+                                            :match-brackets      true
+                                            :auto-close-brackets true
+                                            :style-active-line   true
+                                            :fold-gutter         true
+                                            :gutters             ["CodeMirror-foldgutter"]}}])]])))
+
+
 (defn resource-add-form
   []
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::cimi-subs/show-add-modal?])
         collection-name (subscribe [::cimi-subs/collection-name])
-        default-text (general/edn->json {:key "value"})
-        text (reagent/atom default-text)]
+        default-value (general/edn->json {})
+        value-atom (atom default-value)
+        collection (subscribe [::cimi-subs/collection])
+        resource-metadata (subscribe [::docs-subs/document @collection])
+        collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
+        templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])
+        selected-template (reagent/atom (some-> @templates-info keys first))]
     (fn []
-      (let [collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
-            templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])]
-        (when @show?
-          (if @templates-info
-            [form-utils/form-container-modal
-             :show? @show?
-             :templates (vals @templates-info )
-             :on-cancel #(dispatch [::cimi-events/hide-add-modal])
-             :on-submit (fn [data]
-                          (dispatch [::cimi-events/create-resource
-                                     (cimi-api-utils/create-template @collection-name data)])
-                          (dispatch [::cimi-events/hide-add-modal]))]
-            [ui/Modal
-             {:size      "large"
-              :closeIcon true
-              :onClose   #(dispatch [::cimi-events/hide-add-modal])
-              :open      @show?}
-             [ui/ModalContent
-              [uix/EditorJson text]]
-             [ui/ModalActions
-              [uix/Button
-               {:text     (@tr [:cancel])
-                :on-click (fn []
-                            (reset! text default-text)
-                            (dispatch [::cimi-events/hide-add-modal]))}]
-              [uix/Button
-               {:text     (@tr [:create])
-                :primary  true
-                :on-click (fn []
-                            (try
-                              (let [data (general/json->edn @text)]
-                                (dispatch [::cimi-events/create-resource data]))
-                              (catch :default e
-                                (dispatch [::messages-events/add
-                                           {:header  "invalid JSON document"
-                                            :message (str "invalid JSON:\n\n" e)
-                                            :type    :error}]))
-                              (finally
-                                (dispatch [::cimi-events/hide-add-modal]))))}]]]))))))
+      (when @show?
+        [ui/Modal
+         {:size      "large"
+          :closeIcon true
+          :onClose   #(dispatch [::cimi-events/hide-add-modal])
+          :open      @show?}
+         [ui/ModalContent
+          [ui/Form
+           (when @templates-info
+             [ui/FormField
+              [ui/FormSelect {:label     "resource template"
+                              :value     @selected-template
+                              :options   (forms/descriptions->options (vals @templates-info))
+                              :on-change (ui-callback/value
+                                           (fn [value]
+                                             (reset! selected-template value)
+                                             (reset! value-atom
+                                                     (-> @templates-info
+                                                         (get value)
+                                                         (dissoc :operations)
+                                                         general/edn->json))))}]])
+           [ui/FormField
+            [:label "resource editor"]
+            [resource-editor (or @selected-template collection-name) value-atom
+             :resource-meta (if @templates-info
+                              @(subscribe [::docs-subs/document (get @templates-info @selected-template)])
+                              @resource-metadata)]]
+           [ui/ModalActions
+            [uix/Button
+             {:text     (@tr [:cancel])
+              :on-click (fn []
+                          (reset! value-atom default-value)
+                          (dispatch [::cimi-events/hide-add-modal]))}]
+            [uix/Button
+             {:text     (@tr [:create])
+              :primary  true
+              :on-click (fn []
+                          (try
+                            (let [data (general/json->edn @value-atom)]
+                              (dispatch [::cimi-events/create-resource data]))
+                            (catch :default e
+                              (dispatch [::messages-events/add
+                                         {:header  "invalid JSON document"
+                                          :message (str "invalid JSON:\n\n" e)
+                                          :type    :error}]))
+                            (finally
+                              (dispatch [::cimi-events/hide-add-modal]))))}]]]]]))))
 
 
 (defn can-add?
