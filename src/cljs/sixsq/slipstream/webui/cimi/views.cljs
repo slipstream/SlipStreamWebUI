@@ -30,7 +30,7 @@
 (defn id-selector-formatter [entry]
   (let [v (:id entry)
         label (second (str/split v #"/"))]
-    [history/link (str "cimi/" v) label]))
+    [history/link (str "api/" v) label]))
 
 
 ;; FIXME: Provide better visualization of non-string values.
@@ -169,7 +169,7 @@
                          sort
                          (map (fn [k] {:value k :text k}))
                          vec)
-            callback #(dispatch [::history-events/navigate (str "cimi/" %)])]
+            callback #(dispatch [::history-events/navigate (str "api/" %)])]
         [ui/Dropdown
          {:aria-label  (@tr [:resource-type])
           :value       @selected-id

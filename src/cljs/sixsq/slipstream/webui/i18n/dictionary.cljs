@@ -26,6 +26,7 @@
         :attributes               "attributes"
         :billable-only?           "billable only?"
         :cancel                   "cancel"
+        :cimi                     "api"
         :clear                    "clear"
         :clear-all                "clear all"
         :click-for-depl-details   "click on the card for deployment details"
@@ -183,6 +184,7 @@
         :yesterday                "yesterday"}
 
    :fr {:lang                     "français"
+        
         :about                    "à propos"
         :about-subtitle           "Ce logiciel vous est fournit"
         :access-deployment        "accéder déploiement"
@@ -193,6 +195,7 @@
         :all-users                "tous les utilisateurs"
         :all-credentials          "toutes les informations d'identification"
         :already-registered?      "Déjà enregistré ?"
+        :api                      "api"
         :api-doc                  "Documentation de l'API"
         :application              "application"
         :are-you-sure?            "Êtes-vous sûr ?"
@@ -201,7 +204,7 @@
         :cancel                   "annuler"
         :close                    "fermer"
         :cloud                    "nuage"
-        :cimi                     "cimi"
+        :cimi                     "api"
         :clear                    "effacer"
         :clear-all                "tout effacer"
         :click-for-depl-details   "cliquez sur une carte pour afficher le détail du déploiement"
