@@ -446,6 +446,6 @@
         (vec (concat [ui/Segment style/basic] children))))))
 
 
-(defmethod panel/render :cimi
+(defmethod panel/render :api
   [path]
   [cimi-resource])
