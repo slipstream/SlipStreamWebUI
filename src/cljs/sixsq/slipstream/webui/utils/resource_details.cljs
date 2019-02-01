@@ -5,17 +5,18 @@
     [reagent.core :as r]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
     [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
+    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.utils.collapsible-card :as cc]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
-    [sixsq.slipstream.webui.utils.forms :as form-utils]
+    [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.table :as table]
     [sixsq.slipstream.webui.utils.time :as time]
-    [sixsq.slipstream.webui.utils.ui-callback :as comp]
     [sixsq.slipstream.webui.utils.values :as values]))
 
 
@@ -68,63 +69,20 @@
   [action-button-icon label nil title-text body on-confirm on-cancel scrolling?])
 
 
-(defn update-data [text form-id param value]
-  (let [edn-text (general/json->edn @text)
-        data (cond-> edn-text
-                     param (merge {param value}))
-        result (merge edn-text data)]
-    (reset! text (general/edn->json result))))
-
-
-(defn template-form
-  [text {:keys [template-resource-key params-desc] :as description}]
-  (let [default-data (->> (general/json->edn @text) (map (fn [[k v]] [k {:data v}])) (into {}))
-        params-desc-with-data (-> (merge-with merge params-desc default-data)
-                                  (dissoc :acl)
-                                  (dissoc :operations)
-                                  (dissoc template-resource-key))
-        description-with-data (assoc description :params-desc params-desc-with-data)
-        [hidden-params visible-params] (form-utils/ordered-params description-with-data)
-        update-data-fn (partial update-data text)
-        form-component-fn (partial ff/form-field update-data-fn nil)]
-    (mapv form-component-fn [] (concat hidden-params visible-params))))
-
-
 (defn edit-button
   "Creates an edit that will bring up an edit dialog and will save the
    modified resource when saved."
-  [data description action-fn]
+  [{:keys [id] :as data} description action-fn]
   (let [tr (subscribe [::i18n-subs/tr])
         text (r/atom (general/edn->json data))
-        editor-mode? (r/atom false)
-        json-error? (r/atom false)]
+        collection (subscribe [::cimi-subs/collection-name])
+        resource-metadata (subscribe [::docs-subs/document @collection])]
     (fn [data description action-fn]
       [action-button-icon
        (@tr [:update])
        "pencil"
-       (str (@tr [:editing]) " " (:id data))
-       (if description
-         [:div
-          [ui/Menu {:attached "top"}
-           [ui/MenuItem {:icon    (if @editor-mode? "list layout" "code")
-                         :active  @editor-mode?
-                         :onClick (comp/callback :active (fn [active-v]
-                                                           (reset! json-error? false)
-                                                           (try
-                                                             (general/json->edn @text)
-                                                             (reset! json-error? false)
-                                                             (reset! editor-mode? (not active-v))
-                                                             (catch js/Object e
-                                                               (reset! json-error? true)
-                                                               (reset! editor-mode? true)))))}]
-           (when @json-error?
-             [ui/MenuItem [ui/Label "Invalid JSON!!!"]])]
-          [ui/Segment {:attached "bottom"}
-           (if @editor-mode?
-             [uix/EditorJson text]
-             (vec (concat [ui/Form]
-                          (template-form text description))))]]
-         [uix/EditorJson text])
+       (str (@tr [:editing]) " " id)
+       [forms/resource-editor id text :resource-meta @resource-metadata]
        (fn []
          (try
            (action-fn (general/json->edn @text))

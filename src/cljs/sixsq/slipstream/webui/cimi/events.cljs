@@ -7,8 +7,7 @@
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.general :as general-utils]
-    [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-fx

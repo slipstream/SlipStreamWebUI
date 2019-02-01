@@ -2,13 +2,9 @@
   (:require
     [re-frame.core :refer [subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
-    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.utils.form-fields :as ff]
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
-    [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
-    [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.general :as general]))
 
 
 (defn on-return-key
@@ -23,119 +19,73 @@
     (f)))
 
 
-(defn ordered-params
-  "Orders the parameter of resource metadata for rendering the form."
-  [resource-metadata]
-  (sort-by :order resource-metadata))
-
-
-(defn update-data [form-data-atom form-id param value]
-  (let [data (cond-> {:href form-id}
-                     param (merge {param value}))]
-    (if (= form-id (:href @form-data-atom))
-      (swap! form-data-atom merge data)
-      (reset! form-data-atom data))))
-
-
-(defn template-form                                         ;; FIXME: filter should be a reusable function
-  [form-data-atom {:keys [id] :as template} resourceMetadata]
-  (let [update-data-fn (partial update-data form-data-atom)
-        form-component-fn (partial ff/form-field update-data-fn id)
-        attributes (->> (:attributes resourceMetadata)
-                        (filter (fn [{:keys [consumerWritable consumerMandatory] :as attribute}]
-                                  (or consumerWritable
-                                      (and (not consumerWritable)
-                                           consumerMandatory))))
-                        (sort-by :order))]
-    (mapv form-component-fn attributes)))
-
-
 (defn descriptions->options [descriptions]
   (mapv (fn [{:keys [id label]}] {:value id, :text (or label id)}) descriptions))
 
 
-(defn template-selector
-  [update-form-data-fn selected-id-atom descriptions]
-  [ui/FormField
-   [ui/FormSelect
-    {:fluid     true
-     :value     @selected-id-atom
-     :label     "resource template"
-     :options   (descriptions->options descriptions)
-     :on-change (ui-callback/value (fn [value]
-                                     (reset! selected-id-atom value)
-                                     (update-form-data-fn value nil nil)))}]])
-
-
-(defn form-container-inner-modal
-  [show? templates on-submit on-cancel]
-  (let [tr (subscribe [::i18n-subs/tr])
-        selected-id (reagent/atom nil)
-        form-data (reagent/atom nil)]
-    (fn [show? templates on-submit on-cancel]
-      (when (nil? @selected-id)
-        (reset! selected-id (:id (first templates)))
-        (update-data form-data @selected-id nil nil))
-      (let [selected-template (first (filter #(= @selected-id (:id %)) templates))
-            resourceMetadata (subscribe [::docs-subs/document selected-template])]
-        [ui/Modal {:open      show?
-                   :onClose   on-cancel
-                   :closeIcon true}
-         [ui/ModalHeader (@tr [:create])]
-         [ui/ModalContent
-          [ui/ModalDescription
-           (vec (concat [ui/Form]
-                        [[template-selector
-                          (partial update-data form-data)
-                          selected-id
-                          templates]]
-                        (template-form form-data selected-template @resourceMetadata)))]]
-         [ui/ModalActions
-          [uix/Button
-           {:text     (@tr [:cancel])
-            :on-click on-cancel}]
-          [uix/Button
-           {:text     (@tr [:create])
-            :primary  true
-            :on-click #(on-submit @form-data)}]]]))))
-
-
-(defn form-container-inner-modal-single
-  [show? template on-submit on-cancel]
-  (let [tr (subscribe [::i18n-subs/tr])
-        form-data (reagent/atom nil)
-        resourceMetadata (subscribe [::docs-subs/document template])]
-    (fn [show? template on-submit on-cancel]
-      (update-data form-data (:id template) nil nil)
-      [ui/Modal {:open      show?
-                 :onClose   on-cancel
-                 :closeIcon true}
-       [ui/ModalHeader (@tr [:create])]
-       [ui/ModalContent {:scrolling true}
-        (vec (concat [ui/Form]
-                     (template-form form-data template @resourceMetadata)))]
-       [ui/ModalActions
-        [uix/Button
-         {:text     (@tr [:cancel])
-          :on-click on-cancel}]
-        [uix/Button
-         {:text     (@tr [:create])
-          :primary  true
-          :on-click #(on-submit @form-data)}]]])))
 ;;
 ;; public component
 ;;
 
-(defn form-container-modal
-  [& {:keys [show? templates on-submit on-cancel]
-      :or   {on-submit #()
-             on-cancel #()}
-      :as   args}]
-  [form-container-inner-modal show? templates on-submit on-cancel])
 
-(defn form-container-modal-single-template
-  [& {:keys [show? template on-submit on-cancel]
-      :or   {on-submit #()
-             on-cancel #()}
-      :as   args}]
-  [form-container-inner-modal-single show? template on-submit on-cancel])
+(defn resource-editor
+  [form-id value-atom & {:keys [resource-meta default-mode] :or {default-mode :form}}]
+  (let [mode (reagent/atom (if resource-meta default-mode :json))
+        json-error? (reagent/atom false)
+        check-json-fn (fn [success-action-fn]
+                        (try
+                          @value-atom
+                          (reset! json-error? false)
+                          (success-action-fn)
+                          (catch js/Object e
+                            (reset! json-error? e)
+                            (reset! mode :json))))]
+    (fn [form-id value-atom & {:keys [resource-meta default-mode] :or {default-mode :form}}]
+      ^{:key form-id}
+      [:div
+       [ui/Menu {:icon true, :attached "top"}
+        (vec (concat
+               [ui/MenuMenu {:position "right"}]
+               (map (fn [[mode-kw item-icon item-disabled]]
+                      [ui/MenuItem
+                       {:active   (= mode-kw @mode),
+                        :disabled item-disabled
+                        :on-click (partial check-json-fn #(reset! mode mode-kw))}
+                       [ui/Icon {:name item-icon}]])
+                    [[:form "list" (not resource-meta)], [:json "code" false]])
+               [(when @json-error?
+                  [ui/MenuItem [ui/Label
+                                "Invalid JSON!!!"
+                                [ui/LabelDetail (str (.-name @json-error?) " "
+                                                     (.-message @json-error?))]]])]))]
+       [ui/Segment {:attached "bottom"}
+        (case @mode
+          :form (vec (concat
+                       [ui/Form]
+                       (mapv
+                         (fn [attribute-meta]
+                           (let [param-kw (-> attribute-meta :name keyword)
+                                 new-value (-> @value-atom general/json->edn param-kw)]
+                             (ff/form-field
+                               (fn [form-id param-name param-value]
+                                 (reset! value-atom (-> @value-atom
+                                                        general/json->edn
+                                                        (assoc (keyword param-name) param-value)
+                                                        general/edn->json)))
+                               nil
+                               (cond-> attribute-meta
+                                       new-value (assoc-in [:vscope :value] new-value)))))
+                         (some->> resource-meta
+                                  :attributes
+                                  (filter :consumerWritable)
+                                  (sort-by :order)))))
+          :json [ui/CodeMirror {:value     @value-atom
+                                :on-change (fn [editor data value]
+                                             (reset! value-atom value))
+                                :options   {:mode                "application/json"
+                                            :line-numbers        true
+                                            :match-brackets      true
+                                            :auto-close-brackets true
+                                            :style-active-line   true
+                                            :fold-gutter         true
+                                            :gutters             ["CodeMirror-foldgutter"]}}])]])))

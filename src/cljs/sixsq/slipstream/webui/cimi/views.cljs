@@ -17,7 +17,6 @@
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
@@ -320,65 +319,6 @@
                       (dispatch [::cimi-events/set-selected-fields @selections]))}]]])))
 
 
-(defn resource-editor
-  [form-id value-atom & {:keys [resource-meta default-mode] :or {resource-meta {}, default-mode :form}}]
-  (let [mode (reagent/atom default-mode)
-        json-error? (reagent/atom false)
-        check-json-fn (fn [success-action-fn]
-                        (try
-                          @value-atom
-                          (reset! json-error? false)
-                          (success-action-fn)
-                          (catch js/Object e
-                            (reset! json-error? e)
-                            (reset! mode :json))))]
-    (fn [form-id value-atom & {:keys [resource-meta default-mode] :or {resource-meta {}, default-mode :form}}]
-      ^{:key form-id}
-      [:div
-       [ui/Menu {:icon true, :attached "top"}
-        (vec (concat
-               [ui/MenuMenu {:position "right"}]
-               (map (fn [[mode-kw icon]]
-                      [ui/MenuItem
-                       {:active   (= mode-kw @mode),
-                        :on-click (partial check-json-fn #(reset! mode mode-kw))}
-                       [ui/Icon {:name icon}]])
-                    [[:form "list"], [:json "code"]])
-               [(when @json-error?
-                  [ui/MenuItem [ui/Label
-                                "Invalid JSON!!!"
-                                [ui/LabelDetail (str (.-name @json-error?) " "
-                                                     (.-message @json-error?))]]])]))]
-       [ui/Segment {:attached "bottom"}
-        (case @mode
-          :form (vec (concat
-                       [ui/Form]
-                       (mapv
-                         (fn [attribute-meta]
-                           (let [param-kw (-> attribute-meta :name keyword)
-                                 new-value (-> @value-atom general/json->edn param-kw)]
-                             (ff/form-field
-                               (fn [form-id param-name param-value]
-                                 (reset! value-atom (-> @value-atom
-                                                        general/json->edn
-                                                        (assoc (keyword param-name) param-value)
-                                                        general/edn->json)))
-                               nil
-                               (cond-> attribute-meta
-                                       new-value (assoc-in [:vscope :value] new-value)))))
-                         (some->> resource-meta :attributes (sort-by :order)))))
-          :json [ui/CodeMirror {:value     @value-atom
-                                :on-change (fn [editor data value]
-                                             (reset! value-atom value))
-                                :options   {:mode                "application/json"
-                                            :line-numbers        true
-                                            :match-brackets      true
-                                            :auto-close-brackets true
-                                            :style-active-line   true
-                                            :fold-gutter         true
-                                            :gutters             ["CodeMirror-foldgutter"]}}])]])))
-
-
 (defn resource-add-form
   []
   (let [tr (subscribe [::i18n-subs/tr])
@@ -387,15 +327,16 @@
         default-value (general/edn->json {})
         value-atom (atom default-value)
         collection (subscribe [::cimi-subs/collection])
-        resource-metadata (subscribe [::docs-subs/document @collection])
         selected-template (reagent/atom nil)]
     (fn []
-      (let [collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
+      (let [resource-metadata (subscribe [::docs-subs/document @collection])
+            collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
             templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])
             selected-template-info (subscribe [::docs-subs/document (get @templates-info @selected-template)])]
-        (log/warn "____COLLNAME____" @collection-name " ____SELECTED-TEMPLATE-ID____" @selected-template
-                  "____TMPL-INFO____" (get @templates-info @selected-template)
-                 "____TMPL-RES-META____" @selected-template-info  #_@templates-info)
+        #_(log/warn "resource-metadata" @resource-metadata)
+        #_(log/warn "____COLLNAME____" @collection-name " ____SELECTED-TEMPLATE-ID____" @selected-template
+                    "____TMPL-INFO____" (get @templates-info @selected-template)
+                    "____TMPL-RES-META____" @selected-template-info  #_@templates-info)
         (when @show?
           [ui/Modal
            {:size    "large", :closeIcon true, :open @show?,
@@ -407,22 +348,22 @@
              (when @templates-info
                [ui/Dropdown {:selection   true
                              :placeholder "select a resource template"
-                              :value     @selected-template
-                              :options   (forms/descriptions->options (vals @templates-info))
-                              :on-change (ui-callback/value
-                                           (fn [value]
-                                             (reset! selected-template value)
-                                             (reset! value-atom
-                                                     (-> @templates-info
-                                                         (get value)
-                                                         (dissoc :operations
-                                                                 :resourceMetadata)
-                                                         general/edn->json))))}])
+                             :value       @selected-template
+                             :options     (forms/descriptions->options (vals @templates-info))
+                             :on-change   (ui-callback/value
+                                            (fn [value]
+                                              (reset! selected-template value)
+                                              (reset! value-atom
+                                                      (-> @templates-info
+                                                          (get value)
+                                                          cimi-api-utils/remove-common-attrs
+                                                          (assoc :href @selected-template)
+                                                          general/edn->json))))}])
 
              [:br]
              [:br]
 
-             [resource-editor (or @selected-template collection-name) value-atom
+             [forms/resource-editor (or @selected-template collection-name) value-atom
               :resource-meta (if @templates-info
                                @selected-template-info
                                @resource-metadata)]]]
@@ -438,7 +379,8 @@
               :primary  true
               :on-click (fn []
                           (try
-                            (let [data (general/json->edn @value-atom)]
+                            (let [data (cond->> (general/json->edn @value-atom)
+                                                @selected-template (cimi-api-utils/create-template @collection-name))]
                               (dispatch [::cimi-events/create-resource data]))
                             (catch :default e
                               (dispatch [::messages-events/add

@@ -11,11 +11,8 @@
     [taoensso.timbre :as log]))
 
 
-(def ^:const common-attrs #{:id :resourceURI
-                            :created :updated
-                            :name :description
-                            :properties
-                            :operations :acl})
+(def ^:const common-attrs #{:id, :resourceURI, :created, :updated, :name, :description
+                            :properties, :resourceMetadata, :operations, :acl})
 
 
 (defn select-common-attrs
