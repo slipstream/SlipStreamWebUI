@@ -112,6 +112,7 @@
         :output-parameters        "output parameters"
         :parameters               "parameters"
         :personae-desc            "Personae description"
+        :preview                  "preview"
         :previous-step            "previous step"
         :process                  "process"
         :product-info             "product information"
@@ -184,7 +185,7 @@
         :yesterday                "yesterday"}
 
    :fr {:lang                     "français"
-        
+
         :about                    "à propos"
         :about-subtitle           "Ce logiciel vous est fournit"
         :access-deployment        "accéder déploiement"
@@ -287,6 +288,7 @@
         :output-parameters        "paramètres de sortie"
         :parameters               "paramètres"
         :personae-desc            "Description des acteurs"
+        :preview                  "aperçu"
         :previous-step            "étape précédente"
         :process                  "traiter"
         :product-info             "information produit"
