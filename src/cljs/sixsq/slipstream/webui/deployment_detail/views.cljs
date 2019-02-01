@@ -435,7 +435,7 @@
         cep (subscribe [::api-subs/cloud-entry-point])]
     (vec (concat [ui/Menu {:borderless true}]
 
-                 (operations/format-operations nil @deployment (:baseURI @cep) {})
+                 (operations/format-operations nil @deployment (:baseURI @cep) nil)
 
                  [[service-link-button]
                   [refresh-button]]))))

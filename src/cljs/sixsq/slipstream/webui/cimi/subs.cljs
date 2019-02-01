@@ -55,21 +55,9 @@
   :<- [::collections-templates-cache]
   (fn [collections-templates-cache [_ template-href]]
     (when (contains? collections-templates-cache template-href)
-      (let [templates-info (template-href collections-templates-cache)]
-        (when (neg-int? (:loaded templates-info))
-          (dispatch [::cimi-events/get-templates (name template-href)]))
-        templates-info))))
-
-
-(reg-sub
-  ::collection-templates-loading?
-  :<- [::collections-templates-cache]
-  (fn [collections-templates-cache [_ template-href]]
-    (when (contains? collections-templates-cache template-href)
-      (let [templates-info (template-href collections-templates-cache)
-            loaded (:loaded templates-info)
-            total (:total templates-info)]
-        (or (neg-int? loaded) (< loaded total))))))
+      (if-let [templates-info (template-href collections-templates-cache)]
+        templates-info
+        (dispatch [::cimi-events/get-templates template-href])))))
 
 
 (reg-sub

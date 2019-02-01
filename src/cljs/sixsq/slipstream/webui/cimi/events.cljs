@@ -2,15 +2,12 @@
   (:require
     [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
-    [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [sixsq.slipstream.webui.cimi.effects :as cimi-fx]
     [sixsq.slipstream.webui.cimi.spec :as cimi-spec]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.utils.general :as general-utils]
-    [sixsq.slipstream.webui.utils.response :as response]
-    [taoensso.timbre :as log]))
+    [sixsq.slipstream.webui.utils.response :as response]))
 
 
 (reg-event-fx
@@ -188,13 +185,12 @@
   ::set-cloud-entry-point
   (fn [db [_ {:keys [baseURI] :as cep}]]
     (let [href-map (cimi-utils/collection-href-map cep)
-          key-map (cimi-utils/collection-key-map cep)
-          templates-map (cimi-utils/collections-template-map cep)]
+          key-map (cimi-utils/collection-key-map cep)]
       (-> db
           (assoc ::cimi-spec/cloud-entry-point {:baseURI         baseURI
                                                 :collection-href href-map
                                                 :collection-key  key-map})
-          (assoc ::cimi-spec/collections-templates-cache templates-map)))))
+          (assoc ::cimi-spec/collections-templates-cache (cimi-utils/collections-template-map cep))))))
 
 
 (reg-event-fx
@@ -205,6 +201,7 @@
        [client (fn [cep]
                  (dispatch [::set-cloud-entry-point cep]))]})))
 
+
 (reg-event-fx
   ::get-templates
   (fn [{{:keys [::cimi-spec/cloud-entry-point
@@ -212,53 +209,22 @@
                 ::client-spec/client] :as db} :db} [_ template-href]]
     (let [resource-type (-> cloud-entry-point
                             :collection-key
-                            (get template-href))]
-      {::cimi-api-fx/search [client
-                             resource-type
-                             {}
-                             #(dispatch [::set-templates template-href (resource-type %) (:count %)])]})))
+                            (get (name template-href)))]
+      {::cimi-api-fx/search [client resource-type {:$orderby "id"}
+                             #(dispatch [::set-templates template-href (resource-type %)])]})))
 
-(reg-event-fx
-  ::set-templates
-  (fn [{:keys [db]} [_ template-href templates total]]
-    (let [error? (instance? js/Error templates)
-          entries (get templates template-href [])]
-      (if error?
-        (dispatch [::messages-events/add
-                   (let [{:keys [status message]} (response/parse-ex-info templates)]
-                     {:header  (cond-> (str "failure getting " (name template-href))
-                                       status (str " (" status ")"))
-                      :content message
-                      :type    :error})])
-        (let [template-href-key (keyword template-href)
-              prepared-templates (->> templates
-                                      (map cimi-api-utils/prepare-template)
-                                      (into {}))]
-          {:db                                 (assoc-in db [::cimi-spec/collections-templates-cache template-href-key]
-                                                         {:templates prepared-templates
-                                                          :loaded    0
-                                                          :total     total})
-           ::cimi-fx/get-templates-description [template-href-key prepared-templates]})))))
-
-(reg-event-fx
-  ::get-template-description
-  (fn [{{:keys [::client-spec/client] :as db} :db} [_ template-href-key template-id]]
-    (let [operation "http://sixsq.com/slipstream/1/action/describe"
-          callback #(dispatch [::set-template-description template-href-key template-id %])]
-      (log/info "::get-template-description template-id" template-id)
-      {::cimi-api-fx/operation [client (name template-id) operation callback]})))
 
 (reg-event-db
-  ::set-template-description
-  (fn [{:keys [::cimi-spec/collections-templates-cache] :as db} [_ resource-type template-id params-desc]]
-    (let [template-id-key (keyword template-id)
-          tpl (get-in collections-templates-cache [resource-type :templates template-id-key])
-          default-values-map (->> (:default-values tpl) (map (fn [[k v]] [k {:data v}])) (into {}))
-          description-with-defaults (merge-with merge params-desc default-values-map)
-          description-filtered (cimi-api-utils/filter-params-desc (dissoc description-with-defaults :acl))
-          template (-> tpl
-                       (assoc :params-desc description-filtered)
-                       (dissoc :default-values))]
-      (-> db
-          (update-in [::cimi-spec/collections-templates-cache resource-type :loaded] inc)
-          (assoc-in [::cimi-spec/collections-templates-cache resource-type :templates template-id-key] template)))))
+  ::set-templates
+  (fn [db [_ template-href templates]]
+    (if (instance? js/Error templates)
+      (dispatch [::messages-events/add
+                 (let [{:keys [status message]} (response/parse-ex-info templates)]
+                   {:header  (cond-> (str "failure getting " (name template-href))
+                                     status (str " (" status ")"))
+                    :content message
+                    :type    :error})])
+      (assoc-in db [::cimi-spec/collections-templates-cache template-href]
+                (->> templates
+                     (map (juxt :id identity))
+                     (into {}))))))

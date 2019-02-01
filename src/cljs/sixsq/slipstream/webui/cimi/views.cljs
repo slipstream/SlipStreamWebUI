@@ -10,13 +10,13 @@
     [sixsq.slipstream.webui.cimi.events :as cimi-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.views :as history]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
     [sixsq.slipstream.webui.main.subs :as main-subs]
     [sixsq.slipstream.webui.messages.events :as messages-events]
     [sixsq.slipstream.webui.panel :as panel]
-    [sixsq.slipstream.webui.utils.forms :as form-utils]
     [sixsq.slipstream.webui.utils.forms :as forms]
     [sixsq.slipstream.webui.utils.general :as general]
     [sixsq.slipstream.webui.utils.response :as response]
@@ -24,7 +24,8 @@
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.style :as style]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [sixsq.slipstream.webui.utils.form-fields :as ff]))
 
 
 (defn id-selector-formatter [entry]
@@ -327,49 +328,72 @@
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::cimi-subs/show-add-modal?])
         collection-name (subscribe [::cimi-subs/collection-name])
-        default-text (general/edn->json {:key "value"})
-        text (reagent/atom default-text)]
+        default-text (general/edn->json {})
+        text (atom default-text)
+        collection (subscribe [::cimi-subs/collection])
+        selected-tmpl-id (reagent/atom nil)]
     (fn []
-      (let [template-href (some-> @collection-name keyword cimi-utils/template-href keyword)
-            templates-info (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
+      (let [resource-metadata (subscribe [::docs-subs/document @collection])
+            collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
+            templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])
+            selected-tmpl-resource-meta (subscribe [::docs-subs/document (get @templates-info @selected-tmpl-id)])]
+        #_(log/warn "resource-metadata" @resource-metadata)
+        #_(log/warn "____COLLNAME____" @collection-name " ____SELECTED-TEMPLATE-ID____" @selected-tmpl-id
+                    "____TMPL-INFO____" (get @templates-info @selected-tmpl-id)
+                    "____TMPL-RES-META____" @selected-tmpl-resource-meta  #_@templates-info)
         (when @show?
-          (if @templates-info
-            [form-utils/form-container-modal
-             :show? @show?
-             :templates (-> @templates-info :templates vals)
-             :on-cancel #(dispatch [::cimi-events/hide-add-modal])
-             :on-submit (fn [data]
-                          (dispatch [::cimi-events/create-resource
-                                     (cimi-api-utils/create-template @collection-name data)])
-                          (dispatch [::cimi-events/hide-add-modal]))]
-            (do
-              [ui/Modal
-               {:size       "large"
-                :closeIcon  true
-                :onClose    #(dispatch [::cimi-events/hide-add-modal])
-                :open       @show?}
-               [ui/ModalContent
-                [uix/EditorJson text]]
-               [ui/ModalActions
-                [uix/Button
-                 {:text     (@tr [:cancel])
-                  :on-click (fn []
-                              (reset! text default-text)
-                              (dispatch [::cimi-events/hide-add-modal]))}]
-                [uix/Button
-                 {:text     (@tr [:create])
-                  :primary  true
-                  :on-click (fn []
-                              (try
-                                (let [data (general/json->edn @text)]
-                                  (dispatch [::cimi-events/create-resource data]))
-                                (catch :default e
-                                  (dispatch [::messages-events/add
-                                             {:header  "invalid JSON document"
-                                              :message (str "invalid JSON:\n\n" e)
-                                              :type    :error}]))
-                                (finally
-                                  (dispatch [::cimi-events/hide-add-modal]))))}]]])))))))
+          [ui/Modal
+           {:size    "large", :closeIcon true, :open @show?,
+            :onClose #(dispatch [::cimi-events/hide-add-modal])}
+
+           [ui/ModalContent
+            [:div
+
+             (when @templates-info
+               [ui/Dropdown {:selection   true
+                             :placeholder "select a resource template"
+                             :value       @selected-tmpl-id
+                             :options     (forms/descriptions->options (vals @templates-info))
+                             :on-change   (ui-callback/value
+                                            (fn [value]
+                                              (reset! selected-tmpl-id value)
+                                              (reset! text
+                                                      (-> @templates-info
+                                                          (get value)
+                                                          cimi-api-utils/remove-common-attrs
+                                                          (assoc :href @selected-tmpl-id)
+                                                          general/edn->json))))}])
+
+             [:br]
+             [:br]
+
+             [forms/resource-editor (or @selected-tmpl-id collection-name) text
+              :resource-meta (if @templates-info
+                               @selected-tmpl-resource-meta
+                               @resource-metadata)]]]
+
+           [ui/ModalActions
+            [uix/Button
+             {:text     (@tr [:cancel])
+              :on-click (fn []
+                          (reset! text default-text)
+                          (dispatch [::cimi-events/hide-add-modal]))}]
+            [uix/Button
+             {:text     (@tr [:create])
+              :primary  true
+              :on-click (fn []
+                          (try
+                            (let [data (cond->> (general/json->edn @text)
+                                                @selected-tmpl-id (cimi-api-utils/create-template @collection-name))]
+                              (dispatch [::cimi-events/create-resource data]))
+                            (catch :default e
+                              (dispatch [::messages-events/add
+                                         {:header  "invalid JSON document"
+                                          :message (str "invalid JSON:\n\n" e)
+                                          :type    :error}]))
+                            (finally
+                              (dispatch [::cimi-events/hide-add-modal]))))}]]
+           ])))))
 
 
 (defn can-add?

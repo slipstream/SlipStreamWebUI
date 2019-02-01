@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.authn.utils :as u]
     [sixsq.slipstream.webui.cimi.subs :as api-subs]
     [sixsq.slipstream.webui.cimi.utils :as api-utils]
+    [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -15,6 +16,7 @@
     [sixsq.slipstream.webui.utils.semantic-ui :as ui]
     [sixsq.slipstream.webui.utils.semantic-ui-extensions :as uix]
     [sixsq.slipstream.webui.utils.ui-callback :as ui-callback]
+    [sixsq.slipstream.webui.utils.form-fields :as forms]
     [taoensso.timbre :as log]))
 
 
@@ -42,8 +44,8 @@
 
 
 (defn dropdown-method-option
-  [{:keys [id label] :as method}]
-  {:key id, :text label, :value id})
+  [{:keys [id name] :as method}]
+  {:key id, :text name, :value id})
 
 
 (defn reset-password [tr]
@@ -68,13 +70,17 @@
     (fn [methods collections-kw]
       (let [dropdown? (> (count methods) 1)
             method (u/select-method-by-id @form-id methods)
-
+            resourceMetadata (subscribe [::docs-subs/document method])
             {:keys [baseURI collection-href]} @cep
             post-uri (str baseURI (collections-kw collection-href)) ;; FIXME: Should be part of CIMI API.
-            inputs-method (conj (->> method u/ordered-params (filter u/keep-visible-params))
-                                [:href {:displayName "href" :data @form-id :type "hidden"}]
-                                [:redirectURI {:displayName "redirectURI" :data @server-redirect-uri :type "hidden"}])
-
+            inputs-method (conj
+                            (->> (:attributes @resourceMetadata)
+                                 (filter (fn [{:keys [consumerWritable consumerMandatory group] :as attribute}]
+                                           (and (not (#{"metadata" "acl"} group))
+                                                consumerWritable)))
+                                 (sort-by :order))
+                            {:name "href" :vscope {:value @form-id} :hidden true}
+                            {:name "redirectURI" :vscope {:value @server-redirect-uri} :hidden true})
             dropdown-options (map dropdown-method-option methods)]
 
         (log/infof "creating authentication form: %s %s" (name collections-kw) @form-id)
@@ -82,7 +88,8 @@
           (concat
             [ui/Form {:id (or @form-id "authn-form-placeholder-id"), :action post-uri, :method "post"}]
 
-            [(vec (concat [ui/Segment {:style {:height "35ex"}}
+            [(vec (concat [ui/Segment {:style {:height     "35ex"
+                                               :overflow-y "auto"}}
                            (when dropdown?
                              [ui/FormDropdown
                               {:options       dropdown-options
@@ -92,7 +99,7 @@
                                :close-on-blur true
                                :on-change     (ui-callback/dropdown ::authn-events/set-form-id)}])]
 
-                          (mapv form-component inputs-method)
+                          (mapv (partial forms/form-field #() @form-id) inputs-method)
                           (when (= "internal" (:method method))
                             (reset-password tr))))]))))))
 
@@ -145,8 +152,8 @@
 (defn authn-form-container
   "Container that holds all of the authentication (login or sign up) forms."
   [collection-kw failed-kw method-form-fn]
-  (let [template-href (api-utils/template-href collection-kw)
-        templates (subscribe [::api-subs/collection-templates (keyword template-href)])
+  (let [template-href (api-utils/collection-template-href collection-kw)
+        templates (subscribe [::api-subs/collection-templates template-href])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])
         selected-method-group (subscribe [::authn-subs/selected-method-group])]
@@ -312,7 +319,7 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])
         user (subscribe [::authn-subs/user])
-        template-href (api-utils/template-href :user)
+        template-href (api-utils/collection-template-href :user)
         user-templates (subscribe [::api-subs/collection-templates (keyword template-href)])]
     (let [profile-fn #(history-utils/navigate "profile")
           sign-out-fn (fn []

@@ -17,8 +17,3 @@
 (reg-sub
   ::resource
   ::cimi-detail-spec/resource)
-
-
-(reg-sub
-  ::description
-  ::cimi-detail-spec/description)

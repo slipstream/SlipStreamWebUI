@@ -32,42 +32,14 @@
                                                 (dispatch [::set-resource %]))]})))
 
 
-(reg-event-fx
-  ::set-resource
-  (fn [{{:keys [::client-spec/client
-                ::cimi-spec/collection-name
-                ::cimi-spec/cloud-entry-point] :as db} :db} [_ {:keys [operations] :as resource}]]
-    (let [tpl-resources-key (-> cloud-entry-point
-                                (get :collection-key "")
-                                (get (str collection-name "-template") ""))
-          tpl-resource-key (->> tpl-resources-key
-                                name
-                                drop-last
-                                (str/join "")
-                                keyword)
-          tpl-id (-> resource
-                     (get tpl-resource-key)
-                     :href)
-          describe-operation (->> operations
-                                  (filter #(= (-> % :rel general/operation-name) "describe"))
-                                  first
-                                  :rel)]
-      (log/info (:id resource))
-      (cond-> {:db (assoc db ::cimi-detail-spec/loading? false
-                             ::cimi-detail-spec/resource-id (:id resource)
-                             ::cimi-detail-spec/resource resource
-                             ::cimi-detail-spec/description nil)}
-              (and tpl-id describe-operation) (assoc ::cimi-api-fx/operation
-                                                     [client tpl-id describe-operation
-                                                      #(dispatch [::set-description
-                                                                  {:href                  tpl-id
-                                                                   :template-resource-key tpl-resource-key
-                                                                   :params-desc           %}])])))))
-
 (reg-event-db
-  ::set-description
-  (fn [db [_ description]]
-    (assoc db ::cimi-detail-spec/description description)))
+  ::set-resource
+  (fn [{:keys [::client-spec/client
+               ::cimi-spec/collection-name
+               ::cimi-spec/cloud-entry-point] :as db} [_ {:keys [id] :as resource}]]
+    (assoc db ::cimi-detail-spec/loading? false
+              ::cimi-detail-spec/resource-id id
+              ::cimi-detail-spec/resource resource)))
 
 
 (reg-event-fx
@@ -89,8 +61,7 @@
                                                                status (str " (" status ")"))
                                               :content message
                                               :type    :success}])
-                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]
-       })))
+                                  (dispatch [::history-events/navigate (str "cimi/" collection-name)])))]})))
 
 
 (reg-event-fx
