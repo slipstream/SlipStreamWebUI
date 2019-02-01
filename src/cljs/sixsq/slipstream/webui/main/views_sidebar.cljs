@@ -70,15 +70,14 @@
                 :vertical true
                 :compact  true
                 :inverted true}
-       [logo-item]
+       (when-not @iframe? [logo-item])
        (when-not @iframe? [item :dashboard "dashboard" "dashboard"])
        (when-not @iframe? [item :quota "quota" "balance scale"])
        (when-not @iframe? [item :usage "usage" "history"])
-       [item :deployment "deployment" "cloud"]
        (when-not @iframe? [item :application "application" "sitemap"])
        (when-not @iframe? [item :appstore "appstore" "play"])
        [item :data "data" "database"]
+       [item :deployment "deployment" "cloud"]
        (when-not @iframe? [item :nuvlabox-ctrl "nuvlabox" "desktop"])
        (when (and @is-admin? (not @iframe?)) [item :metrics "metrics" "bar chart"])
-       (when-not @iframe? [item :documentation "documentation" "book"])
-       (when-not @iframe? [item :cimi "cimi" "code"])]]]))
+       (when-not @iframe? [item :api "api" "code"])]]]))

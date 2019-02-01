@@ -5,8 +5,8 @@
     [sixsq.slipstream.webui.application.spec :as application]
     [sixsq.slipstream.webui.appstore.spec :as appstore]
     [sixsq.slipstream.webui.authn.spec :as authn]
-    [sixsq.slipstream.webui.cimi-detail.spec :as cimi-detail]
-    [sixsq.slipstream.webui.cimi.spec :as cimi]
+    [sixsq.slipstream.webui.cimi-detail.spec :as api-detail]
+    [sixsq.slipstream.webui.cimi.spec :as api]
     [sixsq.slipstream.webui.client.spec :as client]
     [sixsq.slipstream.webui.dashboard.spec :as dashboard]
     [sixsq.slipstream.webui.data.spec :as data]
@@ -27,8 +27,8 @@
 (s/def ::db (s/merge ::application/db
                      ::appstore/db
                      ::authn/db
-                     ::cimi/db
-                     ::cimi-detail/db
+                     ::api/db
+                     ::api-detail/db
                      ::client/db
                      ::dashboard/db
                      ::deployment/db
@@ -49,8 +49,8 @@
   (merge application/defaults
          appstore/defaults
          authn/defaults
-         cimi/defaults
-         cimi-detail/defaults
+         api/defaults
+         api-detail/defaults
          data/defaults
          deployment/defaults
          deployment-dialog/defaults

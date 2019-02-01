@@ -44,6 +44,6 @@
    ::error-message         nil
    ::success-message       nil
    ::redirect-uri          nil
-   ::server-redirect-uri   (str @config/path-prefix "/profile")
+   ::server-redirect-uri   (str @config/path-prefix "/welcome")
    ::loading?              false
    ::form-id               nil})

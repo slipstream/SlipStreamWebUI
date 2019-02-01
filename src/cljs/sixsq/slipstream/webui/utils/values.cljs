@@ -14,16 +14,16 @@
 
 
 (defn as-href
-  "Renders a link to the CIMI detail page associated with the href. Ignores
+  "Renders a link to the API detail page associated with the href. Ignores
    other values of the map (if any)."
   [{:keys [href]}]
-  [history/link (str "cimi/" href) (str href)])
+  [history/link (str "api/" href) (str href)])
 
 
 (defn as-link
-  "Renders a link to the CIMI detail page associated with the href."
+  "Renders a link to the API detail page associated with the href."
   [href & [label]]
-  [history/link (str "cimi/" href) (or label href)])
+  [history/link (str "api/" href) (or label href)])
 
 
 (defn href-coll?

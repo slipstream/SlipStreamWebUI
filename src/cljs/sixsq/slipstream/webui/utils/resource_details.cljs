@@ -4,7 +4,7 @@
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]
     [sixsq.slipstream.webui.cimi-api.utils :as cimi-api-utils]
-    [sixsq.slipstream.webui.cimi-detail.events :as cimi-detail-events]
+    [sixsq.slipstream.webui.cimi-detail.events :as api-detail-events]
     [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
     [sixsq.slipstream.webui.docs.subs :as docs-subs]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -134,9 +134,9 @@
 ;; as this will be confused with reagent options.
 (defn operation-button [{:keys [id] :as data} description [label href operation-uri]]
   (case label
-    "edit" ^{:key "edit"} [edit-button data description #(dispatch [::cimi-detail-events/edit id %])]
-    "delete" ^{:key "delete"} [delete-button data #(dispatch [::cimi-detail-events/delete id])]
-    ^{:key operation-uri} [other-button label data #(dispatch [::cimi-detail-events/operation id operation-uri])]))
+    "edit" ^{:key "edit"} [edit-button data description #(dispatch [::api-detail-events/edit id %])]
+    "delete" ^{:key "delete"} [delete-button data #(dispatch [::api-detail-events/delete id])]
+    ^{:key operation-uri} [other-button label data #(dispatch [::api-detail-events/operation id operation-uri])]))
 
 
 (defn format-operations [refresh-button {:keys [operations] :as data} baseURI description]
@@ -216,8 +216,7 @@
   [refresh-button data baseURI description]
   (vec (concat [ui/Menu {:borderless true}]
                (format-operations nil data baseURI description)
-               [refresh-button]
-               )))
+               [refresh-button])))
 
 
 (defn resource-detail

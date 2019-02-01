@@ -44,7 +44,7 @@
       [uix/MenuItemWithIcon
        {:name      (@tr [:process])
         :disabled  (not (seq @datasets))
-        :icon-name "cog"
+        :icon-name "rocket"
         :position  "left"
         :on-click  #(dispatch [::events/open-application-select-modal])}])))
 
