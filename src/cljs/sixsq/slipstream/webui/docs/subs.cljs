@@ -21,6 +21,9 @@
 
 (defn resolve-metadata-id
   [{:keys [id resourceMetadata resourceURI] :as resource}]
+  (log/error "resourceMetadata" resourceMetadata)
+  (when id
+    (log/error (str "resource-metadata/" (str/replace id #"/" "-"))))
   (cond
     resourceMetadata resourceMetadata
     (re-find #"-template/" (str id)) (str "resource-metadata/" (str/replace id #"/" "-"))

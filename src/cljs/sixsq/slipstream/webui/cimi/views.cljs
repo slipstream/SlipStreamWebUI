@@ -388,21 +388,25 @@
         value-atom (atom default-value)
         collection (subscribe [::cimi-subs/collection])
         resource-metadata (subscribe [::docs-subs/document @collection])
-        collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
-        templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])
-        selected-template (reagent/atom (some-> @templates-info keys first))]
+        selected-template (reagent/atom nil)]
     (fn []
-      (when @show?
-        [ui/Modal
-         {:size      "large"
-          :closeIcon true
-          :onClose   #(dispatch [::cimi-events/hide-add-modal])
-          :open      @show?}
-         [ui/ModalContent
-          [ui/Form
-           (when @templates-info
-             [ui/FormField
-              [ui/FormSelect {:label     "resource template"
+      (let [collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
+            templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])
+            selected-template-info (subscribe [::docs-subs/document (get @templates-info @selected-template)])]
+        (log/warn "____COLLNAME____" @collection-name " ____SELECTED-TEMPLATE-ID____" @selected-template
+                  "____TMPL-INFO____" (get @templates-info @selected-template)
+                 "____TMPL-RES-META____" @selected-template-info  #_@templates-info)
+        (when @show?
+          [ui/Modal
+           {:size    "large", :closeIcon true, :open @show?,
+            :onClose #(dispatch [::cimi-events/hide-add-modal])}
+
+           [ui/ModalContent
+            [:div
+
+             (when @templates-info
+               [ui/Dropdown {:selection   true
+                             :placeholder "select a resource template"
                               :value     @selected-template
                               :options   (forms/descriptions->options (vals @templates-info))
                               :on-change (ui-callback/value
@@ -411,14 +415,18 @@
                                              (reset! value-atom
                                                      (-> @templates-info
                                                          (get value)
-                                                         (dissoc :operations)
-                                                         general/edn->json))))}]])
-           [ui/FormField
-            [:label "resource editor"]
-            [resource-editor (or @selected-template collection-name) value-atom
-             :resource-meta (if @templates-info
-                              @(subscribe [::docs-subs/document (get @templates-info @selected-template)])
-                              @resource-metadata)]]
+                                                         (dissoc :operations
+                                                                 :resourceMetadata)
+                                                         general/edn->json))))}])
+
+             [:br]
+             [:br]
+
+             [resource-editor (or @selected-template collection-name) value-atom
+              :resource-meta (if @templates-info
+                               @selected-template-info
+                               @resource-metadata)]]]
+
            [ui/ModalActions
             [uix/Button
              {:text     (@tr [:cancel])
@@ -438,7 +446,8 @@
                                           :message (str "invalid JSON:\n\n" e)
                                           :type    :error}]))
                             (finally
-                              (dispatch [::cimi-events/hide-add-modal]))))}]]]]]))))
+                              (dispatch [::cimi-events/hide-add-modal]))))}]]
+           ])))))
 
 
 (defn can-add?
