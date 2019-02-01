@@ -324,19 +324,19 @@
   (let [tr (subscribe [::i18n-subs/tr])
         show? (subscribe [::cimi-subs/show-add-modal?])
         collection-name (subscribe [::cimi-subs/collection-name])
-        default-value (general/edn->json {})
-        value-atom (atom default-value)
+        default-text (general/edn->json {})
+        text (atom default-text)
         collection (subscribe [::cimi-subs/collection])
-        selected-template (reagent/atom nil)]
+        selected-tmpl-id (reagent/atom nil)]
     (fn []
       (let [resource-metadata (subscribe [::docs-subs/document @collection])
             collection-template-href (some-> @collection-name cimi-utils/collection-template-href)
             templates-info (subscribe [::cimi-subs/collection-templates collection-template-href])
-            selected-template-info (subscribe [::docs-subs/document (get @templates-info @selected-template)])]
+            selected-tmpl-resource-meta (subscribe [::docs-subs/document (get @templates-info @selected-tmpl-id)])]
         #_(log/warn "resource-metadata" @resource-metadata)
-        #_(log/warn "____COLLNAME____" @collection-name " ____SELECTED-TEMPLATE-ID____" @selected-template
-                    "____TMPL-INFO____" (get @templates-info @selected-template)
-                    "____TMPL-RES-META____" @selected-template-info  #_@templates-info)
+        #_(log/warn "____COLLNAME____" @collection-name " ____SELECTED-TEMPLATE-ID____" @selected-tmpl-id
+                    "____TMPL-INFO____" (get @templates-info @selected-tmpl-id)
+                    "____TMPL-RES-META____" @selected-tmpl-resource-meta  #_@templates-info)
         (when @show?
           [ui/Modal
            {:size    "large", :closeIcon true, :open @show?,
@@ -348,39 +348,39 @@
              (when @templates-info
                [ui/Dropdown {:selection   true
                              :placeholder "select a resource template"
-                             :value       @selected-template
+                             :value       @selected-tmpl-id
                              :options     (forms/descriptions->options (vals @templates-info))
                              :on-change   (ui-callback/value
                                             (fn [value]
-                                              (reset! selected-template value)
-                                              (reset! value-atom
+                                              (reset! selected-tmpl-id value)
+                                              (reset! text
                                                       (-> @templates-info
                                                           (get value)
                                                           cimi-api-utils/remove-common-attrs
-                                                          (assoc :href @selected-template)
+                                                          (assoc :href @selected-tmpl-id)
                                                           general/edn->json))))}])
 
              [:br]
              [:br]
 
-             [forms/resource-editor (or @selected-template collection-name) value-atom
+             [forms/resource-editor (or @selected-tmpl-id collection-name) text
               :resource-meta (if @templates-info
-                               @selected-template-info
+                               @selected-tmpl-resource-meta
                                @resource-metadata)]]]
 
            [ui/ModalActions
             [uix/Button
              {:text     (@tr [:cancel])
               :on-click (fn []
-                          (reset! value-atom default-value)
+                          (reset! text default-text)
                           (dispatch [::cimi-events/hide-add-modal]))}]
             [uix/Button
              {:text     (@tr [:create])
               :primary  true
               :on-click (fn []
                           (try
-                            (let [data (cond->> (general/json->edn @value-atom)
-                                                @selected-template (cimi-api-utils/create-template @collection-name))]
+                            (let [data (cond->> (general/json->edn @text)
+                                                @selected-tmpl-id (cimi-api-utils/create-template @collection-name))]
                               (dispatch [::cimi-events/create-resource data]))
                             (catch :default e
                               (dispatch [::messages-events/add

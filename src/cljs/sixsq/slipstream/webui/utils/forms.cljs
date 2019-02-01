@@ -29,18 +29,18 @@
 
 
 (defn resource-editor
-  [form-id value-atom & {:keys [resource-meta default-mode] :or {default-mode :form}}]
+  [form-id text & {:keys [resource-meta default-mode] :or {default-mode :form}}]
   (let [mode (reagent/atom (if resource-meta default-mode :json))
         json-error? (reagent/atom false)
         check-json-fn (fn [success-action-fn]
                         (try
-                          @value-atom
+                          @text
                           (reset! json-error? false)
                           (success-action-fn)
                           (catch js/Object e
                             (reset! json-error? e)
                             (reset! mode :json))))]
-    (fn [form-id value-atom & {:keys [resource-meta default-mode] :or {default-mode :form}}]
+    (fn [form-id text & {:keys [resource-meta default-mode] :or {default-mode :form}}]
       ^{:key form-id}
       [:div
        [ui/Menu {:icon true, :attached "top"}
@@ -65,10 +65,10 @@
                        (mapv
                          (fn [attribute-meta]
                            (let [param-kw (-> attribute-meta :name keyword)
-                                 new-value (-> @value-atom general/json->edn param-kw)]
+                                 new-value (-> @text general/json->edn param-kw)]
                              (ff/form-field
                                (fn [form-id param-name param-value]
-                                 (reset! value-atom (-> @value-atom
+                                 (reset! text (-> @text
                                                         general/json->edn
                                                         (assoc (keyword param-name) param-value)
                                                         general/edn->json)))
@@ -79,9 +79,9 @@
                                   :attributes
                                   (filter :consumerWritable)
                                   (sort-by :order)))))
-          :json [ui/CodeMirror {:value     @value-atom
+          :json [ui/CodeMirror {:value     @text
                                 :on-change (fn [editor data value]
-                                             (reset! value-atom value))
+                                             (reset! text value))
                                 :options   {:mode                "application/json"
                                             :line-numbers        true
                                             :match-brackets      true

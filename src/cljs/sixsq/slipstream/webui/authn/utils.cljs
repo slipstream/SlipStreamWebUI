@@ -1,7 +1,6 @@
 (ns sixsq.slipstream.webui.authn.utils
   (:require
-    [clojure.string :as str]
-    [taoensso.timbre :as log]))
+    [clojure.string :as str]))
 
 
 (defn has-role? [session role]
