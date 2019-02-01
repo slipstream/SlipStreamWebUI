@@ -4,7 +4,7 @@
     [clojure.string :as str]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as reagent]
-    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.cimi.subs :as api-subs]
     [sixsq.slipstream.webui.deployment-detail.events :as events]
     [sixsq.slipstream.webui.deployment-detail.subs :as subs]
     [sixsq.slipstream.webui.deployment-detail.utils :as deployment-detail-utils]
@@ -191,7 +191,7 @@
 
 (defn report-item
   [{:keys [id component created state] :as report}]
-  (let [cep (subscribe [::cimi-subs/cloud-entry-point])
+  (let [cep (subscribe [::api-subs/cloud-entry-point])
         {:keys [baseURI]} @cep]
     (when baseURI
       ^{:key id} [:li
@@ -219,7 +219,7 @@
 (defn format-event-id
   [id]
   (let [tag (second (re-matches #"^.*/([^-]+).*$" id))]
-    [history/link (str "cimi/" id) tag]))
+    [history/link (str "str/" id) tag]))
 
 
 (defn format-delta-time
@@ -432,7 +432,7 @@
 (defn menu
   []
   (let [deployment (subscribe [::subs/deployment])
-        cep (subscribe [::cimi-subs/cloud-entry-point])]
+        cep (subscribe [::api-subs/cloud-entry-point])]
     (vec (concat [ui/Menu {:borderless true}]
 
                  (operations/format-operations nil @deployment (:baseURI @cep) {})

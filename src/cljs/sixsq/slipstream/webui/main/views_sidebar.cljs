@@ -80,5 +80,4 @@
        [item :deployment "deployment" "cloud"]
        (when-not @iframe? [item :nuvlabox-ctrl "nuvlabox" "desktop"])
        (when (and @is-admin? (not @iframe?)) [item :metrics "metrics" "bar chart"])
-       (when-not @iframe? [item :documentation "documentation" "book"])
-       (when-not @iframe? [item :cimi "cimi" "code"])]]]))
+       (when-not @iframe? [item :api "api" "code"])]]]))

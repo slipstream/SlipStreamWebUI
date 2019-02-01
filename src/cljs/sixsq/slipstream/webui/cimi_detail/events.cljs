@@ -28,7 +28,7 @@
                                                               :content message
                                                               :type    :error}])
                                                   (dispatch [::history-events/navigate
-                                                             (str "cimi/" collection-name)]))
+                                                             (str "api/" collection-name)]))
                                                 (dispatch [::set-resource %]))]})))
 
 

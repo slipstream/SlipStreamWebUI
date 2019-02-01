@@ -50,6 +50,5 @@
       [card :deployment :welcome-deployment-desc "cloud" "deployment"]
       (when-not @iframe? [card :nuvlabox-ctrl :welcome-nuvlabox-desc "desktop" "nuvlabox"])
       (when (and @is-admin? (not @iframe?)) [card :metrics :welcome-metrics-desc "bar chart" "metrics"])
-      (when-not @iframe? [card :documentation :welcome-docs-desc "book" "documentation"])
-      (when-not @iframe? [card :cimi :welcome-cimi-desc "code" "cimi"])
+      (when-not @iframe? [card :api :welcome-api-desc "code" "api"])
       ]]))

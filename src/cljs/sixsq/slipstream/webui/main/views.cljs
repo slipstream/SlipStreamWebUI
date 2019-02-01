@@ -5,7 +5,7 @@
     [sixsq.slipstream.webui.application.views]
     [sixsq.slipstream.webui.appstore.views]
     [sixsq.slipstream.webui.authn.views :as authn-views]
-    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.cimi.subs :as api-subs]
     [sixsq.slipstream.webui.cimi.views]
     [sixsq.slipstream.webui.dashboard.views]
     [sixsq.slipstream.webui.data.views]
@@ -75,7 +75,7 @@
   []
   [:footer.webui-footer
    [:div.webui-footer-left
-    [:span "© 2018, SixSq Sàrl"]]
+    [:span "© 2019, SixSq Sàrl"]]
    [:div.webui-footer-centre
     [:a {:on-click #(dispatch
                       [::history-events/navigate "about"])
@@ -120,8 +120,9 @@
 (defn app []
   (fn []
     (let [show? (subscribe [::main-subs/sidebar-open?])
-          cep (subscribe [::cimi-subs/cloud-entry-point])
+          cep (subscribe [::api-subs/cloud-entry-point])
           iframe? (subscribe [::main-subs/iframe?])]
+
       (if @cep
           [ui/Responsive {:as            "div"
                           :fire-on-mount true

@@ -6,8 +6,8 @@
     [sixsq.slipstream.webui.authn.events :as authn-events]
     [sixsq.slipstream.webui.authn.subs :as authn-subs]
     [sixsq.slipstream.webui.authn.utils :as u]
-    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
-    [sixsq.slipstream.webui.cimi.utils :as cimi-utils]
+    [sixsq.slipstream.webui.cimi.subs :as api-subs]
+    [sixsq.slipstream.webui.cimi.utils :as api-utils]
     [sixsq.slipstream.webui.history.events :as history-events]
     [sixsq.slipstream.webui.history.utils :as history-utils]
     [sixsq.slipstream.webui.i18n.subs :as i18n-subs]
@@ -61,7 +61,7 @@
   "Renders the form for a particular authentication (login or sign up) method.
    The fields are taken from the method description."
   [methods collections-kw]
-  (let [cep (subscribe [::cimi-subs/cloud-entry-point])
+  (let [cep (subscribe [::api-subs/cloud-entry-point])
         server-redirect-uri (subscribe [::authn-subs/server-redirect-uri])
         form-id (subscribe [::authn-subs/form-id])
         tr (subscribe [::i18n-subs/tr])]
@@ -145,8 +145,8 @@
 (defn authn-form-container
   "Container that holds all of the authentication (login or sign up) forms."
   [collection-kw failed-kw method-form-fn]
-  (let [template-href (cimi-utils/template-href collection-kw)
-        templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])
+  (let [template-href (api-utils/template-href collection-kw)
+        templates (subscribe [::api-subs/collection-templates (keyword template-href)])
         tr (subscribe [::i18n-subs/tr])
         error-message (subscribe [::authn-subs/error-message])
         selected-method-group (subscribe [::authn-subs/selected-method-group])]
@@ -206,7 +206,7 @@
 (defn reset-password-modal
   []
   (let [open-modal (subscribe [::authn-subs/open-modal])
-        cep (subscribe [::cimi-subs/cloud-entry-point])
+        cep (subscribe [::api-subs/cloud-entry-point])
         error-message (subscribe [::authn-subs/error-message])
         success-message (subscribe [::authn-subs/success-message])
         loading? (subscribe [::authn-subs/loading?])
@@ -312,8 +312,8 @@
   []
   (let [tr (subscribe [::i18n-subs/tr])
         user (subscribe [::authn-subs/user])
-        template-href (cimi-utils/template-href :user)
-        user-templates (subscribe [::cimi-subs/collection-templates (keyword template-href)])]
+        template-href (api-utils/template-href :user)
+        user-templates (subscribe [::api-subs/collection-templates (keyword template-href)])]
     (let [profile-fn #(history-utils/navigate "profile")
           sign-out-fn (fn []
                         (dispatch [::authn-events/logout])

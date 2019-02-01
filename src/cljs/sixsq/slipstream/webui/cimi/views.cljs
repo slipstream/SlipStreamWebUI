@@ -30,7 +30,7 @@
 (defn id-selector-formatter [entry]
   (let [v (:id entry)
         label (second (str/split v #"/"))]
-    [history/link (str "cimi/" v) label]))
+    [history/link (str "api/" v) label]))
 
 
 ;; FIXME: Provide better visualization of non-string values.
@@ -169,7 +169,7 @@
                          sort
                          (map (fn [k] {:value k :text k}))
                          vec)
-            callback #(dispatch [::history-events/navigate (str "cimi/" %)])]
+            callback #(dispatch [::history-events/navigate (str "api/" %)])]
         [ui/Dropdown
          {:aria-label  (@tr [:resource-type])
           :value       @selected-id
@@ -192,14 +192,18 @@
                   :on-key-press (partial forms/on-return-key
                                          #(when @selected-id
                                             (dispatch [::cimi-events/get-results])))}
-         [ui/Button {:aria-label "filter parameter documentation"
-                     :floated    "right"
-                     :size       "tiny"
-                     :basic      true
-                     :icon       "info"
-                     :href       "https://ssapi.sixsq.com/#resource-selection"
-                     :target     "_blank"
-                     :rel        "noreferrer"}]
+
+         [ui/FormGroup
+          [ui/Message {:info     true
+                       :on-click #(dispatch
+                                    [::history-events/navigate "documentation"])
+                       :style    {:cursor "pointer"}
+                       :floated  "right"
+                       :target   "_blank"
+                       :rel      "noreferrer"}
+           [ui/Icon {:name "info"}]
+           (@tr [:api-doc])]]
+
          [ui/FormGroup
           [ui/FormField
            [cloud-entry-point-title]]]
@@ -442,6 +446,6 @@
         (vec (concat [ui/Segment style/basic] children))))))
 
 
-(defmethod panel/render :cimi
+(defmethod panel/render :api
   [path]
   [cimi-resource])

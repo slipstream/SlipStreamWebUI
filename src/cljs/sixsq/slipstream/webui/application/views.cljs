@@ -6,7 +6,7 @@
     [sixsq.slipstream.webui.application.events :as application-events]
     [sixsq.slipstream.webui.application.subs :as application-subs]
     [sixsq.slipstream.webui.application.utils :as utils]
-    [sixsq.slipstream.webui.cimi.subs :as cimi-subs]
+    [sixsq.slipstream.webui.cimi.subs :as api-subs]
     [sixsq.slipstream.webui.deployment-dialog.events :as deployment-dialog-events]
     [sixsq.slipstream.webui.deployment-dialog.views :as deployment-dialog-views]
     [sixsq.slipstream.webui.history.views :as history]
@@ -37,7 +37,7 @@
 (defn control-bar []
   (let [tr (subscribe [::i18n-subs/tr])
         module (subscribe [::application-subs/module])
-        cep (subscribe [::cimi-subs/cloud-entry-point])]
+        cep (subscribe [::api-subs/cloud-entry-point])]
     (let [add-disabled? (not= "PROJECT" (:type @module))
           deploy-disabled? (= "PROJECT" (:type @module))]
       (vec (concat [ui/Menu {:borderless true}]
@@ -339,7 +339,7 @@
 
 (defn format-component-link
   [label href]
-  [history/link (str "cimi/" href) label])
+  [history/link (str "api/" href) label])
 
 
 (defn render-parameter-mapping
