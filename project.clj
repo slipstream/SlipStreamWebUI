@@ -1,6 +1,6 @@
-(def +version+ "3.70-SNAPSHOT")
+(def +version+ "3.70")
 
-(defproject com.sixsq.slipstream/SlipStreamWebUI "3.70-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamWebUI "3.70"
 
   :description "Web Browser User Interface"
 
