@@ -8,6 +8,7 @@
     [sixsq.slipstream.webui.cimi-api.effects :as cimi-api-fx]
     [sixsq.slipstream.webui.client.spec :as client-spec]
     [sixsq.slipstream.webui.history.effects :as history-fx]
+    [sixsq.slipstream.webui.history.utils :as history-utils]
     [taoensso.timbre :as log]))
 
 
@@ -39,7 +40,7 @@
   (fn [db [_ username]]
     (dispatch [::set-loading])
     {:http-xhrio {:method          :post
-                  :uri             "https://nuv.la/reset" ; FIXME: should use a configuration parameter for http://nuv.la, or move reset to /api
+                  :uri             (str (history-utils/host-url) "/reset")
                   :params          {:username @username}
                   :format          (ajax/url-request-format)
                   :response-format (ajax/text-response-format {:keywords? true})
