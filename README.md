@@ -1,3 +1,5 @@
+# SlipStream is now deprecated -> replaced by https://github.com/nuvla
+
 # SlipStream Web UI
 
 An application that provides a graphical interface to cloud management
